@@ -1,2 +1,4 @@
-# telebot
-Telegram bot framework written in Go
+# Telebot
+>Telegram bot framework written in Go
+
+TBA.

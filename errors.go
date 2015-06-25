@@ -1,5 +1,6 @@
 package telebot
 
+// Login error, which basically occurs on broken token.
 type AuthError struct {
 	Payload string
 }

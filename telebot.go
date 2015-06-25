@@ -1,3 +1,5 @@
+// Package telebot provides a handy wrapper for interactions
+// with Telegram bots.
 package telebot
 
 import (
@@ -9,10 +11,11 @@ import (
 type Bot struct {
 	Token string
 
-	// A "user" behind bot instance
+	// Bot as `User` on API level.
 	Identity User
 }
 
+// Attempts to construct a Bot with `token` given.
 func Create(token string) (Bot, error) {
 	request := "https://api.telegram.org/bot" + token + "/getMe"
 
