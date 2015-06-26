@@ -5,5 +5,7 @@ type Message struct {
 	Sender   User   `json:"from"`
 	Unixtime int    `json:"date"`
 	Text     string `json:"text"`
-	// TBA: `chat`
+
+	// Equal to Sender for PM
+	Chat User `json:"chat"`
 }

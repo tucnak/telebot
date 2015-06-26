@@ -27,7 +27,7 @@ func TestListen(t *testing.T) {
 
 	bot.AddListener(func(bot *Bot, message Message) {
 		if message.Text == "/hi" {
-			bot.SendMessage(message.Sender,
+			bot.SendMessage(message.Chat,
 				"Hello, "+message.Sender.FirstName+"!")
 		}
 	})
