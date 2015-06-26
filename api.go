@@ -9,16 +9,26 @@ import (
 	"strconv"
 )
 
-func api_getMe(token string) (User, error) {
-	request := "https://api.telegram.org/bot" + token + "/getMe"
+func performApiCall(method string, token string, params url.Values) ([]byte, error) {
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s?%s",
+		token, method, params.Encode())
 
-	resp, err := http.Get(request)
+	resp, err := http.Get(url)
 	if err != nil {
-		return User{}, err
+		return []byte{}, err
 	}
 
 	defer resp.Body.Close()
-	me_json, err := ioutil.ReadAll(resp.Body)
+	json, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return json, nil
+}
+
+func api_getMe(token string) (User, error) {
+	me_json, err := performApiCall("getMe", token, url.Values{})
 	if err != nil {
 		return User{}, err
 	}
@@ -42,16 +52,9 @@ func api_getMe(token string) (User, error) {
 }
 
 func api_getUpdates(token string, offset int, updates chan<- Update) error {
-	command := fmt.Sprintf("getUpdates?offset=%d", offset)
-	request := "https://api.telegram.org/bot" + token + "/" + command
-
-	resp, err := http.Get(request)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-	updates_json, err := ioutil.ReadAll(resp.Body)
+	params := url.Values{}
+	params.Set("offset", strconv.FormatInt(int64(offset), 10))
+	updates_json, err := performApiCall("getUpdates", token, params)
 	if err != nil {
 		return err
 	}
@@ -79,21 +82,10 @@ func api_getUpdates(token string, offset int, updates chan<- Update) error {
 }
 
 func api_sendMessage(token string, recipient User, text string) error {
-	resource := "https://api.telegram.org/bot" + token + "/sendMessage"
-
 	params := url.Values{}
 	params.Set("chat_id", strconv.FormatInt(int64(recipient.Id), 10))
 	params.Set("text", text)
-
-	request := resource + "?" + params.Encode()
-
-	resp, err := http.Get(request)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-	response_json, err := ioutil.ReadAll(resp.Body)
+	response_json, err := performApiCall("sendMessage", token, params)
 	if err != nil {
 		return err
 	}
