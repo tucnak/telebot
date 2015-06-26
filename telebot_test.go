@@ -26,8 +26,10 @@ func TestListen(t *testing.T) {
 	}
 
 	bot.AddListener(func(bot *Bot, message Message) {
-		log.Printf("Recieved a message \"%s\" from user \"%s\"\n",
-			message.Text, message.Sender.Username)
+		if message.Text == "/hi" {
+			bot.SendMessage(message.Sender,
+				"Hello, "+message.Sender.FirstName+"!")
+		}
 	})
 
 	log.Println("Listening...")

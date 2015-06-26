@@ -42,3 +42,7 @@ func (b *Bot) Listen(interval time.Duration) {
 func (b *Bot) AddListener(ear Listener) {
 	b.listeners = append(b.listeners, ear)
 }
+
+func (b *Bot) SendMessage(recipient User, message string) {
+	go api_sendMessage(b.Token, recipient, message)
+}
