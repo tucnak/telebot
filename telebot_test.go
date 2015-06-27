@@ -1,39 +1,43 @@
 package telebot
 
 import (
-	"log"
+	"fmt"
+	"os"
 	"testing"
 	"time"
 )
 
-const TESTING_TOKEN = "107177593:AAHBJfF3nv3pZXVjXpoowVhv_KSGw56s8zo"
-
-func TestCreate(t *testing.T) {
-	_, err := Create(TESTING_TOKEN)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestListen(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping test in short mode.")
+func TestTelebot(t *testing.T) {
+	token := os.Getenv("TELEBOT_SECRET")
+	if token == "" {
+		fmt.Println("ERROR: " +
+			"In order to test telebot functionality, you need to set up " +
+			"TELEBOT_SECRET environmental variable, which represents an API " +
+			"key to a Telegram bot.\n")
+		t.Fatal("Could't find TELEBOT_SECRET, aborting.")
 	}
 
-	bot, err := Create(TESTING_TOKEN)
+	bot, err := Create(token)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	messages := make(chan Message)
+
+	intelligence := "welcome to the jungle"
+
+	bot.SendMessage(bot.Identity, intelligence)
 	bot.Listen(messages, 1*time.Second)
 
-	log.Println("Listening...")
-
-	for message := range messages {
-		if message.Text == "/hi" {
-			bot.SendMessage(message.Chat,
-				"Hello, "+message.Sender.FirstName+"!")
+	select {
+	case message := <-messages:
+		{
+			if message.Text != intelligence {
+				t.Error("Self-handshake failed.")
+			}
 		}
+
+	case <-time.After(5 * time.Second):
+		t.Error("Self-handshake test took too long, aborting.")
 	}
 }
