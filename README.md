@@ -31,11 +31,3 @@ func main() {
 }
 ```
 
-## Features
-- Listening to messages from users / group chats
-- Replying to users, depending on scope
-
-## TODO
-- Message forwarding
-- Sophiesticated content types (Document, Contact, Video, etc)
-- Reply keyboard styles
