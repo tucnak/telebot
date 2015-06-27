@@ -11,17 +11,89 @@ type User struct {
 	Title string `json:"title"`
 }
 
-// Message object represents a message.
-type Message struct {
-	Id       int    `json:"message_id"`
-	Sender   User   `json:"from"`
-	Unixtime int    `json:"date"`
-	Text     string `json:"text"`
-	Chat     User   `json:"chat"`
-}
-
 // Update object represents an incoming update.
 type Update struct {
 	Id      int     `json:"update_id"`
 	Payload Message `json:"message"`
+}
+
+// File object represents any sort of file. Since you would
+// only deal with specific files in the wild, this structure
+// doesn't make any sense in specific application.
+type File struct {
+	FileId   int `json:"file_id"`
+	FileSize int `json:"file_size"`
+}
+
+// Thumbnail object represents a image/sticker of particular size.
+type Thumbnail struct {
+	File
+
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+// Audio object represents an audio file (voice note).
+type Audio struct {
+	File
+
+	// Duration of the recording in seconds as defined by sender.
+	Duration int `json:"duration"`
+
+	// MIME type of the file as defined by sender.
+	Mime string `json:"mime_type"`
+}
+
+// Document object represents a general file (as opposed to Photo or Audio).
+// Telegram users can send files of any type of up to 1.5 GB in size.
+type Document struct {
+	File
+
+	// Document thumbnail as defined by sender.
+	Preview Thumbnail `json:"thumb"`
+
+	// Original filename as defined by sender.
+	FileName string `json:"file_name"`
+
+	// MIME type of the file as defined by sender.
+	Mime string `json:"mime_type"`
+}
+
+// Sticker object represents a WebP image, so-called sticker.
+type Sticker struct {
+	File
+
+	Width  int `json:"width"`
+	Height int `json:"height"`
+
+	// Sticker thumbnail in .webp or .jpg format.
+	Preview Thumbnail `json:"thumb"`
+}
+
+// Video object represents
+type Video struct {
+	Audio
+
+	Width  int `json:"width"`
+	Height int `json:"height"`
+
+	// Text description of the video as defined by sender (usually empty).
+	Caption string `json:"caption"`
+
+	// Video thumbnail.
+	Preview Thumbnail `json:"thumb"`
+}
+
+type Contact struct {
+	PhoneNumber string `json:"phone_number"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+
+	// Contact's username in Telegram (might be empty).
+	Username string `json:"user_id"`
+}
+
+type Location struct {
+	Longitude float32 `json:"longitude"`
+	Latitude  float32 `json:"latitude"`
 }

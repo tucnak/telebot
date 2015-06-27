@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"testing"
-	"time"
 )
 
 func TestTelebot(t *testing.T) {
@@ -17,7 +16,7 @@ func TestTelebot(t *testing.T) {
 		t.Fatal("Could't find TELEBOT_SECRET, aborting.")
 	}
 
-	bot, err := Create(token)
+	_, err := Create(token)
 	if err != nil {
 		t.Fatal(err)
 	}
