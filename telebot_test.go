@@ -22,7 +22,9 @@ func TestTelebot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	messages := make(chan Message)
+	// TODO: Uncomment when Telegram fixes behavior for self-messaging
+
+	/*messages := make(chan Message)
 
 	intelligence := "welcome to the jungle"
 
@@ -39,5 +41,5 @@ func TestTelebot(t *testing.T) {
 
 	case <-time.After(5 * time.Second):
 		t.Error("Self-handshake test took too long, aborting.")
-	}
+	}*/
 }

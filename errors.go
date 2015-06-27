@@ -1,14 +1,18 @@
 package telebot
 
-// Login error, which basically occurs on broken token.
+// AuthError occurs if the token appears to be invalid.
 type AuthError struct {
 	Payload string
 }
 
+// FetchError occurs when something goes wrong
+// while fetching updates.
 type FetchError struct {
 	Payload string
 }
 
+// SendError occurs when something goes wrong
+// while posting images, documents, etc.
 type SendError struct {
 	Payload string
 }

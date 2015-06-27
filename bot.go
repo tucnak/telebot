@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Bot represents a separate Telegram bot instance.
 type Bot struct {
 	Token string
 
@@ -11,6 +12,8 @@ type Bot struct {
 	Identity User
 }
 
+// Listen periodically looks for updates and delivers new messages
+// to subscription channel.
 func (b *Bot) Listen(subscription chan<- Message, interval time.Duration) {
 	updates := make(chan Update)
 	pulse := time.NewTicker(interval)
@@ -35,6 +38,7 @@ func (b *Bot) Listen(subscription chan<- Message, interval time.Duration) {
 	}()
 }
 
+// SendMessage sends a text message to recipient.
 func (b *Bot) SendMessage(recipient User, message string) {
 	go api_sendMessage(b.Token, recipient, message)
 }
