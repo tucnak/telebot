@@ -25,13 +25,15 @@ func TestListen(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	bot.AddListener(func(bot *Bot, message Message) {
+	messages := make(chan Message)
+	bot.Listen(messages, 1*time.Second)
+
+	log.Println("Listening...")
+
+	for message := range messages {
 		if message.Text == "/hi" {
 			bot.SendMessage(message.Chat,
 				"Hello, "+message.Sender.FirstName+"!")
 		}
-	})
-
-	log.Println("Listening...")
-	bot.Listen(1 * time.Second)
+	}
 }
