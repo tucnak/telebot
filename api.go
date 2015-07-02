@@ -106,3 +106,32 @@ func api_sendMessage(token string, recipient User, text string) error {
 
 	return nil
 }
+
+func api_forwardMessage(token string, recipient User, message Message) error {
+	params := url.Values{}
+	params.Set("chat_id", strconv.FormatInt(int64(recipient.Id), 10))
+	params.Set("from_chat_id",
+		strconv.FormatInt(int64(message.Origin().Id), 10))
+	params.Set("message_id", strconv.FormatInt(int64(message.Id), 10))
+
+	response_json, err := performApiCall("forwardMessage", token, params)
+	if err != nil {
+		return err
+	}
+
+	var response_recieved struct {
+		Ok          bool
+		Description string
+	}
+
+	err = json.Unmarshal(response_json, &response_recieved)
+	if err != nil {
+		return err
+	}
+
+	if !response_recieved.Ok {
+		return SendError{response_recieved.Description}
+	}
+
+	return nil
+}

@@ -38,7 +38,14 @@ func (b *Bot) Listen(subscription chan<- Message, interval time.Duration) {
 	}()
 }
 
-// SendMessage sends a text message to recipient.
+// SendMessage sends a text message to recipient in a
+// detached goroutine.
 func (b *Bot) SendMessage(recipient User, message string) {
 	go api_sendMessage(b.Token, recipient, message)
+}
+
+// ForwardMessage forwards a message to recipient in a
+// detached goroutine.
+func (b *Bot) ForwardMessage(recipient User, message Message) {
+	go api_forwardMessage(b.Token, recipient, message)
 }

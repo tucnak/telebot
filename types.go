@@ -21,8 +21,8 @@ type Update struct {
 // only deal with specific files in the wild, this structure
 // doesn't make any sense in specific application.
 type File struct {
-	FileId   int `json:"file_id"`
-	FileSize int `json:"file_size"`
+	FileId   string `json:"file_id"`
+	FileSize int    `json:"file_size"`
 }
 
 // Thumbnail object represents a image/sticker of particular size.

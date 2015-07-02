@@ -93,7 +93,16 @@ type Message struct {
 	ChatCreated bool `json:"group_chat_created"`
 }
 
-// Time returns the moment of message creation in local time
+// Origin returns an origin of message: group chat / personal.
+func (m Message) Origin() User {
+	if (m.Chat != User{}) {
+		return m.Chat
+	} else {
+		return m.Sender
+	}
+}
+
+// Time returns the moment of message creation in local time.
 func (m Message) Time() time.Time {
 	return time.Unix(int64(m.Unixtime), 0)
 }
@@ -110,7 +119,7 @@ func (m Message) IsForwarded() bool {
 
 // IsReply says whether message is reply to another message or not.
 func (m Message) IsReply() bool {
-	if (m.ReplyTo != nil) {
+	if m.ReplyTo != nil {
 		return true
 	}
 
