@@ -17,6 +17,10 @@ type SendError struct {
 	Payload string
 }
 
+type FileError struct {
+	Payload string
+}
+
 func (e AuthError) Error() string {
 	return "AuthError: " + e.Payload
 }
@@ -27,4 +31,8 @@ func (e FetchError) Error() string {
 
 func (e SendError) Error() string {
 	return "SendError: " + e.Payload
+}
+
+func (e FileError) Error() string {
+	return "FileError: " + e.Payload
 }

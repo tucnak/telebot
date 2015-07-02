@@ -47,3 +47,8 @@ func (b *Bot) SendMessage(recipient User, message string) error {
 func (b *Bot) ForwardMessage(recipient User, message Message) error {
 	return api_forwardMessage(b.Token, recipient, message)
 }
+
+// SendPhoto sends a photo object to recipient.
+func (b *Bot) SendPhoto(recipient User, photo *Photo) error {
+	return api_sendPhoto(b.Token, recipient, photo)
+}

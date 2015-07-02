@@ -17,12 +17,23 @@ type Update struct {
 	Payload Message `json:"message"`
 }
 
-// File object represents any sort of file. Since you would
-// only deal with specific files in the wild, this structure
-// doesn't make any sense in specific application.
+// File object represents any sort of file.
 type File struct {
 	FileId   string `json:"file_id"`
 	FileSize int    `json:"file_size"`
+
+	// Local absolute path to file on file system. Valid only for
+	// new files, meant to be uploaded soon.
+	filename string
+}
+
+// Exists says whether file presents on Telegram servers or not.
+func (f File) Exists() bool {
+	if f.filename == "" {
+		return true
+	}
+
+	return false
 }
 
 // Thumbnail object represents a image/sticker of particular size.
@@ -31,6 +42,13 @@ type Thumbnail struct {
 
 	Width  int `json:"width"`
 	Height int `json:"height"`
+}
+
+// Photo object represents a photo with caption.
+type Photo struct {
+	Thumbnail
+
+	Caption string
 }
 
 // Audio object represents an audio file (voice note).
