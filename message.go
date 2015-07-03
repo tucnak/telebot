@@ -97,9 +97,9 @@ type Message struct {
 func (m Message) Origin() User {
 	if (m.Chat != User{}) {
 		return m.Chat
-	} else {
-		return m.Sender
 	}
+
+	return m.Sender
 }
 
 // Time returns the moment of message creation in local time.

@@ -16,7 +16,7 @@ func TestTelebot(t *testing.T) {
 		t.Fatal("Could't find TELEBOT_SECRET, aborting.")
 	}
 
-	_, err := Create(token)
+	_, err := NewBot(token)
 	if err != nil {
 		t.Fatal(err)
 	}

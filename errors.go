@@ -17,6 +17,7 @@ type SendError struct {
 	Payload string
 }
 
+// FileError occurs when local file can't be read.
 type FileError struct {
 	Payload string
 }

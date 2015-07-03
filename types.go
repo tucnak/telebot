@@ -17,25 +17,6 @@ type Update struct {
 	Payload Message `json:"message"`
 }
 
-// File object represents any sort of file.
-type File struct {
-	FileId   string `json:"file_id"`
-	FileSize int    `json:"file_size"`
-
-	// Local absolute path to file on file system. Valid only for
-	// new files, meant to be uploaded soon.
-	filename string
-}
-
-// Exists says whether file presents on Telegram servers or not.
-func (f File) Exists() bool {
-	if f.filename == "" {
-		return true
-	}
-
-	return false
-}
-
 // Thumbnail object represents a image/sticker of particular size.
 type Thumbnail struct {
 	File
@@ -88,7 +69,7 @@ type Sticker struct {
 	Preview Thumbnail `json:"thumb"`
 }
 
-// Video object represents
+// Video object represents an MP4-encoded video.
 type Video struct {
 	Audio
 
@@ -102,6 +83,7 @@ type Video struct {
 	Preview Thumbnail `json:"thumb"`
 }
 
+// Contact object represents a contact to Telegram user
 type Contact struct {
 	PhoneNumber string `json:"phone_number"`
 	FirstName   string `json:"first_name"`
@@ -111,6 +93,7 @@ type Contact struct {
 	Username string `json:"user_id"`
 }
 
+// Location object represents geographic position.
 type Location struct {
 	Longitude float32 `json:"longitude"`
 	Latitude  float32 `json:"latitude"`

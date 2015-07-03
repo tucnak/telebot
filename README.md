@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-    bot, err := telebot.Create("SECRET TOKEN")
+    bot, err := telebot.NewBot("SECRET TOKEN")
     if err != nil {
         return
     }
