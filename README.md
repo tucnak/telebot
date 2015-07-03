@@ -5,7 +5,7 @@
 
 Bots are special Telegram accounts designed to handle messages automatically. Users can interact with bots by sending them command messages in private or group chats. These accounts serve as an interface for code running somewhere on your server.
 
-Telebot offers a convenient wrapper to Bots API, so you shouldn't even care about networking at all.
+Telebot offers a convenient wrapper to Bots API, so you shouldn't even care about networking at all. Here is an example "helloworld" bot, written with telebot:
 
 ```go
 import (
@@ -31,3 +31,15 @@ func main() {
 }
 ```
 
+You can also send any kind of resources from file system easily:
+
+```go
+boom, err := telebot.NewFile("boom.ogg")
+if err != nil {
+    return err
+}
+
+// Next time you send &boom, telebot won't issue
+// an upload, but would re-use existing file.
+err = bot.SendAudio(recipient, &boom)
+```
