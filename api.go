@@ -269,3 +269,150 @@ func api_sendAudio(token string, recipient User, audio *Audio) error {
 
 	return nil
 }
+
+func api_sendDocument(token string, recipient User, doc *Document) error {
+	params := url.Values{}
+	params.Set("chat_id", strconv.Itoa(recipient.Id))
+
+	var response_json []byte
+	var err error
+
+	if doc.Exists() {
+		params.Set("document", doc.FileId)
+		response_json, err = api_GET("sendDocument", token, params)
+	} else {
+		response_json, err = api_POST("sendDocument", token, "document",
+			doc.filename, params)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	var response_recieved struct {
+		Ok          bool
+		Result      Message
+		Description string
+	}
+
+	err = json.Unmarshal(response_json, &response_recieved)
+	if err != nil {
+		return err
+	}
+
+	if !response_recieved.Ok {
+		return SendError{response_recieved.Description}
+	}
+
+	*doc = response_recieved.Result.Document
+
+	return nil
+}
+
+func api_sendSticker(token string, recipient User, sticker *Sticker) error {
+	params := url.Values{}
+	params.Set("chat_id", strconv.Itoa(recipient.Id))
+
+	var response_json []byte
+	var err error
+
+	if sticker.Exists() {
+		params.Set("sticker", sticker.FileId)
+		response_json, err = api_GET("sendSticker", token, params)
+	} else {
+		response_json, err = api_POST("sendSticker", token, "sticker",
+			sticker.filename, params)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	var response_recieved struct {
+		Ok          bool
+		Result      Message
+		Description string
+	}
+
+	err = json.Unmarshal(response_json, &response_recieved)
+	if err != nil {
+		return err
+	}
+
+	if !response_recieved.Ok {
+		return SendError{response_recieved.Description}
+	}
+
+	*sticker = response_recieved.Result.Sticker
+
+	return nil
+}
+
+func api_sendVideo(token string, recipient User, video *Video) error {
+	params := url.Values{}
+	params.Set("chat_id", strconv.Itoa(recipient.Id))
+
+	var response_json []byte
+	var err error
+
+	if video.Exists() {
+		params.Set("video", video.FileId)
+		response_json, err = api_GET("sendVideo", token, params)
+	} else {
+		response_json, err = api_POST("sendVideo", token, "video",
+			video.filename, params)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	var response_recieved struct {
+		Ok          bool
+		Result      Message
+		Description string
+	}
+
+	err = json.Unmarshal(response_json, &response_recieved)
+	if err != nil {
+		return err
+	}
+
+	if !response_recieved.Ok {
+		return SendError{response_recieved.Description}
+	}
+
+	*video = response_recieved.Result.Video
+
+	return nil
+}
+
+func api_sendLocation(token string, recipient User, geo *Location) error {
+	params := url.Values{}
+	params.Set("chat_id", strconv.Itoa(recipient.Id))
+	params.Set("latitude", fmt.Sprintf("%f", geo.Latitude))
+	params.Set("longitude", fmt.Sprintf("%f", geo.Longitude))
+
+	response_json, err := api_GET("sendLocation", token, params)
+
+	if err != nil {
+		return err
+	}
+
+	var response_recieved struct {
+		Ok          bool
+		Result      Message
+		Description string
+	}
+
+	err = json.Unmarshal(response_json, &response_recieved)
+	if err != nil {
+		return err
+	}
+
+	if !response_recieved.Ok {
+		return SendError{response_recieved.Description}
+	}
+
+	return nil
+}
