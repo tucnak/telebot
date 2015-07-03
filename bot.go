@@ -49,6 +49,21 @@ func (b *Bot) ForwardMessage(recipient User, message Message) error {
 }
 
 // SendPhoto sends a photo object to recipient.
+//
+// On success, photo object would be aliased to its copy on
+// the Telegram servers, so sending the same photo object
+// again, won't issue a new upload, but would make a use
+// of existing file on Telegram servers.
 func (b *Bot) SendPhoto(recipient User, photo *Photo) error {
 	return api_sendPhoto(b.Token, recipient, photo)
+}
+
+// SendPhoto sends an audio object to recipient.
+//
+// On success, audio object would be aliased to its copy on
+// the Telegram servers, so sending the same audio object
+// again, won't issue a new upload, but would make a use
+// of existing file on Telegram servers.
+func (b *Bot) SendAudio(recipient User, audio *Audio) error {
+	return api_sendAudio(b.Token, recipient, audio)
 }

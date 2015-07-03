@@ -230,3 +230,42 @@ func api_sendPhoto(token string, recipient User, photo *Photo) error {
 
 	return nil
 }
+
+func api_sendAudio(token string, recipient User, audio *Audio) error {
+	params := url.Values{}
+	params.Set("chat_id", strconv.Itoa(recipient.Id))
+
+	var response_json []byte
+	var err error
+
+	if audio.Exists() {
+		params.Set("audio", audio.FileId)
+		response_json, err = api_GET("sendAudio", token, params)
+	} else {
+		response_json, err = api_POST("sendAudio", token, "audio",
+			audio.filename, params)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	var response_recieved struct {
+		Ok          bool
+		Result      Message
+		Description string
+	}
+
+	err = json.Unmarshal(response_json, &response_recieved)
+	if err != nil {
+		return err
+	}
+
+	if !response_recieved.Ok {
+		return SendError{response_recieved.Description}
+	}
+
+	*audio = response_recieved.Result.Audio
+
+	return nil
+}
