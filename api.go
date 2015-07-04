@@ -101,9 +101,9 @@ func getMe(token string) (User, error) {
 
 	if bot_info.Ok {
 		return bot_info.Result, nil
-	} else {
-		return User{}, AuthError{bot_info.Description}
 	}
+
+	return User{}, AuthError{bot_info.Description}
 }
 
 func getUpdates(token string, offset int, updates chan<- Update) error {
