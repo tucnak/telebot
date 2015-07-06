@@ -7,7 +7,7 @@ import (
 
 // File object represents any sort of file.
 type File struct {
-	FileId   string `json:"file_id"`
+	FileID   string `json:"file_id"`
 	FileSize int    `json:"file_size"`
 
 	// Local absolute path to file on file system. Valid only for

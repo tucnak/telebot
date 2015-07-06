@@ -87,8 +87,8 @@ func embedSendOptions(params *url.Values, options *SendOptions) {
 		return
 	}
 
-	if options.ReplyTo.Id != 0 {
-		params.Set("reply_to_message_id", strconv.Itoa(options.ReplyTo.Id))
+	if options.ReplyTo.ID != 0 {
+		params.Set("reply_to_message_id", strconv.Itoa(options.ReplyTo.ID))
 	}
 
 	if options.DisableWebPagePreview {

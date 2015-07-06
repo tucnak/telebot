@@ -47,8 +47,8 @@ func (b Bot) Listen(subscription chan<- Message, interval time.Duration) {
 
 	go func() {
 		for update := range updates {
-			if update.Id > latestUpdate {
-				latestUpdate = update.Id
+			if update.ID > latestUpdate {
+				latestUpdate = update.ID
 			}
 
 			subscription <- update.Payload
@@ -59,7 +59,7 @@ func (b Bot) Listen(subscription chan<- Message, interval time.Duration) {
 // SendMessage sends a text message to recipient.
 func (b Bot) SendMessage(recipient User, message string, options *SendOptions) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Id))
+	params.Set("chat_id", strconv.Itoa(recipient.ID))
 	params.Set("text", message)
 
 	if options != nil {
@@ -91,9 +91,9 @@ func (b Bot) SendMessage(recipient User, message string, options *SendOptions) e
 // ForwardMessage forwards a message to recipient.
 func (b Bot) ForwardMessage(recipient User, message Message) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Id))
-	params.Set("from_chat_id", strconv.Itoa(message.Origin().Id))
-	params.Set("message_id", strconv.Itoa(message.Id))
+	params.Set("chat_id", strconv.Itoa(recipient.ID))
+	params.Set("from_chat_id", strconv.Itoa(message.Origin().ID))
+	params.Set("message_id", strconv.Itoa(message.ID))
 
 	responseJSON, err := sendCommand("forwardMessage", b.Token, params)
 	if err != nil {
@@ -125,7 +125,7 @@ func (b Bot) ForwardMessage(recipient User, message Message) error {
 // of existing file on Telegram servers.
 func (b Bot) SendPhoto(recipient User, photo *Photo, options *SendOptions) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Id))
+	params.Set("chat_id", strconv.Itoa(recipient.ID))
 	params.Set("caption", photo.Caption)
 
 	if options != nil {
@@ -136,7 +136,7 @@ func (b Bot) SendPhoto(recipient User, photo *Photo, options *SendOptions) error
 	var err error
 
 	if photo.Exists() {
-		params.Set("photo", photo.FileId)
+		params.Set("photo", photo.FileID)
 		responseJSON, err = sendCommand("sendPhoto", b.Token, params)
 	} else {
 		responseJSON, err = sendFile("sendPhoto", b.Token, "photo",
@@ -176,7 +176,7 @@ func (b Bot) SendPhoto(recipient User, photo *Photo, options *SendOptions) error
 // of existing file on Telegram servers.
 func (b Bot) SendAudio(recipient User, audio *Audio, options *SendOptions) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Id))
+	params.Set("chat_id", strconv.Itoa(recipient.ID))
 
 	if options != nil {
 		embedSendOptions(&params, options)
@@ -186,7 +186,7 @@ func (b Bot) SendAudio(recipient User, audio *Audio, options *SendOptions) error
 	var err error
 
 	if audio.Exists() {
-		params.Set("audio", audio.FileId)
+		params.Set("audio", audio.FileID)
 		responseJSON, err = sendCommand("sendAudio", b.Token, params)
 	} else {
 		responseJSON, err = sendFile("sendAudio", b.Token, "audio",
@@ -225,7 +225,7 @@ func (b Bot) SendAudio(recipient User, audio *Audio, options *SendOptions) error
 // of existing file on Telegram servers.
 func (b Bot) SendDocument(recipient User, doc *Document, options *SendOptions) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Id))
+	params.Set("chat_id", strconv.Itoa(recipient.ID))
 
 	if options != nil {
 		embedSendOptions(&params, options)
@@ -235,7 +235,7 @@ func (b Bot) SendDocument(recipient User, doc *Document, options *SendOptions) e
 	var err error
 
 	if doc.Exists() {
-		params.Set("document", doc.FileId)
+		params.Set("document", doc.FileID)
 		responseJSON, err = sendCommand("sendDocument", b.Token, params)
 	} else {
 		responseJSON, err = sendFile("sendDocument", b.Token, "document",
@@ -274,7 +274,7 @@ func (b Bot) SendDocument(recipient User, doc *Document, options *SendOptions) e
 // of existing file on Telegram servers.
 func (b *Bot) SendSticker(recipient User, sticker *Sticker, options *SendOptions) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Id))
+	params.Set("chat_id", strconv.Itoa(recipient.ID))
 
 	if options != nil {
 		embedSendOptions(&params, options)
@@ -284,7 +284,7 @@ func (b *Bot) SendSticker(recipient User, sticker *Sticker, options *SendOptions
 	var err error
 
 	if sticker.Exists() {
-		params.Set("sticker", sticker.FileId)
+		params.Set("sticker", sticker.FileID)
 		responseJSON, err = sendCommand("sendSticker", b.Token, params)
 	} else {
 		responseJSON, err = sendFile("sendSticker", b.Token, "sticker",
@@ -323,7 +323,7 @@ func (b *Bot) SendSticker(recipient User, sticker *Sticker, options *SendOptions
 // of existing file on Telegram servers.
 func (b Bot) SendVideo(recipient User, video *Video, options *SendOptions) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Id))
+	params.Set("chat_id", strconv.Itoa(recipient.ID))
 
 	if options != nil {
 		embedSendOptions(&params, options)
@@ -333,7 +333,7 @@ func (b Bot) SendVideo(recipient User, video *Video, options *SendOptions) error
 	var err error
 
 	if video.Exists() {
-		params.Set("video", video.FileId)
+		params.Set("video", video.FileID)
 		responseJSON, err = sendCommand("sendVideo", b.Token, params)
 	} else {
 		responseJSON, err = sendFile("sendVideo", b.Token, "video",
@@ -372,7 +372,7 @@ func (b Bot) SendVideo(recipient User, video *Video, options *SendOptions) error
 // of existing file on Telegram servers.
 func (b Bot) SendLocation(recipient User, geo *Location, options *SendOptions) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Id))
+	params.Set("chat_id", strconv.Itoa(recipient.ID))
 	params.Set("latitude", fmt.Sprintf("%f", geo.Latitude))
 	params.Set("longitude", fmt.Sprintf("%f", geo.Longitude))
 
@@ -415,7 +415,7 @@ func (b Bot) SendLocation(recipient User, geo *Location, options *SendOptions) e
 // actions, these are aligned as constants of this package.
 func (b Bot) SendChatAction(recipient User, action string) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Id))
+	params.Set("chat_id", strconv.Itoa(recipient.ID))
 	params.Set("action", action)
 
 	responseJSON, err := sendCommand("sendChatAction", b.Token, params)

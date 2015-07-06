@@ -6,7 +6,7 @@ import (
 
 // Message object represents a message.
 type Message struct {
-	Id       int  `json:"message_id"`
+	ID       int  `json:"message_id"`
 	Sender   User `json:"from"`
 	Unixtime int  `json:"date"`
 

@@ -2,7 +2,7 @@ package telebot
 
 // User object represents a Telegram user, bot or group chat.
 type User struct {
-	Id        int    `json:"id"`
+	ID        int    `json:"id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Username  string `json:"username"`
@@ -13,7 +13,7 @@ type User struct {
 
 // Update object represents an incoming update.
 type Update struct {
-	Id      int     `json:"update_id"`
+	ID      int     `json:"update_id"`
 	Payload Message `json:"message"`
 }
 
