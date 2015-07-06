@@ -25,7 +25,7 @@ func main() {
     for message := range messages {
         if message.Text == "/hi" {
             bot.SendMessage(message.Chat,
-                "Hello, "+message.Sender.FirstName+"!")
+                "Hello, "+message.Sender.FirstName+"!", nil)
         }
     }
 }
@@ -41,5 +41,18 @@ if err != nil {
 
 // Next time you send &boom, telebot won't issue
 // an upload, but would re-use existing file.
-err = bot.SendAudio(recipient, &boom)
+err = bot.SendAudio(recipient, &boom, nil)
+```
+
+Sometimes you might want to send a little bit complicated messages, with some optional parameters:
+
+```go
+// Send a selective force reply message.
+bot.SendMessage(user, "pong", &telebot.SendOptions{
+        ForceReply: telebot.ForceReply{
+            Require: true,
+            Selective: true,
+        },
+    },
+)
 ```

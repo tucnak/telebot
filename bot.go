@@ -57,10 +57,15 @@ func (b Bot) Listen(subscription chan<- Message, interval time.Duration) {
 }
 
 // SendMessage sends a text message to recipient.
-func (b Bot) SendMessage(recipient User, message string) error {
+func (b Bot) SendMessage(recipient User, message string, options *SendOptions) error {
 	params := url.Values{}
 	params.Set("chat_id", strconv.Itoa(recipient.Id))
 	params.Set("text", message)
+
+	if options != nil {
+		embedSendOptions(&params, options)
+	}
+
 	response_json, err := sendCommand("sendMessage", b.Token, params)
 	if err != nil {
 		return err
@@ -118,10 +123,14 @@ func (b Bot) ForwardMessage(recipient User, message Message) error {
 // the Telegram servers, so sending the same photo object
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
-func (b Bot) SendPhoto(recipient User, photo *Photo) error {
+func (b Bot) SendPhoto(recipient User, photo *Photo, options *SendOptions) error {
 	params := url.Values{}
 	params.Set("chat_id", strconv.Itoa(recipient.Id))
 	params.Set("caption", photo.Caption)
+
+	if options != nil {
+		embedSendOptions(&params, options)
+	}
 
 	var response_json []byte
 	var err error
@@ -165,9 +174,13 @@ func (b Bot) SendPhoto(recipient User, photo *Photo) error {
 // the Telegram servers, so sending the same audio object
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
-func (b Bot) SendAudio(recipient User, audio *Audio) error {
+func (b Bot) SendAudio(recipient User, audio *Audio, options *SendOptions) error {
 	params := url.Values{}
 	params.Set("chat_id", strconv.Itoa(recipient.Id))
+
+	if options != nil {
+		embedSendOptions(&params, options)
+	}
 
 	var response_json []byte
 	var err error
@@ -210,9 +223,13 @@ func (b Bot) SendAudio(recipient User, audio *Audio) error {
 // the Telegram servers, so sending the same document object
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
-func (b Bot) SendDocument(recipient User, doc *Document) error {
+func (b Bot) SendDocument(recipient User, doc *Document, options *SendOptions) error {
 	params := url.Values{}
 	params.Set("chat_id", strconv.Itoa(recipient.Id))
+
+	if options != nil {
+		embedSendOptions(&params, options)
+	}
 
 	var response_json []byte
 	var err error
@@ -255,9 +272,13 @@ func (b Bot) SendDocument(recipient User, doc *Document) error {
 // the Telegram servers, so sending the same sticker object
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
-func (b *Bot) SendSticker(recipient User, sticker *Sticker) error {
+func (b *Bot) SendSticker(recipient User, sticker *Sticker, options *SendOptions) error {
 	params := url.Values{}
 	params.Set("chat_id", strconv.Itoa(recipient.Id))
+
+	if options != nil {
+		embedSendOptions(&params, options)
+	}
 
 	var response_json []byte
 	var err error
@@ -300,9 +321,13 @@ func (b *Bot) SendSticker(recipient User, sticker *Sticker) error {
 // the Telegram servers, so sending the same video object
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
-func (b Bot) SendVideo(recipient User, video *Video) error {
+func (b Bot) SendVideo(recipient User, video *Video, options *SendOptions) error {
 	params := url.Values{}
 	params.Set("chat_id", strconv.Itoa(recipient.Id))
+
+	if options != nil {
+		embedSendOptions(&params, options)
+	}
 
 	var response_json []byte
 	var err error
@@ -345,11 +370,15 @@ func (b Bot) SendVideo(recipient User, video *Video) error {
 // the Telegram servers, so sending the same video object
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
-func (b Bot) SendLocation(recipient User, geo *Location) error {
+func (b Bot) SendLocation(recipient User, geo *Location, options *SendOptions) error {
 	params := url.Values{}
 	params.Set("chat_id", strconv.Itoa(recipient.Id))
 	params.Set("latitude", fmt.Sprintf("%f", geo.Latitude))
 	params.Set("longitude", fmt.Sprintf("%f", geo.Longitude))
+
+	if options != nil {
+		embedSendOptions(&params, options)
+	}
 
 	response_json, err := sendCommand("sendLocation", b.Token, params)
 

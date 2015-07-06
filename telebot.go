@@ -20,7 +20,7 @@
 //		for message := range messages {
 //			if message.Text == "/hi" {
 //				bot.SendMessage(message.Chat,
-//					"Hello, "+message.Sender.FirstName+"!")
+//					"Hello, "+message.Sender.FirstName+"!", nil)
 //			}
 //		}
 //	}

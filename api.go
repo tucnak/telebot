@@ -82,6 +82,25 @@ func sendFile(method, token, name, path string, params url.Values) ([]byte, erro
 	return json, nil
 }
 
+func embedSendOptions(params *url.Values, options *SendOptions) {
+	if params == nil || options == nil {
+		return
+	}
+
+	if options.ReplyTo.Id != 0 {
+		params.Set("reply_to_message_id", strconv.Itoa(options.ReplyTo.Id))
+	}
+
+	if options.DisableWebPagePreview {
+		params.Set("disable_web_page_preview", "true")
+	}
+
+	if options.ForceReply.Require {
+		forceReply, _ := json.Marshal(options.ForceReply)
+		params.Set("reply_markup", string(forceReply))
+	}
+}
+
 func getMe(token string) (User, error) {
 	me_json, err := sendCommand("getMe", token, url.Values{})
 	if err != nil {
