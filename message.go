@@ -143,31 +143,31 @@ func (m Message) IsPersonal() bool {
 // typically occur on some global action. For instance, when
 // anyone leaves the chat or chat title changes.
 func (m Message) IsService() bool {
-	is_service := false
+	service := false
 
 	if (m.UserJoined != User{}) {
-		is_service = true
+		service = true
 	}
 
 	if (m.UserLeft != User{}) {
-		is_service = true
+		service = true
 	}
 
 	if m.NewChatTitle != "" {
-		is_service = true
+		service = true
 	}
 
 	if len(m.NewChatPhoto) > 0 {
-		is_service = true
+		service = true
 	}
 
 	if m.ChatPhotoDeleted {
-		is_service = true
+		service = true
 	}
 
 	if m.ChatCreated {
-		is_service = true
+		service = true
 	}
 
-	return is_service
+	return service
 }

@@ -35,20 +35,20 @@ func NewBot(token string) (*Bot, error) {
 func (b Bot) Listen(subscription chan<- Message, interval time.Duration) {
 	updates := make(chan Update)
 	pulse := time.NewTicker(interval)
-	latest_update := 0
+	latestUpdate := 0
 
 	go func() {
 		for range pulse.C {
 			go getUpdates(b.Token,
-				latest_update+1,
+				latestUpdate+1,
 				updates)
 		}
 	}()
 
 	go func() {
 		for update := range updates {
-			if update.Id > latest_update {
-				latest_update = update.Id
+			if update.Id > latestUpdate {
+				latestUpdate = update.Id
 			}
 
 			subscription <- update.Payload
@@ -66,23 +66,23 @@ func (b Bot) SendMessage(recipient User, message string, options *SendOptions) e
 		embedSendOptions(&params, options)
 	}
 
-	response_json, err := sendCommand("sendMessage", b.Token, params)
+	responseJSON, err := sendCommand("sendMessage", b.Token, params)
 	if err != nil {
 		return err
 	}
 
-	var response_recieved struct {
+	var responseRecieved struct {
 		Ok          bool
 		Description string
 	}
 
-	err = json.Unmarshal(response_json, &response_recieved)
+	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
 		return err
 	}
 
-	if !response_recieved.Ok {
-		return SendError{response_recieved.Description}
+	if !responseRecieved.Ok {
+		return SendError{responseRecieved.Description}
 	}
 
 	return nil
@@ -95,23 +95,23 @@ func (b Bot) ForwardMessage(recipient User, message Message) error {
 	params.Set("from_chat_id", strconv.Itoa(message.Origin().Id))
 	params.Set("message_id", strconv.Itoa(message.Id))
 
-	response_json, err := sendCommand("forwardMessage", b.Token, params)
+	responseJSON, err := sendCommand("forwardMessage", b.Token, params)
 	if err != nil {
 		return err
 	}
 
-	var response_recieved struct {
+	var responseRecieved struct {
 		Ok          bool
 		Description string
 	}
 
-	err = json.Unmarshal(response_json, &response_recieved)
+	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
 		return err
 	}
 
-	if !response_recieved.Ok {
-		return SendError{response_recieved.Description}
+	if !responseRecieved.Ok {
+		return SendError{responseRecieved.Description}
 	}
 
 	return nil
@@ -132,14 +132,14 @@ func (b Bot) SendPhoto(recipient User, photo *Photo, options *SendOptions) error
 		embedSendOptions(&params, options)
 	}
 
-	var response_json []byte
+	var responseJSON []byte
 	var err error
 
 	if photo.Exists() {
 		params.Set("photo", photo.FileId)
-		response_json, err = sendCommand("sendPhoto", b.Token, params)
+		responseJSON, err = sendCommand("sendPhoto", b.Token, params)
 	} else {
-		response_json, err = sendFile("sendPhoto", b.Token, "photo",
+		responseJSON, err = sendFile("sendPhoto", b.Token, "photo",
 			photo.filename, params)
 	}
 
@@ -147,22 +147,22 @@ func (b Bot) SendPhoto(recipient User, photo *Photo, options *SendOptions) error
 		return err
 	}
 
-	var response_recieved struct {
+	var responseRecieved struct {
 		Ok          bool
 		Result      Message
 		Description string
 	}
 
-	err = json.Unmarshal(response_json, &response_recieved)
+	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
 		return err
 	}
 
-	if !response_recieved.Ok {
-		return SendError{response_recieved.Description}
+	if !responseRecieved.Ok {
+		return SendError{responseRecieved.Description}
 	}
 
-	thumbnails := &response_recieved.Result.Photo
+	thumbnails := &responseRecieved.Result.Photo
 	photo.File = (*thumbnails)[len(*thumbnails)-1].File
 
 	return nil
@@ -182,14 +182,14 @@ func (b Bot) SendAudio(recipient User, audio *Audio, options *SendOptions) error
 		embedSendOptions(&params, options)
 	}
 
-	var response_json []byte
+	var responseJSON []byte
 	var err error
 
 	if audio.Exists() {
 		params.Set("audio", audio.FileId)
-		response_json, err = sendCommand("sendAudio", b.Token, params)
+		responseJSON, err = sendCommand("sendAudio", b.Token, params)
 	} else {
-		response_json, err = sendFile("sendAudio", b.Token, "audio",
+		responseJSON, err = sendFile("sendAudio", b.Token, "audio",
 			audio.filename, params)
 	}
 
@@ -197,22 +197,22 @@ func (b Bot) SendAudio(recipient User, audio *Audio, options *SendOptions) error
 		return err
 	}
 
-	var response_recieved struct {
+	var responseRecieved struct {
 		Ok          bool
 		Result      Message
 		Description string
 	}
 
-	err = json.Unmarshal(response_json, &response_recieved)
+	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
 		return err
 	}
 
-	if !response_recieved.Ok {
-		return SendError{response_recieved.Description}
+	if !responseRecieved.Ok {
+		return SendError{responseRecieved.Description}
 	}
 
-	*audio = response_recieved.Result.Audio
+	*audio = responseRecieved.Result.Audio
 
 	return nil
 }
@@ -231,14 +231,14 @@ func (b Bot) SendDocument(recipient User, doc *Document, options *SendOptions) e
 		embedSendOptions(&params, options)
 	}
 
-	var response_json []byte
+	var responseJSON []byte
 	var err error
 
 	if doc.Exists() {
 		params.Set("document", doc.FileId)
-		response_json, err = sendCommand("sendDocument", b.Token, params)
+		responseJSON, err = sendCommand("sendDocument", b.Token, params)
 	} else {
-		response_json, err = sendFile("sendDocument", b.Token, "document",
+		responseJSON, err = sendFile("sendDocument", b.Token, "document",
 			doc.filename, params)
 	}
 
@@ -246,22 +246,22 @@ func (b Bot) SendDocument(recipient User, doc *Document, options *SendOptions) e
 		return err
 	}
 
-	var response_recieved struct {
+	var responseRecieved struct {
 		Ok          bool
 		Result      Message
 		Description string
 	}
 
-	err = json.Unmarshal(response_json, &response_recieved)
+	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
 		return err
 	}
 
-	if !response_recieved.Ok {
-		return SendError{response_recieved.Description}
+	if !responseRecieved.Ok {
+		return SendError{responseRecieved.Description}
 	}
 
-	*doc = response_recieved.Result.Document
+	*doc = responseRecieved.Result.Document
 
 	return nil
 }
@@ -280,14 +280,14 @@ func (b *Bot) SendSticker(recipient User, sticker *Sticker, options *SendOptions
 		embedSendOptions(&params, options)
 	}
 
-	var response_json []byte
+	var responseJSON []byte
 	var err error
 
 	if sticker.Exists() {
 		params.Set("sticker", sticker.FileId)
-		response_json, err = sendCommand("sendSticker", b.Token, params)
+		responseJSON, err = sendCommand("sendSticker", b.Token, params)
 	} else {
-		response_json, err = sendFile("sendSticker", b.Token, "sticker",
+		responseJSON, err = sendFile("sendSticker", b.Token, "sticker",
 			sticker.filename, params)
 	}
 
@@ -295,22 +295,22 @@ func (b *Bot) SendSticker(recipient User, sticker *Sticker, options *SendOptions
 		return err
 	}
 
-	var response_recieved struct {
+	var responseRecieved struct {
 		Ok          bool
 		Result      Message
 		Description string
 	}
 
-	err = json.Unmarshal(response_json, &response_recieved)
+	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
 		return err
 	}
 
-	if !response_recieved.Ok {
-		return SendError{response_recieved.Description}
+	if !responseRecieved.Ok {
+		return SendError{responseRecieved.Description}
 	}
 
-	*sticker = response_recieved.Result.Sticker
+	*sticker = responseRecieved.Result.Sticker
 
 	return nil
 }
@@ -329,14 +329,14 @@ func (b Bot) SendVideo(recipient User, video *Video, options *SendOptions) error
 		embedSendOptions(&params, options)
 	}
 
-	var response_json []byte
+	var responseJSON []byte
 	var err error
 
 	if video.Exists() {
 		params.Set("video", video.FileId)
-		response_json, err = sendCommand("sendVideo", b.Token, params)
+		responseJSON, err = sendCommand("sendVideo", b.Token, params)
 	} else {
-		response_json, err = sendFile("sendVideo", b.Token, "video",
+		responseJSON, err = sendFile("sendVideo", b.Token, "video",
 			video.filename, params)
 	}
 
@@ -344,22 +344,22 @@ func (b Bot) SendVideo(recipient User, video *Video, options *SendOptions) error
 		return err
 	}
 
-	var response_recieved struct {
+	var responseRecieved struct {
 		Ok          bool
 		Result      Message
 		Description string
 	}
 
-	err = json.Unmarshal(response_json, &response_recieved)
+	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
 		return err
 	}
 
-	if !response_recieved.Ok {
-		return SendError{response_recieved.Description}
+	if !responseRecieved.Ok {
+		return SendError{responseRecieved.Description}
 	}
 
-	*video = response_recieved.Result.Video
+	*video = responseRecieved.Result.Video
 
 	return nil
 }
@@ -380,25 +380,25 @@ func (b Bot) SendLocation(recipient User, geo *Location, options *SendOptions) e
 		embedSendOptions(&params, options)
 	}
 
-	response_json, err := sendCommand("sendLocation", b.Token, params)
+	responseJSON, err := sendCommand("sendLocation", b.Token, params)
 
 	if err != nil {
 		return err
 	}
 
-	var response_recieved struct {
+	var responseRecieved struct {
 		Ok          bool
 		Result      Message
 		Description string
 	}
 
-	err = json.Unmarshal(response_json, &response_recieved)
+	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
 		return err
 	}
 
-	if !response_recieved.Ok {
-		return SendError{response_recieved.Description}
+	if !responseRecieved.Ok {
+		return SendError{responseRecieved.Description}
 	}
 
 	return nil

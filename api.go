@@ -102,53 +102,53 @@ func embedSendOptions(params *url.Values, options *SendOptions) {
 }
 
 func getMe(token string) (User, error) {
-	me_json, err := sendCommand("getMe", token, url.Values{})
+	meJSON, err := sendCommand("getMe", token, url.Values{})
 	if err != nil {
 		return User{}, err
 	}
 
-	var bot_info struct {
+	var botInfo struct {
 		Ok          bool
 		Result      User
 		Description string
 	}
 
-	err = json.Unmarshal(me_json, &bot_info)
+	err = json.Unmarshal(meJSON, &botInfo)
 	if err != nil {
 		return User{}, err
 	}
 
-	if bot_info.Ok {
-		return bot_info.Result, nil
+	if botInfo.Ok {
+		return botInfo.Result, nil
 	}
 
-	return User{}, AuthError{bot_info.Description}
+	return User{}, AuthError{botInfo.Description}
 }
 
 func getUpdates(token string, offset int, updates chan<- Update) error {
 	params := url.Values{}
 	params.Set("offset", strconv.Itoa(offset))
-	updates_json, err := sendCommand("getUpdates", token, params)
+	updatesJSON, err := sendCommand("getUpdates", token, params)
 	if err != nil {
 		return err
 	}
 
-	var updates_recieved struct {
+	var updatesRecieved struct {
 		Ok          bool
 		Result      []Update
 		Description string
 	}
 
-	err = json.Unmarshal(updates_json, &updates_recieved)
+	err = json.Unmarshal(updatesJSON, &updatesRecieved)
 	if err != nil {
 		return err
 	}
 
-	if !updates_recieved.Ok {
-		return FetchError{updates_recieved.Description}
+	if !updatesRecieved.Ok {
+		return FetchError{updatesRecieved.Description}
 	}
 
-	for _, update := range updates_recieved.Result {
+	for _, update := range updatesRecieved.Result {
 		updates <- update
 	}
 
