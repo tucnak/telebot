@@ -10,8 +10,7 @@ type File struct {
 	FileID   string `json:"file_id"`
 	FileSize int    `json:"file_size"`
 
-	// Local absolute path to file on file system. Valid only for
-	// new files, meant to be uploaded soon.
+	// Local absolute path to file on local file system.
 	filename string
 }
 
@@ -30,11 +29,17 @@ func NewFile(path string) (File, error) {
 	return File{filename: path}, nil
 }
 
-// Exists says whether file presents on Telegram servers or not.
+// Exists says whether the file presents on Telegram servers or not.
 func (f File) Exists() bool {
-	if f.filename == "" {
+	if f.FileID != "" {
 		return true
 	}
 
 	return false
+}
+
+// Local returns location of file on local file system, if it's
+// actually there, otherwise returns empty string.
+func (f File) Local() string {
+	return f.filename
 }

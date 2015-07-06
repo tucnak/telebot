@@ -115,7 +115,7 @@ func getMe(token string) (User, error) {
 
 	err = json.Unmarshal(meJSON, &botInfo)
 	if err != nil {
-		return User{}, err
+		return User{}, AuthError{"invalid token"}
 	}
 
 	if botInfo.Ok {

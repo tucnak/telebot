@@ -163,7 +163,9 @@ func (b Bot) SendPhoto(recipient User, photo *Photo, options *SendOptions) error
 	}
 
 	thumbnails := &responseRecieved.Result.Photo
+	filename := photo.filename
 	photo.File = (*thumbnails)[len(*thumbnails)-1].File
+	photo.filename = filename
 
 	return nil
 }
@@ -212,7 +214,9 @@ func (b Bot) SendAudio(recipient User, audio *Audio, options *SendOptions) error
 		return SendError{responseRecieved.Description}
 	}
 
+	filename := audio.filename
 	*audio = responseRecieved.Result.Audio
+	audio.filename = filename
 
 	return nil
 }
@@ -261,7 +265,9 @@ func (b Bot) SendDocument(recipient User, doc *Document, options *SendOptions) e
 		return SendError{responseRecieved.Description}
 	}
 
+	filename := doc.filename
 	*doc = responseRecieved.Result.Document
+	doc.filename = filename
 
 	return nil
 }
@@ -310,7 +316,9 @@ func (b *Bot) SendSticker(recipient User, sticker *Sticker, options *SendOptions
 		return SendError{responseRecieved.Description}
 	}
 
+	filename := sticker.filename
 	*sticker = responseRecieved.Result.Sticker
+	sticker.filename = filename
 
 	return nil
 }
@@ -359,7 +367,9 @@ func (b Bot) SendVideo(recipient User, video *Video, options *SendOptions) error
 		return SendError{responseRecieved.Description}
 	}
 
+	filename := video.filename
 	*video = responseRecieved.Result.Video
+	video.filename = filename
 
 	return nil
 }

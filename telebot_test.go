@@ -6,7 +6,11 @@ import (
 	"testing"
 )
 
-func TestTelebot(t *testing.T) {
+func TestBot(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
 	token := os.Getenv("TELEBOT_SECRET")
 	if token == "" {
 		fmt.Println("ERROR: " +
@@ -18,27 +22,42 @@ func TestTelebot(t *testing.T) {
 
 	_, err := NewBot(token)
 	if err != nil {
+		t.Fatal("Couldn't create bot:", err)
+	}
+}
+
+func TestFile(t *testing.T) {
+	file, err := NewFile("telebot.go")
+	if err != nil {
 		t.Fatal(err)
 	}
 
-	// TODO: Uncomment when Telegram fixes behavior for self-messaging
+	if file.Exists() {
+		t.Fatal("Newly created file can't exist on Telegram servers!")
+	}
 
-	/*messages := make(chan Message)
+	file.FileID = "magic"
 
-	intelligence := "welcome to the jungle"
+	if !file.Exists() {
+		t.Fatal("File with defined FileID is supposed to exist, fail.")
+	}
 
-	bot.SendMessage(bot.Identity, intelligence)
-	bot.Listen(messages, 1*time.Second)
+	if file.Local() != "telebot.go" {
+		t.Fatal("File doesn't preserve its original filename.")
+	}
+}
 
-	select {
-	case message := <-messages:
-		{
-			if message.Text != intelligence {
-				t.Error("Self-handshake failed.")
-			}
-		}
+func TestUser(t *testing.T) {
+	user := User{Title: "bazinga"}
 
-	case <-time.After(5 * time.Second):
-		t.Error("Self-handshake test took too long, aborting.")
-	}*/
+	// According to API, user object with non-empty Title is a group chat.
+	if !user.IsGroupChat() {
+		t.Fatal("Can't tell users/bots and group chats apart!")
+	}
+
+	// Reverse.
+	user.Title = ""
+	if user.IsGroupChat() {
+		t.Fatal("Can't tell users/bots and group chats apart!")
+	}
 }
