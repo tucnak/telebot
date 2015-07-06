@@ -26,3 +26,15 @@
 //	}
 //
 package telebot
+
+// A bunch of available chat actions.
+const (
+	Typing            = "typing"
+	UploadingPhoto    = "upload_photo"
+	UploadingVideo    = "upload_video"
+	UploadingAudio    = "upload_audio"
+	UploadingDocument = "upload_document"
+	RecordingVideo    = "record_video"
+	RecordingAudio    = "record_audio"
+	FindingLocation   = "find_location"
+)

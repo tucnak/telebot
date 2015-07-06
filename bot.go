@@ -403,3 +403,40 @@ func (b Bot) SendLocation(recipient User, geo *Location, options *SendOptions) e
 
 	return nil
 }
+
+// SendChatAction updates a chat action for recipient.
+//
+// Chat action is a status message that recipient would see where
+// you typically see "Harry is typing" status message. The only
+// difference is that bots' chat actions live only for 5 seconds
+// and die just once the client recieves a message from the bot.
+//
+// Currently, Telegram supports only a narrow range of possible
+// actions, these are aligned as constants of this package.
+func (b Bot) SendChatAction(recipient User, action string) error {
+	params := url.Values{}
+	params.Set("chat_id", strconv.Itoa(recipient.Id))
+	params.Set("action", action)
+
+	responseJSON, err := sendCommand("sendChatAction", b.Token, params)
+
+	if err != nil {
+		return err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Description string
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return err
+	}
+
+	if !responseRecieved.Ok {
+		return SendError{responseRecieved.Description}
+	}
+
+	return nil
+}
