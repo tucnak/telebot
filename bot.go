@@ -38,7 +38,7 @@ func (b Bot) Listen(subscription chan<- Message, interval time.Duration) {
 	latestUpdate := 0
 
 	go func() {
-		for range pulse.C {
+		for _ = range pulse.C {
 			go getUpdates(b.Token,
 				latestUpdate+1,
 				updates)
