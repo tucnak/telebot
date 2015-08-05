@@ -126,12 +126,13 @@ func getMe(token string) (User, error) {
 	return User{}, AuthError{botInfo.Description}
 }
 
-func getUpdates(token string, offset int, updates chan<- Update) error {
+func getUpdates(token string, offset int, timeout int) (updates []Update, err error) {
 	params := url.Values{}
 	params.Set("offset", strconv.Itoa(offset))
+	params.Set("timeout", strconv.Itoa(timeout))
 	updatesJSON, err := sendCommand("getUpdates", token, params)
 	if err != nil {
-		return err
+		return
 	}
 
 	var updatesRecieved struct {
@@ -142,16 +143,14 @@ func getUpdates(token string, offset int, updates chan<- Update) error {
 
 	err = json.Unmarshal(updatesJSON, &updatesRecieved)
 	if err != nil {
-		return err
+		return
 	}
 
 	if !updatesRecieved.Ok {
-		return FetchError{updatesRecieved.Description}
+		err = FetchError{updatesRecieved.Description}
+		return
 	}
 
-	for _, update := range updatesRecieved.Result {
-		updates <- update
-	}
-
-	return nil
+	updates = updatesRecieved.Result
+	return
 }

@@ -32,26 +32,17 @@ func NewBot(token string) (*Bot, error) {
 
 // Listen periodically looks for updates and delivers new messages
 // to subscription channel.
-func (b Bot) Listen(subscription chan<- Message, interval time.Duration) {
-	updates := make(chan Update)
-	pulse := time.NewTicker(interval)
-	latestUpdate := 0
+func (b Bot) Listen(subscription chan<- Message, timeout time.Duration) {
 
 	go func() {
-		for _ = range pulse.C {
-			go getUpdates(b.Token,
-				latestUpdate+1,
-				updates)
-		}
-	}()
-
-	go func() {
-		for update := range updates {
-			if update.ID > latestUpdate {
-				latestUpdate = update.ID
+		latestUpdate := 0
+		for {
+			if updates, err := getUpdates(b.Token, latestUpdate+1, int(timeout / time.Second)); err == nil {
+				for _, update := range updates {
+					latestUpdate = update.ID
+					subscription <- update.Payload
+				}
 			}
-
-			subscription <- update.Payload
 		}
 	}()
 }
