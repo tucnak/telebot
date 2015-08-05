@@ -37,7 +37,7 @@ func (b Bot) Listen(subscription chan<- Message, timeout time.Duration) {
 	go func() {
 		latestUpdate := 0
 		for {
-			if updates, err := getUpdates(b.Token, latestUpdate+1, int(timeout / time.Second)); err == nil {
+			if updates, err := getUpdates(b.Token, latestUpdate+1, int(timeout/time.Second)); err == nil {
 				for _, update := range updates {
 					latestUpdate = update.ID
 					subscription <- update.Payload

@@ -19,7 +19,6 @@ type ReplyMarkup struct {
 	// has selected the bot‘s message and tapped "Reply").
 	ForceReply bool `json:"force_reply,omitempty"`
 
-
 	// CustomKeyboard is Array of button rows, each represented by an Array of Strings.
 	//
 	// Note: you don't need to set HideCustomKeyboard field to show custom keyboard.
@@ -32,12 +31,10 @@ type ReplyMarkup struct {
 	// Requests clients to hide the keyboard as soon as it's been used. Defaults to false.
 	OneTimeKeyboard bool `json:"one_time_keyboard,omitempty"`
 
-
 	// Requests clients to hide the custom keyboard.
 	//
 	// Note: You dont need to set CustomKeyboard field to hide custom keyboard.
 	HideCustomKeyboard bool `json:"hide_keyboard,omitempty"`
-
 
 	// Use this param if you want to force reply from
 	// specific users only.
