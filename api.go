@@ -95,6 +95,10 @@ func embedSendOptions(params *url.Values, options *SendOptions) {
 		params.Set("disable_web_page_preview", "true")
 	}
 
+	if options.ParseMode != ModeDefault {
+		params.Set("parse_mode", string(options.ParseMode))
+	}
+
 	// process reply_markup
 	if options.ReplyMarkup.ForceReply || options.ReplyMarkup.CustomKeyboard != nil || options.ReplyMarkup.HideCustomKeyboard {
 		replyMarkup, _ := json.Marshal(options.ReplyMarkup)
