@@ -1,5 +1,14 @@
 package telebot
 
+// ParseMode determines the way client applications treat the text of the message
+type ParseMode string
+
+// Supported ParseMode
+const (
+	ModeDefault ParseMode = ""
+	ModeMarkdown ParseMode = "Markdown"
+)
+
 // SendOptions represents a set of custom options that could
 // be appled to messages sent.
 type SendOptions struct {
@@ -11,6 +20,9 @@ type SendOptions struct {
 
 	// For text messages, disables previews for links in this message.
 	DisableWebPagePreview bool
+
+	// ParseMode controls how client apps render your message.
+	ParseMode ParseMode
 }
 
 type ReplyMarkup struct {
