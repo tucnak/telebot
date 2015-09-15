@@ -1,6 +1,6 @@
 package telebot
 
-// ParseMode is new bot api released at Sep 7, 2015. It adds markdown support to sendMessage API
+// ParseMode determines the way client applications treat the text of the message
 type ParseMode string
 
 // Supported ParseMode
