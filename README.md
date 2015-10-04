@@ -39,9 +39,11 @@ if err != nil {
     return err
 }
 
-// Next time you send &boom, telebot won't issue
+audio := telebot.Audio{File: boom}
+
+// Next time you send &audio, telebot won't issue
 // an upload, but would re-use existing file.
-err = bot.SendAudio(recipient, &boom, nil)
+err = bot.SendAudio(recipient, &audio, nil)
 ```
 
 Sometimes you might want to send a little bit complicated messages, with some optional parameters:
