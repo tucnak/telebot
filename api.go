@@ -74,6 +74,10 @@ func sendFile(method, token, name, path string, params url.Values) ([]byte, erro
 		return []byte{}, err
 	}
 
+	if resp.StatusCode == http.StatusInternalServerError {
+		return []byte{}, fmt.Errorf("Telegram API returned 500 internal server error")
+	}
+
 	json, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return []byte{}, err
