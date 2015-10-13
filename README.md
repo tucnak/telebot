@@ -23,10 +23,13 @@ func main() {
     bot.Listen(messages, 1*time.Second)
 
     for message := range messages {
-        if message.Text == "/hi" {
-            bot.SendMessage(message.Chat,
-                "Hello, "+message.Sender.FirstName+"!", nil)
-        }
+        // use go routine for processing messages
+        go func (message telebot.Message){
+            if message.Text == "/hi" {
+                bot.SendMessage(message.Chat,
+                    "Hello, "+message.Sender.FirstName+"!", nil)
+            }
+        }(message)
     }
 }
 ```
