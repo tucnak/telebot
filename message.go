@@ -95,7 +95,7 @@ type Message struct {
 
 // Origin returns an origin of message: group chat / personal.
 func (m Message) Origin() User {
-	if (m.Chat != User{}) {
+	if m.IsPersonal() {
 		return m.Chat
 	}
 
