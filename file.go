@@ -31,11 +31,7 @@ func NewFile(path string) (File, error) {
 
 // Exists says whether the file presents on Telegram servers or not.
 func (f File) Exists() bool {
-	if f.FileID != "" {
-		return true
-	}
-
-	return false
+	return f.FileID != ""
 }
 
 // Local returns location of file on local file system, if it's
