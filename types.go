@@ -15,11 +15,7 @@ type User struct {
 
 // IsGroupChat returns true if user object represents a group chat.
 func (u User) IsGroupChat() bool {
-	if u.Title != "" {
-		return true
-	}
-
-	return false
+	return u.Title != ""
 }
 
 // Update object represents an incoming update.

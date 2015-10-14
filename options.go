@@ -5,7 +5,7 @@ type ParseMode string
 
 // Supported ParseMode
 const (
-	ModeDefault ParseMode = ""
+	ModeDefault  ParseMode = ""
 	ModeMarkdown ParseMode = "Markdown"
 )
 
@@ -39,7 +39,7 @@ type ReplyMarkup struct {
 	// (e.g., make the keyboard smaller if there are just two rows of buttons).
 	// Defaults to false, in which case the custom keyboard is always of the
 	// same height as the app's standard keyboard.
-	ResizeKeyboard bool `json:"resize_keyboard,omitemptyd"`
+	ResizeKeyboard bool `json:"resize_keyboard,omitempty"`
 	// Requests clients to hide the keyboard as soon as it's been used. Defaults to false.
 	OneTimeKeyboard bool `json:"one_time_keyboard,omitempty"`
 
