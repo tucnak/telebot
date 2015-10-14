@@ -95,7 +95,7 @@ type Message struct {
 
 // Origin returns an origin of message: group chat / personal.
 func (m Message) Origin() User {
-	if (m.Chat != User{}) {
+	if m.IsPersonal() {
 		return m.Chat
 	}
 
@@ -110,30 +110,18 @@ func (m Message) Time() time.Time {
 // IsForwarded says whether message is forwarded copy of another
 // message or not.
 func (m Message) IsForwarded() bool {
-	if (m.OriginalSender != User{}) {
-		return true
-	}
-
-	return false
+	return m.OriginalSender != User{}
 }
 
 // IsReply says whether message is reply to another message or not.
 func (m Message) IsReply() bool {
-	if m.ReplyTo != nil {
-		return true
-	}
-
-	return false
+	return m.ReplyTo != nil
 }
 
 // IsPersonal returns true, if message is a personal message,
 // returns false if sent to group chat.
 func (m Message) IsPersonal() bool {
-	if (m.Chat != User{}) {
-		return true
-	}
-
-	return false
+	return m.Chat != User{}
 }
 
 // IsService returns true, if message is a service message,
