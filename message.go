@@ -47,7 +47,7 @@ type Message struct {
 	Location Location `json:"location"`
 
 	// A group chat message belongs to, empty if personal.
-	Chat User `json:"chat"`
+	Chat Chat `json:"chat"`
 
 	// For a service message, represents a user,
 	// that just got added to chat, this message came from.
