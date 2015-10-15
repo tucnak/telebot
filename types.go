@@ -1,33 +1,32 @@
 package telebot
 
-// User object represents a Telegram user, bot or group chat.
+// User object represents a Telegram user, bot
 //
-// Title field differs a group chat apart from users and bots:
 // object represents a group chat if Title is empty.
 type User struct {
 	ID        int    `json:"id"`
 	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Username  string `json:"username"`
 
-	Title string `json:"title"`
+	LastName string `json:"last_name"`
+	Username string `json:"username"`
 }
 
 // Chat object represents a Telegram user, bot or group chat.
+// Title for channels and group chats
 // Type of chat, can be either “private”, or “group”, or “channel”
 type Chat struct {
-	ID        int    `json:"id"`
-	Type      string `json:"type"`
+	ID   int    `json:"id"`
+	Type string `json:"type"`
+
+	Title     string `json:"title"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Username  string `json:"username"`
-
-	Title string `json:"title"`
 }
 
-// IsGroupChat returns true if user object represents a group chat.
-func (u User) IsGroupChat() bool {
-	return u.Title != ""
+// IsGroupChat returns true if chat object represents a group chat.
+func (u Chat) IsGroupChat() bool {
+	return u.Type == "group"
 }
 
 // Update object represents an incoming update.
