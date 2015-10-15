@@ -73,7 +73,7 @@ func (b Bot) SendMessage(recipient User, message string, options *SendOptions) e
 	}
 
 	if !responseRecieved.Ok {
-		return SendError{responseRecieved.Description}
+		return fmt.Errorf("telebot: %s", responseRecieved.Description)
 	}
 
 	return nil
@@ -102,7 +102,7 @@ func (b Bot) ForwardMessage(recipient User, message Message) error {
 	}
 
 	if !responseRecieved.Ok {
-		return SendError{responseRecieved.Description}
+		return fmt.Errorf("telebot: %s", responseRecieved.Description)
 	}
 
 	return nil
@@ -150,7 +150,7 @@ func (b Bot) SendPhoto(recipient User, photo *Photo, options *SendOptions) error
 	}
 
 	if !responseRecieved.Ok {
-		return SendError{responseRecieved.Description}
+		return fmt.Errorf("telebot: %s", responseRecieved.Description)
 	}
 
 	thumbnails := &responseRecieved.Result.Photo
@@ -202,7 +202,7 @@ func (b Bot) SendAudio(recipient User, audio *Audio, options *SendOptions) error
 	}
 
 	if !responseRecieved.Ok {
-		return SendError{responseRecieved.Description}
+		return fmt.Errorf("telebot: %s", responseRecieved.Description)
 	}
 
 	filename := audio.filename
@@ -253,7 +253,7 @@ func (b Bot) SendDocument(recipient User, doc *Document, options *SendOptions) e
 	}
 
 	if !responseRecieved.Ok {
-		return SendError{responseRecieved.Description}
+		return fmt.Errorf("telebot: %s", responseRecieved.Description)
 	}
 
 	filename := doc.filename
@@ -304,7 +304,7 @@ func (b *Bot) SendSticker(recipient User, sticker *Sticker, options *SendOptions
 	}
 
 	if !responseRecieved.Ok {
-		return SendError{responseRecieved.Description}
+		return fmt.Errorf("telebot: %s", responseRecieved.Description)
 	}
 
 	filename := sticker.filename
@@ -355,7 +355,7 @@ func (b Bot) SendVideo(recipient User, video *Video, options *SendOptions) error
 	}
 
 	if !responseRecieved.Ok {
-		return SendError{responseRecieved.Description}
+		return fmt.Errorf("telebot: %s", responseRecieved.Description)
 	}
 
 	filename := video.filename
@@ -399,7 +399,7 @@ func (b Bot) SendLocation(recipient User, geo *Location, options *SendOptions) e
 	}
 
 	if !responseRecieved.Ok {
-		return SendError{responseRecieved.Description}
+		return fmt.Errorf("telebot: %s", responseRecieved.Description)
 	}
 
 	return nil
@@ -436,7 +436,7 @@ func (b Bot) SendChatAction(recipient User, action string) error {
 	}
 
 	if !responseRecieved.Ok {
-		return SendError{responseRecieved.Description}
+		return fmt.Errorf("telebot: %s", responseRecieved.Description)
 	}
 
 	return nil

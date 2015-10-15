@@ -124,14 +124,14 @@ func getMe(token string) (User, error) {
 
 	err = json.Unmarshal(meJSON, &botInfo)
 	if err != nil {
-		return User{}, AuthError{"invalid token"}
+		return User{}, fmt.Errorf("telebot: invalid token")
 	}
 
 	if botInfo.Ok {
 		return botInfo.Result, nil
 	}
 
-	return User{}, AuthError{botInfo.Description}
+	return User{}, fmt.Errorf("telebot: %s", botInfo.Description)
 }
 
 func getUpdates(token string, offset int, timeout int) (updates []Update, err error) {
@@ -155,7 +155,7 @@ func getUpdates(token string, offset int, timeout int) (updates []Update, err er
 	}
 
 	if !updatesRecieved.Ok {
-		err = FetchError{updatesRecieved.Description}
+		err = fmt.Errorf("telebot: %s", updatesRecieved.Description)
 		return
 	}
 
