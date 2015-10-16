@@ -6,7 +6,8 @@ import (
 
 // Message object represents a message.
 type Message struct {
-	ID       int  `json:"message_id"`
+	ID int `json:"message_id"`
+	// For message sent to channels, Sender maybe empty
 	Sender   User `json:"from"`
 	Unixtime int  `json:"date"`
 
@@ -47,7 +48,7 @@ type Message struct {
 	Location Location `json:"location"`
 
 	// A group chat message belongs to, empty if personal.
-	Chat User `json:"chat"`
+	Chat Chat `json:"chat"`
 
 	// For a service message, represents a user,
 	// that just got added to chat, this message came from.
@@ -95,9 +96,9 @@ type Message struct {
 
 // Origin returns an origin of message: group chat / personal.
 func (m Message) Origin() User {
-	if m.IsPersonal() {
-		return m.Chat
-	}
+	// if m.IsPersonal() {
+	// 	return m.Chat
+	// }
 
 	return m.Sender
 }
@@ -121,7 +122,7 @@ func (m Message) IsReply() bool {
 // IsPersonal returns true, if message is a personal message,
 // returns false if sent to group chat.
 func (m Message) IsPersonal() bool {
-	return m.Chat != User{}
+	return !m.Chat.IsGroupChat()
 }
 
 // IsService returns true, if message is a service message,

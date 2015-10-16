@@ -47,17 +47,19 @@ func TestFile(t *testing.T) {
 	}
 }
 
-func TestUser(t *testing.T) {
-	user := User{Title: "bazinga"}
+func TestChat(t *testing.T) {
+	user := Chat{Type: "group", Title: "bazinga"}
 
-	// According to API, user object with non-empty Title is a group chat.
+	// According to API, chat object with group Type is a group chat.
 	if !user.IsGroupChat() {
-		t.Fatal("Can't tell users/bots and group chats apart!")
+		t.Fatal("Can't tell private and group chats apart!")
 	}
 
 	// Reverse.
 	user.Title = ""
+	user.Type = "private"
+
 	if user.IsGroupChat() {
-		t.Fatal("Can't tell users/bots and group chats apart!")
+		t.Fatal("Can't tell private and group chats apart!")
 	}
 }
