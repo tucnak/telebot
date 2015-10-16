@@ -11,7 +11,7 @@ func TestBot(t *testing.T) {
 		t.Skip("skipping test in short mode.")
 	}
 
-	token := os.Getenv("TELEGRAM_SECRET ")
+	token := os.Getenv("TELEGRAM_SECRET")
 	if token == "" {
 		fmt.Println("ERROR: " +
 			"In order to test telebot functionality, you need to set up " +
