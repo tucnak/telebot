@@ -1,5 +1,12 @@
 package telebot
 
+// Recipient is basically any possible endpoint you can send
+// messages to. It's usually a distinct user or a chat.
+type Recipient interface {
+	// Basically, ID of the endpoint.
+	Destination() int
+}
+
 // User object represents a Telegram user, bot
 //
 // object represents a group chat if Title is empty.
@@ -9,6 +16,11 @@ type User struct {
 
 	LastName string `json:"last_name"`
 	Username string `json:"username"`
+}
+
+// Destination is internal user ID.
+func (u User) Destination() int {
+	return u.ID
 }
 
 // Chat object represents a Telegram user, bot or group chat.
@@ -24,9 +36,14 @@ type Chat struct {
 	Username  string `json:"username"`
 }
 
+// Destination is internal chat ID.
+func (c Chat) Destination() int {
+	return c.ID
+}
+
 // IsGroupChat returns true if chat object represents a group chat.
-func (u Chat) IsGroupChat() bool {
-	return u.Type == "group"
+func (c Chat) IsGroupChat() bool {
+	return c.Type == "group"
 }
 
 // Update object represents an incoming update.

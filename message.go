@@ -7,9 +7,11 @@ import (
 // Message object represents a message.
 type Message struct {
 	ID int `json:"message_id"`
-	// For message sent to channels, Sender maybe empty
-	Sender   User `json:"from"`
-	Unixtime int  `json:"date"`
+
+	// For message sent to channels, Sender may be empty
+	Sender User `json:"from"`
+
+	Unixtime int `json:"date"`
 
 	// For forwarded messages, sender of the original message.
 	OriginalSender User `json:"forward_from"`
