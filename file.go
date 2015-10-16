@@ -21,9 +21,7 @@ type File struct {
 // a descriptor for it.
 func NewFile(path string) (File, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return File{}, FileError{
-			fmt.Sprintf("'%s' does not exist!", path),
-		}
+		return File{}, fmt.Errorf("telebot: '%s' does not exist", path)
 	}
 
 	return File{filename: path}, nil
