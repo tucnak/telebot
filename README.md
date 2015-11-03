@@ -52,8 +52,8 @@ Sometimes you might want to send a little bit complicated messages, with some op
 ```go
 // Send a selective force reply message.
 bot.SendMessage(user, "pong", &telebot.SendOptions{
-        ForceReply: telebot.ForceReply{
-            Require: true,
+        ReplyMarkup: telebot.ReplyMarkup{
+            ForceReply: true,
             Selective: true,
         },
     },
