@@ -22,7 +22,7 @@ func sendCommand(method string, token string, params url.Values) ([]byte, error)
 	if err != nil {
 		return []byte{}, err
 	}
-
+	resp.Close = true
 	defer resp.Body.Close()
 	json, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
