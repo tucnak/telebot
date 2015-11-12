@@ -3,8 +3,10 @@ package telebot
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -45,6 +47,41 @@ func (b Bot) Listen(subscription chan<- Message, timeout time.Duration) {
 			}
 		}
 	}()
+}
+
+// ListenWebHook starts HTTPS server and register webHooks in Telegram for PUSH
+// updates. certFile and keyFile - filenames containing a certificate and matching private key for the server
+// See https://golang.org/pkg/net/http/#ListenAndServeTLS
+func (b Bot) ListenWebHook(subscription chan<- Message, publicAddress, path, certFile, keyFile string) error {
+	// register web hook in Telegram
+	if _, err := sendFile("setWebhook", b.Token, "certificate", certFile, url.Values{"url": []string{publicAddress + path}}); err != nil {
+		return err
+	}
+	go func() {
+		mux := http.NewServeMux()
+
+		server := &http.Server{
+			Addr:    publicAddress,
+			Handler: mux,
+		}
+		mux.HandleFunc(path, func(response http.ResponseWriter, request *http.Request) {
+			if strings.ToUpper(request.Method) != "POST" {
+				http.Error(response, "Must be POST method", 405) //Method not allowed
+				return
+			}
+			update := Update{}
+			decoder := json.NewDecoder(request.Body)
+			err := decoder.Decode(&update)
+			if err != nil {
+				http.Error(response, err.Error(), 502)
+				return
+			}
+			subscription <- update.Payload
+			response.WriteHeader(200)
+		})
+		panic(server.ListenAndServeTLS(certFile, keyFile))
+	}()
+	return nil
 }
 
 // SendMessage sends a text message to recipient.
