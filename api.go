@@ -14,7 +14,7 @@ import (
 	"strconv"
 )
 
-func sendCommand(method string, token string, params url.Values) ([]byte, error) {
+func sendCommand(method, token string, params url.Values) ([]byte, error) {
 	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s?%s",
 		token, method, params.Encode())
 
@@ -75,7 +75,7 @@ func sendFile(method, token, name, path string, params url.Values) ([]byte, erro
 	}
 
 	if resp.StatusCode == http.StatusInternalServerError {
-		return []byte{}, fmt.Errorf("Telegram API returned 500 internal server error")
+		return []byte{}, fmt.Errorf("telegram: internal server error")
 	}
 
 	json, err := ioutil.ReadAll(resp.Body)
@@ -103,10 +103,15 @@ func embedSendOptions(params *url.Values, options *SendOptions) {
 		params.Set("parse_mode", string(options.ParseMode))
 	}
 
-	// process reply_markup
-	if options.ReplyMarkup.ForceReply || options.ReplyMarkup.CustomKeyboard != nil || options.ReplyMarkup.HideCustomKeyboard {
-		replyMarkup, _ := json.Marshal(options.ReplyMarkup)
-		params.Set("reply_markup", string(replyMarkup))
+	// Processing force_reply:
+	{
+		forceReply := options.ReplyMarkup.ForceReply
+		customKeyboard := (options.ReplyMarkup.CustomKeyboard != nil)
+		hiddenKeyboard := options.ReplyMarkup.HideCustomKeyboard
+		if forceReply || customKeyboard || hiddenKeyboard {
+			replyMarkup, _ := json.Marshal(options.ReplyMarkup)
+			params.Set("reply_markup", string(replyMarkup))
+		}
 	}
 }
 
@@ -134,7 +139,7 @@ func getMe(token string) (User, error) {
 	return User{}, fmt.Errorf("telebot: %s", botInfo.Description)
 }
 
-func getUpdates(token string, offset int, timeout int) (updates []Update, err error) {
+func getUpdates(token string, offset, timeout int) (upd []Update, err error) {
 	params := url.Values{}
 	params.Set("offset", strconv.Itoa(offset))
 	params.Set("timeout", strconv.Itoa(timeout))
@@ -159,6 +164,5 @@ func getUpdates(token string, offset int, timeout int) (updates []Update, err er
 		return
 	}
 
-	updates = updatesRecieved.Result
-	return
+	return updatesRecieved.Result, nil
 }

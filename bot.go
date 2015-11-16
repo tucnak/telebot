@@ -3,6 +3,7 @@ package telebot
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/url"
 	"strconv"
 	"time"
@@ -31,24 +32,31 @@ func NewBot(token string) (*Bot, error) {
 }
 
 // Listen periodically looks for updates and delivers new messages
-// to subscription channel.
-func (b Bot) Listen(subscription chan<- Message, timeout time.Duration) {
-
+// to the subscription channel.
+func (b *Bot) Listen(subscription chan<- Message, timeout time.Duration) {
 	go func() {
 		latestUpdate := 0
 		for {
-			if updates, err := getUpdates(b.Token, latestUpdate+1, int(timeout/time.Second)); err == nil {
-				for _, update := range updates {
-					latestUpdate = update.ID
-					subscription <- update.Payload
-				}
+			updates, err := getUpdates(b.Token,
+				latestUpdate+1,
+				int(timeout/time.Second),
+			)
+
+			if err != nil {
+				log.Println("failed to get updates:", err)
+				continue
+			}
+
+			for _, update := range updates {
+				latestUpdate = update.ID
+				subscription <- update.Payload
 			}
 		}
 	}()
 }
 
 // SendMessage sends a text message to recipient.
-func (b Bot) SendMessage(recipient Recipient, message string, options *SendOptions) error {
+func (b *Bot) SendMessage(recipient Recipient, message string, options *SendOptions) error {
 	params := url.Values{}
 	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
 	params.Set("text", message)
@@ -80,7 +88,7 @@ func (b Bot) SendMessage(recipient Recipient, message string, options *SendOptio
 }
 
 // ForwardMessage forwards a message to recipient.
-func (b Bot) ForwardMessage(recipient Recipient, message Message) error {
+func (b *Bot) ForwardMessage(recipient Recipient, message Message) error {
 	params := url.Values{}
 	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
 	params.Set("from_chat_id", strconv.Itoa(message.Origin().ID))
@@ -114,7 +122,7 @@ func (b Bot) ForwardMessage(recipient Recipient, message Message) error {
 // the Telegram servers, so sending the same photo object
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
-func (b Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions) error {
+func (b *Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions) error {
 	params := url.Values{}
 	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
 	params.Set("caption", photo.Caption)
@@ -167,7 +175,7 @@ func (b Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions) 
 // the Telegram servers, so sending the same audio object
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
-func (b Bot) SendAudio(recipient Recipient, audio *Audio, options *SendOptions) error {
+func (b *Bot) SendAudio(recipient Recipient, audio *Audio, options *SendOptions) error {
 	params := url.Values{}
 	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
 
@@ -218,7 +226,7 @@ func (b Bot) SendAudio(recipient Recipient, audio *Audio, options *SendOptions) 
 // the Telegram servers, so sending the same document object
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
-func (b Bot) SendDocument(recipient Recipient, doc *Document, options *SendOptions) error {
+func (b *Bot) SendDocument(recipient Recipient, doc *Document, options *SendOptions) error {
 	params := url.Values{}
 	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
 
@@ -320,7 +328,7 @@ func (b *Bot) SendSticker(recipient Recipient, sticker *Sticker, options *SendOp
 // the Telegram servers, so sending the same video object
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
-func (b Bot) SendVideo(recipient Recipient, video *Video, options *SendOptions) error {
+func (b *Bot) SendVideo(recipient Recipient, video *Video, options *SendOptions) error {
 	params := url.Values{}
 	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
 
@@ -371,7 +379,7 @@ func (b Bot) SendVideo(recipient Recipient, video *Video, options *SendOptions) 
 // the Telegram servers, so sending the same video object
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
-func (b Bot) SendLocation(recipient Recipient, geo *Location, options *SendOptions) error {
+func (b *Bot) SendLocation(recipient Recipient, geo *Location, options *SendOptions) error {
 	params := url.Values{}
 	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
 	params.Set("latitude", fmt.Sprintf("%f", geo.Latitude))
@@ -414,7 +422,7 @@ func (b Bot) SendLocation(recipient Recipient, geo *Location, options *SendOptio
 //
 // Currently, Telegram supports only a narrow range of possible
 // actions, these are aligned as constants of this package.
-func (b Bot) SendChatAction(recipient Recipient, action string) error {
+func (b *Bot) SendChatAction(recipient Recipient, action string) error {
 	params := url.Values{}
 	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
 	params.Set("action", action)
