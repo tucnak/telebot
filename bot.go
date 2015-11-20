@@ -3,6 +3,7 @@ package telebot
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/armon/go-radix"
 	"log"
 	"net/url"
 	"strconv"
@@ -15,6 +16,8 @@ type Bot struct {
 
 	// Bot as `User` on API level.
 	Identity User
+
+	handlers *radix.Tree
 }
 
 // NewBot does try to build a Bot with token `token`, which
@@ -28,6 +31,8 @@ func NewBot(token string) (*Bot, error) {
 	return &Bot{
 		Token:    token,
 		Identity: user,
+
+		handlers: radix.New(),
 	}, nil
 }
 
@@ -53,6 +58,38 @@ func (b *Bot) Listen(subscription chan<- Message, timeout time.Duration) {
 			}
 		}
 	}()
+}
+
+// Handle does smth.
+func (b *Bot) Handle(prefix string, fn Handler) {
+	b.handlers.Insert(prefix, fn)
+}
+
+// Serve is smth.
+func (b *Bot) Serve() {
+	var defaultHandler Handler
+
+	if userProvided, ok := b.handlers.Get(Default); ok {
+		if handler, ok := userProvided.(Handler); ok {
+			defaultHandler = handler
+		}
+	} else {
+		defaultHandler = func(_ Context) {}
+	}
+
+	messages := make(chan Message)
+	b.Listen(messages, 1*time.Second)
+
+	for message := range messages {
+		if _, handler, ok := b.handlers.LongestPrefix(message.Text); ok {
+			if handler, ok := handler.(Handler); ok {
+				go handler(Context{Message: &message})
+				continue
+			}
+		}
+
+		go defaultHandler(Context{Message: &message})
+	}
 }
 
 // SendMessage sends a text message to recipient.
