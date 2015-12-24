@@ -1,10 +1,12 @@
 package telebot
 
+import "strconv"
+
 // Recipient is basically any possible endpoint you can send
 // messages to. It's usually a distinct user or a chat.
 type Recipient interface {
-	// Basically, ID of the endpoint.
-	Destination() int
+	// ID of user or group chat, @Username for channel
+	Destination() string
 }
 
 // User object represents a Telegram user, bot
@@ -19,15 +21,15 @@ type User struct {
 }
 
 // Destination is internal user ID.
-func (u User) Destination() int {
-	return u.ID
+func (u User) Destination() string {
+	return strconv.Itoa(u.ID)
 }
 
 // Chat object represents a Telegram user, bot or group chat.
 // Title for channels and group chats
-// Type of chat, can be either “private”, or “group”, or “channel”
+// Type of chat, can be either “private”, “group”, "supergroup" or “channel”
 type Chat struct {
-	ID   int    `json:"id"`
+	ID   int64  `json:"id"`
 	Type string `json:"type"`
 
 	Title     string `json:"title"`
@@ -37,13 +39,17 @@ type Chat struct {
 }
 
 // Destination is internal chat ID.
-func (c Chat) Destination() int {
-	return c.ID
+func (c Chat) Destination() string {
+	ret := "@" + c.Username
+	if c.Type != "channel" {
+		ret = strconv.FormatInt(c.ID, 10)
+	}
+	return ret
 }
 
 // IsGroupChat returns true if chat object represents a group chat.
 func (c Chat) IsGroupChat() bool {
-	return c.Type == "group"
+	return c.Type != "private"
 }
 
 // Update object represents an incoming update.

@@ -58,7 +58,7 @@ func (b *Bot) Listen(subscription chan<- Message, timeout time.Duration) {
 // SendMessage sends a text message to recipient.
 func (b *Bot) SendMessage(recipient Recipient, message string, options *SendOptions) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
+	params.Set("chat_id", recipient.Destination())
 	params.Set("text", message)
 
 	if options != nil {
@@ -90,7 +90,7 @@ func (b *Bot) SendMessage(recipient Recipient, message string, options *SendOpti
 // ForwardMessage forwards a message to recipient.
 func (b *Bot) ForwardMessage(recipient Recipient, message Message) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
+	params.Set("chat_id", recipient.Destination())
 	params.Set("from_chat_id", strconv.Itoa(message.Origin().ID))
 	params.Set("message_id", strconv.Itoa(message.ID))
 
@@ -124,7 +124,7 @@ func (b *Bot) ForwardMessage(recipient Recipient, message Message) error {
 // of existing file on Telegram servers.
 func (b *Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
+	params.Set("chat_id", recipient.Destination())
 	params.Set("caption", photo.Caption)
 
 	if options != nil {
@@ -177,7 +177,7 @@ func (b *Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions)
 // of existing file on Telegram servers.
 func (b *Bot) SendAudio(recipient Recipient, audio *Audio, options *SendOptions) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
+	params.Set("chat_id", recipient.Destination())
 
 	if options != nil {
 		embedSendOptions(&params, options)
@@ -228,7 +228,7 @@ func (b *Bot) SendAudio(recipient Recipient, audio *Audio, options *SendOptions)
 // of existing file on Telegram servers.
 func (b *Bot) SendDocument(recipient Recipient, doc *Document, options *SendOptions) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
+	params.Set("chat_id", recipient.Destination())
 
 	if options != nil {
 		embedSendOptions(&params, options)
@@ -279,7 +279,7 @@ func (b *Bot) SendDocument(recipient Recipient, doc *Document, options *SendOpti
 // of existing file on Telegram servers.
 func (b *Bot) SendSticker(recipient Recipient, sticker *Sticker, options *SendOptions) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
+	params.Set("chat_id", recipient.Destination())
 
 	if options != nil {
 		embedSendOptions(&params, options)
@@ -330,7 +330,7 @@ func (b *Bot) SendSticker(recipient Recipient, sticker *Sticker, options *SendOp
 // of existing file on Telegram servers.
 func (b *Bot) SendVideo(recipient Recipient, video *Video, options *SendOptions) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
+	params.Set("chat_id", recipient.Destination())
 
 	if options != nil {
 		embedSendOptions(&params, options)
@@ -381,7 +381,7 @@ func (b *Bot) SendVideo(recipient Recipient, video *Video, options *SendOptions)
 // of existing file on Telegram servers.
 func (b *Bot) SendLocation(recipient Recipient, geo *Location, options *SendOptions) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
+	params.Set("chat_id", recipient.Destination())
 	params.Set("latitude", fmt.Sprintf("%f", geo.Latitude))
 	params.Set("longitude", fmt.Sprintf("%f", geo.Longitude))
 
@@ -424,7 +424,7 @@ func (b *Bot) SendLocation(recipient Recipient, geo *Location, options *SendOpti
 // actions, these are aligned as constants of this package.
 func (b *Bot) SendChatAction(recipient Recipient, action string) error {
 	params := url.Values{}
-	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
+	params.Set("chat_id", recipient.Destination())
 	params.Set("action", action)
 
 	responseJSON, err := sendCommand("sendChatAction", b.Token, params)

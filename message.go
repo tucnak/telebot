@@ -94,6 +94,40 @@ type Message struct {
 	//
 	// Sender would lead to creator of the chat.
 	ChatCreated bool `json:"group_chat_created"`
+
+	// For a service message, true if super group has been created.
+	//
+	// You would recieve such a message if you are one of
+	// initial group chat members.
+	//
+	// Sender would lead to creator of the chat.
+	SuperGroupCreated bool `json:"supergroup_chat_created"`
+
+	// For a service message, true if channel has been created.
+	//
+	// You would recieve such a message if you are one of
+	// initial channel administrators.
+	//
+	// Sender would lead to creator of the chat.
+	ChannelCreated bool `json:"channel_chat_created"`
+
+	// For a service message, the destination (super group) you
+	// migrated to.
+	//
+	// You would recieve such a message when your chat has migrated
+	// to a super group.
+	//
+	// Sender would lead to creator of the migration.
+	MigrateTo int64 `json:"migrate_to_chat_id"`
+
+	// For a service message, the Origin (normal group) you migrated
+	// from.
+	//
+	// You would recieve such a message when your chat has migrated
+	// to a super group.
+	//
+	// Sender would lead to creator of the migration.
+	MigrateFrom int64 `json:"migrate_from_chat_id"`
 }
 
 // Origin returns an origin of message: group chat / personal.
