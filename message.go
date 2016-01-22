@@ -131,7 +131,7 @@ type Message struct {
 }
 
 // Origin returns an origin of message: group chat / personal.
-func (m Message) Origin() User {
+func (m *Message) Origin() User {
 	// if m.IsPersonal() {
 	// 	return m.Chat
 	// }
@@ -140,24 +140,24 @@ func (m Message) Origin() User {
 }
 
 // Time returns the moment of message creation in local time.
-func (m Message) Time() time.Time {
+func (m *Message) Time() time.Time {
 	return time.Unix(int64(m.Unixtime), 0)
 }
 
 // IsForwarded says whether message is forwarded copy of another
 // message or not.
-func (m Message) IsForwarded() bool {
+func (m *Message) IsForwarded() bool {
 	return m.OriginalSender != User{}
 }
 
 // IsReply says whether message is reply to another message or not.
-func (m Message) IsReply() bool {
+func (m *Message) IsReply() bool {
 	return m.ReplyTo != nil
 }
 
 // IsPersonal returns true, if message is a personal message,
 // returns false if sent to group chat.
-func (m Message) IsPersonal() bool {
+func (m *Message) IsPersonal() bool {
 	return !m.Chat.IsGroupChat()
 }
 
@@ -167,7 +167,7 @@ func (m Message) IsPersonal() bool {
 // Service messages are automatically sent messages, which
 // typically occur on some global action. For instance, when
 // anyone leaves the chat or chat title changes.
-func (m Message) IsService() bool {
+func (m *Message) IsService() bool {
 	service := false
 
 	if (m.UserJoined != User{}) {

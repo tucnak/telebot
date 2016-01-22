@@ -11,10 +11,10 @@ import (
 
 // Bot represents a separate Telegram bot instance.
 type Bot struct {
-	Token string
-
-	// Bot as `User` on API level.
+	Token    string
 	Identity User
+	Messages chan Message
+	Queries  chan Query
 }
 
 // NewBot does try to build a Bot with token `token`, which
@@ -33,26 +33,53 @@ func NewBot(token string) (*Bot, error) {
 
 // Listen periodically looks for updates and delivers new messages
 // to the subscription channel.
-func (b *Bot) Listen(subscription chan<- Message, timeout time.Duration) {
-	go func() {
-		latestUpdate := 0
-		for {
-			updates, err := getUpdates(b.Token,
-				latestUpdate+1,
-				int(timeout/time.Second),
-			)
+func (b *Bot) Listen(subscription chan Message, timeout time.Duration) {
+	go b.poll(subscription, nil, timeout)
+}
 
-			if err != nil {
-				log.Println("failed to get updates:", err)
-				continue
-			}
+// Start periodically polls messages and/or updates to corresponding channels
+// from the bot object.
+func (b *Bot) Start(timeout time.Duration) {
+	b.poll(b.Messages, b.Queries, timeout)
+}
 
-			for _, update := range updates {
-				latestUpdate = update.ID
-				subscription <- update.Payload
-			}
+func (b *Bot) poll(
+	messages chan Message,
+	queries chan Query,
+	timeout time.Duration,
+) {
+	latestUpdate := 0
+
+	for {
+		updates, err := getUpdates(b.Token,
+			latestUpdate+1,
+			int(timeout/time.Second),
+		)
+
+		if err != nil {
+			log.Println("failed to get updates:", err)
+			continue
 		}
-	}()
+
+		for _, update := range updates {
+			if update.Query == nil /* if message */ {
+				if messages == nil {
+					continue
+				}
+
+				messages <- update.Payload
+			} else /* if query */ {
+				if queries == nil {
+					continue
+				}
+
+				queries <- *update.Query
+			}
+
+			latestUpdate = update.ID
+		}
+	}
+
 }
 
 // SendMessage sends a text message to recipient.
@@ -390,7 +417,6 @@ func (b *Bot) SendLocation(recipient Recipient, geo *Location, options *SendOpti
 	}
 
 	responseJSON, err := sendCommand("sendLocation", b.Token, params)
-
 	if err != nil {
 		return err
 	}
@@ -428,7 +454,39 @@ func (b *Bot) SendChatAction(recipient Recipient, action string) error {
 	params.Set("action", action)
 
 	responseJSON, err := sendCommand("sendChatAction", b.Token, params)
+	if err != nil {
+		return err
+	}
 
+	var responseRecieved struct {
+		Ok          bool
+		Description string
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return err
+	}
+
+	if !responseRecieved.Ok {
+		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+	}
+
+	return nil
+}
+
+// Respond publishes a set of responses for an inline query.
+func (b *Bot) Respond(query Query, results []Result) error {
+	params := url.Values{}
+	params.Set("inline_query_id", query.ID)
+
+	if res, err := json.Marshal(results); err == nil {
+		params.Set("results", string(res))
+	} else {
+		return err
+	}
+
+	responseJSON, err := sendCommand("answerInlineQuery", b.Token, params)
 	if err != nil {
 		return err
 	}

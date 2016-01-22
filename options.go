@@ -7,6 +7,7 @@ type ParseMode string
 const (
 	ModeDefault  ParseMode = ""
 	ModeMarkdown ParseMode = "Markdown"
+	ModeHTML     ParseMode = "HTML"
 )
 
 // SendOptions represents a set of custom options that could
@@ -25,6 +26,7 @@ type SendOptions struct {
 	ParseMode ParseMode
 }
 
+// ReplyMarkup specifies convenient options for bot-user communications.
 type ReplyMarkup struct {
 	// ForceReply forces Telegram clients to display
 	// a reply interface to the user (act as if the user

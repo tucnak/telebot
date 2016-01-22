@@ -56,9 +56,12 @@ func (c Chat) IsGroupChat() bool {
 type Update struct {
 	ID      int     `json:"update_id"`
 	Payload Message `json:"message"`
+
+	// optional
+	Query *Query `json:"inline_query"`
 }
 
-// Thumbnail object represents a image/sticker of particular size.
+// Thumbnail object represents an image/sticker of a particular size.
 type Thumbnail struct {
 	File
 
@@ -68,6 +71,8 @@ type Thumbnail struct {
 
 // Photo object represents a photo with caption.
 type Photo struct {
+	File
+
 	Thumbnail
 
 	Caption string

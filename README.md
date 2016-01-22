@@ -7,7 +7,6 @@
 Bots are special Telegram accounts designed to handle messages automatically. Users can interact with bots by sending them command messages in private or group chats. These accounts serve as an interface for code running somewhere on your server.
 
 Telebot offers a convenient wrapper to Bots API, so you shouldn't even care about networking at all. Here is an example "helloworld" bot, written with telebot:
-
 ```go
 import (
     "time"
@@ -32,8 +31,66 @@ func main() {
 }
 ```
 
-You can also send any kind of resources from file system easily:
+## Inline mode
+As of January 4, 2016, Telegram added inline mode support for bots. Telebot does support inline mode in a fancy manner. Here's a nice way to handle both incoming messages and inline queries:
+```go
+import (
+	"log"
+    "time"
 
+    "github.com/tucnak/telebot"
+)
+
+var bot *telebot.Bot
+
+func main() {
+    if bot, err := telebot.NewBot("SECRET TOKEN"); err != nil {
+        return
+    }
+
+	bot.Messages = make(chan telebot.Message, 1000)
+	bot.Queries = make(chan telebot.Query, 1000)
+
+	go messages()
+	go queries()
+
+    bot.Start(1 * time.Second)
+}
+
+func messages() {
+	for message := range bot.Messages {
+		// ...
+	}
+}
+
+func queries() {
+	for query := range bot.Queries {
+		log.Println("--- new query ---")
+		log.Println("from:", query.From)
+		log.Println("text:", query.Text)
+
+		// There you build a slice of let's say, article results:
+		articles := []telebot.ArticleResult{...}
+
+		// And finally respond to the query:
+		if err := bot.Respond(query, Articles(articles)); err != nil {
+			log.Println("ouch:", err)
+		}
+
+		// Respond() accepts a []Result — a slice of interface
+		// called Result, which stands for a some query result.
+		// In order to transform concrete []ArticleResult into
+		// []Result, you need to do an implicit downcast, that's
+		// exactly what Articles() does:
+		//
+		// func Articles([]ArticleResult) []Result
+	}
+}
+```
+
+## Files
+
+Telebot lets you upload files from the file system:
 ```go
 boom, err := telebot.NewFile("boom.ogg")
 if err != nil {
@@ -47,14 +104,22 @@ audio := telebot.Audio{File: boom}
 err = bot.SendAudio(recipient, &audio, nil)
 ```
 
-Sometimes you might want to send a little bit complicated messages, with some optional parameters:
+## Reply markup
 
+Sometimes you wanna send a little complicated messages with some optional parameters. The third argument of all `Send*` methods accepts `telebot.SendOptions`, capable of defining an advanced reply markup:
 ```go
 // Send a selective force reply message.
 bot.SendMessage(user, "pong", &telebot.SendOptions{
         ReplyMarkup: telebot.ReplyMarkup{
             ForceReply: true,
             Selective: true,
+
+			CustomKeyboard: [][]string{
+				[]string{"1", "2", "3"},
+				[]string{"4", "5", "6"},
+				[]string{"7", "8", "9"},
+				[]string{"*", "0", "#"},
+			},
         },
     },
 )
