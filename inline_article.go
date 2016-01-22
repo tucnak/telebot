@@ -43,40 +43,45 @@ func (r ArticleResult) id() string {
 func (r ArticleResult) MarshalJSON() ([]byte, error) {
 	var b bytes.Buffer
 
-	bind := func(key, value string) string {
-		return fmt.Sprintf("\"%s\": \"%s\",", key, value)
+	props := map[string]string{}
+
+	props["type"] = "article"
+	props["id"] = r.id()
+	props["title"] = r.Title
+	props["description"] = r.Description
+	props["message_text"] = r.Text
+
+	if r.URL != "" {
+		props["url"] = r.URL
 	}
 
-	bindl := func(key, value string) string {
-		return fmt.Sprintf("\"%s\": \"%s\"", key, value)
+	if r.ThumbURL != "" {
+		props["thumb_url"] = r.URL
+	}
+
+	if r.HideURL {
+		props["hide_url"] = "true"
+	}
+
+	if r.DisableWebPagePreview {
+		props["disable_web_page_preview"] = "true"
+	}
+
+	if r.Mode != ModeDefault {
+		props["parse_mode"] = string(r.Mode)
 	}
 
 	b.WriteRune('{')
 
-	b.WriteString(bind("type", "article"))
-	b.WriteString(bind("id", r.id()))
-	b.WriteString(bind("title", r.Title))
-	b.WriteString(bind("description", r.Description))
-	b.WriteString(bind("message_text", r.Text))
+	if len(props) > 0 {
+		const tpl = `"%s":"%s",`
 
-	if r.URL != "" {
-		b.WriteString(bind("url", r.URL))
-	}
+		for key, value := range props {
+			b.WriteString(fmt.Sprintf(tpl, key, value))
+		}
 
-	if r.ThumbURL != "" {
-		b.WriteString(bind("thumb_url", r.URL))
-	}
-
-	if r.HideURL {
-		b.WriteString(bind("hide_url", "true"))
-	}
-
-	if r.DisableWebPagePreview {
-		b.WriteString(bind("disable_web_page_preview", "true"))
-	}
-
-	if r.Mode != ModeDefault {
-		b.WriteString(bindl("parse_mode", string(r.Mode)))
+		// the last
+		b.WriteString(`"":""`)
 	}
 
 	b.WriteRune('}')

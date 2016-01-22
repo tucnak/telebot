@@ -73,20 +73,12 @@ func queries() {
 		log.Println("text:", query.Text)
 
 		// There you build a slice of let's say, article results:
-		articles := []telebot.ArticleResult{...}
+		results := []telebot.Result{...}
 
 		// And finally respond to the query:
-		if err := bot.Respond(query, Articles(articles)); err != nil {
+		if err := bot.Respond(query, results); err != nil {
 			log.Println("ouch:", err)
 		}
-
-		// Respond() accepts a []Result — a slice of interface
-		// called Result, which stands for a some query result.
-		// In order to transform concrete []ArticleResult into
-		// []Result, you need to do an implicit downcast, that's
-		// exactly what Articles() does:
-		//
-		// func Articles([]ArticleResult) []Result
 	}
 }
 ```
