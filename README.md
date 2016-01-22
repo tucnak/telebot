@@ -44,9 +44,12 @@ import (
 var bot *telebot.Bot
 
 func main() {
-    if bot, err := telebot.NewBot("SECRET TOKEN"); err != nil {
+    if newBot, err := telebot.NewBot("SECRET TOKEN"); err != nil {
         return
-    }
+    } else {
+		// shadowing, remember?
+		bot = newBot
+	}
 
 	bot.Messages = make(chan telebot.Message, 1000)
 	bot.Queries = make(chan telebot.Query, 1000)
