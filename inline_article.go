@@ -56,7 +56,7 @@ func (r ArticleResult) MarshalJSON() ([]byte, error) {
 	}
 
 	if r.ThumbURL != "" {
-		props["thumb_url"] = r.URL
+		props["thumb_url"] = r.ThumbURL
 	}
 
 	if r.HideURL {
