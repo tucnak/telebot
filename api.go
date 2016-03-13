@@ -99,6 +99,10 @@ func embedSendOptions(params *url.Values, options *SendOptions) {
 		params.Set("disable_web_page_preview", "true")
 	}
 
+	if options.DisableNotification {
+		params.Set("disable_notification", "true")
+	}
+
 	if options.ParseMode != ModeDefault {
 		params.Set("parse_mode", string(options.ParseMode))
 	}

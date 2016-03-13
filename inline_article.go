@@ -24,6 +24,9 @@ type ArticleResult struct {
 	// Disables link previews for links in the sent message.
 	DisableWebPagePreview bool
 
+	// Sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound.
+	DisableNotification bool
+
 	// URL of the result
 	URL string
 
@@ -65,6 +68,10 @@ func (r ArticleResult) MarshalJSON() ([]byte, error) {
 
 	if r.DisableWebPagePreview {
 		props["disable_web_page_preview"] = "true"
+	}
+
+	if r.DisableNotification {
+		props["disable_notification"] = "true"
 	}
 
 	if r.Mode != ModeDefault {

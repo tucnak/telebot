@@ -22,6 +22,9 @@ type SendOptions struct {
 	// For text messages, disables previews for links in this message.
 	DisableWebPagePreview bool
 
+	// Sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound.
+	DisableNotification bool
+
 	// ParseMode controls how client apps render your message.
 	ParseMode ParseMode
 }
