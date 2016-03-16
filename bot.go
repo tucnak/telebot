@@ -476,9 +476,27 @@ func (b *Bot) SendChatAction(recipient Recipient, action string) error {
 }
 
 // Respond publishes a set of responses for an inline query.
-func (b *Bot) Respond(query Query, results []Result) error {
+func (b *Bot) Respond(query Query, results []Result, options *AnswerOptions) error {
 	params := url.Values{}
 	params.Set("inline_query_id", query.ID)
+
+	if options != nil {
+		if options.CacheTime != 0 {
+			if options.CacheTime == -1 {
+				params.Set("cache_time", "0")
+			} else {
+				params.Set("cache_time", strconv.Itoa(options.CacheTime))
+			}
+		}
+
+		if options.IsPersonal {
+			params.Set("is_personal", "true")
+		}
+
+		if options.Offset != "" {
+			params.Set("offset", options.Offset)
+		}
+	}
 
 	if res, err := json.Marshal(results); err == nil {
 		params.Set("results", string(res))

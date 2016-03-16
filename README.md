@@ -76,7 +76,7 @@ func queries() {
 		results := []telebot.Result{...}
 
 		// And finally respond to the query:
-		if err := bot.Respond(query, results); err != nil {
+		if err := bot.Respond(query, results, nil); err != nil {
 			log.Println("ouch:", err)
 		}
 	}
