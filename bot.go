@@ -2,11 +2,16 @@ package telebot
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/url"
 	"strconv"
+	"strings"
+	"sync"
 	"time"
+
+	"golang.org/x/net/context"
 )
 
 // Bot represents a separate Telegram bot instance.
@@ -15,6 +20,14 @@ type Bot struct {
 	Identity User
 	Messages chan Message
 	Queries  chan Query
+
+	mu          sync.RWMutex
+	middlewares []func(context.Context) context.Context
+	routes      []struct {
+		key   string
+		value []func(context.Context) context.Context
+	}
+	done chan struct{}
 }
 
 // NewBot does try to build a Bot with token `token`, which
@@ -26,8 +39,14 @@ func NewBot(token string) (*Bot, error) {
 	}
 
 	return &Bot{
-		Token:    token,
-		Identity: user,
+		Token:       token,
+		Identity:    user,
+		middlewares: make([]func(context.Context) context.Context, 0),
+		routes: make([]struct {
+			key   string
+			value []func(context.Context) context.Context
+		}, 0),
+		done: make(chan struct{}),
 	}, nil
 }
 
@@ -506,4 +525,100 @@ func (b *Bot) Respond(query Query, results []Result) error {
 	}
 
 	return nil
+}
+
+// R O U T I N G  &  M I D D L E W A R E S
+
+// Use appends given middlewares into call chain.
+func (b *Bot) Use(middlewares ...func(context.Context) context.Context) {
+	b.mu.Lock()
+	b.middlewares = append(b.middlewares, middlewares...)
+	b.mu.Unlock()
+}
+
+// Handle bind the route(telegram command) with handlers.
+// Note: set `*` at teh end of route if you need to catch all
+// messages with route prefix, for example: `/help*`.
+func (b *Bot) Handle(route string, handlers ...func(context.Context) context.Context) {
+	b.mu.Lock()
+
+	for _, kv := range b.routes {
+		if kv.key == route {
+			panic("route `" + route + "` already taken!")
+		}
+	}
+
+	b.routes = append(b.routes, struct {
+		key   string
+		value []func(context.Context) context.Context
+	}{
+		key:   route,
+		value: handlers,
+	})
+	b.mu.Unlock()
+}
+
+// Route routes given message into the bound handlers
+// through defined middlewares.
+func (b *Bot) Route(m Message) (context.Context, error) {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+
+	var handlerFound bool
+	var err error
+	ctx := context.WithValue(context.Background(), "message", m)
+
+	for _, mdll := range b.middlewares {
+		ctx = mdll(ctx)
+	}
+
+	for _, kv := range b.routes {
+		if kv.key == "*" || kv.key == m.Text {
+			handlerFound = true
+			ctx = context.WithValue(ctx, "route", kv.key)
+			for _, handler := range kv.value {
+				ctx = handler(ctx)
+			}
+			break
+		} else if strings.HasSuffix(kv.key, "*") &&
+			strings.HasPrefix(m.Text, kv.key[:len(kv.key)-2]) {
+			handlerFound = true
+			ctx = context.WithValue(ctx, "route", kv.key)
+			for _, handler := range kv.value {
+				ctx = handler(ctx)
+			}
+			break
+		}
+	}
+
+	if !handlerFound {
+		err = errors.New("handler for `" + m.Text + "` not found")
+	}
+
+	return ctx, err
+}
+
+// StartRouter starts polling telegram with time duration and
+// route received messages.
+func (b *Bot) StartRouter(d time.Duration) {
+	messages := make(chan Message)
+	b.Listen(messages, d)
+
+	for {
+		select {
+		case <-b.done:
+			return
+		case m := <-messages:
+			_, err := b.Route(m)
+			if err != nil {
+				fmt.Printf("telebot error: " + err.Error())
+			}
+		}
+	}
+}
+
+// StopRouter stops polling telegram if was
+func (b *Bot) StopRouter() {
+	close(b.done)
+	b.done = make(chan struct{})
 }
