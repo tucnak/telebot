@@ -573,16 +573,14 @@ func (b *Bot) Route(m Message) (context.Context, error) {
 	}
 
 	for _, kv := range b.routes {
-		if strings.HasSuffix(kv.key, "*") {
-			key := kv.key[:len(kv.key)-2]
-			if strings.HasPrefix(m.Text, key) {
-				handlerFound = true
-				ctx = context.WithValue(ctx, "route", kv.key)
-				for _, handler := range kv.value {
-					ctx = handler(ctx)
-				}
+		if kv.key == "*" || kv.key == m.Text {
+			handlerFound = true
+			ctx = context.WithValue(ctx, "route", kv.key)
+			for _, handler := range kv.value {
+				ctx = handler(ctx)
 			}
-		} else if kv.key == m.Text {
+		} else if strings.HasSuffix(kv.key, "*") &&
+			strings.HasPrefix(m.Text, kv.key[:len(kv.key)-2]) {
 			handlerFound = true
 			ctx = context.WithValue(ctx, "route", kv.key)
 			for _, handler := range kv.value {
@@ -610,7 +608,9 @@ func (b *Bot) StartRouter(d time.Duration) {
 			return
 		case m := <-messages:
 			_, err := b.Route(m)
-			fmt.Printf("telebot error: " + err.Error())
+			if err != nil {
+				fmt.Printf("telebot error: " + err.Error())
+			}
 		}
 	}
 }
