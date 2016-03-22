@@ -604,17 +604,15 @@ func (b *Bot) StartRouter(d time.Duration) {
 	messages := make(chan Message)
 	b.Listen(messages, d)
 
-	go func(b *Bot, messages chan Message) {
-		for {
-			select {
-			case <-b.done:
-				return
-			case m := <-messages:
-				_, err := b.Route(m)
-				fmt.Printf("telebot error: " + err.Error())
-			}
+	for {
+		select {
+		case <-b.done:
+			return
+		case m := <-messages:
+			_, err := b.Route(m)
+			fmt.Printf("telebot error: " + err.Error())
 		}
-	}(b, messages)
+	}
 }
 
 // StopRouter stops polling telegram if was
