@@ -579,6 +579,7 @@ func (b *Bot) Route(m Message) (context.Context, error) {
 			for _, handler := range kv.value {
 				ctx = handler(ctx)
 			}
+			break
 		} else if strings.HasSuffix(kv.key, "*") &&
 			strings.HasPrefix(m.Text, kv.key[:len(kv.key)-2]) {
 			handlerFound = true
@@ -586,6 +587,7 @@ func (b *Bot) Route(m Message) (context.Context, error) {
 			for _, handler := range kv.value {
 				ctx = handler(ctx)
 			}
+			break
 		}
 	}
 
