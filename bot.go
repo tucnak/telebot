@@ -5,16 +5,19 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"regexp"
 	"strconv"
 	"time"
 )
 
 // Bot represents a separate Telegram bot instance.
 type Bot struct {
-	Token    string
-	Identity User
-	Messages chan Message
-	Queries  chan Query
+	Token          string
+	Identity       User
+	Messages       chan Message
+	Queries        chan Query
+	Handlers       map[string]Handler
+	DefaultHandler Handler
 }
 
 // NewBot does try to build a Bot with token `token`, which
@@ -28,6 +31,7 @@ func NewBot(token string) (*Bot, error) {
 	return &Bot{
 		Token:    token,
 		Identity: user,
+		Handlers: make(map[string]Handler),
 	}, nil
 }
 
@@ -506,4 +510,46 @@ func (b *Bot) Respond(query Query, results []Result) error {
 	}
 
 	return nil
+}
+
+func (b *Bot) Handle(command string, handler Handler) {
+	if command == Default {
+		b.DefaultHandler = handler
+		return
+	}
+
+	b.Handlers[command] = handler
+}
+
+func (b *Bot) Serve() {
+	messages := make(chan Message)
+	b.Listen(messages, 1*time.Second)
+
+	for message := range messages {
+		if handler, args, err := b.route(&message); err == nil {
+			handler(Context{Message: &message, Args: args})
+		}
+	}
+}
+
+func (b *Bot) route(message *Message) (Handler, map[string]string, error) {
+	for i, handler := range b.Handlers {
+		r, err := regexp.Compile(i)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if matches := r.FindStringSubmatch(message.Text); len(matches) > 0 {
+			args := make(map[string]string)
+
+			for x, name := range r.SubexpNames() {
+				if x != 0 {
+					args[name] = matches[x]
+				}
+			}
+			return handler, args, nil
+		}
+	}
+
+	return b.DefaultHandler, nil, nil
 }
