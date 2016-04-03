@@ -29,9 +29,10 @@ func NewBot(token string) (*Bot, error) {
 	}
 
 	return &Bot{
-		Token:    token,
-		Identity: user,
-		Handlers: make(map[string]Handler),
+		Token:          token,
+		Identity:       user,
+		Handlers:       make(map[string]Handler),
+		DefaultHandler: func(_ Context) {},
 	}, nil
 }
 
@@ -512,6 +513,7 @@ func (b *Bot) Respond(query Query, results []Result) error {
 	return nil
 }
 
+// Handle registers a handler for a message which text matches the provided regular expression
 func (b *Bot) Handle(command string, handler Handler) {
 	if command == Default {
 		b.DefaultHandler = handler
@@ -521,6 +523,7 @@ func (b *Bot) Handle(command string, handler Handler) {
 	b.Handlers[command] = handler
 }
 
+// Serve listens for messages and route them to the appropiate handler
 func (b *Bot) Serve() {
 	messages := make(chan Message)
 	b.Listen(messages, 1*time.Second)
