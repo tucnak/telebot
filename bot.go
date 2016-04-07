@@ -3,11 +3,12 @@ package telebot
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/armon/go-radix"
 	"log"
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/armon/go-radix"
 )
 
 // Bot represents a separate Telegram bot instance.
@@ -253,6 +254,57 @@ func (b *Bot) SendAudio(recipient Recipient, audio *Audio, options *SendOptions)
 	filename := audio.filename
 	*audio = responseRecieved.Result.Audio
 	audio.filename = filename
+
+	return nil
+}
+
+// SendVoice sends an voice object to recipient.
+//
+// On success, voice object would be aliased to its copy on
+// the Telegram servers, so sending the same voice object
+// again, won't issue a new upload, but would make a use
+// of existing file on Telegram servers.
+func (b *Bot) SendVoice(recipient Recipient, voice *Voice, options *SendOptions) error {
+	params := url.Values{}
+	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
+
+	if options != nil {
+		embedSendOptions(&params, options)
+	}
+
+	var responseJSON []byte
+	var err error
+
+	if voice.Exists() {
+		params.Set("voice", voice.FileID)
+		responseJSON, err = sendCommand("sendVoice", b.Token, params)
+	} else {
+		responseJSON, err = sendFile("sendVoice", b.Token, "voice",
+			voice.filename, params)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Result      Message
+		Description string
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return err
+	}
+
+	if !responseRecieved.Ok {
+		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+	}
+
+	filename := voice.filename
+	*voice = responseRecieved.Result.Voice
+	voice.filename = filename
 
 	return nil
 }

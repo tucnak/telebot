@@ -67,8 +67,25 @@ type Photo struct {
 	Caption string
 }
 
-// Audio object represents an audio file (voice note).
+// Audio object represents an audio file to be treated as music.
 type Audio struct {
+	File
+
+	// Duration of the recording in seconds as defined by sender.
+	Duration int `json:"duration"`
+
+	//Performer of the audio as defined by sender or by audio tag.
+	Performer string `json:"performer"`
+
+	//Title of the audio as defined by sender or by audio tags.
+	Title string `json:"title"`
+
+	// MIME type of the file as defined by sender.
+	Mime string `json:"mime_type"`
+}
+
+// Voice object represents a voice note.
+type Voice struct {
 	File
 
 	// Duration of the recording in seconds as defined by sender.

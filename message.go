@@ -28,8 +28,11 @@ type Message struct {
 	// For a text message, the actual UTF-8 text of the message
 	Text string `json:"text"`
 
-	// For an audio recording, information about it.
+	// For a music file, information about it.
 	Audio Audio `json:"audio"`
+
+	// For an audio recording, information about it.
+	Voice Voice `json:"voice"`
 
 	// For a general file, information about it.
 	Document Document `json:"document"`
