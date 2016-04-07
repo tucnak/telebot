@@ -61,6 +61,7 @@ func sendFile(method, token, name, path string, params url.Values) ([]byte, erro
 	}
 
 	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", token, method)
+
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return []byte{}, err

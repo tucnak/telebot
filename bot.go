@@ -216,6 +216,9 @@ func (b *Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions)
 func (b *Bot) SendAudio(recipient Recipient, audio *Audio, options *SendOptions) error {
 	params := url.Values{}
 	params.Set("chat_id", strconv.Itoa(recipient.Destination()))
+	params.Set("title", audio.Title)
+	params.Set("performer", audio.Performer)
+	params.Set("duration", strconv.Itoa(audio.Duration))
 
 	if options != nil {
 		embedSendOptions(&params, options)

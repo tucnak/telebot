@@ -62,6 +62,8 @@ type Thumbnail struct {
 
 // Photo object represents a photo with caption.
 type Photo struct {
+	File
+
 	Thumbnail
 
 	Caption string

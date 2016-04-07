@@ -7,6 +7,7 @@ type ParseMode string
 const (
 	ModeDefault  ParseMode = ""
 	ModeMarkdown ParseMode = "Markdown"
+	ModeHTML     ParseMode = "HTML"
 )
 
 // SendOptions represents a set of custom options that could
