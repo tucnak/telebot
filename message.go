@@ -58,7 +58,7 @@ type Message struct {
 	// Sender leads to User, capable of invite.
 	//
 	// UserJoined might be the Bot itself.
-	UserJoined User `json:"new_chat_participant"`
+	UserJoined User `json:"new_chat_member"`
 
 	// For a service message, represents a user,
 	// that just left chat, this message came from.
@@ -67,7 +67,7 @@ type Message struct {
 	// capable of this kick.
 	//
 	// UserLeft might be the Bot itself.
-	UserLeft User `json:"left_chat_participant"`
+	UserLeft User `json:"left_chat_member"`
 
 	// For a service message, represents a new title
 	// for chat this message came from.
