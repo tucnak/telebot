@@ -142,3 +142,12 @@ type Location struct {
 	Longitude float32 `json:"longitude"`
 	Latitude  float32 `json:"latitude"`
 }
+
+// Context is passed to message handlers
+type Context struct {
+	Message *Message
+	Args    map[string]string
+}
+
+// Handler represents a message handler
+type Handler func(Context)

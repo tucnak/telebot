@@ -16,8 +16,7 @@ type Bot struct {
 	Identity       User
 	Messages       chan Message
 	Queries        chan Query
-	Handlers       map[string]Handler
-	DefaultHandler Handler
+	handlers       map[*regexp.Regexp]Handler
 }
 
 // NewBot does try to build a Bot with token `token`, which
@@ -31,8 +30,7 @@ func NewBot(token string) (*Bot, error) {
 	return &Bot{
 		Token:          token,
 		Identity:       user,
-		Handlers:       make(map[string]Handler),
-		DefaultHandler: func(_ Context) {},
+		handlers:       map[*regexp.Regexp]Handler{},
 	}, nil
 }
 
@@ -515,12 +513,8 @@ func (b *Bot) Respond(query Query, results []Result) error {
 
 // Handle registers a handler for a message which text matches the provided regular expression
 func (b *Bot) Handle(command string, handler Handler) {
-	if command == Default {
-		b.DefaultHandler = handler
-		return
-	}
-
-	b.Handlers[command] = handler
+	reg := regexp.MustCompile(command)
+	b.handlers[reg] = handler
 }
 
 // Serve listens for messages and route them to the appropiate handler
@@ -529,30 +523,26 @@ func (b *Bot) Serve() {
 	b.Listen(messages, 1*time.Second)
 
 	for message := range messages {
-		if handler, args, err := b.route(&message); err == nil {
+		if handler, args := b.route(&message); handler != nil {
 			handler(Context{Message: &message, Args: args})
 		}
 	}
 }
 
-func (b *Bot) route(message *Message) (Handler, map[string]string, error) {
-	for i, handler := range b.Handlers {
-		r, err := regexp.Compile(i)
-		if err != nil {
-			return nil, nil, err
-		}
+func (b *Bot) route(message *Message) (Handler, map[string]string) {
+	for reg, handler := range b.handlers {
 
-		if matches := r.FindStringSubmatch(message.Text); len(matches) > 0 {
-			args := make(map[string]string)
+		if matches := reg.FindStringSubmatch(message.Text); len(matches) > 0 {
+			args := map[string]string{}
 
-			for x, name := range r.SubexpNames() {
+			for x, name := range reg.SubexpNames() {
 				if x != 0 {
 					args[name] = matches[x]
 				}
 			}
-			return handler, args, nil
+			return handler, args
 		}
 	}
 
-	return b.DefaultHandler, nil, nil
+	return nil, nil
 }
