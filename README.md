@@ -19,15 +19,17 @@ func main() {
         return
     }
 
-    messages := make(chan telebot.Message)
-    bot.Listen(messages, 1*time.Second)
+    // routes are compiled as regexps
+    bot.Handle("/hi", func (context telebot.Context) {
+	   bot.SendMessage(context.Message.Chat, "Hi!", nil)
+    })
 
-    for message := range messages {
-        if message.Text == "/hi" {
-            bot.SendMessage(message.Chat,
-                "Hello, "+message.Sender.FirstName+"!", nil)
-        }
-    }
+    // named parameters found in routes will get injected in the controller
+	bot.Handle("/greet (?P<name>[a-z]+) (?P<last_name>[a-z]+)", func(context telebot.Context) {
+	   bot.SendMessage(context.Message.Chat, fmt.Sprintf("Hello %s, %s", context.Args["last_name"], context.Args["name"]), nil)
+	})
+
+	bot.Serve()
 }
 ```
 
