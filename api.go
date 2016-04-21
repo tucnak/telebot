@@ -111,8 +111,9 @@ func embedSendOptions(params *url.Values, options *SendOptions) {
 	{
 		forceReply := options.ReplyMarkup.ForceReply
 		customKeyboard := (options.ReplyMarkup.CustomKeyboard != nil)
+		inlineKeyboard := options.ReplyMarkup.InlineKeyboard != nil
 		hiddenKeyboard := options.ReplyMarkup.HideCustomKeyboard
-		if forceReply || customKeyboard || hiddenKeyboard {
+		if forceReply || customKeyboard || hiddenKeyboard || inlineKeyboard {
 			replyMarkup, _ := json.Marshal(options.ReplyMarkup)
 			params.Set("reply_markup", string(replyMarkup))
 		}

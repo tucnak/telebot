@@ -54,11 +54,12 @@ func (c Chat) IsGroupChat() bool {
 
 // Update object represents an incoming update.
 type Update struct {
-	ID      int     `json:"update_id"`
-	Payload Message `json:"message"`
+	ID      int      `json:"update_id"`
+	Payload *Message `json:"message"`
 
 	// optional
-	Query *Query `json:"inline_query"`
+	Callback *Callback `json:"callback_query"`
+	Query    *Query    `json:"inline_query"`
 }
 
 // Thumbnail object represents an image/sticker of a particular size.
@@ -129,6 +130,14 @@ type Video struct {
 	Preview Thumbnail `json:"thumb"`
 }
 
+// KeyboardButton represents a button displayed on in a message.
+type KeyboardButton struct {
+	Text        string `json:"text"`
+	URL         string `json:"url,omitempty"`
+	Data        string `json:"callback_data,omitempty"`
+	InlineQuery string `json:"switch_inline_query,omitempty"`
+}
+
 // Contact object represents a contact to Telegram user
 type Contact struct {
 	UserID      int    `json:"user_id"`
@@ -141,4 +150,14 @@ type Contact struct {
 type Location struct {
 	Longitude float32 `json:"longitude"`
 	Latitude  float32 `json:"latitude"`
+}
+
+type Callback struct {
+	ID string `json:"id"`
+	// For message sent to channels, Sender may be empty
+	Sender User `json:"from"`
+
+	Message Message `json:"message"`
+
+	Data string `json:"data"`
 }
