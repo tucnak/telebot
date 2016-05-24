@@ -142,3 +142,11 @@ type Location struct {
 	Longitude float32 `json:"longitude"`
 	Latitude  float32 `json:"latitude"`
 }
+
+// Venue object represents a venue location with name, address and optional foursquare id.
+type Venue struct {
+	Location Location		`json:"location"`
+	Title string			`json:"title"`
+	Address string			`json:"address"`
+	Foursquare_id string	`json:"foursquare_id",omitempty`
+}
