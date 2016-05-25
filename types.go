@@ -152,12 +152,20 @@ type Location struct {
 	Latitude  float32 `json:"latitude"`
 }
 
+// Callback object represents a query from a callback button in an
+// inline keyboard.
 type Callback struct {
 	ID string `json:"id"`
+
 	// For message sent to channels, Sender may be empty
 	Sender User `json:"from"`
 
+	// Message will be set if the button that originated the query
+	// was attached to a message sent by a bot.
 	Message Message `json:"message"`
 
-	Data string `json:"data"`
+	// MessageID will be set if the button was attached to a message
+	// sent via the bot in inline mode.
+	MessageID string `json:"inline_message_id"`
+	Data      string `json:"data"`
 }
