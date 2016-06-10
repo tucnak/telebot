@@ -11,10 +11,11 @@ import (
 
 // Bot represents a separate Telegram bot instance.
 type Bot struct {
-	Token    string
-	Identity User
-	Messages chan Message
-	Queries  chan Query
+	Token     string
+	Identity  User
+	Messages  chan Message
+	Queries   chan Query
+	Callbacks chan Callback
 }
 
 // NewBot does try to build a Bot with token `token`, which
@@ -34,18 +35,19 @@ func NewBot(token string) (*Bot, error) {
 // Listen periodically looks for updates and delivers new messages
 // to the subscription channel.
 func (b *Bot) Listen(subscription chan Message, timeout time.Duration) {
-	go b.poll(subscription, nil, timeout)
+	go b.poll(subscription, nil, nil, timeout)
 }
 
 // Start periodically polls messages and/or updates to corresponding channels
 // from the bot object.
 func (b *Bot) Start(timeout time.Duration) {
-	b.poll(b.Messages, b.Queries, timeout)
+	b.poll(b.Messages, b.Queries, b.Callbacks, timeout)
 }
 
 func (b *Bot) poll(
 	messages chan Message,
 	queries chan Query,
+	callbacks chan Callback,
 	timeout time.Duration,
 ) {
 	latestUpdate := 0
@@ -62,18 +64,24 @@ func (b *Bot) poll(
 		}
 
 		for _, update := range updates {
-			if update.Query == nil /* if message */ {
+			if update.Payload != nil /* if message */ {
 				if messages == nil {
 					continue
 				}
 
-				messages <- update.Payload
-			} else /* if query */ {
+				messages <- *update.Payload
+			} else if update.Query != nil /* if query */ {
 				if queries == nil {
 					continue
 				}
 
 				queries <- *update.Query
+			} else if update.Callback != nil {
+				if callbacks == nil {
+					continue
+				}
+
+				callbacks <- *update.Callback
 			}
 
 			latestUpdate = update.ID
