@@ -8,6 +8,7 @@ import (
 )
 
 // ArticleResult represents a link to an article or web page.
+// Deprecated, use InlineQueryResultArticle instead.
 type ArticleResult struct {
 	// [Required!] Title of the result.
 	Title string
