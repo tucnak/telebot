@@ -42,7 +42,7 @@ func (r ArticleResult) id() string {
 	return string(hex.EncodeToString(sum[:]))
 }
 
-// MarshalJSON ...
+// MarshalJSON is a serializer.
 func (r ArticleResult) MarshalJSON() ([]byte, error) {
 	var b bytes.Buffer
 

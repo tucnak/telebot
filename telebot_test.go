@@ -26,13 +26,7 @@ func TestBot(t *testing.T) {
 	}
 }
 
-// Just some compile-time checks to make sure it's stable.
 func TestRecipient(_ *testing.T) {
-	// Tricking linters...
-	if true {
-		return
-	}
-
 	bot := Bot{}
 	bot.SendMessage(User{}, "", nil)
 	bot.SendMessage(Chat{}, "", nil)

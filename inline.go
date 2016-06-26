@@ -9,7 +9,7 @@ type Query struct {
 	Text string `json:"query"`
 }
 
-// Result ...
+// This object represents one result of an inline query.
 type Result interface {
 	MarshalJSON() ([]byte, error)
 }
