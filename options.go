@@ -29,6 +29,19 @@ type SendOptions struct {
 	ParseMode ParseMode
 }
 
+// AnswerOptions specifies options about responses to inline results
+type AnswerOptions struct {
+	// Cache time (default: 300). Set to -1 to set to 0 (no cache)
+	CacheTime int
+
+	// Cache personality (cache result for this user or for all)
+	// Default: false
+	IsPersonal bool
+
+	// Offset to send back if the client wants more results.
+	Offset string
+}
+
 // ReplyMarkup specifies convenient options for bot-user communications.
 type ReplyMarkup struct {
 	// ForceReply forces Telegram clients to display
