@@ -8,6 +8,8 @@ Bots are special Telegram accounts designed to handle messages automatically. Us
 
 Telebot offers a convenient wrapper to Bots API, so you shouldn't even care about networking at all. Here is an example "helloworld" bot, written with telebot:
 ```go
+package main
+
 import (
     "time"
     "github.com/tucnak/telebot"
@@ -38,6 +40,8 @@ Telebot support inline mode in a fancy manner.
 Here's a nice way to handle both incoming messages and inline queries:
 
 ```go
+package main
+
 import (
     "log"
     "time"
@@ -48,7 +52,8 @@ import (
 var bot *telebot.Bot
 
 func main() {
-    bot, err := telebot.NewBot("SECRET TOKEN")
+    var err error
+    bot, err = telebot.NewBot("SECRET TOKEN")
     if err != nil {
         log.Fatalln(err)
     }
@@ -64,7 +69,7 @@ func main() {
 
 func messages() {
     for message := range bot.Messages {
-        // ...
+        log.Printf("Received a message from %s with the text: %s\n", message.Sender.Username, message.Text)
     }
 }
 
