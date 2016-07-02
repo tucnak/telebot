@@ -138,6 +138,13 @@ type KeyboardButton struct {
 	InlineQuery string `json:"switch_inline_query,omitempty"`
 }
 
+// InlineKeyboardMarkup represents an inline keyboard that appears right next
+// to the message it belongs to.
+type InlineKeyboardMarkup struct {
+	// Array of button rows, each represented by an Array of KeyboardButton objects.
+	InlineKeyboard [][]KeyboardButton `json:"inline_keyboard,omitempty"`
+}
+
 // Contact object represents a contact to Telegram user
 type Contact struct {
 	UserID      int    `json:"user_id"`

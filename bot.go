@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/url"
 	"strconv"
 	"time"
 )
@@ -92,12 +91,13 @@ func (b *Bot) poll(
 
 // SendMessage sends a text message to recipient.
 func (b *Bot) SendMessage(recipient Recipient, message string, options *SendOptions) error {
-	params := url.Values{}
-	params.Set("chat_id", recipient.Destination())
-	params.Set("text", message)
+	params := map[string]string{
+		"chat_id": recipient.Destination(),
+		"text":    message,
+	}
 
 	if options != nil {
-		embedSendOptions(&params, options)
+		embedSendOptions(params, options)
 	}
 
 	responseJSON, err := sendCommand("sendMessage", b.Token, params)
@@ -124,10 +124,11 @@ func (b *Bot) SendMessage(recipient Recipient, message string, options *SendOpti
 
 // ForwardMessage forwards a message to recipient.
 func (b *Bot) ForwardMessage(recipient Recipient, message Message) error {
-	params := url.Values{}
-	params.Set("chat_id", recipient.Destination())
-	params.Set("from_chat_id", strconv.Itoa(message.Origin().ID))
-	params.Set("message_id", strconv.Itoa(message.ID))
+	params := map[string]string{
+		"chat_id":      recipient.Destination(),
+		"from_chat_id": strconv.Itoa(message.Origin().ID),
+		"message_id":   strconv.Itoa(message.ID),
+	}
 
 	responseJSON, err := sendCommand("forwardMessage", b.Token, params)
 	if err != nil {
@@ -158,19 +159,20 @@ func (b *Bot) ForwardMessage(recipient Recipient, message Message) error {
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
 func (b *Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions) error {
-	params := url.Values{}
-	params.Set("chat_id", recipient.Destination())
-	params.Set("caption", photo.Caption)
+	params := map[string]string{
+		"chat_id": recipient.Destination(),
+		"caption": photo.Caption,
+	}
 
 	if options != nil {
-		embedSendOptions(&params, options)
+		embedSendOptions(params, options)
 	}
 
 	var responseJSON []byte
 	var err error
 
 	if photo.Exists() {
-		params.Set("photo", photo.FileID)
+		params["photo"] = photo.FileID
 		responseJSON, err = sendCommand("sendPhoto", b.Token, params)
 	} else {
 		responseJSON, err = sendFile("sendPhoto", b.Token, "photo",
@@ -211,18 +213,19 @@ func (b *Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions)
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
 func (b *Bot) SendAudio(recipient Recipient, audio *Audio, options *SendOptions) error {
-	params := url.Values{}
-	params.Set("chat_id", recipient.Destination())
+	params := map[string]string{
+		"chat_id": recipient.Destination(),
+	}
 
 	if options != nil {
-		embedSendOptions(&params, options)
+		embedSendOptions(params, options)
 	}
 
 	var responseJSON []byte
 	var err error
 
 	if audio.Exists() {
-		params.Set("audio", audio.FileID)
+		params["audio"] = audio.FileID
 		responseJSON, err = sendCommand("sendAudio", b.Token, params)
 	} else {
 		responseJSON, err = sendFile("sendAudio", b.Token, "audio",
@@ -262,18 +265,19 @@ func (b *Bot) SendAudio(recipient Recipient, audio *Audio, options *SendOptions)
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
 func (b *Bot) SendDocument(recipient Recipient, doc *Document, options *SendOptions) error {
-	params := url.Values{}
-	params.Set("chat_id", recipient.Destination())
+	params := map[string]string{
+		"chat_id": recipient.Destination(),
+	}
 
 	if options != nil {
-		embedSendOptions(&params, options)
+		embedSendOptions(params, options)
 	}
 
 	var responseJSON []byte
 	var err error
 
 	if doc.Exists() {
-		params.Set("document", doc.FileID)
+		params["document"] = doc.FileID
 		responseJSON, err = sendCommand("sendDocument", b.Token, params)
 	} else {
 		responseJSON, err = sendFile("sendDocument", b.Token, "document",
@@ -313,18 +317,19 @@ func (b *Bot) SendDocument(recipient Recipient, doc *Document, options *SendOpti
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
 func (b *Bot) SendSticker(recipient Recipient, sticker *Sticker, options *SendOptions) error {
-	params := url.Values{}
-	params.Set("chat_id", recipient.Destination())
+	params := map[string]string{
+		"chat_id": recipient.Destination(),
+	}
 
 	if options != nil {
-		embedSendOptions(&params, options)
+		embedSendOptions(params, options)
 	}
 
 	var responseJSON []byte
 	var err error
 
 	if sticker.Exists() {
-		params.Set("sticker", sticker.FileID)
+		params["sticker"] = sticker.FileID
 		responseJSON, err = sendCommand("sendSticker", b.Token, params)
 	} else {
 		responseJSON, err = sendFile("sendSticker", b.Token, "sticker",
@@ -364,18 +369,19 @@ func (b *Bot) SendSticker(recipient Recipient, sticker *Sticker, options *SendOp
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
 func (b *Bot) SendVideo(recipient Recipient, video *Video, options *SendOptions) error {
-	params := url.Values{}
-	params.Set("chat_id", recipient.Destination())
+	params := map[string]string{
+		"chat_id": recipient.Destination(),
+	}
 
 	if options != nil {
-		embedSendOptions(&params, options)
+		embedSendOptions(params, options)
 	}
 
 	var responseJSON []byte
 	var err error
 
 	if video.Exists() {
-		params.Set("video", video.FileID)
+		params["video"] = video.FileID
 		responseJSON, err = sendCommand("sendVideo", b.Token, params)
 	} else {
 		responseJSON, err = sendFile("sendVideo", b.Token, "video",
@@ -415,13 +421,14 @@ func (b *Bot) SendVideo(recipient Recipient, video *Video, options *SendOptions)
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
 func (b *Bot) SendLocation(recipient Recipient, geo *Location, options *SendOptions) error {
-	params := url.Values{}
-	params.Set("chat_id", recipient.Destination())
-	params.Set("latitude", fmt.Sprintf("%f", geo.Latitude))
-	params.Set("longitude", fmt.Sprintf("%f", geo.Longitude))
+	params := map[string]string{
+		"chat_id":   recipient.Destination(),
+		"latitude":  fmt.Sprintf("%f", geo.Latitude),
+		"longitude": fmt.Sprintf("%f", geo.Longitude),
+	}
 
 	if options != nil {
-		embedSendOptions(&params, options)
+		embedSendOptions(params, options)
 	}
 
 	responseJSON, err := sendCommand("sendLocation", b.Token, params)
@@ -457,9 +464,10 @@ func (b *Bot) SendLocation(recipient Recipient, geo *Location, options *SendOpti
 // Currently, Telegram supports only a narrow range of possible
 // actions, these are aligned as constants of this package.
 func (b *Bot) SendChatAction(recipient Recipient, action string) error {
-	params := url.Values{}
-	params.Set("chat_id", recipient.Destination())
-	params.Set("action", action)
+	params := map[string]string{
+		"chat_id": recipient.Destination(),
+		"action":  action,
+	}
 
 	responseJSON, err := sendCommand("sendChatAction", b.Token, params)
 	if err != nil {
@@ -484,17 +492,47 @@ func (b *Bot) SendChatAction(recipient Recipient, action string) error {
 }
 
 // Respond publishes a set of responses for an inline query.
+// This function is deprecated in favor of AnswerInlineQuery.
 func (b *Bot) Respond(query Query, results []Result) error {
-	params := url.Values{}
-	params.Set("inline_query_id", query.ID)
+	params := map[string]string{
+		"inline_query_id": query.ID,
+	}
 
 	if res, err := json.Marshal(results); err == nil {
-		params.Set("results", string(res))
+		params["results"] = string(res)
 	} else {
 		return err
 	}
 
 	responseJSON, err := sendCommand("answerInlineQuery", b.Token, params)
+	if err != nil {
+		return err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Description string
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return err
+	}
+
+	if !responseRecieved.Ok {
+		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+	}
+
+	return nil
+}
+
+// AnswerInlineQuery sends a response for a given inline query. A query can
+// only be responded to once, subsequent attempts to respond to the same query
+// will result in an error.
+func (b *Bot) AnswerInlineQuery(query *Query, response *QueryResponse) error {
+	response.QueryID = query.ID
+
+	responseJSON, err := sendCommand("answerInlineQuery", b.Token, response)
 	if err != nil {
 		return err
 	}
