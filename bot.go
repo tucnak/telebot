@@ -454,6 +454,45 @@ func (b *Bot) SendLocation(recipient Recipient, geo *Location, options *SendOpti
 	return nil
 }
 
+// SendVenue sends a venue object to recipient.
+func (b *Bot) SendVenue(recipient Recipient, venue *Venue, options *SendOptions) error {
+	params := map[string]string{
+		"chat_id":   recipient.Destination(),
+		"latitude":  fmt.Sprintf("%f", venue.Location.Latitude),
+		"longitude": fmt.Sprintf("%f", venue.Location.Longitude),
+		"title":     venue.Title,
+		"address":   venue.Address}
+	if venue.Foursquare_id != "" {
+		params["foursquare_id"] = venue.Foursquare_id
+	}
+
+	if options != nil {
+		embedSendOptions(params, options)
+	}
+
+	responseJSON, err := sendCommand("sendVenue", b.Token, params)
+	if err != nil {
+		return err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Result      Message
+		Description string
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return err
+	}
+
+	if !responseRecieved.Ok {
+		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+	}
+
+	return nil
+}
+
 // SendChatAction updates a chat action for recipient.
 //
 // Chat action is a status message that recipient would see where
