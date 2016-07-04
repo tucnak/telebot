@@ -456,16 +456,16 @@ func (b *Bot) SendLocation(recipient Recipient, geo *Location, options *SendOpti
 
 // SendVenue sends a venue object to recipient.
 func (b *Bot) SendVenue(recipient Recipient, venue *Venue, options *SendOptions) error {
-	params := url.Values{}
-	params.Set("chat_id", recipient.Destination())
-	params.Set("latitude", fmt.Sprintf("%f", venue.Location.Latitude))
-	params.Set("longitude", fmt.Sprintf("%f", venue.Location.Longitude))
-	params.Set("title", venue.Title)
-	params.Set("address", venue.Address)
-	if venue.Foursquare_id != "" { params.Set("foursquare_id",venue.Foursquare_id) }
+	params := map[string]string{
+		"chat_id":   recipient.Destination(),
+		"latitude": fmt.Sprintf("%f", venue.Location.Latitude),
+		"longitude": fmt.Sprintf("%f", venue.Location.Longitude),
+		"title": venue.Title,
+		"address": venue.Address}
+	if venue.Foursquare_id != "" { params["foursquare_id"]=venue.Foursquare_id }
 
 	if options != nil {
-		embedSendOptions(&params, options)
+		embedSendOptions(params, options)
 	}
 
 	responseJSON, err := sendCommand("sendVenue", b.Token, params)
