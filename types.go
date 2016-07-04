@@ -54,11 +54,12 @@ func (c Chat) IsGroupChat() bool {
 
 // Update object represents an incoming update.
 type Update struct {
-	ID      int     `json:"update_id"`
-	Payload Message `json:"message"`
+	ID      int      `json:"update_id"`
+	Payload *Message `json:"message"`
 
 	// optional
-	Query *Query `json:"inline_query"`
+	Callback *Callback `json:"callback_query"`
+	Query    *Query    `json:"inline_query"`
 }
 
 // Thumbnail object represents an image/sticker of a particular size.
@@ -129,6 +130,21 @@ type Video struct {
 	Preview Thumbnail `json:"thumb"`
 }
 
+// KeyboardButton represents a button displayed on in a message.
+type KeyboardButton struct {
+	Text        string `json:"text"`
+	URL         string `json:"url,omitempty"`
+	Data        string `json:"callback_data,omitempty"`
+	InlineQuery string `json:"switch_inline_query,omitempty"`
+}
+
+// InlineKeyboardMarkup represents an inline keyboard that appears right next
+// to the message it belongs to.
+type InlineKeyboardMarkup struct {
+	// Array of button rows, each represented by an Array of KeyboardButton objects.
+	InlineKeyboard [][]KeyboardButton `json:"inline_keyboard,omitempty"`
+}
+
 // Contact object represents a contact to Telegram user
 type Contact struct {
 	UserID      int    `json:"user_id"`
@@ -141,6 +157,24 @@ type Contact struct {
 type Location struct {
 	Longitude float32 `json:"longitude"`
 	Latitude  float32 `json:"latitude"`
+}
+
+// Callback object represents a query from a callback button in an
+// inline keyboard.
+type Callback struct {
+	ID string `json:"id"`
+
+	// For message sent to channels, Sender may be empty
+	Sender User `json:"from"`
+
+	// Message will be set if the button that originated the query
+	// was attached to a message sent by a bot.
+	Message Message `json:"message"`
+
+	// MessageID will be set if the button was attached to a message
+	// sent via the bot in inline mode.
+	MessageID string `json:"inline_message_id"`
+	Data      string `json:"data"`
 }
 
 // Venue object represents a venue location with name, address and optional foursquare id.
