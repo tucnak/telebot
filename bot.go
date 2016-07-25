@@ -592,3 +592,31 @@ func (b *Bot) AnswerInlineQuery(query *Query, response *QueryResponse) error {
 
 	return nil
 }
+
+// AnswerCallbackQuery sends a response for a given callback query. A callback can
+// only be responded to once, subsequent attempts to respond to the same callback
+// will result in an error.
+func (b *Bot) AnswerCallbackQuery(callback *Callback, response *CallbackResponse) error {
+	response.CallbackID = callback.ID
+
+	responseJSON, err := sendCommand("answerCallbackQuery", b.Token, response)
+	if err != nil {
+		return err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Description string
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return err
+	}
+
+	if !responseRecieved.Ok {
+		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+	}
+
+	return nil
+}
