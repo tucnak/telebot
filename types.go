@@ -177,6 +177,21 @@ type Callback struct {
 	Data      string `json:"data"`
 }
 
+// CallbackResponse builds a response to an Callback query.
+// See also: https://core.telegram.org/bots/api#answerCallbackQuery
+type CallbackResponse struct {
+	// The ID of the callback to which this is a response.
+	// It is not necessary to specify this field manually.
+	CallbackID string `json:"callback_query_id"`
+
+	// Text of the notification. If not specified, nothing will be shown to the user.
+	Text string `json:"text,omitempty"`
+
+	// (Optional) If true, an alert will be shown by the client instead
+	// of a notification at the top of the chat screen. Defaults to false.
+	ShowAlert bool `json:"show_alert,omitempty"`
+}
+
 // Venue object represents a venue location with name, address and optional foursquare id.
 type Venue struct {
 	Location      Location `json:"location"`
