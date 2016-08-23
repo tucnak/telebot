@@ -11,6 +11,7 @@ Telebot offers a convenient wrapper to Bots API, so you shouldn't even care abou
 package main
 
 import (
+    "log"
     "time"
     "github.com/tucnak/telebot"
 )
