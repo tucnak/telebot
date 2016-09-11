@@ -155,8 +155,8 @@ type Contact struct {
 
 // Location object represents geographic position.
 type Location struct {
-	Longitude float32 `json:"longitude"`
 	Latitude  float32 `json:"latitude"`
+	Longitude float32 `json:"longitude"`
 }
 
 // Callback object represents a query from a callback button in an
