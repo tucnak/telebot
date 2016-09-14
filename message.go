@@ -130,6 +130,8 @@ type Message struct {
 	MigrateFrom int64 `json:"migrate_from_chat_id"`
 
 	Entities []MessageEntity `json:"entities",omitempty`
+	
+	Caption string `json:"caption",omitempty`
 }
 
 // Origin returns an origin of message: group chat / personal.
