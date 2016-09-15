@@ -97,3 +97,32 @@ func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
 
 	return responseRecieved.Result, nil
 }
+
+
+func (b *Bot) LeaveChat(recipient Recipient) error {
+	params := map[string]string{
+		"chat_id": recipient.Destination(),
+	}
+
+	responseJSON, err := sendCommand("getChatMembersCount", b.Token, params)
+	if err != nil {
+		return err
+	}
+
+	var responseRecieved struct {
+		Ok     bool `json:"ok"`
+		Result bool `json:"result"`
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return err
+	}
+
+	if !responseRecieved.Ok {
+		return fmt.Errorf("telebot: %s", responseRecieved.Result)
+	}
+
+	return nil
+}
+
