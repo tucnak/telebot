@@ -70,3 +70,30 @@ func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChannelUser, error) 
 
 	return responseRecieved.Result, nil
 }
+
+func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
+	params := map[string]string{
+		"chat_id": recipient.Destination(),
+	}
+
+	responseJSON, err := sendCommand("getChatMembersCount", b.Token, params)
+	if err != nil {
+		return 0, err
+	}
+
+	var responseRecieved struct {
+		Ok     bool `json:"ok"`
+		Result int  `json:"result"`
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return 0, err
+	}
+
+	if !responseRecieved.Ok {
+		return 0, fmt.Errorf("telebot: %s", responseRecieved.Result)
+	}
+
+	return responseRecieved.Result, nil
+}
