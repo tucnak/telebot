@@ -649,7 +649,7 @@ func (b *Bot) GetFile(fileID string) (File, error) {
 	return responseRecieved.Result, nil
 }
 
-// Get file object with FilePath field
+// Get file url string
 func (b *Bot) GetFileDirectURL(fileID string) (string, error) {
 	f, err := b.GetFile(fileID)
 	if err != nil {
