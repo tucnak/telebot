@@ -620,3 +620,40 @@ func (b *Bot) AnswerCallbackQuery(callback *Callback, response *CallbackResponse
 
 	return nil
 }
+
+// Get file object with FilePath field
+func (b *Bot) GetFile(fileID string) (File, error) {
+	params := map[string]string{
+		"file_id":   fileID,
+	}
+	responseJSON, err := sendCommand("getFile", b.Token, params)
+	if err != nil {
+		return File{}, err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Description string
+		Result      File
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return File{}, err
+	}
+
+	if !responseRecieved.Ok {
+		return File{}, fmt.Errorf("telebot: %s", responseRecieved.Description)
+	}
+
+	return responseRecieved.Result, nil
+}
+
+// Get file object with FilePath field
+func (b *Bot) GetFileDirectURL(fileID string) (string, error) {
+	f, err := b.GetFile(fileID)
+	if err != nil {
+		return "", err
+	}
+	return "https://api.telegram.org/file/bot"+b.Token+"/"+f.FilePath, nil
+}
