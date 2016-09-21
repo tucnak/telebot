@@ -15,7 +15,7 @@ type ChatInfo struct {
 
 // For each member of a chat , we have some information like usertype (admin , etc..) 
 // and the main information about user like id and etc...
-type ChannelUser struct {
+type ChatMember struct {
 	User   User   `json:"user"`
 	Status string `json:"status"`
 }
@@ -49,28 +49,28 @@ func (b *Bot) GetChat(recipient Recipient) (ChatInfo, error) {
 }
 
 // GetChatAdministrators return an array of ChannelUser struct which have two types, administrator and creator
-func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChannelUser, error) {
+func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChatMember, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 	}
 
 	responseJSON, err := sendCommand("getChatAdministrators", b.Token, params)
 	if err != nil {
-		return []ChannelUser{}, err
+		return []ChatMember{}, err
 	}
 
 	var responseRecieved struct {
 		Ok     bool          `json:"ok"`
-		Result []ChannelUser `json:"result"`
+		Result []ChatMember `json:"result"`
 	}
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return []ChannelUser{}, err
+		return []ChatMember{}, err
 	}
 
 	if !responseRecieved.Ok {
-		return []ChannelUser{}, fmt.Errorf("telebot: %s", responseRecieved.Result)
+		return []ChatMember{}, fmt.Errorf("telebot: %s", responseRecieved.Result)
 	}
 
 	return responseRecieved.Result, nil
