@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// ChatInfo struct is the main chat information from telegram
 type ChatInfo struct {
 	ID       int64  `json:"id"`
 	Title    string `json:"title"`
@@ -12,11 +13,14 @@ type ChatInfo struct {
 	Type     string `json:"type"`
 }
 
+// For each member of a chat , we have some information like usertype (admin , etc..) 
+// and the main information about user like id and etc...
 type ChannelUser struct {
 	User   User   `json:"user"`
 	Status string `json:"status"`
 }
 
+// GetChat allows to get main information of chat like channel username and etc...
 func (b *Bot) GetChat(recipient Recipient) (ChatInfo, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
@@ -44,6 +48,7 @@ func (b *Bot) GetChat(recipient Recipient) (ChatInfo, error) {
 	return responseRecieved.Result, nil
 }
 
+// GetChatAdministrators return an array of ChannelUser struct which have two types, administrator and creator
 func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChannelUser, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
@@ -71,6 +76,7 @@ func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChannelUser, error) 
 	return responseRecieved.Result, nil
 }
 
+// GetChatMembersCount... are you kidding me ? this method return number of users in a channel or group and etc...
 func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
@@ -98,7 +104,7 @@ func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
 	return responseRecieved.Result, nil
 }
 
-
+// The bot will leave the chat if this method has been called.
 func (b *Bot) LeaveChat(recipient Recipient) error {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
