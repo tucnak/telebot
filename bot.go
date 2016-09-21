@@ -620,3 +620,27 @@ func (b *Bot) AnswerCallbackQuery(callback *Callback, response *CallbackResponse
 
 	return nil
 }
+
+// GetFile allows to download a image , video and ... just with a FileId
+func (b *Bot) GetFile(file File) (string, error) {
+	responseJSON, err := sendCommand("getFile", b.Token, map[string]string{
+		"file_id": file.FileID,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	var Result struct {
+		Ok     bool `json:"ok"`
+		Result struct {
+			FilePath string `json:"file_path"`
+		} `json:"result"`
+	}
+
+	err = json.Unmarshal(responseJSON, &Result)
+	if err != nil {
+		return "", err
+	}
+
+	return "https://api.telegram.org/file/bot" + b.Token + "/" + Result.Result.FilePath, nil
+}
