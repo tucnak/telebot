@@ -76,7 +76,7 @@ func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChatMember, error) {
 	return responseRecieved.Result, nil
 }
 
-// GetChatMembersCount... are you kidding me ? this method return number of users in a channel or group and etc...
+// GetChatMembersCount get the number of members in a chat
 func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
