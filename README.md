@@ -6,18 +6,34 @@
 
 Bots are special Telegram accounts designed to handle messages automatically. Users can interact with bots by sending them command messages in private or group chats. These accounts serve as an interface for code running somewhere on your server.
 
-Telebot offers a convenient wrapper to Bots API, so you shouldn't even care about networking at all. Here is an example "helloworld" bot, written with telebot:
+Telebot offers a convenient wrapper to Bots API, so you shouldn't even
+care about networking at all. You may install it with
+
+	go get github.com/tucnak/telebot
+
+(after setting up your `GOPATH` properly).
+
+Since you are probably
+hosting your bot in a public repository, we'll add an environment
+variable for the token in this example. Please set it with
+
+	export BOT_TOKEN=<your token here>
+
+
+Here is an example "helloworld" bot, written with telebot:
+
 ```go
 package main
 
 import (
     "log"
     "time"
+    "os" 
     "github.com/tucnak/telebot"
 )
 
 func main() {
-    bot, err := telebot.NewBot("SECRET TOKEN")
+    bot, err := telebot.NewBot(os.Getenv("BOT_TOKEN"))
     if err != nil {
         log.Fatalln(err)
     }
@@ -37,8 +53,7 @@ func main() {
 ## Inline mode
 
 As of January 4, 2016, Telegram added inline mode support for bots.
-Telebot support inline mode in a fancy manner.
-Here's a nice way to handle both incoming messages and inline queries:
+Telebot support inline mode in a fancy manner. Here's a nice way to handle both incoming messages and inline queries:
 
 ```go
 package main
@@ -46,7 +61,7 @@ package main
 import (
     "log"
     "time"
-
+    "os"
     "github.com/tucnak/telebot"
 )
 
@@ -54,7 +69,7 @@ var bot *telebot.Bot
 
 func main() {
     var err error
-    bot, err = telebot.NewBot("SECRET TOKEN")
+    bot, err = telebot.NewBot(os.Getenv("BOT_TOKEN"))
     if err != nil {
         log.Fatalln(err)
     }
