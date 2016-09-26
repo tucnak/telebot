@@ -621,7 +621,9 @@ func (b *Bot) AnswerCallbackQuery(callback *Callback, response *CallbackResponse
 	return nil
 }
 
-// Get file object with FilePath field
+// GetFile returns full file object including File.FilePath, which allow you to load file from Telegram
+//
+// Usually File objects does not contain any FilePath so you need to perform additional request
 func (b *Bot) GetFile(fileID string) (File, error) {
 	params := map[string]string{
 		"file_id":   fileID,
@@ -649,7 +651,7 @@ func (b *Bot) GetFile(fileID string) (File, error) {
 	return responseRecieved.Result, nil
 }
 
-// Get file url string
+// GetFileDirectURL returns direct url for files using FileId which you can get from File object
 func (b *Bot) GetFileDirectURL(fileID string) (string, error) {
 	f, err := b.GetFile(fileID)
 	if err != nil {
