@@ -620,3 +620,42 @@ func (b *Bot) AnswerCallbackQuery(callback *Callback, response *CallbackResponse
 
 	return nil
 }
+
+// GetFile returns full file object including File.FilePath, which allow you to load file from Telegram
+//
+// Usually File objects does not contain any FilePath so you need to perform additional request
+func (b *Bot) GetFile(fileID string) (File, error) {
+	params := map[string]string{
+		"file_id":   fileID,
+	}
+	responseJSON, err := sendCommand("getFile", b.Token, params)
+	if err != nil {
+		return File{}, err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Description string
+		Result      File
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return File{}, err
+	}
+
+	if !responseRecieved.Ok {
+		return File{}, fmt.Errorf("telebot: %s", responseRecieved.Description)
+	}
+
+	return responseRecieved.Result, nil
+}
+
+// GetFileDirectURL returns direct url for files using FileId which you can get from File object
+func (b *Bot) GetFileDirectURL(fileID string) (string, error) {
+	f, err := b.GetFile(fileID)
+	if err != nil {
+		return "", err
+	}
+	return "https://api.telegram.org/file/bot"+b.Token+"/"+f.FilePath, nil
+}
