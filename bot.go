@@ -769,6 +769,36 @@ func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
 	return responseRecieved.Result, nil
 }
 
+// Use this method to get a list of profile pictures for a user.
+//
+// Returns a UserProfilePhotos object.
+func (b *Bot) GetUserProfilePhotos(recipient Recipient) (UserProfilePhotos, error) {
+	params := map[string]string{
+		"user_id": recipient.Destination(),
+	}
+	responseJSON, err := sendCommand("getUserProfilePhotos", b.Token, params)
+	if err != nil {
+		return UserProfilePhotos{}, err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Result      UserProfilePhotos
+		Description string `json:"description",omitempty`
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return UserProfilePhotos{}, err
+	}
+
+	if !responseRecieved.Ok {
+		return UserProfilePhotos{}, fmt.Errorf("telebot: getUserProfilePhotos failure %s", responseRecieved.Description)
+	}
+
+	return responseRecieved.Result, nil
+}
+
 // Use this method to get information about a member of a chat.
 //
 // Returns a ChatMember object on success.
