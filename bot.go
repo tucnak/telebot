@@ -739,6 +739,36 @@ func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChatMember, error) {
 	return responseRecieved.Result, nil
 }
 
+// Use this method to get the number of members in a chat.
+//
+// Returns Int on success.
+func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
+	params := map[string]string{
+		"chat_id": recipient.Destination(),
+	}
+	responseJSON, err := sendCommand("getChatMembersCount", b.Token, params)
+	if err != nil {
+		return 0, err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Result      int
+		Description string `json:"description",omitempty`
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return 0, err
+	}
+
+	if !responseRecieved.Ok {
+		return 0, fmt.Errorf("telebot: getChatMembersCount failure %s", responseRecieved.Description)
+	}
+
+	return responseRecieved.Result, nil
+}
+
 // GetFileDirectURL returns direct url for files using FileId which you can get from File object
 func (b *Bot) GetFileDirectURL(fileID string) (string, error) {
 	f, err := b.GetFile(fileID)
