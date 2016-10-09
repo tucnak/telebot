@@ -678,7 +678,9 @@ func (b *Bot) LeaveChat(recipient Recipient) (bool, error) {
 	return responseRecieved.Result, nil
 }
 
-// Use this method to get up to date information about the chat (current name of the user for one-on-one conversations, current username of a user, group or channel, etc.).
+// Use this method to get up to date information
+// about the chat (current name of the user for one-on-one
+// conversations, current username of a user, group or channel, etc.).
 //
 // Returns a Chat object on success.
 func (b *Bot) GetChat(recipient Recipient) (Chat, error) {
@@ -709,9 +711,11 @@ func (b *Bot) GetChat(recipient Recipient) (Chat, error) {
 
 // Use this method to get a list of administrators in a chat.
 //
-// On success, returns an Array of ChatMember objects that contains information about all chat administrators except other bots.
+// On success, returns an Array of ChatMember objects that
+// contains information about all chat administrators except other bots.
 //
-// If the chat is a group or a supergroup and no administrators were appointed, only the creator will be returned.
+// If the chat is a group or a supergroup and
+// no administrators were appointed, only the creator will be returned.
 func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChatMember, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
