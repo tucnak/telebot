@@ -626,7 +626,7 @@ func (b *Bot) AnswerCallbackQuery(callback *Callback, response *CallbackResponse
 // Usually File objects does not contain any FilePath so you need to perform additional request
 func (b *Bot) GetFile(fileID string) (File, error) {
 	params := map[string]string{
-		"file_id":   fileID,
+		"file_id": fileID,
 	}
 	responseJSON, err := sendCommand("getFile", b.Token, params)
 	if err != nil {
@@ -651,11 +651,38 @@ func (b *Bot) GetFile(fileID string) (File, error) {
 	return responseRecieved.Result, nil
 }
 
+// Use this method for your bot to leave a group, supergroup or channel. Returns True on success.
+func (b *Bot) LeaveChat(recipient Recipient) (bool, error) {
+	params := map[string]string{
+		"chat_id": recipient.Destination(),
+	}
+	responseJSON, err := sendCommand("leaveChat", b.Token, params)
+	if err != nil {
+		return false, err
+	}
+
+	var responseRecieved struct {
+		Ok     bool
+		Result bool
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return false, err
+	}
+
+	if !responseRecieved.Ok {
+		return false, fmt.Errorf("telebot: leavechat failure %s", responseRecieved.Result)
+	}
+
+	return responseRecieved.Result, nil
+}
+
 // GetFileDirectURL returns direct url for files using FileId which you can get from File object
 func (b *Bot) GetFileDirectURL(fileID string) (string, error) {
 	f, err := b.GetFile(fileID)
 	if err != nil {
 		return "", err
 	}
-	return "https://api.telegram.org/file/bot"+b.Token+"/"+f.FilePath, nil
+	return "https://api.telegram.org/file/bot" + b.Token + "/" + f.FilePath, nil
 }
