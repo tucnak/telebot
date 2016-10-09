@@ -223,3 +223,9 @@ type MessageEntity struct {
 	//user	Optional. For “text_mention” only, the mentioned user
 	User User `json:"user",omitempty`
 }
+
+// This object contains information about one member of the chat.
+type ChatMember struct {
+	User   User   `json:"user"`
+	Status string `json:"status"`
+}
