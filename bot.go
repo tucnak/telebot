@@ -672,7 +672,36 @@ func (b *Bot) LeaveChat(recipient Recipient) (bool, error) {
 	}
 
 	if !responseRecieved.Ok {
-		return false, fmt.Errorf("telebot: leavechat failure %s", responseRecieved.Result)
+		return false, fmt.Errorf("telebot: leaveChat failure %s", responseRecieved.Result)
+	}
+
+	return responseRecieved.Result, nil
+}
+
+// Use this method to get up to date information about the chat (current name of the user for one-on-one conversations, current username of a user, group or channel, etc.).
+//
+// Returns a Chat object on success.
+func (b *Bot) GetChat(recipient Recipient) (Chat, error) {
+	params := map[string]string{
+		"chat_id": recipient.Destination(),
+	}
+	responseJSON, err := sendCommand("getChat", b.Token, params)
+	if err != nil {
+		return Chat{}, err
+	}
+
+	var responseRecieved struct {
+		Ok     bool
+		Result Chat
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return Chat{}, err
+	}
+
+	if !responseRecieved.Ok {
+		return Chat{}, fmt.Errorf("telebot: getChat failure %s", responseRecieved.Result)
 	}
 
 	return responseRecieved.Result, nil
