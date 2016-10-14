@@ -224,12 +224,14 @@ type MessageEntity struct {
 	User User `json:"user",omitempty`
 }
 
+// ChatMember ,
 // This struct contains information about one member of the chat.
 type ChatMember struct {
 	User   User   `json:"user"`
 	Status string `json:"status"`
 }
 
+// UserProfilePhotos ,
 // This struct represent a user's profile pictures.
 //
 // Count : Total number of profile pictures the target user has

@@ -651,7 +651,7 @@ func (b *Bot) GetFile(fileID string) (File, error) {
 	return responseRecieved.Result, nil
 }
 
-// Use this method for your bot to leave a group, supergroup or channel. Returns True on success.
+// LeaveChat , Use this method for your bot to leave a group, supergroup or channel. Returns True on success.
 func (b *Bot) LeaveChat(recipient Recipient) (bool, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
@@ -678,7 +678,7 @@ func (b *Bot) LeaveChat(recipient Recipient) (bool, error) {
 	return responseRecieved.Result, nil
 }
 
-// Use this method to get up to date information
+// GetChat get up to date information
 // about the chat (current name of the user for one-on-one
 // conversations, current username of a user, group or channel, etc.).
 //
@@ -709,7 +709,7 @@ func (b *Bot) GetChat(recipient Recipient) (Chat, error) {
 	return responseRecieved.Result, nil
 }
 
-// Use this method to get a list of administrators in a chat.
+// GetChatAdministrators return list of administrators in a chat.
 //
 // On success, returns an Array of ChatMember objects that
 // contains information about all chat administrators except other bots.
@@ -743,7 +743,7 @@ func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChatMember, error) {
 	return responseRecieved.Result, nil
 }
 
-// Use this method to get the number of members in a chat.
+// GetChatMembersCount return the number of members in a chat.
 //
 // Returns Int on success.
 func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
@@ -773,7 +773,7 @@ func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
 	return responseRecieved.Result, nil
 }
 
-// Use this method to get a list of profile pictures for a user.
+// GetUserProfilePhotos return list of profile pictures for a user.
 //
 // Returns a UserProfilePhotos object.
 func (b *Bot) GetUserProfilePhotos(recipient Recipient) (UserProfilePhotos, error) {
@@ -803,7 +803,7 @@ func (b *Bot) GetUserProfilePhotos(recipient Recipient) (UserProfilePhotos, erro
 	return responseRecieved.Result, nil
 }
 
-// Use this method to get information about a member of a chat.
+// GetChatMember return information about a member of a chat.
 //
 // Returns a ChatMember object on success.
 func (b *Bot) GetChatMember(recipient Recipient, user User) (ChatMember, error) {
