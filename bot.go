@@ -652,13 +652,13 @@ func (b *Bot) GetFile(fileID string) (File, error) {
 }
 
 // LeaveChat , Use this method for your bot to leave a group, supergroup or channel. Returns True on success.
-func (b *Bot) LeaveChat(recipient Recipient) (bool, error) {
+func (b *Bot) LeaveChat(recipient Recipient) error {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 	}
 	responseJSON, err := sendCommand("leaveChat", b.Token, params)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	var responseRecieved struct {
@@ -668,14 +668,14 @@ func (b *Bot) LeaveChat(recipient Recipient) (bool, error) {
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	if !responseRecieved.Ok {
-		return false, fmt.Errorf("telebot: leaveChat failure %s", responseRecieved.Result)
+		return fmt.Errorf("telebot: leaveChat failure %s", responseRecieved.Result)
 	}
 
-	return responseRecieved.Result, nil
+	return nil
 }
 
 // GetChat get up to date information
