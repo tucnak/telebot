@@ -223,3 +223,21 @@ type MessageEntity struct {
 	//user	Optional. For “text_mention” only, the mentioned user
 	User User `json:"user",omitempty`
 }
+
+// ChatMember ,
+// This struct contains information about one member of the chat.
+type ChatMember struct {
+	User   User   `json:"user"`
+	Status string `json:"status"`
+}
+
+// UserProfilePhotos ,
+// This struct represent a user's profile pictures.
+//
+// Count : Total number of profile pictures the target user has
+//
+// Photos : Array of Array of PhotoSize	, Requested profile pictures (in up to 4 sizes each)
+type UserProfilePhotos struct {
+	Count  int       `json:"total_count"`
+	Photos [][]Photo `json:"photos"`
+}

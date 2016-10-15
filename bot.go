@@ -626,7 +626,7 @@ func (b *Bot) AnswerCallbackQuery(callback *Callback, response *CallbackResponse
 // Usually File objects does not contain any FilePath so you need to perform additional request
 func (b *Bot) GetFile(fileID string) (File, error) {
 	params := map[string]string{
-		"file_id":   fileID,
+		"file_id": fileID,
 	}
 	responseJSON, err := sendCommand("getFile", b.Token, params)
 	if err != nil {
@@ -651,11 +651,194 @@ func (b *Bot) GetFile(fileID string) (File, error) {
 	return responseRecieved.Result, nil
 }
 
+// LeaveChat , Use this method for your bot to leave a group, supergroup or channel. Returns True on success.
+func (b *Bot) LeaveChat(recipient Recipient) error {
+	params := map[string]string{
+		"chat_id": recipient.Destination(),
+	}
+	responseJSON, err := sendCommand("leaveChat", b.Token, params)
+	if err != nil {
+		return err
+	}
+
+	var responseRecieved struct {
+		Ok     bool
+		Result bool
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return err
+	}
+
+	if !responseRecieved.Ok {
+		return fmt.Errorf("telebot: leaveChat failure %s", responseRecieved.Result)
+	}
+
+	return nil
+}
+
+// GetChat get up to date information
+// about the chat (current name of the user for one-on-one
+// conversations, current username of a user, group or channel, etc.).
+//
+// Returns a Chat object on success.
+func (b *Bot) GetChat(recipient Recipient) (Chat, error) {
+	params := map[string]string{
+		"chat_id": recipient.Destination(),
+	}
+	responseJSON, err := sendCommand("getChat", b.Token, params)
+	if err != nil {
+		return Chat{}, err
+	}
+
+	var responseRecieved struct {
+		Ok     bool
+		Result Chat
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return Chat{}, err
+	}
+
+	if !responseRecieved.Ok {
+		return Chat{}, fmt.Errorf("telebot: getChat failure %s", responseRecieved.Result)
+	}
+
+	return responseRecieved.Result, nil
+}
+
+// GetChatAdministrators return list of administrators in a chat.
+//
+// On success, returns an Array of ChatMember objects that
+// contains information about all chat administrators except other bots.
+//
+// If the chat is a group or a supergroup and
+// no administrators were appointed, only the creator will be returned.
+func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChatMember, error) {
+	params := map[string]string{
+		"chat_id": recipient.Destination(),
+	}
+	responseJSON, err := sendCommand("getChatAdministrators", b.Token, params)
+	if err != nil {
+		return []ChatMember{}, err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Result      []ChatMember
+		Description string `json:"description",omitempty`
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return []ChatMember{}, err
+	}
+
+	if !responseRecieved.Ok {
+		return []ChatMember{}, fmt.Errorf("telebot: getChatAdministrators failure %s", responseRecieved.Description)
+	}
+
+	return responseRecieved.Result, nil
+}
+
+// GetChatMembersCount return the number of members in a chat.
+//
+// Returns Int on success.
+func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
+	params := map[string]string{
+		"chat_id": recipient.Destination(),
+	}
+	responseJSON, err := sendCommand("getChatMembersCount", b.Token, params)
+	if err != nil {
+		return 0, err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Result      int
+		Description string `json:"description",omitempty`
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return 0, err
+	}
+
+	if !responseRecieved.Ok {
+		return 0, fmt.Errorf("telebot: getChatMembersCount failure %s", responseRecieved.Description)
+	}
+
+	return responseRecieved.Result, nil
+}
+
+// GetUserProfilePhotos return list of profile pictures for a user.
+//
+// Returns a UserProfilePhotos object.
+func (b *Bot) GetUserProfilePhotos(recipient Recipient) (UserProfilePhotos, error) {
+	params := map[string]string{
+		"user_id": recipient.Destination(),
+	}
+	responseJSON, err := sendCommand("getUserProfilePhotos", b.Token, params)
+	if err != nil {
+		return UserProfilePhotos{}, err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Result      UserProfilePhotos
+		Description string `json:"description",omitempty`
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return UserProfilePhotos{}, err
+	}
+
+	if !responseRecieved.Ok {
+		return UserProfilePhotos{}, fmt.Errorf("telebot: getUserProfilePhotos failure %s", responseRecieved.Description)
+	}
+
+	return responseRecieved.Result, nil
+}
+
+// GetChatMember return information about a member of a chat.
+//
+// Returns a ChatMember object on success.
+func (b *Bot) GetChatMember(recipient Recipient, user User) (ChatMember, error) {
+	params := map[string]string{
+		"chat_id": recipient.Destination(),
+		"user_id": user.Destination(),
+	}
+	responseJSON, err := sendCommand("getChatMember", b.Token, params)
+	if err != nil {
+		return ChatMember{}, err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Result      ChatMember
+		Description string `json:"description",omitempty`
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return ChatMember{}, err
+	}
+
+	if !responseRecieved.Ok {
+		return ChatMember{}, fmt.Errorf("telebot: getChatMember failure %s", responseRecieved.Description)
+	}
+
+	return responseRecieved.Result, nil
+}
+
 // GetFileDirectURL returns direct url for files using FileId which you can get from File object
 func (b *Bot) GetFileDirectURL(fileID string) (string, error) {
 	f, err := b.GetFile(fileID)
 	if err != nil {
 		return "", err
 	}
-	return "https://api.telegram.org/file/bot"+b.Token+"/"+f.FilePath, nil
+	return "https://api.telegram.org/file/bot" + b.Token + "/" + f.FilePath, nil
 }
