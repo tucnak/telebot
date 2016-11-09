@@ -54,7 +54,7 @@ func (c Chat) IsGroupChat() bool {
 
 // Update object represents an incoming update.
 type Update struct {
-	ID      int      `json:"update_id"`
+	ID      int64    `json:"update_id"`
 	Payload *Message `json:"message"`
 
 	// optional

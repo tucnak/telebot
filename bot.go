@@ -49,12 +49,12 @@ func (b *Bot) poll(
 	callbacks chan Callback,
 	timeout time.Duration,
 ) {
-	latestUpdate := 0
+	var latestUpdate int64 = 0
 
 	for {
 		updates, err := getUpdates(b.Token,
 			latestUpdate+1,
-			int(timeout/time.Second),
+			int64(timeout/time.Second),
 		)
 
 		if err != nil {
