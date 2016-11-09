@@ -86,7 +86,16 @@ type Audio struct {
 	// Duration of the recording in seconds as defined by sender.
 	Duration int `json:"duration"`
 
-	// MIME type of the file as defined by sender.
+	// FileSize (optional) of the audio file.
+	FileSize int `json:"file_size"`
+
+	// Title (optional) as defined by sender or by audio tags.
+	Title string `json:"title"`
+
+	// Performer (optional) is defined by sender or by audio tags.
+	Performer string `json:"performer"`
+
+	// MIME type (optional) of the file as defined by sender.
 	Mime string `json:"mime_type"`
 }
 
@@ -190,7 +199,7 @@ type CallbackResponse struct {
 	// (Optional) If true, an alert will be shown by the client instead
 	// of a notification at the top of the chat screen. Defaults to false.
 	ShowAlert bool `json:"show_alert,omitempty"`
-	
+
 	// (Optional) URL that will be opened by the user's client.
 	// If you have created a Game and accepted the conditions via @Botfather
 	// specify the URL that opens your game
