@@ -1,9 +1,10 @@
 package telebot
 
 import (
-	"github.com/mitchellh/hashstructure"
 	"hash/fnv"
 	"strconv"
+
+	"github.com/mitchellh/hashstructure"
 )
 
 // inlineQueryHashOptions sets the HashOptions to be used when hashing
@@ -83,7 +84,7 @@ func hashInlineQueryResult(result InlineQueryResult) (string, error) {
 	return strconv.FormatUint(hash, 16), nil
 }
 
-// Deprecated interface type, superseded by InlineQueryResult.
+// Result is a deprecated type, superseded by InlineQueryResult.
 type Result interface {
 	MarshalJSON() ([]byte, error)
 }

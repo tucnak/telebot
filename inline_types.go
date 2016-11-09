@@ -44,31 +44,31 @@ type InlineQueryResultArticle struct {
 	ThumbHeight int `json:"thumb_height,omitempty"`
 }
 
-// Used to avoid endless recursion in MarshalJSON.
-type wrappedInlineQueryResultArticle InlineQueryResultArticle
-
 func (r *InlineQueryResultArticle) MarshalJSON() ([]byte, error) {
+	// avoiding endless self-recursion
+	type wrapper InlineQueryResultArticle
+
 	id, err := r.id()
 	if err != nil {
 		return nil, err
 	}
 	return json.Marshal(struct {
-		wrappedInlineQueryResultArticle
+		wrapper
 		Type string `json:"type"`
 		ID   string `json:"id",hash:"ignore"`
 	}{
-		wrappedInlineQueryResultArticle: wrappedInlineQueryResultArticle(*r),
-		ID:   id,
-		Type: "article",
+		wrapper: wrapper(*r),
+		ID:      id,
+		Type:    "article",
 	})
 }
 
 func (r *InlineQueryResultArticle) id() (string, error) {
 	if r.ID == "" {
 		return hashInlineQueryResult(r)
-	} else {
-		return r.ID, nil
 	}
+
+	return r.ID, nil
 }
 
 // InlineQueryResultAudio represents a link to an mp3 audio file.
@@ -97,32 +97,32 @@ type InlineQueryResultAudio struct {
 	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-// Used to avoid endless recursion in MarshalJSON.
-type wrappedInlineQueryResultAudio InlineQueryResultAudio
-
 func (r *InlineQueryResultAudio) MarshalJSON() ([]byte, error) {
+	// avoiding endless self-recursion
+	type wrapper InlineQueryResultAudio
+
 	id, err := r.id()
 	if err != nil {
 		return nil, err
 	}
 
 	return json.Marshal(struct {
-		wrappedInlineQueryResultAudio
+		wrapper
 		Type string `json:"type"`
 		ID   string `json:"id",hash:"ignore"`
 	}{
-		wrappedInlineQueryResultAudio: wrappedInlineQueryResultAudio(*r),
-		ID:   id,
-		Type: "audio",
+		wrapper: wrapper(*r),
+		ID:      id,
+		Type:    "audio",
 	})
 }
 
 func (r *InlineQueryResultAudio) id() (string, error) {
 	if r.ID == "" {
 		return hashInlineQueryResult(r)
-	} else {
-		return r.ID, nil
 	}
+
+	return r.ID, nil
 }
 
 // InlineQueryResultContact represents a contact with a phone number.
@@ -158,32 +158,32 @@ type InlineQueryResultContact struct {
 	ThumbHeight int `json:"thumb_height,omitempty"`
 }
 
-// Used to avoid endless recursion in MarshalJSON.
-type wrappedInlineQueryResultContact InlineQueryResultContact
-
 func (r *InlineQueryResultContact) MarshalJSON() ([]byte, error) {
+	// avoiding endless self-recursion
+	type wrapper InlineQueryResultContact
+
 	id, err := r.id()
 	if err != nil {
 		return nil, err
 	}
 
 	return json.Marshal(struct {
-		wrappedInlineQueryResultContact
+		wrapper
 		Type string `json:"type"`
 		ID   string `json:"id",hash:"ignore"`
 	}{
-		wrappedInlineQueryResultContact: wrappedInlineQueryResultContact(*r),
-		ID:   id,
-		Type: "contact",
+		wrapper: wrapper(*r),
+		ID:      id,
+		Type:    "contact",
 	})
 }
 
 func (r *InlineQueryResultContact) id() (string, error) {
 	if r.ID == "" {
 		return hashInlineQueryResult(r)
-	} else {
-		return r.ID, nil
 	}
+
+	return r.ID, nil
 }
 
 // InlineQueryResultDocument represents a link to a file.
@@ -226,32 +226,32 @@ type InlineQueryResultDocument struct {
 	ThumbHeight int `json:"thumb_height,omitempty"`
 }
 
-// Used to avoid endless recursion in MarshalJSON.
-type wrappedInlineQueryResultDocument InlineQueryResultDocument
-
 func (r *InlineQueryResultDocument) MarshalJSON() ([]byte, error) {
+	// avoiding endless self-recursion
+	type wrapper InlineQueryResultDocument
+
 	id, err := r.id()
 	if err != nil {
 		return nil, err
 	}
 
 	return json.Marshal(struct {
-		wrappedInlineQueryResultDocument
+		wrapper
 		Type string `json:"type"`
 		ID   string `json:"id",hash:"ignore"`
 	}{
-		wrappedInlineQueryResultDocument: wrappedInlineQueryResultDocument(*r),
-		ID:   id,
-		Type: "document",
+		wrapper: wrapper(*r),
+		ID:      id,
+		Type:    "document",
 	})
 }
 
 func (r *InlineQueryResultDocument) id() (string, error) {
 	if r.ID == "" {
 		return hashInlineQueryResult(r)
-	} else {
-		return r.ID, nil
 	}
+
+	return r.ID, nil
 }
 
 // InlineQueryResultGif represents a link to an animated GIF file.
@@ -287,31 +287,32 @@ type InlineQueryResultGif struct {
 	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-// Used to avoid endless recursion in MarshalJSON.
-type wrappedInlineQueryResultGif InlineQueryResultGif
-
 func (r *InlineQueryResultGif) MarshalJSON() ([]byte, error) {
+	// avoiding endless self-recursion
+	type wrapper InlineQueryResultGif
+
 	id, err := r.id()
 	if err != nil {
 		return nil, err
 	}
+
 	return json.Marshal(struct {
-		wrappedInlineQueryResultGif
+		wrapper
 		Type string `json:"type"`
 		ID   string `json:"id",hash:"ignore"`
 	}{
-		wrappedInlineQueryResultGif: wrappedInlineQueryResultGif(*r),
-		ID:   id,
-		Type: "gif",
+		wrapper: wrapper(*r),
+		ID:      id,
+		Type:    "gif",
 	})
 }
 
 func (r *InlineQueryResultGif) id() (string, error) {
 	if r.ID == "" {
 		return hashInlineQueryResult(r)
-	} else {
-		return r.ID, nil
 	}
+
+	return r.ID, nil
 }
 
 // InlineQueryResultLocation represents a location on a map.
@@ -348,31 +349,32 @@ type InlineQueryResultLocation struct {
 	ThumbHeight int `json:"thumb_height,omitempty"`
 }
 
-// Used to avoid endless recursion in MarshalJSON.
-type wrappedInlineQueryResultLocation InlineQueryResultLocation
-
 func (r *InlineQueryResultLocation) MarshalJSON() ([]byte, error) {
+	// avoiding endless self-recursion
+	type wrapper InlineQueryResultLocation
+
 	id, err := r.id()
 	if err != nil {
 		return nil, err
 	}
+
 	return json.Marshal(struct {
-		wrappedInlineQueryResultLocation
+		wrapper
 		Type string `json:"type"`
 		ID   string `json:"id",hash:"ignore"`
 	}{
-		wrappedInlineQueryResultLocation: wrappedInlineQueryResultLocation(*r),
-		ID:   id,
-		Type: "location",
+		wrapper: wrapper(*r),
+		ID:      id,
+		Type:    "location",
 	})
 }
 
 func (r *InlineQueryResultLocation) id() (string, error) {
 	if r.ID == "" {
 		return hashInlineQueryResult(r)
-	} else {
-		return r.ID, nil
 	}
+
+	return r.ID, nil
 }
 
 // InlineQueryResultMpeg4Gif represents a link to a video animation
@@ -409,31 +411,32 @@ type InlineQueryResultMpeg4Gif struct {
 	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-// Used to avoid endless recursion in MarshalJSON.
-type wrappedInlineQueryResultMpeg4Gif InlineQueryResultMpeg4Gif
-
 func (r *InlineQueryResultMpeg4Gif) MarshalJSON() ([]byte, error) {
+	// avoiding endless self-recursion
+	type wrapper InlineQueryResultMpeg4Gif
+
 	id, err := r.id()
 	if err != nil {
 		return nil, err
 	}
+
 	return json.Marshal(struct {
-		wrappedInlineQueryResultMpeg4Gif
+		wrapper
 		Type string `json:"type"`
 		ID   string `json:"id",hash:"ignore"`
 	}{
-		wrappedInlineQueryResultMpeg4Gif: wrappedInlineQueryResultMpeg4Gif(*r),
-		ID:   id,
-		Type: "mpeg4_gif",
+		wrapper: wrapper(*r),
+		ID:      id,
+		Type:    "mpeg4_gif",
 	})
 }
 
 func (r *InlineQueryResultMpeg4Gif) id() (string, error) {
 	if r.ID == "" {
 		return hashInlineQueryResult(r)
-	} else {
-		return r.ID, nil
 	}
+
+	return r.ID, nil
 }
 
 // InlineQueryResultPhoto represents a link to a photo.
@@ -473,31 +476,32 @@ type InlineQueryResultPhoto struct {
 	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-// Used to avoid endless recursion in MarshalJSON.
-type wrappedInlineQueryResultPhoto InlineQueryResultPhoto
-
 func (r *InlineQueryResultPhoto) MarshalJSON() ([]byte, error) {
+	// avoiding endless self-recursion
+	type wrapper InlineQueryResultPhoto
+
 	id, err := r.id()
 	if err != nil {
 		return nil, err
 	}
+
 	return json.Marshal(struct {
-		wrappedInlineQueryResultPhoto
+		wrapper
 		Type string `json:"type"`
 		ID   string `json:"id",hash:"ignore"`
 	}{
-		wrappedInlineQueryResultPhoto: wrappedInlineQueryResultPhoto(*r),
-		ID:   id,
-		Type: "photo",
+		wrapper: wrapper(*r),
+		ID:      id,
+		Type:    "photo",
 	})
 }
 
 func (r *InlineQueryResultPhoto) id() (string, error) {
 	if r.ID == "" {
 		return hashInlineQueryResult(r)
-	} else {
-		return r.ID, nil
 	}
+
+	return r.ID, nil
 }
 
 // InlineQueryResultVenue represents a venue.
@@ -539,31 +543,32 @@ type InlineQueryResultVenue struct {
 	ThumbHeight int `json:"thumb_height,omitempty"`
 }
 
-// Used to avoid endless recursion in MarshalJSON.
-type wrappedInlineQueryResultVenue InlineQueryResultVenue
-
 func (r *InlineQueryResultVenue) MarshalJSON() ([]byte, error) {
+	// avoiding endless self-recursion
+	type wrapper InlineQueryResultVenue
+
 	id, err := r.id()
 	if err != nil {
 		return nil, err
 	}
+
 	return json.Marshal(struct {
-		wrappedInlineQueryResultVenue
+		wrapper
 		Type string `json:"type"`
 		ID   string `json:"id",hash:"ignore"`
 	}{
-		wrappedInlineQueryResultVenue: wrappedInlineQueryResultVenue(*r),
-		ID:   id,
-		Type: "venue",
+		wrapper: wrapper(*r),
+		ID:      id,
+		Type:    "venue",
 	})
 }
 
 func (r *InlineQueryResultVenue) id() (string, error) {
 	if r.ID == "" {
 		return hashInlineQueryResult(r)
-	} else {
-		return r.ID, nil
 	}
+
+	return r.ID, nil
 }
 
 // InlineQueryResultVideo represents a link to a page containing an embedded
@@ -609,31 +614,32 @@ type InlineQueryResultVideo struct {
 	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-// Used to avoid endless recursion in MarshalJSON.
-type wrappedInlineQueryResultVideo InlineQueryResultVideo
-
 func (r *InlineQueryResultVideo) MarshalJSON() ([]byte, error) {
+	// avoiding endless self-recursion
+	type wrapper InlineQueryResultVideo
+
 	id, err := r.id()
 	if err != nil {
 		return nil, err
 	}
+
 	return json.Marshal(struct {
-		wrappedInlineQueryResultVideo
+		wrapper
 		Type string `json:"type"`
 		ID   string `json:"id",hash:"ignore"`
 	}{
-		wrappedInlineQueryResultVideo: wrappedInlineQueryResultVideo(*r),
-		ID:   id,
-		Type: "video",
+		wrapper: wrapper(*r),
+		ID:      id,
+		Type:    "video",
 	})
 }
 
 func (r *InlineQueryResultVideo) id() (string, error) {
 	if r.ID == "" {
 		return hashInlineQueryResult(r)
-	} else {
-		return r.ID, nil
 	}
+
+	return r.ID, nil
 }
 
 // InlineQueryResultVoice represents a link to a voice recording in a
@@ -662,29 +668,30 @@ type InlineQueryResultVoice struct {
 	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-// Used to avoid endless recursion in MarshalJSON.
-type wrappedInlineQueryResultVoice InlineQueryResultVoice
-
 func (r *InlineQueryResultVoice) MarshalJSON() ([]byte, error) {
+	// avoiding endless self-recursion
+	type wrapper InlineQueryResultVoice
+
 	id, err := r.id()
 	if err != nil {
 		return nil, err
 	}
+
 	return json.Marshal(struct {
-		wrappedInlineQueryResultVoice
+		wrapper
 		Type string `json:"type"`
 		ID   string `json:"id",hash:"ignore"`
 	}{
-		wrappedInlineQueryResultVoice: wrappedInlineQueryResultVoice(*r),
-		ID:   id,
-		Type: "voice",
+		wrapper: wrapper(*r),
+		ID:      id,
+		Type:    "voice",
 	})
 }
 
 func (r *InlineQueryResultVoice) id() (string, error) {
 	if r.ID == "" {
 		return hashInlineQueryResult(r)
-	} else {
-		return r.ID, nil
 	}
+
+	return r.ID, nil
 }

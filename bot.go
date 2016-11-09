@@ -651,7 +651,7 @@ func (b *Bot) GetFile(fileID string) (File, error) {
 	return responseRecieved.Result, nil
 }
 
-// LeaveChat , Use this method for your bot to leave a group, supergroup or channel. Returns True on success.
+// LeaveChat makes bot leave a group, supergroup or channel.
 func (b *Bot) LeaveChat(recipient Recipient) error {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
@@ -662,8 +662,9 @@ func (b *Bot) LeaveChat(recipient Recipient) error {
 	}
 
 	var responseRecieved struct {
-		Ok     bool
-		Result bool
+		Ok          bool
+		Description string
+		Result      bool
 	}
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
@@ -672,15 +673,17 @@ func (b *Bot) LeaveChat(recipient Recipient) error {
 	}
 
 	if !responseRecieved.Ok {
-		return fmt.Errorf("telebot: leaveChat failure %s", responseRecieved.Result)
+		return fmt.Errorf("telebot: leaveChat failure %s",
+			responseRecieved.Description)
 	}
 
 	return nil
 }
 
-// GetChat get up to date information
-// about the chat (current name of the user for one-on-one
-// conversations, current username of a user, group or channel, etc.).
+// GetChat get up to date information about the chat.
+//
+// Including current name of the user for one-on-one conversations,
+// current username of a user, group or channel, etc.
 //
 // Returns a Chat object on success.
 func (b *Bot) GetChat(recipient Recipient) (Chat, error) {
@@ -693,8 +696,9 @@ func (b *Bot) GetChat(recipient Recipient) (Chat, error) {
 	}
 
 	var responseRecieved struct {
-		Ok     bool
-		Result Chat
+		Ok          bool
+		Description string
+		Result      Chat
 	}
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
@@ -703,7 +707,8 @@ func (b *Bot) GetChat(recipient Recipient) (Chat, error) {
 	}
 
 	if !responseRecieved.Ok {
-		return Chat{}, fmt.Errorf("telebot: getChat failure %s", responseRecieved.Result)
+		return Chat{}, fmt.Errorf("telebot: getChat failure %s",
+			responseRecieved.Description)
 	}
 
 	return responseRecieved.Result, nil
