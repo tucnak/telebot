@@ -26,13 +26,17 @@ func (u User) Destination() string {
 }
 
 // Chat object represents a Telegram user, bot or group chat.
-// Title for channels and group chats
+//
 // Type of chat, can be either “private”, “group”, "supergroup" or “channel”
 type Chat struct {
-	ID   int64  `json:"id"`
-	Type string `json:"type"`
+	ID int64 `json:"id"`
 
-	Title     string `json:"title"`
+	// See telebot.ChatType and consts.
+	Type ChatType `json:"type"`
+
+	// Won't be there for ChatPrivate.
+	Title string `json:"title"`
+
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Username  string `json:"username"`
@@ -147,10 +151,11 @@ type KeyboardButton struct {
 	InlineQuery string `json:"switch_inline_query,omitempty"`
 }
 
-// InlineKeyboardMarkup represents an inline keyboard that appears right next
-// to the message it belongs to.
+// InlineKeyboardMarkup represents an inline keyboard that appears
+// right next to the message it belongs to.
 type InlineKeyboardMarkup struct {
-	// Array of button rows, each represented by an Array of KeyboardButton objects.
+	// Array of button rows, each represented by
+	// an Array of KeyboardButton objects.
 	InlineKeyboard [][]KeyboardButton `json:"inline_keyboard,omitempty"`
 }
 
@@ -183,10 +188,14 @@ type Callback struct {
 	// MessageID will be set if the button was attached to a message
 	// sent via the bot in inline mode.
 	MessageID string `json:"inline_message_id"`
-	Data      string `json:"data"`
+
+	// Data associated with the callback button. Be aware that
+	// a bad client can send arbitrary data in this field.
+	Data string `json:"data"`
 }
 
-// CallbackResponse builds a response to an Callback query.
+// CallbackResponse builds a response to a Callback query.
+//
 // See also: https://core.telegram.org/bots/api#answerCallbackQuery
 type CallbackResponse struct {
 	// The ID of the callback to which this is a response.
@@ -208,52 +217,47 @@ type CallbackResponse struct {
 	URL string `json:"url,omitempty"`
 }
 
-// Venue object represents a venue location with name, address and optional foursquare id.
+// Venue object represents a venue location with name, address and
+// optional foursquare ID.
 type Venue struct {
-	Location      Location `json:"location"`
-	Title         string   `json:"title"`
-	Address       string   `json:"address"`
-	Foursquare_id string   `json:"foursquare_id",omitempty`
+	Location     Location `json:"location"`
+	Title        string   `json:"title"`
+	Address      string   `json:"address"`
+	FoursquareID string   `json:"foursquare_id,omitempty"`
 }
 
-// MessageEntity
-// This object represents one special entity in a text message.
-// For example, hashtags, usernames, URLs, etc
+// MessageEntity object represents "special" parts of text messages,
+// including hashtags, usernames, URLs, etc.
 type MessageEntity struct {
+	// Specifies entity type.
+	Type EntityType `json:"type"`
 
-	// type Type of the entity. Can be mention (@username), hashtag,
-	// bot_command, url, email, bold (bold text), italic (italic text),
-	// code (monowidth string), pre (monowidth block), text_link (for clickable text URLs),
-	// text_mention (for users without usernames)
-	Type string `json:"type"`
-
-	// offset Offset in UTF-16 code units to the start of the entity
+	// Offset in UTF-16 code units to the start of the entity.
 	Offset int `json:"offset"`
 
-	//length Length of the entity in UTF-16 code units
+	// Length of the entity in UTF-16 code units.
 	Length int `json:"length"`
 
-	//url	Optional. For “text_link” only, url that will be opened after user taps on the text
-	Url string `json:"url",omitempty`
+	// (Optional) For EntityTextLink entity type only.
+	//
+	// URL will be opened after user taps on the text.
+	URL string `json:"url,omitempty"`
 
-	//user	Optional. For “text_mention” only, the mentioned user
-	User User `json:"user",omitempty`
+	// (Optional) For EntityTMention entity type only.
+	User User `json:"user,omitempty"`
 }
 
-// ChatMember ,
-// This struct contains information about one member of the chat.
+// ChatMember object represents information about a single chat member.
 type ChatMember struct {
 	User   User   `json:"user"`
 	Status string `json:"status"`
 }
 
-// UserProfilePhotos ,
-// This struct represent a user's profile pictures.
-//
-// Count : Total number of profile pictures the target user has
-//
-// Photos : Array of Array of PhotoSize	, Requested profile pictures (in up to 4 sizes each)
+// UserProfilePhotos object represent a user's profile pictures.
 type UserProfilePhotos struct {
-	Count  int       `json:"total_count"`
+	// Total number of profile pictures the target user has.
+	Count int `json:"total_count"`
+
+	// Requested profile pictures (in up to 4 sizes each).
 	Photos [][]Photo `json:"photos"`
 }

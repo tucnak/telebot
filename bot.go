@@ -49,7 +49,7 @@ func (b *Bot) poll(
 	callbacks chan Callback,
 	timeout time.Duration,
 ) {
-	var latestUpdate int64 = 0
+	var latestUpdate int64
 
 	for {
 		updates, err := getUpdates(b.Token,
@@ -462,8 +462,8 @@ func (b *Bot) SendVenue(recipient Recipient, venue *Venue, options *SendOptions)
 		"longitude": fmt.Sprintf("%f", venue.Location.Longitude),
 		"title":     venue.Title,
 		"address":   venue.Address}
-	if venue.Foursquare_id != "" {
-		params["foursquare_id"] = venue.Foursquare_id
+	if venue.FoursquareID != "" {
+		params["foursquare_id"] = venue.FoursquareID
 	}
 
 	if options != nil {
@@ -502,10 +502,10 @@ func (b *Bot) SendVenue(recipient Recipient, venue *Venue, options *SendOptions)
 //
 // Currently, Telegram supports only a narrow range of possible
 // actions, these are aligned as constants of this package.
-func (b *Bot) SendChatAction(recipient Recipient, action string) error {
+func (b *Bot) SendChatAction(recipient Recipient, action ChatAction) error {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
-		"action":  action,
+		"action":  string(action),
 	}
 
 	responseJSON, err := sendCommand("sendChatAction", b.Token, params)
@@ -733,7 +733,7 @@ func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChatMember, error) {
 	var responseRecieved struct {
 		Ok          bool
 		Result      []ChatMember
-		Description string `json:"description",omitempty`
+		Description string `json:"description"`
 	}
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
@@ -763,7 +763,7 @@ func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
 	var responseRecieved struct {
 		Ok          bool
 		Result      int
-		Description string `json:"description",omitempty`
+		Description string `json:"description"`
 	}
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
@@ -793,7 +793,7 @@ func (b *Bot) GetUserProfilePhotos(recipient Recipient) (UserProfilePhotos, erro
 	var responseRecieved struct {
 		Ok          bool
 		Result      UserProfilePhotos
-		Description string `json:"description",omitempty`
+		Description string `json:"description"`
 	}
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
@@ -824,7 +824,7 @@ func (b *Bot) GetChatMember(recipient Recipient, user User) (ChatMember, error) 
 	var responseRecieved struct {
 		Ok          bool
 		Result      ChatMember
-		Description string `json:"description",omitempty`
+		Description string `json:"description"`
 	}
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
