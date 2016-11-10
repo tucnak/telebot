@@ -79,6 +79,10 @@ type InlineQueryResult interface {
 // InlineQueryResults is a slice wrapper for convenient marshalling.
 type InlineQueryResults []InlineQueryResult
 
+// MarshalJSON makes sure IQRs have proper IDs and Type variables set.
+//
+// If ID of some result appears empty, it gets set to a new hash.
+// JSON-specific Type gets infered from the actual (specific) IQR type.
 func (results *InlineQueryResults) MarshalJSON() ([]byte, error) {
 	for i, result := range *results {
 		if result.GetID() == "" {

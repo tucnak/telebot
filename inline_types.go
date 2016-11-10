@@ -16,7 +16,7 @@ func (result *InlineQueryResultBase) GetID() string {
 	return result.ID
 }
 
-// GetID is part of IQRBase's implementation of IQR interface.
+// SetID is part of IQRBase's implementation of IQR interface.
 func (result *InlineQueryResultBase) SetID(id string) {
 	result.ID = id
 }
