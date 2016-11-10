@@ -23,8 +23,9 @@ package main
 
 import (
 	"log"
-	"time"
 	"os"
+	"time"
+
 	"github.com/tucnak/telebot"
 )
 
@@ -54,8 +55,9 @@ package main
 
 import (
 	"log"
-	"time"
 	"os"
+	"time"
+
 	"github.com/tucnak/telebot"
 )
 

@@ -4,17 +4,19 @@
 // Here is an example of helloworld bot implementation:
 //
 //	import (
+//		"log"
 //		"time"
+//		"os'
 //		"github.com/tucnak/telebot"
 //	)
 //
 //	func main() {
-//		bot, err := telebot.NewBot("SECRET_TOKEN")
+//		bot, err := telebot.NewBot(os.Getenv("BOT_TOKEN"))
 //		if err != nil {
-//			return
+//			log.Fatalln(err)
 //		}
 //
-//		messages := make(chan telebot.Message)
+//		messages := make(chan telebot.Message, 100)
 //		bot.Listen(messages, 1*time.Second)
 //
 //		for message := range messages {
