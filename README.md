@@ -17,9 +17,7 @@ preferably as an environmental variable:
 
 	export BOT_TOKEN=<your token here>
 
-
-Here is an example bot powered by Telebot:
-
+Take a look at the minimal bot setup:
 ```go
 package main
 
@@ -36,12 +34,43 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	// routes are compiled as regexps
+	messages := make(chan telebot.Message)
+	bot.Listen(messages, 1*time.Second)
+
+	for message := range messages {
+		if message.Text == "/hi" {
+			bot.SendMessage(message.Chat,
+				"Hello, "+message.Sender.FirstName+"!", nil)
+		}
+	}
+}
+```
+
+Previous example leaves all the logic implementation up to you. Usually you
+wouldn't want to do that, so Telebot provides a handy route API. Here is an
+example of it:
+```go
+package main
+
+import (
+	"log"
+	"time"
+	"os"
+	"github.com/tucnak/telebot"
+)
+
+func main() {
+	bot, err := telebot.NewBot(os.Getenv("BOT_TOKEN"))
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// Routes get compiled into regular expressions.
 	bot.Handle("/hi", func (context telebot.Context) {
 		bot.SendMessage(context.Message.Chat, "Hi!", nil)
 	})
 
-	// named groups found in routes will get injected in the controller as arguments
+	// Handle passes regex named groups into context variable as Args.
 	bot.Handle("/greet (?P<name>[a-z]+)", func(ctx telebot.Context) {
 		bot.SendMessage(ctx.Message.Chat, "Hello "+ctx.Args["name"], nil)
 	})
@@ -144,8 +173,8 @@ bot.SendMessage(user, "pong", &telebot.SendOptions{
 		ReplyMarkup: telebot.ReplyMarkup{
 			ForceReply: true,
 			Selective: true,
-
 			CustomKeyboard: [][]string{
+
 				[]string{"1", "2", "3"},
 				[]string{"4", "5", "6"},
 				[]string{"7", "8", "9"},
