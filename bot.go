@@ -41,10 +41,35 @@ func (b *Bot) Listen(subscription chan Message, timeout time.Duration) {
 	go b.poll(subscription, nil, nil, timeout)
 }
 
-// Start periodically polls messages and/or updates to corresponding channels
-// from the bot object.
+// Start periodically polls messages and/or updates to corresponding
+// channels from the bot object.
 func (b *Bot) Start(timeout time.Duration) {
 	b.poll(b.Messages, b.Queries, b.Callbacks, timeout)
+}
+
+// Handle registers a route handler for messages, matching the
+// regular expression provided.
+//
+// It panics if command regex appears malformed.
+func (b *Bot) Handle(command string, handler Handler) {
+	reg := regexp.MustCompile(command)
+	b.handlers[reg] = handler
+}
+
+// Serve listens for messages and routes them to appropiate handlers.
+//
+// Buffer is a size of buffered message channel.
+//
+// Freq is a poll frequency, e.g. 2*time.Second (once / 2 sec).
+func (b *Bot) Serve(buffer int, freq time.Duration) {
+	messages := make(chan Message, buffer)
+	b.Listen(messages, freq)
+
+	for message := range messages {
+		if handler, args := b.route(&message); handler != nil {
+			handler(Context{Message: &message, Args: args})
+		}
+	}
 }
 
 func (b *Bot) poll(
@@ -91,6 +116,24 @@ func (b *Bot) poll(
 		}
 	}
 
+}
+
+func (b *Bot) route(message *Message) (Handler, map[string]string) {
+	for reg, handler := range b.handlers {
+		if matches := reg.FindStringSubmatch(message.Text); len(matches) > 0 {
+			args := map[string]string{}
+
+			for x, name := range reg.SubexpNames() {
+				if x != 0 {
+					args[name] = matches[x]
+				}
+			}
+
+			return handler, args
+		}
+	}
+
+	return nil, nil
 }
 
 // SendMessage sends a text message to recipient.
@@ -850,40 +893,4 @@ func (b *Bot) GetFileDirectURL(fileID string) (string, error) {
 		return "", err
 	}
 	return "https://api.telegram.org/file/bot" + b.Token + "/" + f.FilePath, nil
-}
-
-// Handle registers a handler for a message which text matches the provided regular expression
-func (b *Bot) Handle(command string, handler Handler) {
-	reg := regexp.MustCompile(command)
-	b.handlers[reg] = handler
-}
-
-// Serve listens for messages and route them to the appropiate handler
-func (b *Bot) Serve() {
-	messages := make(chan Message)
-	b.Listen(messages, 1*time.Second)
-
-	for message := range messages {
-		if handler, args := b.route(&message); handler != nil {
-			handler(Context{Message: &message, Args: args})
-		}
-	}
-}
-
-func (b *Bot) route(message *Message) (Handler, map[string]string) {
-	for reg, handler := range b.handlers {
-
-		if matches := reg.FindStringSubmatch(message.Text); len(matches) > 0 {
-			args := map[string]string{}
-
-			for x, name := range reg.SubexpNames() {
-				if x != 0 {
-					args[name] = matches[x]
-				}
-			}
-			return handler, args
-		}
-	}
-
-	return nil, nil
 }

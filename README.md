@@ -34,7 +34,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	messages := make(chan telebot.Message)
+	messages := make(chan telebot.Message, 100)
 	bot.Listen(messages, 1*time.Second)
 
 	for message := range messages {
@@ -75,7 +75,8 @@ func main() {
 		bot.SendMessage(ctx.Message.Chat, "Hello "+ctx.Args["name"], nil)
 	})
 
-	bot.Serve()
+    // Poll 100 messages at max every second.
+	bot.Serve(100, 1*time.Second)
 }
 ```
 
@@ -99,7 +100,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	bot.Messages = make(chan telebot.Message, 1000)
+	bot.Messages = make(chan telebot.Message, 100)
 	bot.Queries = make(chan telebot.Query, 1000)
 
 	go messages(bot)
