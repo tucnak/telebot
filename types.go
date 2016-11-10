@@ -210,10 +210,10 @@ type CallbackResponse struct {
 
 // Venue object represents a venue location with name, address and optional foursquare id.
 type Venue struct {
-	Location      Location `json:"location"`
-	Title         string   `json:"title"`
-	Address       string   `json:"address"`
-	Foursquare_id string   `json:"foursquare_id",omitempty`
+	Location     Location `json:"location"`
+	Title        string   `json:"title"`
+	Address      string   `json:"address"`
+	FoursquareID string   `json:"foursquare_id,omitempty"`
 }
 
 // MessageEntity
@@ -234,10 +234,10 @@ type MessageEntity struct {
 	Length int `json:"length"`
 
 	//url	Optional. For “text_link” only, url that will be opened after user taps on the text
-	Url string `json:"url",omitempty`
+	Url string `json:"url,omitempty"`
 
 	//user	Optional. For “text_mention” only, the mentioned user
-	User User `json:"user",omitempty`
+	User User `json:"user,omitempty"`
 }
 
 // ChatMember ,
