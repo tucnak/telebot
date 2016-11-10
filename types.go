@@ -257,3 +257,12 @@ type UserProfilePhotos struct {
 	Count  int       `json:"total_count"`
 	Photos [][]Photo `json:"photos"`
 }
+
+// Context is passed to message handlers
+type Context struct {
+	Message *Message
+	Args    map[string]string
+}
+
+// Handler represents a message handler
+type Handler func(Context)
