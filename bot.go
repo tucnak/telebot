@@ -502,10 +502,10 @@ func (b *Bot) SendVenue(recipient Recipient, venue *Venue, options *SendOptions)
 //
 // Currently, Telegram supports only a narrow range of possible
 // actions, these are aligned as constants of this package.
-func (b *Bot) SendChatAction(recipient Recipient, action string) error {
+func (b *Bot) SendChatAction(recipient Recipient, action ChatAction) error {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
-		"action":  action,
+		"action":  string(action),
 	}
 
 	responseJSON, err := sendCommand("sendChatAction", b.Token, params)
