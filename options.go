@@ -7,6 +7,7 @@ type ParseMode string
 const (
 	ModeDefault  ParseMode = ""
 	ModeMarkdown ParseMode = "Markdown"
+	ModeHTML     ParseMode = "HTML"
 )
 
 // SendOptions represents a set of custom options that could
@@ -21,10 +22,14 @@ type SendOptions struct {
 	// For text messages, disables previews for links in this message.
 	DisableWebPagePreview bool
 
+	// Sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound.
+	DisableNotification bool
+
 	// ParseMode controls how client apps render your message.
 	ParseMode ParseMode
 }
 
+// ReplyMarkup specifies convenient options for bot-user communications.
 type ReplyMarkup struct {
 	// ForceReply forces Telegram clients to display
 	// a reply interface to the user (act as if the user
@@ -35,6 +40,9 @@ type ReplyMarkup struct {
 	//
 	// Note: you don't need to set HideCustomKeyboard field to show custom keyboard.
 	CustomKeyboard [][]string `json:"keyboard,omitempty"`
+
+	InlineKeyboard [][]KeyboardButton `json:"inline_keyboard,omitempty"`
+
 	// Requests clients to resize the keyboard vertically for optimal fit
 	// (e.g., make the keyboard smaller if there are just two rows of buttons).
 	// Defaults to false, in which case the custom keyboard is always of the

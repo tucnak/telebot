@@ -9,6 +9,7 @@ import (
 type File struct {
 	FileID   string `json:"file_id"`
 	FileSize int    `json:"file_size"`
+	FilePath string `json:"file_path"`
 
 	// Local absolute path to file on local file system.
 	filename string

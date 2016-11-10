@@ -8,17 +8,20 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
 )
 
-func sendCommand(method, token string, params url.Values) ([]byte, error) {
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s?%s",
-		token, method, params.Encode())
+func sendCommand(method, token string, payload interface{}) ([]byte, error) {
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", token, method)
 
-	resp, err := http.Get(url)
+	var b bytes.Buffer
+	if err := json.NewEncoder(&b).Encode(payload); err != nil {
+		return []byte{}, err
+	}
+
+	resp, err := http.Post(url, "application/json", &b)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -32,7 +35,7 @@ func sendCommand(method, token string, params url.Values) ([]byte, error) {
 	return json, nil
 }
 
-func sendFile(method, token, name, path string, params url.Values) ([]byte, error) {
+func sendFile(method, token, name, path string, params map[string]string) ([]byte, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return []byte{}, err
@@ -50,10 +53,8 @@ func sendFile(method, token, name, path string, params url.Values) ([]byte, erro
 		return []byte{}, err
 	}
 
-	for field, values := range params {
-		if len(values) > 0 {
-			writer.WriteField(field, values[0])
-		}
+	for field, value := range params {
+		writer.WriteField(field, value)
 	}
 
 	if err = writer.Close(); err != nil {
@@ -86,37 +87,42 @@ func sendFile(method, token, name, path string, params url.Values) ([]byte, erro
 	return json, nil
 }
 
-func embedSendOptions(params *url.Values, options *SendOptions) {
-	if params == nil || options == nil {
+func embedSendOptions(params map[string]string, options *SendOptions) {
+	if options == nil {
 		return
 	}
 
 	if options.ReplyTo.ID != 0 {
-		params.Set("reply_to_message_id", strconv.Itoa(options.ReplyTo.ID))
+		params["reply_to_message_id"] = strconv.Itoa(options.ReplyTo.ID)
 	}
 
 	if options.DisableWebPagePreview {
-		params.Set("disable_web_page_preview", "true")
+		params["disable_web_page_preview"] = "true"
+	}
+
+	if options.DisableNotification {
+		params["disable_notification"] = "true"
 	}
 
 	if options.ParseMode != ModeDefault {
-		params.Set("parse_mode", string(options.ParseMode))
+		params["parse_mode"] = string(options.ParseMode)
 	}
 
 	// Processing force_reply:
 	{
 		forceReply := options.ReplyMarkup.ForceReply
 		customKeyboard := (options.ReplyMarkup.CustomKeyboard != nil)
+		inlineKeyboard := options.ReplyMarkup.InlineKeyboard != nil
 		hiddenKeyboard := options.ReplyMarkup.HideCustomKeyboard
-		if forceReply || customKeyboard || hiddenKeyboard {
+		if forceReply || customKeyboard || hiddenKeyboard || inlineKeyboard {
 			replyMarkup, _ := json.Marshal(options.ReplyMarkup)
-			params.Set("reply_markup", string(replyMarkup))
+			params["reply_markup"] = string(replyMarkup)
 		}
 	}
 }
 
 func getMe(token string) (User, error) {
-	meJSON, err := sendCommand("getMe", token, url.Values{})
+	meJSON, err := sendCommand("getMe", token, nil)
 	if err != nil {
 		return User{}, err
 	}
@@ -139,10 +145,11 @@ func getMe(token string) (User, error) {
 	return User{}, fmt.Errorf("telebot: %s", botInfo.Description)
 }
 
-func getUpdates(token string, offset, timeout int) (upd []Update, err error) {
-	params := url.Values{}
-	params.Set("offset", strconv.Itoa(offset))
-	params.Set("timeout", strconv.Itoa(timeout))
+func getUpdates(token string, offset, timeout int64) (upd []Update, err error) {
+	params := map[string]string{
+		"offset":  strconv.FormatInt(offset, 10),
+		"timeout": strconv.FormatInt(timeout, 10),
+	}
 	updatesJSON, err := sendCommand("getUpdates", token, params)
 	if err != nil {
 		return
