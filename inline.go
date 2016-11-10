@@ -95,8 +95,8 @@ func (results *InlineQueryResults) MarshalJSON() ([]byte, error) {
 			result.SetID(strconv.FormatUint(hash, 16))
 		}
 
-		if err := infereIQR(result); err != nil {
-			return nil, fmt.Errorf("telebot: can't infere type of IQR #%d: %s",
+		if err := inferIQR(result); err != nil {
+			return nil, fmt.Errorf("telebot: can't infer type of IQR #%d: %s",
 				i, err)
 		}
 	}
@@ -104,7 +104,7 @@ func (results *InlineQueryResults) MarshalJSON() ([]byte, error) {
 	return json.Marshal([]InlineQueryResult(*results))
 }
 
-func infereIQR(result InlineQueryResult) error {
+func inferIQR(result InlineQueryResult) error {
 	switch r := result.(type) {
 	case *InlineQueryResultArticle:
 		r.Type = "article"
