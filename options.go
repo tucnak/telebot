@@ -1,15 +1,5 @@
 package telebot
 
-// ParseMode determines the way client applications treat the text of the message
-type ParseMode string
-
-// Supported ParseMode
-const (
-	ModeDefault  ParseMode = ""
-	ModeMarkdown ParseMode = "Markdown"
-	ModeHTML     ParseMode = "HTML"
-)
-
 // SendOptions represents a set of custom options that could
 // be appled to messages sent.
 type SendOptions struct {

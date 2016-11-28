@@ -145,10 +145,10 @@ func getMe(token string) (User, error) {
 	return User{}, fmt.Errorf("telebot: %s", botInfo.Description)
 }
 
-func getUpdates(token string, offset, timeout int) (upd []Update, err error) {
+func getUpdates(token string, offset, timeout int64) (upd []Update, err error) {
 	params := map[string]string{
-		"offset":  strconv.Itoa(offset),
-		"timeout": strconv.Itoa(timeout),
+		"offset":  strconv.FormatInt(offset, 10),
+		"timeout": strconv.FormatInt(timeout, 10),
 	}
 	updatesJSON, err := sendCommand("getUpdates", token, params)
 	if err != nil {

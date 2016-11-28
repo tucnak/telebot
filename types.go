@@ -26,13 +26,17 @@ func (u User) Destination() string {
 }
 
 // Chat object represents a Telegram user, bot or group chat.
-// Title for channels and group chats
+//
 // Type of chat, can be either “private”, “group”, "supergroup" or “channel”
 type Chat struct {
-	ID   int64  `json:"id"`
-	Type string `json:"type"`
+	ID int64 `json:"id"`
 
-	Title     string `json:"title"`
+	// See telebot.ChatType and consts.
+	Type ChatType `json:"type"`
+
+	// Won't be there for ChatPrivate.
+	Title string `json:"title"`
+
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Username  string `json:"username"`
@@ -54,7 +58,7 @@ func (c Chat) IsGroupChat() bool {
 
 // Update object represents an incoming update.
 type Update struct {
-	ID      int      `json:"update_id"`
+	ID      int64    `json:"update_id"`
 	Payload *Message `json:"message"`
 
 	// optional
@@ -86,7 +90,16 @@ type Audio struct {
 	// Duration of the recording in seconds as defined by sender.
 	Duration int `json:"duration"`
 
-	// MIME type of the file as defined by sender.
+	// FileSize (optional) of the audio file.
+	FileSize int `json:"file_size"`
+
+	// Title (optional) as defined by sender or by audio tags.
+	Title string `json:"title"`
+
+	// Performer (optional) is defined by sender or by audio tags.
+	Performer string `json:"performer"`
+
+	// MIME type (optional) of the file as defined by sender.
 	Mime string `json:"mime_type"`
 }
 
@@ -138,10 +151,11 @@ type KeyboardButton struct {
 	InlineQuery string `json:"switch_inline_query,omitempty"`
 }
 
-// InlineKeyboardMarkup represents an inline keyboard that appears right next
-// to the message it belongs to.
+// InlineKeyboardMarkup represents an inline keyboard that appears
+// right next to the message it belongs to.
 type InlineKeyboardMarkup struct {
-	// Array of button rows, each represented by an Array of KeyboardButton objects.
+	// Array of button rows, each represented by
+	// an Array of KeyboardButton objects.
 	InlineKeyboard [][]KeyboardButton `json:"inline_keyboard,omitempty"`
 }
 
@@ -155,8 +169,8 @@ type Contact struct {
 
 // Location object represents geographic position.
 type Location struct {
-	Longitude float32 `json:"longitude"`
 	Latitude  float32 `json:"latitude"`
+	Longitude float32 `json:"longitude"`
 }
 
 // Callback object represents a query from a callback button in an
@@ -174,13 +188,76 @@ type Callback struct {
 	// MessageID will be set if the button was attached to a message
 	// sent via the bot in inline mode.
 	MessageID string `json:"inline_message_id"`
-	Data      string `json:"data"`
+
+	// Data associated with the callback button. Be aware that
+	// a bad client can send arbitrary data in this field.
+	Data string `json:"data"`
 }
 
-// Venue object represents a venue location with name, address and optional foursquare id.
+// CallbackResponse builds a response to a Callback query.
+//
+// See also: https://core.telegram.org/bots/api#answerCallbackQuery
+type CallbackResponse struct {
+	// The ID of the callback to which this is a response.
+	// It is not necessary to specify this field manually.
+	CallbackID string `json:"callback_query_id"`
+
+	// Text of the notification. If not specified, nothing will be shown to the user.
+	Text string `json:"text,omitempty"`
+
+	// (Optional) If true, an alert will be shown by the client instead
+	// of a notification at the top of the chat screen. Defaults to false.
+	ShowAlert bool `json:"show_alert,omitempty"`
+
+	// (Optional) URL that will be opened by the user's client.
+	// If you have created a Game and accepted the conditions via @Botfather
+	// specify the URL that opens your game
+	// note that this will only work if the query comes from a callback_game button.
+	// Otherwise, you may use links like telegram.me/your_bot?start=XXXX that open your bot with a parameter.
+	URL string `json:"url,omitempty"`
+}
+
+// Venue object represents a venue location with name, address and
+// optional foursquare ID.
 type Venue struct {
-	Location      Location `json:"location"`
-	Title         string   `json:"title"`
-	Address       string   `json:"address"`
-	Foursquare_id string   `json:"foursquare_id",omitempty`
+	Location     Location `json:"location"`
+	Title        string   `json:"title"`
+	Address      string   `json:"address"`
+	FoursquareID string   `json:"foursquare_id,omitempty"`
+}
+
+// MessageEntity object represents "special" parts of text messages,
+// including hashtags, usernames, URLs, etc.
+type MessageEntity struct {
+	// Specifies entity type.
+	Type EntityType `json:"type"`
+
+	// Offset in UTF-16 code units to the start of the entity.
+	Offset int `json:"offset"`
+
+	// Length of the entity in UTF-16 code units.
+	Length int `json:"length"`
+
+	// (Optional) For EntityTextLink entity type only.
+	//
+	// URL will be opened after user taps on the text.
+	URL string `json:"url,omitempty"`
+
+	// (Optional) For EntityTMention entity type only.
+	User User `json:"user,omitempty"`
+}
+
+// ChatMember object represents information about a single chat member.
+type ChatMember struct {
+	User   User   `json:"user"`
+	Status string `json:"status"`
+}
+
+// UserProfilePhotos object represent a user's profile pictures.
+type UserProfilePhotos struct {
+	// Total number of profile pictures the target user has.
+	Count int `json:"total_count"`
+
+	// Requested profile pictures (in up to 4 sizes each).
+	Photos [][]Photo `json:"photos"`
 }

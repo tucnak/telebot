@@ -128,6 +128,10 @@ type Message struct {
 	//
 	// Sender would lead to creator of the migration.
 	MigrateFrom int64 `json:"migrate_from_chat_id"`
+
+	Entities []MessageEntity `json:"entities,omitempty"`
+
+	Caption string `json:"caption,omitempty"`
 }
 
 // Origin returns an origin of message: group chat / personal.
