@@ -152,6 +152,40 @@ func (b *Bot) ForwardMessage(recipient Recipient, message Message) error {
 	return nil
 }
 
+// EditMessage sends a text message to recipient.
+func (b *Bot) EditMessageText(message Message, text string, options *SendOptions) error {
+	params := map[string]string{
+		"chat_id":    strconv.FormatInt(message.Chat.ID, 10),
+		"message_id": strconv.Itoa(message.ID),
+		"text":       text,
+	}
+
+	if options != nil {
+		embedSendOptions(params, options)
+	}
+
+	responseJSON, err := sendCommand("editMessageText", b.Token, params)
+	if err != nil {
+		return err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Description string
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return err
+	}
+
+	if !responseRecieved.Ok {
+		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+	}
+
+	return nil
+}
+
 // SendPhoto sends a photo object to recipient.
 //
 // On success, photo object would be aliased to its copy on
