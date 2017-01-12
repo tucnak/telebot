@@ -90,7 +90,7 @@ func (b *Bot) poll(
 }
 
 // SendMessage sends a text message to recipient.
-func (b *Bot) SendMessage(recipient Recipient, message string, options *SendOptions) error {
+func (b *Bot) SendMessage(recipient Recipient, message string, options *SendOptions) (*Message, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 		"text":    message,
@@ -102,24 +102,25 @@ func (b *Bot) SendMessage(recipient Recipient, message string, options *SendOpti
 
 	responseJSON, err := sendCommand("sendMessage", b.Token, params)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var responseRecieved struct {
 		Ok          bool
+		Result      Message
 		Description string
 	}
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if !responseRecieved.Ok {
-		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+		return nil, fmt.Errorf("telebot: %s", responseRecieved.Description)
 	}
 
-	return nil
+	return &responseRecieved.Result, nil
 }
 
 // ForwardMessage forwards a message to recipient.
@@ -158,7 +159,7 @@ func (b *Bot) ForwardMessage(recipient Recipient, message Message) error {
 // the Telegram servers, so sending the same photo object
 // again, won't issue a new upload, but would make a use
 // of existing file on Telegram servers.
-func (b *Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions) error {
+func (b *Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions) (*Message, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 		"caption": photo.Caption,
@@ -180,7 +181,7 @@ func (b *Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions)
 	}
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var responseRecieved struct {
@@ -191,11 +192,11 @@ func (b *Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions)
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if !responseRecieved.Ok {
-		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+		return nil, fmt.Errorf("telebot: %s", responseRecieved.Description)
 	}
 
 	thumbnails := &responseRecieved.Result.Photo
@@ -203,7 +204,7 @@ func (b *Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions)
 	photo.File = (*thumbnails)[len(*thumbnails)-1].File
 	photo.filename = filename
 
-	return nil
+	return &responseRecieved.Result, nil
 }
 
 // SendAudio sends an audio object to recipient.
@@ -846,4 +847,251 @@ func (b *Bot) GetFileDirectURL(fileID string) (string, error) {
 		return "", err
 	}
 	return "https://api.telegram.org/file/bot" + b.Token + "/" + f.FilePath, nil
+}
+
+// EditMessageText used to edit already sent message with known recepient and message id.
+//
+// On success, returns edited message object
+func (b *Bot) EditMessageText(recipient Recipient, messageID int, message string, inlineKeyboard *InlineKeyboardMarkup) (*Message, error) {
+	params := map[string]string{
+		"chat_id":    recipient.Destination(),
+		"message_id": strconv.Itoa(messageID),
+		"text":       message,
+	}
+
+	if inlineKeyboard != nil {
+		embedSendOptions(params, &SendOptions{
+			ReplyMarkup: ReplyMarkup{
+				InlineKeyboard: inlineKeyboard.InlineKeyboard,
+			},
+		})
+	}
+
+	responseJSON, err := sendCommand("editMessageText", b.Token, params)
+	if err != nil {
+		return nil, err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Description string
+		Message     Message `json:"result"`
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return nil, err
+	}
+
+	if !responseRecieved.Ok {
+		return nil, fmt.Errorf("telebot: %s", responseRecieved.Description)
+	}
+
+	return &responseRecieved.Message, err
+
+}
+
+// EditInlineMessageText used to edit already sent inline message with known inline message id.
+//
+// On success, returns edited message object
+func (b *Bot) EditInlineMessageText(messageID string, message string, inlineKeyboard *InlineKeyboardMarkup) (*Message, error) {
+	params := map[string]string{
+		"inline_message_id": messageID,
+		"text":              message,
+	}
+
+	if inlineKeyboard != nil {
+		embedSendOptions(params, &SendOptions{
+			ReplyMarkup: ReplyMarkup{
+				InlineKeyboard: inlineKeyboard.InlineKeyboard,
+			},
+		})
+	}
+
+	responseJSON, err := sendCommand("editMessageText", b.Token, params)
+	if err != nil {
+		return nil, err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Description string
+		Message     Message `json:"result"`
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return nil, err
+	}
+
+	if !responseRecieved.Ok {
+		return nil, fmt.Errorf("telebot: %s", responseRecieved.Description)
+	}
+
+	return &responseRecieved.Message, err
+
+}
+
+// EditMessageCaption used to edit already sent photo caption with known recepient and message id.
+//
+// On success, returns edited message object
+func (b *Bot) EditMessageCaption(recipient Recipient, messageID int, caption string, inlineKeyboard *InlineKeyboardMarkup) (*Message, error) {
+	params := map[string]string{
+		"chat_id":    recipient.Destination(),
+		"message_id": strconv.Itoa(messageID),
+		"caption":    caption,
+	}
+
+	if inlineKeyboard != nil {
+		embedSendOptions(params, &SendOptions{
+			ReplyMarkup: ReplyMarkup{
+				InlineKeyboard: inlineKeyboard.InlineKeyboard,
+			},
+		})
+	}
+
+	responseJSON, err := sendCommand("editMessageCaption", b.Token, params)
+	if err != nil {
+		return nil, err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Description string
+		Message     Message `json:"result"`
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return nil, err
+	}
+
+	if !responseRecieved.Ok {
+		return nil, fmt.Errorf("telebot: %s", responseRecieved.Description)
+	}
+
+	return &responseRecieved.Message, err
+
+}
+
+// EditInlineMessageCaption used to edit already sent photo caption with known inline message id.
+//
+// On success, returns edited message object
+func (b *Bot) EditInlineMessageCaption(messageID string, caption string, inlineKeyboard *InlineKeyboardMarkup) (*Message, error) {
+	params := map[string]string{
+		"inline_message_id": messageID,
+		"caption":           caption,
+	}
+
+	if inlineKeyboard != nil {
+		embedSendOptions(params, &SendOptions{
+			ReplyMarkup: ReplyMarkup{
+				InlineKeyboard: inlineKeyboard.InlineKeyboard,
+			},
+		})
+	}
+
+	responseJSON, err := sendCommand("editMessageCaption", b.Token, params)
+	if err != nil {
+		return nil, err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Description string
+		Message     Message `json:"result"`
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return nil, err
+	}
+
+	if !responseRecieved.Ok {
+		return nil, fmt.Errorf("telebot: %s", responseRecieved.Description)
+	}
+
+	return &responseRecieved.Message, err
+
+}
+
+// EditMessageReplyMarkup used to edit already sent message inline keyboard markup with known recepient and message id.
+//
+// On success, returns edited message object
+func (b *Bot) EditMessageReplyMarkup(recipient Recipient, messageID int, inlineKeyboard *InlineKeyboardMarkup) (*Message, error) {
+	params := map[string]string{
+		"chat_id":    recipient.Destination(),
+		"message_id": strconv.Itoa(messageID),
+	}
+
+	if inlineKeyboard != nil {
+		embedSendOptions(params, &SendOptions{
+			ReplyMarkup: ReplyMarkup{
+				InlineKeyboard: inlineKeyboard.InlineKeyboard,
+			},
+		})
+	}
+
+	responseJSON, err := sendCommand("editMessageReplyMarkup", b.Token, params)
+	if err != nil {
+		return nil, err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Description string
+		Message     Message `json:"result"`
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return nil, err
+	}
+
+	if !responseRecieved.Ok {
+		return nil, fmt.Errorf("telebot: %s", responseRecieved.Description)
+	}
+
+	return &responseRecieved.Message, err
+
+}
+
+// EditInlineMessageReplyMarkup used to edit already sent message inline keyboard markup with known inline message id.
+//
+// On success, returns edited message object
+func (b *Bot) EditInlineMessageReplyMarkup(messageID string, caption string, inlineKeyboard *InlineKeyboardMarkup) (*Message, error) {
+	params := map[string]string{
+		"inline_message_id": messageID,
+	}
+
+	if inlineKeyboard != nil {
+		embedSendOptions(params, &SendOptions{
+			ReplyMarkup: ReplyMarkup{
+				InlineKeyboard: inlineKeyboard.InlineKeyboard,
+			},
+		})
+	}
+
+	responseJSON, err := sendCommand("editMessageReplyMarkup", b.Token, params)
+	if err != nil {
+		return nil, err
+	}
+
+	var responseRecieved struct {
+		Ok          bool
+		Description string
+		Message     Message `json:"result"`
+	}
+
+	err = json.Unmarshal(responseJSON, &responseRecieved)
+	if err != nil {
+		return nil, err
+	}
+
+	if !responseRecieved.Ok {
+		return nil, fmt.Errorf("telebot: %s", responseRecieved.Description)
+	}
+
+	return &responseRecieved.Message, err
+
 }
