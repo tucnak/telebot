@@ -852,19 +852,15 @@ func (b *Bot) GetFileDirectURL(fileID string) (string, error) {
 // EditMessageText used to edit already sent message with known recepient and message id.
 //
 // On success, returns edited message object
-func (b *Bot) EditMessageText(recipient Recipient, messageID int, message string, inlineKeyboard *InlineKeyboardMarkup) (*Message, error) {
+func (b *Bot) EditMessageText(recipient Recipient, messageID int, message string, sendOptions *SendOptions) (*Message, error) {
 	params := map[string]string{
 		"chat_id":    recipient.Destination(),
 		"message_id": strconv.Itoa(messageID),
 		"text":       message,
 	}
 
-	if inlineKeyboard != nil {
-		embedSendOptions(params, &SendOptions{
-			ReplyMarkup: ReplyMarkup{
-				InlineKeyboard: inlineKeyboard.InlineKeyboard,
-			},
-		})
+	if sendOptions != nil {
+		embedSendOptions(params, sendOptions)
 	}
 
 	responseJSON, err := sendCommand("editMessageText", b.Token, params)
@@ -894,18 +890,14 @@ func (b *Bot) EditMessageText(recipient Recipient, messageID int, message string
 // EditInlineMessageText used to edit already sent inline message with known inline message id.
 //
 // On success, returns edited message object
-func (b *Bot) EditInlineMessageText(messageID string, message string, inlineKeyboard *InlineKeyboardMarkup) (*Message, error) {
+func (b *Bot) EditInlineMessageText(messageID string, message string, sendOptions *SendOptions) (*Message, error) {
 	params := map[string]string{
 		"inline_message_id": messageID,
 		"text":              message,
 	}
 
-	if inlineKeyboard != nil {
-		embedSendOptions(params, &SendOptions{
-			ReplyMarkup: ReplyMarkup{
-				InlineKeyboard: inlineKeyboard.InlineKeyboard,
-			},
-		})
+	if sendOptions != nil {
+		embedSendOptions(params, sendOptions)
 	}
 
 	responseJSON, err := sendCommand("editMessageText", b.Token, params)
