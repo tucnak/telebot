@@ -131,7 +131,7 @@ type Sticker struct {
 
 // Video object represents an MP4-encoded video.
 type Video struct {
-	Audio
+	File
 
 	Width  int `json:"width"`
 	Height int `json:"height"`
