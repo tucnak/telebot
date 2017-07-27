@@ -114,7 +114,8 @@ func embedSendOptions(params map[string]string, options *SendOptions) {
 		customKeyboard := (options.ReplyMarkup.CustomKeyboard != nil)
 		inlineKeyboard := options.ReplyMarkup.InlineKeyboard != nil
 		hiddenKeyboard := options.ReplyMarkup.HideCustomKeyboard
-		if forceReply || customKeyboard || hiddenKeyboard || inlineKeyboard {
+		removeKeyboard := options.ReplyMarkup.RemoveCustomKeyboard
+		if forceReply || customKeyboard || hiddenKeyboard || inlineKeyboard || removeKeyboard {
 			replyMarkup, _ := json.Marshal(options.ReplyMarkup)
 			params["reply_markup"] = string(replyMarkup)
 		}
