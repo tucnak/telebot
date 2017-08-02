@@ -1,6 +1,8 @@
 package telebot
 
 import (
+	"encoding/json"
+	"fmt"
 	"hash/fnv"
 	"strconv"
 
@@ -41,7 +43,7 @@ type QueryResponse struct {
 	QueryID string `json:"inline_query_id"`
 
 	// The results for the inline query.
-	Results []InlineQueryResult `json:"results"`
+	Results InlineQueryResults `json:"results"`
 
 	// (Optional) The maximum amount of time in seconds that the result
 	// of the inline query may be cached on the server.
@@ -70,18 +72,67 @@ type QueryResponse struct {
 
 // InlineQueryResult represents one result of an inline query.
 type InlineQueryResult interface {
-	MarshalJSON() ([]byte, error)
-	id() (string, error)
+	GetID() string
+	SetID(string)
 }
 
-// hashInlineQueryResult calculates the 64-bit FNV-1 hash of an
-// inline query result.
-func hashInlineQueryResult(result InlineQueryResult) (string, error) {
-	hash, err := hashstructure.Hash(result, inlineQueryHashOptions)
-	if err != nil {
-		return "", err
+// InlineQueryResults is a slice wrapper for convenient marshalling.
+type InlineQueryResults []InlineQueryResult
+
+// MarshalJSON makes sure IQRs have proper IDs and Type variables set.
+//
+// If ID of some result appears empty, it gets set to a new hash.
+// JSON-specific Type gets infered from the actual (specific) IQR type.
+func (results *InlineQueryResults) MarshalJSON() ([]byte, error) {
+	for i, result := range *results {
+		if result.GetID() == "" {
+			hash, err := hashstructure.Hash(result, inlineQueryHashOptions)
+			if err != nil {
+				return nil, fmt.Errorf("telebot: can't hash IQR #%d: %s",
+					i, err)
+			}
+
+			result.SetID(strconv.FormatUint(hash, 16))
+		}
+
+		if err := inferIQR(result); err != nil {
+			return nil, fmt.Errorf("telebot: can't infer type of IQR #%d: %s",
+				i, err)
+		}
 	}
-	return strconv.FormatUint(hash, 16), nil
+
+	return json.Marshal([]InlineQueryResult(*results))
+}
+
+func inferIQR(result InlineQueryResult) error {
+	switch r := result.(type) {
+	case *InlineQueryResultArticle:
+		r.Type = "article"
+	case *InlineQueryResultAudio:
+		r.Type = "audio"
+	case *InlineQueryResultContact:
+		r.Type = "contact"
+	case *InlineQueryResultDocument:
+		r.Type = "document"
+	case *InlineQueryResultGif:
+		r.Type = "gif"
+	case *InlineQueryResultLocation:
+		r.Type = "location"
+	case *InlineQueryResultMpeg4Gif:
+		r.Type = "mpeg4_gif"
+	case *InlineQueryResultPhoto:
+		r.Type = "photo"
+	case *InlineQueryResultVenue:
+		r.Type = "venue"
+	case *InlineQueryResultVideo:
+		r.Type = "video"
+	case *InlineQueryResultVoice:
+		r.Type = "voice"
+	default:
+		return fmt.Errorf("%T is not an IQR", result)
+	}
+
+	return nil
 }
 
 // Result is a deprecated type, superseded by InlineQueryResult.

@@ -1,16 +1,30 @@
 package telebot
 
-import (
-	"encoding/json"
-)
-
-// InlineQueryResultArticle represents a link to an article or web page.
-// See also: https://core.telegram.org/bots/api#inlinequeryresultarticle
-type InlineQueryResultArticle struct {
+// InlineQueryResultBase must be embedded into all IQRs.
+type InlineQueryResultBase struct {
 	// Unique identifier for this result, 1-64 Bytes.
 	// If left unspecified, a 64-bit FNV-1 hash will be calculated
 	// from the other fields and used automatically.
 	ID string `json:"id",hash:"ignore"`
+
+	// Ignore. This field gets set automatically.
+	Type string `json:"type",hash:"ignore"`
+}
+
+// GetID is part of IQRBase's implementation of IQR interface.
+func (result *InlineQueryResultBase) GetID() string {
+	return result.ID
+}
+
+// SetID is part of IQRBase's implementation of IQR interface.
+func (result *InlineQueryResultBase) SetID(id string) {
+	result.ID = id
+}
+
+// InlineQueryResultArticle represents a link to an article or web page.
+// See also: https://core.telegram.org/bots/api#inlinequeryresultarticle
+type InlineQueryResultArticle struct {
+	InlineQueryResultBase
 
 	// Title of the result.
 	Title string `json:"title"`
@@ -44,39 +58,9 @@ type InlineQueryResultArticle struct {
 	ThumbHeight int `json:"thumb_height,omitempty"`
 }
 
-func (r *InlineQueryResultArticle) MarshalJSON() ([]byte, error) {
-	// avoiding endless self-recursion
-	type wrapper InlineQueryResultArticle
-
-	id, err := r.id()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(struct {
-		wrapper
-		Type string `json:"type"`
-		ID   string `json:"id",hash:"ignore"`
-	}{
-		wrapper: wrapper(*r),
-		ID:      id,
-		Type:    "article",
-	})
-}
-
-func (r *InlineQueryResultArticle) id() (string, error) {
-	if r.ID == "" {
-		return hashInlineQueryResult(r)
-	}
-
-	return r.ID, nil
-}
-
 // InlineQueryResultAudio represents a link to an mp3 audio file.
 type InlineQueryResultAudio struct {
-	// Unique identifier for this result, 1-64 Bytes.
-	// If left unspecified, a 64-bit FNV-1 hash will be calculated
-	// from the other fields and used automatically.
-	ID string `json:"id",hash:"ignore"`
+	InlineQueryResultBase
 
 	// A valid URL for the audio file.
 	AudioURL string `json:"audio_url"`
@@ -97,41 +81,10 @@ type InlineQueryResultAudio struct {
 	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (r *InlineQueryResultAudio) MarshalJSON() ([]byte, error) {
-	// avoiding endless self-recursion
-	type wrapper InlineQueryResultAudio
-
-	id, err := r.id()
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(struct {
-		wrapper
-		Type string `json:"type"`
-		ID   string `json:"id",hash:"ignore"`
-	}{
-		wrapper: wrapper(*r),
-		ID:      id,
-		Type:    "audio",
-	})
-}
-
-func (r *InlineQueryResultAudio) id() (string, error) {
-	if r.ID == "" {
-		return hashInlineQueryResult(r)
-	}
-
-	return r.ID, nil
-}
-
 // InlineQueryResultContact represents a contact with a phone number.
 // See also: https://core.telegram.org/bots/api#inlinequeryresultcontact
 type InlineQueryResultContact struct {
-	// Unique identifier for this result, 1-64 Bytes.
-	// If left unspecified, a 64-bit FNV-1 hash will be calculated
-	// from the other fields and used automatically.
-	ID string `json:"id",hash:"ignore"`
+	InlineQueryResultBase
 
 	// Contact's phone number.
 	PhoneNumber string `json:"phone_number"`
@@ -158,41 +111,10 @@ type InlineQueryResultContact struct {
 	ThumbHeight int `json:"thumb_height,omitempty"`
 }
 
-func (r *InlineQueryResultContact) MarshalJSON() ([]byte, error) {
-	// avoiding endless self-recursion
-	type wrapper InlineQueryResultContact
-
-	id, err := r.id()
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(struct {
-		wrapper
-		Type string `json:"type"`
-		ID   string `json:"id",hash:"ignore"`
-	}{
-		wrapper: wrapper(*r),
-		ID:      id,
-		Type:    "contact",
-	})
-}
-
-func (r *InlineQueryResultContact) id() (string, error) {
-	if r.ID == "" {
-		return hashInlineQueryResult(r)
-	}
-
-	return r.ID, nil
-}
-
 // InlineQueryResultDocument represents a link to a file.
 // See also: https://core.telegram.org/bots/api#inlinequeryresultdocument
 type InlineQueryResultDocument struct {
-	// Unique identifier for this result, 1-64 Bytes.
-	// If left unspecified, a 64-bit FNV-1 hash will be calculated
-	// from the other fields and used automatically.
-	ID string `json:"id",hash:"ignore"`
+	InlineQueryResultBase
 
 	// Title for the result.
 	Title string `json:"title"`
@@ -226,41 +148,10 @@ type InlineQueryResultDocument struct {
 	ThumbHeight int `json:"thumb_height,omitempty"`
 }
 
-func (r *InlineQueryResultDocument) MarshalJSON() ([]byte, error) {
-	// avoiding endless self-recursion
-	type wrapper InlineQueryResultDocument
-
-	id, err := r.id()
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(struct {
-		wrapper
-		Type string `json:"type"`
-		ID   string `json:"id",hash:"ignore"`
-	}{
-		wrapper: wrapper(*r),
-		ID:      id,
-		Type:    "document",
-	})
-}
-
-func (r *InlineQueryResultDocument) id() (string, error) {
-	if r.ID == "" {
-		return hashInlineQueryResult(r)
-	}
-
-	return r.ID, nil
-}
-
 // InlineQueryResultGif represents a link to an animated GIF file.
 // See also: https://core.telegram.org/bots/api#inlinequeryresultgif
 type InlineQueryResultGif struct {
-	// Unique identifier for this result, 1-64 Bytes.
-	// If left unspecified, a 64-bit FNV-1 hash will be calculated
-	// from the other fields and used automatically.
-	ID string `json:"id",hash:"ignore"`
+	InlineQueryResultBase
 
 	// A valid URL for the GIF file. File size must not exceed 1MB.
 	GifURL string `json:"gif_url"`
@@ -287,42 +178,10 @@ type InlineQueryResultGif struct {
 	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (r *InlineQueryResultGif) MarshalJSON() ([]byte, error) {
-	// avoiding endless self-recursion
-	type wrapper InlineQueryResultGif
-
-	id, err := r.id()
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(struct {
-		wrapper
-		Type string `json:"type"`
-		ID   string `json:"id",hash:"ignore"`
-	}{
-		wrapper: wrapper(*r),
-		ID:      id,
-		Type:    "gif",
-	})
-}
-
-func (r *InlineQueryResultGif) id() (string, error) {
-	if r.ID == "" {
-		return hashInlineQueryResult(r)
-	}
-
-	return r.ID, nil
-}
-
 // InlineQueryResultLocation represents a location on a map.
 // See also: https://core.telegram.org/bots/api#inlinequeryresultlocation
 type InlineQueryResultLocation struct {
-
-	// Unique identifier for this result, 1-64 Bytes.
-	// If left unspecified, a 64-bit FNV-1 hash will be calculated
-	// from the other fields and used automatically.
-	ID string `json:"id",hash:"ignore"`
+	InlineQueryResultBase
 
 	// Latitude of the location in degrees.
 	Latitude float32 `json:"latitude"`
@@ -349,42 +208,11 @@ type InlineQueryResultLocation struct {
 	ThumbHeight int `json:"thumb_height,omitempty"`
 }
 
-func (r *InlineQueryResultLocation) MarshalJSON() ([]byte, error) {
-	// avoiding endless self-recursion
-	type wrapper InlineQueryResultLocation
-
-	id, err := r.id()
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(struct {
-		wrapper
-		Type string `json:"type"`
-		ID   string `json:"id",hash:"ignore"`
-	}{
-		wrapper: wrapper(*r),
-		ID:      id,
-		Type:    "location",
-	})
-}
-
-func (r *InlineQueryResultLocation) id() (string, error) {
-	if r.ID == "" {
-		return hashInlineQueryResult(r)
-	}
-
-	return r.ID, nil
-}
-
 // InlineQueryResultMpeg4Gif represents a link to a video animation
 // (H.264/MPEG-4 AVC video without sound).
 // See also: https://core.telegram.org/bots/api#inlinequeryresultmpeg4gif
 type InlineQueryResultMpeg4Gif struct {
-	// Unique identifier for this result, 1-64 Bytes.
-	// If left unspecified, a 64-bit FNV-1 hash will be calculated
-	// from the other fields and used automatically.
-	ID string `json:"id",hash:"ignore"`
+	InlineQueryResultBase
 
 	// A valid URL for the MP4 file.
 	URL string `json:"mpeg4_url"`
@@ -411,41 +239,10 @@ type InlineQueryResultMpeg4Gif struct {
 	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (r *InlineQueryResultMpeg4Gif) MarshalJSON() ([]byte, error) {
-	// avoiding endless self-recursion
-	type wrapper InlineQueryResultMpeg4Gif
-
-	id, err := r.id()
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(struct {
-		wrapper
-		Type string `json:"type"`
-		ID   string `json:"id",hash:"ignore"`
-	}{
-		wrapper: wrapper(*r),
-		ID:      id,
-		Type:    "mpeg4_gif",
-	})
-}
-
-func (r *InlineQueryResultMpeg4Gif) id() (string, error) {
-	if r.ID == "" {
-		return hashInlineQueryResult(r)
-	}
-
-	return r.ID, nil
-}
-
 // InlineQueryResultPhoto represents a link to a photo.
 // See also: https://core.telegram.org/bots/api#inlinequeryresultphoto
 type InlineQueryResultPhoto struct {
-	// Unique identifier for this result, 1-64 Bytes.
-	// If left unspecified, a 64-bit FNV-1 hash will be calculated
-	// from the other fields and used automatically.
-	ID string `json:"id",hash:"ignore"`
+	InlineQueryResultBase
 
 	// A valid URL of the photo. Photo must be in jpeg format.
 	// Photo size must not exceed 5MB.
@@ -476,41 +273,10 @@ type InlineQueryResultPhoto struct {
 	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (r *InlineQueryResultPhoto) MarshalJSON() ([]byte, error) {
-	// avoiding endless self-recursion
-	type wrapper InlineQueryResultPhoto
-
-	id, err := r.id()
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(struct {
-		wrapper
-		Type string `json:"type"`
-		ID   string `json:"id",hash:"ignore"`
-	}{
-		wrapper: wrapper(*r),
-		ID:      id,
-		Type:    "photo",
-	})
-}
-
-func (r *InlineQueryResultPhoto) id() (string, error) {
-	if r.ID == "" {
-		return hashInlineQueryResult(r)
-	}
-
-	return r.ID, nil
-}
-
 // InlineQueryResultVenue represents a venue.
 // See also: https://core.telegram.org/bots/api#inlinequeryresultvenue
 type InlineQueryResultVenue struct {
-	// Unique identifier for this result, 1-64 Bytes.
-	// If left unspecified, a 64-bit FNV-1 hash will be calculated
-	// from the other fields and used automatically.
-	ID string `json:"id",hash:"ignore"`
+	InlineQueryResultBase
 
 	// Latitude of the venue location in degrees.
 	Latitude float32 `json:"latitude"`
@@ -543,42 +309,11 @@ type InlineQueryResultVenue struct {
 	ThumbHeight int `json:"thumb_height,omitempty"`
 }
 
-func (r *InlineQueryResultVenue) MarshalJSON() ([]byte, error) {
-	// avoiding endless self-recursion
-	type wrapper InlineQueryResultVenue
-
-	id, err := r.id()
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(struct {
-		wrapper
-		Type string `json:"type"`
-		ID   string `json:"id",hash:"ignore"`
-	}{
-		wrapper: wrapper(*r),
-		ID:      id,
-		Type:    "venue",
-	})
-}
-
-func (r *InlineQueryResultVenue) id() (string, error) {
-	if r.ID == "" {
-		return hashInlineQueryResult(r)
-	}
-
-	return r.ID, nil
-}
-
 // InlineQueryResultVideo represents a link to a page containing an embedded
 // video player or a video file.
 // See also: https://core.telegram.org/bots/api#inlinequeryresultvideo
 type InlineQueryResultVideo struct {
-	// Unique identifier for this result, 1-64 Bytes.
-	// If left unspecified, a 64-bit FNV-1 hash will be calculated
-	// from the other fields and used automatically.
-	ID string `json:"id",hash:"ignore"`
+	InlineQueryResultBase
 
 	// A valid URL for the embedded video player or video file.
 	VideoURL string `json:"video_url"`
@@ -614,43 +349,11 @@ type InlineQueryResultVideo struct {
 	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (r *InlineQueryResultVideo) MarshalJSON() ([]byte, error) {
-	// avoiding endless self-recursion
-	type wrapper InlineQueryResultVideo
-
-	id, err := r.id()
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(struct {
-		wrapper
-		Type string `json:"type"`
-		ID   string `json:"id",hash:"ignore"`
-	}{
-		wrapper: wrapper(*r),
-		ID:      id,
-		Type:    "video",
-	})
-}
-
-func (r *InlineQueryResultVideo) id() (string, error) {
-	if r.ID == "" {
-		return hashInlineQueryResult(r)
-	}
-
-	return r.ID, nil
-}
-
 // InlineQueryResultVoice represents a link to a voice recording in a
 // .ogg container encoded with OPUS.
 // See also: https://core.telegram.org/bots/api#inlinequeryresultvoice
 type InlineQueryResultVoice struct {
-
-	// Unique identifier for this result, 1-64 Bytes.
-	// If left unspecified, a 64-bit FNV-1 hash will be calculated
-	// from the other fields and used automatically.
-	ID string `json:"id",hash:"ignore"`
+	InlineQueryResultBase
 
 	// A valid URL for the voice recording.
 	VoiceURL string `json:"voice_url"`
@@ -666,32 +369,4 @@ type InlineQueryResultVoice struct {
 
 	// Optional. Content of the message to be sent instead of the audio.
 	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
-}
-
-func (r *InlineQueryResultVoice) MarshalJSON() ([]byte, error) {
-	// avoiding endless self-recursion
-	type wrapper InlineQueryResultVoice
-
-	id, err := r.id()
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(struct {
-		wrapper
-		Type string `json:"type"`
-		ID   string `json:"id",hash:"ignore"`
-	}{
-		wrapper: wrapper(*r),
-		ID:      id,
-		Type:    "voice",
-	})
-}
-
-func (r *InlineQueryResultVoice) id() (string, error) {
-	if r.ID == "" {
-		return hashInlineQueryResult(r)
-	}
-
-	return r.ID, nil
 }
