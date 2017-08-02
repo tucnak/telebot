@@ -13,20 +13,21 @@ import (
 	"strconv"
 )
 
-func sendCommand(method, token string, payload interface{}) ([]byte, error) {
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", token, method)
+func (u *Bot) sendCommand(method string, payload interface{}) ([]byte, error) {
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s",
+		u.Token, method)
 
 	var b bytes.Buffer
 	if err := json.NewEncoder(&b).Encode(payload); err != nil {
 		return []byte{}, err
 	}
 
-	resp, err := http.Post(url, "application/json", &b)
+	resp, err := u.Client.Post(url, "application/json", &b)
 	if err != nil {
 		return []byte{}, err
 	}
-	resp.Close = true
 	defer resp.Body.Close()
+
 	json, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return []byte{}, err
@@ -35,7 +36,7 @@ func sendCommand(method, token string, payload interface{}) ([]byte, error) {
 	return json, nil
 }
 
-func sendFile(method, token, name, path string, params map[string]string) ([]byte, error) {
+func (u *Bot) sendFile(method, name, path string, params map[string]string) ([]byte, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return []byte{}, err
@@ -61,7 +62,9 @@ func sendFile(method, token, name, path string, params map[string]string) ([]byt
 		return []byte{}, err
 	}
 
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", token, method)
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s",
+		u.Token, method)
+
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return []byte{}, err
@@ -69,8 +72,7 @@ func sendFile(method, token, name, path string, params map[string]string) ([]byt
 
 	req.Header.Add("Content-Type", writer.FormDataContentType())
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := u.Client.Do(req)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -121,8 +123,8 @@ func embedSendOptions(params map[string]string, options *SendOptions) {
 	}
 }
 
-func getMe(token string) (User, error) {
-	meJSON, err := sendCommand("getMe", token, nil)
+func (u *Bot) getMe(token string) (User, error) {
+	meJSON, err := u.sendCommand("getMe", nil)
 	if err != nil {
 		return User{}, err
 	}
@@ -145,12 +147,12 @@ func getMe(token string) (User, error) {
 	return User{}, fmt.Errorf("telebot: %s", botInfo.Description)
 }
 
-func getUpdates(token string, offset, timeout int64) (upd []Update, err error) {
+func (u *Bot) getUpdates(token string, offset, timeout int64) (upd []Update, err error) {
 	params := map[string]string{
 		"offset":  strconv.FormatInt(offset, 10),
 		"timeout": strconv.FormatInt(timeout, 10),
 	}
-	updatesJSON, err := sendCommand("getUpdates", token, params)
+	updatesJSON, err := u.sendCommand("getUpdates", params)
 	if err != nil {
 		return
 	}

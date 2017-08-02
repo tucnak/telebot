@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 	"time"
 )
@@ -15,20 +16,26 @@ type Bot struct {
 	Messages  chan Message
 	Queries   chan Query
 	Callbacks chan Callback
+
+	Client *http.Client
 }
 
 // NewBot does try to build a Bot with token `token`, which
 // is a secret API key assigned to particular bot.
 func NewBot(token string) (*Bot, error) {
-	user, err := getMe(token)
+	bot := &Bot{
+		Token:  token,
+		Client: &http.Client{},
+	}
+
+	user, err := bot.getMe(token)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Bot{
-		Token:    token,
-		Identity: user,
-	}, nil
+	bot.Identity = user
+
+	return bot, nil
 }
 
 // Listen periodically looks for updates and delivers new messages
@@ -52,7 +59,7 @@ func (b *Bot) poll(
 	var latestUpdate int64
 
 	for {
-		updates, err := getUpdates(b.Token,
+		updates, err := b.getUpdates(b.Token,
 			latestUpdate+1,
 			int64(timeout/time.Second),
 		)
@@ -100,7 +107,7 @@ func (b *Bot) SendMessage(recipient Recipient, message string, options *SendOpti
 		embedSendOptions(params, options)
 	}
 
-	responseJSON, err := sendCommand("sendMessage", b.Token, params)
+	responseJSON, err := b.sendCommand("sendMessage", params)
 	if err != nil {
 		return err
 	}
@@ -130,7 +137,7 @@ func (b *Bot) ForwardMessage(recipient Recipient, message Message) error {
 		"message_id":   strconv.Itoa(message.ID),
 	}
 
-	responseJSON, err := sendCommand("forwardMessage", b.Token, params)
+	responseJSON, err := b.sendCommand("forwardMessage", params)
 	if err != nil {
 		return err
 	}
@@ -173,9 +180,9 @@ func (b *Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions)
 
 	if photo.Exists() {
 		params["photo"] = photo.FileID
-		responseJSON, err = sendCommand("sendPhoto", b.Token, params)
+		responseJSON, err = b.sendCommand("sendPhoto", params)
 	} else {
-		responseJSON, err = sendFile("sendPhoto", b.Token, "photo",
+		responseJSON, err = b.sendFile("sendPhoto", "photo",
 			photo.filename, params)
 	}
 
@@ -226,9 +233,9 @@ func (b *Bot) SendAudio(recipient Recipient, audio *Audio, options *SendOptions)
 
 	if audio.Exists() {
 		params["audio"] = audio.FileID
-		responseJSON, err = sendCommand("sendAudio", b.Token, params)
+		responseJSON, err = b.sendCommand("sendAudio", params)
 	} else {
-		responseJSON, err = sendFile("sendAudio", b.Token, "audio",
+		responseJSON, err = b.sendFile("sendAudio", "audio",
 			audio.filename, params)
 	}
 
@@ -278,9 +285,9 @@ func (b *Bot) SendDocument(recipient Recipient, doc *Document, options *SendOpti
 
 	if doc.Exists() {
 		params["document"] = doc.FileID
-		responseJSON, err = sendCommand("sendDocument", b.Token, params)
+		responseJSON, err = b.sendCommand("sendDocument", params)
 	} else {
-		responseJSON, err = sendFile("sendDocument", b.Token, "document",
+		responseJSON, err = b.sendFile("sendDocument", "document",
 			doc.filename, params)
 	}
 
@@ -330,9 +337,9 @@ func (b *Bot) SendSticker(recipient Recipient, sticker *Sticker, options *SendOp
 
 	if sticker.Exists() {
 		params["sticker"] = sticker.FileID
-		responseJSON, err = sendCommand("sendSticker", b.Token, params)
+		responseJSON, err = b.sendCommand("sendSticker", params)
 	} else {
-		responseJSON, err = sendFile("sendSticker", b.Token, "sticker",
+		responseJSON, err = b.sendFile("sendSticker", "sticker",
 			sticker.filename, params)
 	}
 
@@ -342,8 +349,8 @@ func (b *Bot) SendSticker(recipient Recipient, sticker *Sticker, options *SendOp
 
 	var responseRecieved struct {
 		Ok          bool
-		Result      Message
 		Description string
+		Result      Message
 	}
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
@@ -382,9 +389,9 @@ func (b *Bot) SendVideo(recipient Recipient, video *Video, options *SendOptions)
 
 	if video.Exists() {
 		params["video"] = video.FileID
-		responseJSON, err = sendCommand("sendVideo", b.Token, params)
+		responseJSON, err = b.sendCommand("sendVideo", params)
 	} else {
-		responseJSON, err = sendFile("sendVideo", b.Token, "video",
+		responseJSON, err = b.sendFile("sendVideo", "video",
 			video.filename, params)
 	}
 
@@ -431,7 +438,7 @@ func (b *Bot) SendLocation(recipient Recipient, geo *Location, options *SendOpti
 		embedSendOptions(params, options)
 	}
 
-	responseJSON, err := sendCommand("sendLocation", b.Token, params)
+	responseJSON, err := b.sendCommand("sendLocation", params)
 	if err != nil {
 		return err
 	}
@@ -470,7 +477,7 @@ func (b *Bot) SendVenue(recipient Recipient, venue *Venue, options *SendOptions)
 		embedSendOptions(params, options)
 	}
 
-	responseJSON, err := sendCommand("sendVenue", b.Token, params)
+	responseJSON, err := b.sendCommand("sendVenue", params)
 	if err != nil {
 		return err
 	}
@@ -508,7 +515,7 @@ func (b *Bot) SendChatAction(recipient Recipient, action ChatAction) error {
 		"action":  string(action),
 	}
 
-	responseJSON, err := sendCommand("sendChatAction", b.Token, params)
+	responseJSON, err := b.sendCommand("sendChatAction", params)
 	if err != nil {
 		return err
 	}
@@ -543,7 +550,7 @@ func (b *Bot) Respond(query Query, results []Result) error {
 		return err
 	}
 
-	responseJSON, err := sendCommand("answerInlineQuery", b.Token, params)
+	responseJSON, err := b.sendCommand("answerInlineQuery", params)
 	if err != nil {
 		return err
 	}
@@ -571,7 +578,7 @@ func (b *Bot) Respond(query Query, results []Result) error {
 func (b *Bot) AnswerInlineQuery(query *Query, response *QueryResponse) error {
 	response.QueryID = query.ID
 
-	responseJSON, err := sendCommand("answerInlineQuery", b.Token, response)
+	responseJSON, err := b.sendCommand("answerInlineQuery", response)
 	if err != nil {
 		return err
 	}
@@ -599,7 +606,7 @@ func (b *Bot) AnswerInlineQuery(query *Query, response *QueryResponse) error {
 func (b *Bot) AnswerCallbackQuery(callback *Callback, response *CallbackResponse) error {
 	response.CallbackID = callback.ID
 
-	responseJSON, err := sendCommand("answerCallbackQuery", b.Token, response)
+	responseJSON, err := b.sendCommand("answerCallbackQuery", response)
 	if err != nil {
 		return err
 	}
@@ -628,7 +635,7 @@ func (b *Bot) GetFile(fileID string) (File, error) {
 	params := map[string]string{
 		"file_id": fileID,
 	}
-	responseJSON, err := sendCommand("getFile", b.Token, params)
+	responseJSON, err := b.sendCommand("getFile", params)
 	if err != nil {
 		return File{}, err
 	}
@@ -656,7 +663,7 @@ func (b *Bot) LeaveChat(recipient Recipient) error {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 	}
-	responseJSON, err := sendCommand("leaveChat", b.Token, params)
+	responseJSON, err := b.sendCommand("leaveChat", params)
 	if err != nil {
 		return err
 	}
@@ -690,7 +697,7 @@ func (b *Bot) GetChat(recipient Recipient) (Chat, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 	}
-	responseJSON, err := sendCommand("getChat", b.Token, params)
+	responseJSON, err := b.sendCommand("getChat", params)
 	if err != nil {
 		return Chat{}, err
 	}
@@ -725,7 +732,7 @@ func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChatMember, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 	}
-	responseJSON, err := sendCommand("getChatAdministrators", b.Token, params)
+	responseJSON, err := b.sendCommand("getChatAdministrators", params)
 	if err != nil {
 		return []ChatMember{}, err
 	}
@@ -755,7 +762,7 @@ func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 	}
-	responseJSON, err := sendCommand("getChatMembersCount", b.Token, params)
+	responseJSON, err := b.sendCommand("getChatMembersCount", params)
 	if err != nil {
 		return 0, err
 	}
@@ -785,7 +792,7 @@ func (b *Bot) GetUserProfilePhotos(recipient Recipient) (UserProfilePhotos, erro
 	params := map[string]string{
 		"user_id": recipient.Destination(),
 	}
-	responseJSON, err := sendCommand("getUserProfilePhotos", b.Token, params)
+	responseJSON, err := b.sendCommand("getUserProfilePhotos", params)
 	if err != nil {
 		return UserProfilePhotos{}, err
 	}
@@ -816,7 +823,7 @@ func (b *Bot) GetChatMember(recipient Recipient, user User) (ChatMember, error) 
 		"chat_id": recipient.Destination(),
 		"user_id": user.Destination(),
 	}
-	responseJSON, err := sendCommand("getChatMember", b.Token, params)
+	responseJSON, err := b.sendCommand("getChatMember", params)
 	if err != nil {
 		return ChatMember{}, err
 	}
