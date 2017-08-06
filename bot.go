@@ -123,9 +123,9 @@ func (b *Bot) SendMessage(recipient Recipient, message string, options *SendOpti
 }
 
 //EditMessageText edit the message
-func (b *Bot) EditMessageText(chat Chat, message Message, text string, options *SendOptions) error {
+func (b *Bot) EditMessageText(message Message, text string, options *SendOptions) error {
 	params := map[string]string{
-		"chat_id":    chat.Destination(),
+		"chat_id":    message.Chat.Destination(),
 		"text":       text,
 		"message_id": strconv.Itoa(message.ID),
 	}
