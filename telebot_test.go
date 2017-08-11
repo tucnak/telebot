@@ -2,7 +2,6 @@ package telebot
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"testing"
 )
@@ -28,8 +27,7 @@ func TestBot(t *testing.T) {
 }
 
 func TestRecipient(_ *testing.T) {
-	bot := Bot{Client: &http.Client{}}
-
+	bot := Bot{}
 	bot.SendMessage(User{}, "", nil)
 	bot.SendMessage(Chat{}, "", nil)
 }
