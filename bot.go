@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/armon/go-radix"
 	"github.com/pkg/errors"
 )
 
@@ -20,12 +21,17 @@ type Bot struct {
 	// Telebot debugging channel. If present, Telebot
 	// will use it to report all occuring errors.
 	Errors chan error
+
+	tree *radix.Tree
 }
 
 // NewBot does try to build a Bot with token `token`, which
 // is a secret API key assigned to particular bot.
 func NewBot(token string) (*Bot, error) {
-	bot := &Bot{Token: token}
+	bot := &Bot{
+		Token: token,
+		tree:  radix.New(),
+	}
 
 	user, err := bot.getMe()
 	if err != nil {
