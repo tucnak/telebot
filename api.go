@@ -12,34 +12,40 @@ import (
 	"path/filepath"
 	"strconv"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
-func sendCommand(method, token string, payload interface{}) ([]byte, error) {
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", token, method)
+func wrapSystem(err error) error {
+	return errors.Wrap(err, "system error")
+}
 
-	var b bytes.Buffer
-	if err := json.NewEncoder(&b).Encode(payload); err != nil {
-		return []byte{}, err
+func (b *Bot) sendCommand(method string, payload interface{}) ([]byte, error) {
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.Token, method)
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(payload); err != nil {
+		return []byte{}, wrapSystem(err)
 	}
 
-	resp, err := http.Post(url, "application/json", &b)
+	resp, err := http.Post(url, "application/json", &buf)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(err, "http.Post failed")
 	}
 	resp.Close = true
 	defer resp.Body.Close()
 	json, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, wrapSystem(err)
 	}
 
 	return json, nil
 }
 
-func sendFile(method, token, name, path string, params map[string]string) ([]byte, error) {
+func (b *Bot) sendFile(method, name, path string, params map[string]string) ([]byte, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, wrapSystem(err)
 	}
 	defer file.Close()
 
@@ -47,11 +53,11 @@ func sendFile(method, token, name, path string, params map[string]string) ([]byt
 	writer := multipart.NewWriter(body)
 	part, err := writer.CreateFormFile(name, filepath.Base(path))
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, wrapSystem(err)
 	}
 
 	if _, err = io.Copy(part, file); err != nil {
-		return []byte{}, err
+		return []byte{}, wrapSystem(err)
 	}
 
 	for field, value := range params {
@@ -59,30 +65,29 @@ func sendFile(method, token, name, path string, params map[string]string) ([]byt
 	}
 
 	if err = writer.Close(); err != nil {
-		return []byte{}, err
+		return []byte{}, wrapSystem(err)
 	}
 
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", token, method)
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.Token, method)
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, wrapSystem(err)
 	}
 
 	req.Header.Add("Content-Type", writer.FormDataContentType())
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(err, "http.Post failed")
 	}
 
 	if resp.StatusCode == http.StatusInternalServerError {
-		return []byte{}, fmt.Errorf("telegram: internal server error")
+		return []byte{}, errors.New("api error: internal server error")
 	}
 
 	json, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, wrapSystem(err)
 	}
 
 	return json, nil
@@ -122,8 +127,8 @@ func embedSendOptions(params map[string]string, options *SendOptions) {
 	}
 }
 
-func getMe(token string) (User, error) {
-	meJSON, err := sendCommand("getMe", token, nil)
+func (b *Bot) getMe() (User, error) {
+	meJSON, err := b.sendCommand("getMe", nil)
 	if err != nil {
 		return User{}, err
 	}
@@ -136,23 +141,25 @@ func getMe(token string) (User, error) {
 
 	err = json.Unmarshal(meJSON, &botInfo)
 	if err != nil {
-		return User{}, fmt.Errorf("telebot: invalid token")
+		return User{}, errors.Wrap(err, "bad response json")
 	}
 
-	if botInfo.Ok {
-		return botInfo.Result, nil
+	if !botInfo.Ok {
+		return User{}, errors.Errorf("api error: %s", botInfo.Description)
 	}
 
-	return User{}, fmt.Errorf("telebot: %s", botInfo.Description)
+	return botInfo.Result, nil
+
 }
 
-func getUpdates(token string, offset, timeout time.Duration) (upd []Update, err error) {
+func (b *Bot) getUpdates(offset int64, timeout time.Duration) (upd []Update, err error) {
 	params := map[string]string{
-		"offset":  strconv.Itoa(offset),
-		"timeout": strconv.Itoa(timeout / time.Second),
+		"offset":  strconv.FormatInt(offset, 10),
+		"timeout": strconv.FormatInt(int64(timeout/time.Second), 10),
 	}
-	updatesJSON, err := sendCommand("getUpdates", token, params)
-	if err != nil {
+	updatesJSON, errCommand := b.sendCommand("getUpdates", params)
+	if errCommand != nil {
+		err = errCommand
 		return
 	}
 
@@ -164,11 +171,12 @@ func getUpdates(token string, offset, timeout time.Duration) (upd []Update, err 
 
 	err = json.Unmarshal(updatesJSON, &updatesRecieved)
 	if err != nil {
+		err = errors.Wrap(err, "bad response json")
 		return
 	}
 
 	if !updatesRecieved.Ok {
-		err = fmt.Errorf("telebot: %s", updatesRecieved.Description)
+		err = errors.Errorf("api error: %s", updatesRecieved.Description)
 		return
 	}
 

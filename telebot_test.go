@@ -22,7 +22,7 @@ func TestBot(t *testing.T) {
 
 	_, err := NewBot(token)
 	if err != nil {
-		t.Fatal("Couldn't create bot:", err)
+		t.Fatal("couldn't create bot:", err)
 	}
 }
 

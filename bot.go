@@ -3,9 +3,10 @@ package telebot
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 // Bot represents a separate Telegram bot instance.
@@ -15,32 +16,44 @@ type Bot struct {
 	Messages  chan Message
 	Queries   chan Query
 	Callbacks chan Callback
+
+	// Telebot debugging channel. If present, Telebot
+	// will use it to report all occuring errors.
+	Errors chan error
 }
 
 // NewBot does try to build a Bot with token `token`, which
 // is a secret API key assigned to particular bot.
 func NewBot(token string) (*Bot, error) {
-	user, err := getMe(token)
+	bot := &Bot{Token: token}
+
+	user, err := bot.getMe()
 	if err != nil {
 		return nil, err
 	}
 
-	return &Bot{
-		Token:    token,
-		Identity: user,
-	}, nil
+	bot.Identity = user
+	return bot, nil
 }
 
-// Listen periodically looks for updates and delivers new messages
-// to the subscription channel.
+// Listen starts a new polling goroutine, one that periodically looks for
+// updates and delivers new messages to the subscription channel.
 func (b *Bot) Listen(subscription chan Message, timeout time.Duration) {
 	go b.poll(subscription, nil, nil, timeout)
 }
 
-// Start periodically polls messages and/or updates to corresponding channels
-// from the bot object.
+// Start periodically polls messages, updates and callbacks into their
+// corresponding channels of the bot object.
+//
+// NOTE: It's a blocking method!
 func (b *Bot) Start(timeout time.Duration) {
 	b.poll(b.Messages, b.Queries, b.Callbacks, timeout)
+}
+
+func (b *Bot) debug(err error) {
+	if b.Errors != nil {
+		b.Errors <- errors.WithStack(err)
+	}
 }
 
 func (b *Bot) poll(
@@ -52,13 +65,10 @@ func (b *Bot) poll(
 	var latestUpdate int64
 
 	for {
-		updates, err := getUpdates(b.Token,
-			latestUpdate+1,
-			timeout,
-		)
+		updates, err := b.getUpdates(latestUpdate+1, timeout)
 
 		if err != nil {
-			log.Println("failed to get updates:", err)
+			b.debug(errors.Wrap(err, "getUpdates() failed"))
 			continue
 		}
 
@@ -100,7 +110,7 @@ func (b *Bot) SendMessage(recipient Recipient, message string, options *SendOpti
 		embedSendOptions(params, options)
 	}
 
-	responseJSON, err := sendCommand("sendMessage", b.Token, params)
+	responseJSON, err := b.sendCommand("sendMessage", params)
 	if err != nil {
 		return err
 	}
@@ -112,11 +122,11 @@ func (b *Bot) SendMessage(recipient Recipient, message string, options *SendOpti
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+		return errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	return nil
@@ -130,7 +140,7 @@ func (b *Bot) ForwardMessage(recipient Recipient, message Message) error {
 		"message_id":   strconv.Itoa(message.ID),
 	}
 
-	responseJSON, err := sendCommand("forwardMessage", b.Token, params)
+	responseJSON, err := b.sendCommand("forwardMessage", params)
 	if err != nil {
 		return err
 	}
@@ -142,11 +152,11 @@ func (b *Bot) ForwardMessage(recipient Recipient, message Message) error {
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+		return errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	return nil
@@ -173,10 +183,9 @@ func (b *Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions)
 
 	if photo.Exists() {
 		params["photo"] = photo.FileID
-		responseJSON, err = sendCommand("sendPhoto", b.Token, params)
+		responseJSON, err = b.sendCommand("sendPhoto", params)
 	} else {
-		responseJSON, err = sendFile("sendPhoto", b.Token, "photo",
-			photo.filename, params)
+		responseJSON, err = b.sendFile("sendPhoto", "photo", photo.filename, params)
 	}
 
 	if err != nil {
@@ -191,11 +200,11 @@ func (b *Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions)
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+		return errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	thumbnails := &responseRecieved.Result.Photo
@@ -226,10 +235,9 @@ func (b *Bot) SendAudio(recipient Recipient, audio *Audio, options *SendOptions)
 
 	if audio.Exists() {
 		params["audio"] = audio.FileID
-		responseJSON, err = sendCommand("sendAudio", b.Token, params)
+		responseJSON, err = b.sendCommand("sendAudio", params)
 	} else {
-		responseJSON, err = sendFile("sendAudio", b.Token, "audio",
-			audio.filename, params)
+		responseJSON, err = b.sendFile("sendAudio", "audio", audio.filename, params)
 	}
 
 	if err != nil {
@@ -244,11 +252,11 @@ func (b *Bot) SendAudio(recipient Recipient, audio *Audio, options *SendOptions)
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+		return errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	filename := audio.filename
@@ -278,10 +286,9 @@ func (b *Bot) SendDocument(recipient Recipient, doc *Document, options *SendOpti
 
 	if doc.Exists() {
 		params["document"] = doc.FileID
-		responseJSON, err = sendCommand("sendDocument", b.Token, params)
+		responseJSON, err = b.sendCommand("sendDocument", params)
 	} else {
-		responseJSON, err = sendFile("sendDocument", b.Token, "document",
-			doc.filename, params)
+		responseJSON, err = b.sendFile("sendDocument", "document", doc.filename, params)
 	}
 
 	if err != nil {
@@ -296,11 +303,11 @@ func (b *Bot) SendDocument(recipient Recipient, doc *Document, options *SendOpti
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+		return errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	filename := doc.filename
@@ -330,10 +337,9 @@ func (b *Bot) SendSticker(recipient Recipient, sticker *Sticker, options *SendOp
 
 	if sticker.Exists() {
 		params["sticker"] = sticker.FileID
-		responseJSON, err = sendCommand("sendSticker", b.Token, params)
+		responseJSON, err = b.sendCommand("sendSticker", params)
 	} else {
-		responseJSON, err = sendFile("sendSticker", b.Token, "sticker",
-			sticker.filename, params)
+		responseJSON, err = b.sendFile("sendSticker", "sticker", sticker.filename, params)
 	}
 
 	if err != nil {
@@ -348,11 +354,11 @@ func (b *Bot) SendSticker(recipient Recipient, sticker *Sticker, options *SendOp
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+		return errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	filename := sticker.filename
@@ -382,10 +388,9 @@ func (b *Bot) SendVideo(recipient Recipient, video *Video, options *SendOptions)
 
 	if video.Exists() {
 		params["video"] = video.FileID
-		responseJSON, err = sendCommand("sendVideo", b.Token, params)
+		responseJSON, err = b.sendCommand("sendVideo", params)
 	} else {
-		responseJSON, err = sendFile("sendVideo", b.Token, "video",
-			video.filename, params)
+		responseJSON, err = b.sendFile("sendVideo", "video", video.filename, params)
 	}
 
 	if err != nil {
@@ -400,11 +405,11 @@ func (b *Bot) SendVideo(recipient Recipient, video *Video, options *SendOptions)
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+		return errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	filename := video.filename
@@ -431,7 +436,7 @@ func (b *Bot) SendLocation(recipient Recipient, geo *Location, options *SendOpti
 		embedSendOptions(params, options)
 	}
 
-	responseJSON, err := sendCommand("sendLocation", b.Token, params)
+	responseJSON, err := b.sendCommand("sendLocation", params)
 	if err != nil {
 		return err
 	}
@@ -444,11 +449,11 @@ func (b *Bot) SendLocation(recipient Recipient, geo *Location, options *SendOpti
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+		return errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	return nil
@@ -470,7 +475,7 @@ func (b *Bot) SendVenue(recipient Recipient, venue *Venue, options *SendOptions)
 		embedSendOptions(params, options)
 	}
 
-	responseJSON, err := sendCommand("sendVenue", b.Token, params)
+	responseJSON, err := b.sendCommand("sendVenue", params)
 	if err != nil {
 		return err
 	}
@@ -483,11 +488,11 @@ func (b *Bot) SendVenue(recipient Recipient, venue *Venue, options *SendOptions)
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+		return errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	return nil
@@ -508,7 +513,7 @@ func (b *Bot) SendChatAction(recipient Recipient, action ChatAction) error {
 		"action":  string(action),
 	}
 
-	responseJSON, err := sendCommand("sendChatAction", b.Token, params)
+	responseJSON, err := b.sendCommand("sendChatAction", params)
 	if err != nil {
 		return err
 	}
@@ -520,11 +525,11 @@ func (b *Bot) SendChatAction(recipient Recipient, action ChatAction) error {
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+		return errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	return nil
@@ -540,10 +545,11 @@ func (b *Bot) Respond(query Query, results []Result) error {
 	if res, err := json.Marshal(results); err == nil {
 		params["results"] = string(res)
 	} else {
+		b.debug(errors.Wrapf(err, "failed to respond to \"%s\"", query.Text))
 		return err
 	}
 
-	responseJSON, err := sendCommand("answerInlineQuery", b.Token, params)
+	responseJSON, err := b.sendCommand("answerInlineQuery", params)
 	if err != nil {
 		return err
 	}
@@ -555,11 +561,11 @@ func (b *Bot) Respond(query Query, results []Result) error {
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+		return errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	return nil
@@ -571,7 +577,7 @@ func (b *Bot) Respond(query Query, results []Result) error {
 func (b *Bot) AnswerInlineQuery(query *Query, response *QueryResponse) error {
 	response.QueryID = query.ID
 
-	responseJSON, err := sendCommand("answerInlineQuery", b.Token, response)
+	responseJSON, err := b.sendCommand("answerInlineQuery", response)
 	if err != nil {
 		return err
 	}
@@ -583,11 +589,11 @@ func (b *Bot) AnswerInlineQuery(query *Query, response *QueryResponse) error {
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+		return errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	return nil
@@ -599,7 +605,7 @@ func (b *Bot) AnswerInlineQuery(query *Query, response *QueryResponse) error {
 func (b *Bot) AnswerCallbackQuery(callback *Callback, response *CallbackResponse) error {
 	response.CallbackID = callback.ID
 
-	responseJSON, err := sendCommand("answerCallbackQuery", b.Token, response)
+	responseJSON, err := b.sendCommand("answerCallbackQuery", response)
 	if err != nil {
 		return err
 	}
@@ -611,11 +617,11 @@ func (b *Bot) AnswerCallbackQuery(callback *Callback, response *CallbackResponse
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return fmt.Errorf("telebot: %s", responseRecieved.Description)
+		return errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	return nil
@@ -628,7 +634,7 @@ func (b *Bot) GetFile(fileID string) (File, error) {
 	params := map[string]string{
 		"file_id": fileID,
 	}
-	responseJSON, err := sendCommand("getFile", b.Token, params)
+	responseJSON, err := b.sendCommand("getFile", params)
 	if err != nil {
 		return File{}, err
 	}
@@ -641,11 +647,12 @@ func (b *Bot) GetFile(fileID string) (File, error) {
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return File{}, err
+		return File{}, errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return File{}, fmt.Errorf("telebot: %s", responseRecieved.Description)
+		return File{}, errors.Errorf("api error: %s", responseRecieved.Description)
+
 	}
 
 	return responseRecieved.Result, nil
@@ -656,7 +663,7 @@ func (b *Bot) LeaveChat(recipient Recipient) error {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 	}
-	responseJSON, err := sendCommand("leaveChat", b.Token, params)
+	responseJSON, err := b.sendCommand("leaveChat", params)
 	if err != nil {
 		return err
 	}
@@ -669,12 +676,11 @@ func (b *Bot) LeaveChat(recipient Recipient) error {
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return fmt.Errorf("telebot: leaveChat failure %s",
-			responseRecieved.Description)
+		return errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	return nil
@@ -690,7 +696,7 @@ func (b *Bot) GetChat(recipient Recipient) (Chat, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 	}
-	responseJSON, err := sendCommand("getChat", b.Token, params)
+	responseJSON, err := b.sendCommand("getChat", params)
 	if err != nil {
 		return Chat{}, err
 	}
@@ -703,12 +709,11 @@ func (b *Bot) GetChat(recipient Recipient) (Chat, error) {
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return Chat{}, err
+		return Chat{}, errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return Chat{}, fmt.Errorf("telebot: getChat failure %s",
-			responseRecieved.Description)
+		return Chat{}, errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	return responseRecieved.Result, nil
@@ -725,7 +730,7 @@ func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChatMember, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 	}
-	responseJSON, err := sendCommand("getChatAdministrators", b.Token, params)
+	responseJSON, err := b.sendCommand("getChatAdministrators", params)
 	if err != nil {
 		return []ChatMember{}, err
 	}
@@ -738,11 +743,11 @@ func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChatMember, error) {
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return []ChatMember{}, err
+		return []ChatMember{}, errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return []ChatMember{}, fmt.Errorf("telebot: getChatAdministrators failure %s", responseRecieved.Description)
+		return []ChatMember{}, errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	return responseRecieved.Result, nil
@@ -755,7 +760,7 @@ func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 	}
-	responseJSON, err := sendCommand("getChatMembersCount", b.Token, params)
+	responseJSON, err := b.sendCommand("getChatMembersCount", params)
 	if err != nil {
 		return 0, err
 	}
@@ -768,11 +773,11 @@ func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return 0, fmt.Errorf("telebot: getChatMembersCount failure %s", responseRecieved.Description)
+		return 0, errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	return responseRecieved.Result, nil
@@ -785,7 +790,7 @@ func (b *Bot) GetUserProfilePhotos(recipient Recipient) (UserProfilePhotos, erro
 	params := map[string]string{
 		"user_id": recipient.Destination(),
 	}
-	responseJSON, err := sendCommand("getUserProfilePhotos", b.Token, params)
+	responseJSON, err := b.sendCommand("getUserProfilePhotos", params)
 	if err != nil {
 		return UserProfilePhotos{}, err
 	}
@@ -798,11 +803,11 @@ func (b *Bot) GetUserProfilePhotos(recipient Recipient) (UserProfilePhotos, erro
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return UserProfilePhotos{}, err
+		return UserProfilePhotos{}, errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return UserProfilePhotos{}, fmt.Errorf("telebot: getUserProfilePhotos failure %s", responseRecieved.Description)
+		return UserProfilePhotos{}, errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	return responseRecieved.Result, nil
@@ -816,7 +821,7 @@ func (b *Bot) GetChatMember(recipient Recipient, user User) (ChatMember, error) 
 		"chat_id": recipient.Destination(),
 		"user_id": user.Destination(),
 	}
-	responseJSON, err := sendCommand("getChatMember", b.Token, params)
+	responseJSON, err := b.sendCommand("getChatMember", params)
 	if err != nil {
 		return ChatMember{}, err
 	}
@@ -829,11 +834,11 @@ func (b *Bot) GetChatMember(recipient Recipient, user User) (ChatMember, error) 
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return ChatMember{}, err
+		return ChatMember{}, errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return ChatMember{}, fmt.Errorf("telebot: getChatMember failure %s", responseRecieved.Description)
+		return ChatMember{}, errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	return responseRecieved.Result, nil
