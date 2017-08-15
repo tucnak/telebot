@@ -54,7 +54,7 @@ func (b *Bot) poll(
 	for {
 		updates, err := getUpdates(b.Token,
 			latestUpdate+1,
-			int64(timeout/time.Second),
+			timeout,
 		)
 
 		if err != nil {

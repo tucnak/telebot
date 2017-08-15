@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 )
 
 func sendCommand(method, token string, payload interface{}) ([]byte, error) {
@@ -145,10 +146,10 @@ func getMe(token string) (User, error) {
 	return User{}, fmt.Errorf("telebot: %s", botInfo.Description)
 }
 
-func getUpdates(token string, offset, timeout int64) (upd []Update, err error) {
+func getUpdates(token string, offset, timeout time.Duration) (upd []Update, err error) {
 	params := map[string]string{
-		"offset":  strconv.FormatInt(offset, 10),
-		"timeout": strconv.FormatInt(timeout, 10),
+		"offset":  strconv.Itoa(offset),
+		"timeout": strconv.Itoa(timeout / time.Second),
 	}
 	updatesJSON, err := sendCommand("getUpdates", token, params)
 	if err != nil {
