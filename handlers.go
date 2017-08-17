@@ -4,8 +4,8 @@ package telebot
 const Default string = ""
 
 type Context struct {
-	Bot *Bot
-	Msg *Message
+	Bot     *Bot
+	Message *Message
 }
 
 type Handler func(Context)
