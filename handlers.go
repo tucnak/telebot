@@ -21,7 +21,5 @@ func (b *Bot) Serve(msg *Message) {
 
 	if endpoint, ok := value.(Handler); ok {
 		endpoint(Context{b, msg})
-	} else {
-		panic("telebot: couldn't find a route")
 	}
 }
