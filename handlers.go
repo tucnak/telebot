@@ -20,6 +20,6 @@ func (b *Bot) Serve(msg *Message) {
 	_, value, _ := b.tree.LongestPrefix(request)
 
 	if endpoint, ok := value.(Handler); ok {
-		endpoint(Context{b, msg})
+		go endpoint(Context{b, msg})
 	}
 }
