@@ -129,11 +129,11 @@ func (b *Bot) SendMessage(recipient Recipient, message string, options *SendOpti
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return errors.Wrap(err, "bad response json")
+		return nil, errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
+		return nil, errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	return &responseRecieved.Result, nil
@@ -207,11 +207,11 @@ func (b *Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions)
 
 	err = json.Unmarshal(responseJSON, &responseRecieved)
 	if err != nil {
-		return errors.Wrap(err, "bad response json")
+		return nil, errors.Wrap(err, "bad response json")
 	}
 
 	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
+		return nil, errors.Errorf("api error: %s", responseRecieved.Description)
 	}
 
 	thumbnails := &responseRecieved.Result.Photo
@@ -874,7 +874,7 @@ func (b *Bot) EditMessageText(recipient Recipient, messageID int, message string
 		embedSendOptions(params, sendOptions)
 	}
 
-	responseJSON, err := sendCommand("editMessageText", b.Token, params)
+	responseJSON, err := b.sendCommand("editMessageText", params)
 	if err != nil {
 		return nil, err
 	}
@@ -911,7 +911,7 @@ func (b *Bot) EditInlineMessageText(messageID string, message string, sendOption
 		embedSendOptions(params, sendOptions)
 	}
 
-	responseJSON, err := sendCommand("editMessageText", b.Token, params)
+	responseJSON, err := b.sendCommand("editMessageText", params)
 	if err != nil {
 		return nil, err
 	}
@@ -953,7 +953,7 @@ func (b *Bot) EditMessageCaption(recipient Recipient, messageID int, caption str
 		})
 	}
 
-	responseJSON, err := sendCommand("editMessageCaption", b.Token, params)
+	responseJSON, err := b.sendCommand("editMessageCaption", params)
 	if err != nil {
 		return nil, err
 	}
@@ -994,7 +994,7 @@ func (b *Bot) EditInlineMessageCaption(messageID string, caption string, inlineK
 		})
 	}
 
-	responseJSON, err := sendCommand("editMessageCaption", b.Token, params)
+	responseJSON, err := b.sendCommand("editMessageCaption", params)
 	if err != nil {
 		return nil, err
 	}
@@ -1035,7 +1035,7 @@ func (b *Bot) EditMessageReplyMarkup(recipient Recipient, messageID int, inlineK
 		})
 	}
 
-	responseJSON, err := sendCommand("editMessageReplyMarkup", b.Token, params)
+	responseJSON, err := b.sendCommand("editMessageReplyMarkup", params)
 	if err != nil {
 		return nil, err
 	}
@@ -1075,7 +1075,7 @@ func (b *Bot) EditInlineMessageReplyMarkup(messageID string, caption string, inl
 		})
 	}
 
-	responseJSON, err := sendCommand("editMessageReplyMarkup", b.Token, params)
+	responseJSON, err := b.sendCommand("editMessageReplyMarkup", params)
 	if err != nil {
 		return nil, err
 	}
