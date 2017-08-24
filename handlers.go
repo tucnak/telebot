@@ -18,8 +18,9 @@ func (b *Bot) Serve(msg Message) (ok bool) {
 	request := msg.Text
 
 	_, value, _ := b.tree.LongestPrefix(request)
+	endpoint, ok := value.(Handler)
 
-	if endpoint, ok := value.(Handler); ok {
+	if ok {
 		go endpoint(Context{b, msg})
 	}
 	return
