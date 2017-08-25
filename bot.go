@@ -121,18 +121,18 @@ func (b *Bot) SendMessage(recipient Recipient, message string, options *SendOpti
 		return err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Description string
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
 	return nil
@@ -151,18 +151,18 @@ func (b *Bot) ForwardMessage(recipient Recipient, message Message) error {
 		return err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Description string
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
 	return nil
@@ -198,22 +198,22 @@ func (b *Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions)
 		return err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Result      Message
 		Description string
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
-	thumbnails := &responseRecieved.Result.Photo
+	thumbnails := &responseReceived.Result.Photo
 	filename := photo.filename
 	photo.File = (*thumbnails)[len(*thumbnails)-1].File
 	photo.filename = filename
@@ -250,23 +250,23 @@ func (b *Bot) SendAudio(recipient Recipient, audio *Audio, options *SendOptions)
 		return err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Result      Message
 		Description string
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
 	filename := audio.filename
-	*audio = responseRecieved.Result.Audio
+	*audio = responseReceived.Result.Audio
 	audio.filename = filename
 
 	return nil
@@ -301,23 +301,23 @@ func (b *Bot) SendDocument(recipient Recipient, doc *Document, options *SendOpti
 		return err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Result      Message
 		Description string
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
 	filename := doc.filename
-	*doc = responseRecieved.Result.Document
+	*doc = responseReceived.Result.Document
 	doc.filename = filename
 
 	return nil
@@ -352,23 +352,23 @@ func (b *Bot) SendSticker(recipient Recipient, sticker *Sticker, options *SendOp
 		return err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Result      Message
 		Description string
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
 	filename := sticker.filename
-	*sticker = responseRecieved.Result.Sticker
+	*sticker = responseReceived.Result.Sticker
 	sticker.filename = filename
 
 	return nil
@@ -403,23 +403,23 @@ func (b *Bot) SendVideo(recipient Recipient, video *Video, options *SendOptions)
 		return err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Result      Message
 		Description string
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
 	filename := video.filename
-	*video = responseRecieved.Result.Video
+	*video = responseReceived.Result.Video
 	video.filename = filename
 
 	return nil
@@ -447,19 +447,19 @@ func (b *Bot) SendLocation(recipient Recipient, geo *Location, options *SendOpti
 		return err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Result      Message
 		Description string
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
 	return nil
@@ -486,19 +486,19 @@ func (b *Bot) SendVenue(recipient Recipient, venue *Venue, options *SendOptions)
 		return err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Result      Message
 		Description string
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
 	return nil
@@ -524,18 +524,18 @@ func (b *Bot) SendChatAction(recipient Recipient, action ChatAction) error {
 		return err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Description string
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
 	return nil
@@ -560,18 +560,18 @@ func (b *Bot) Respond(query Query, results []Result) error {
 		return err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Description string
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
 	return nil
@@ -588,18 +588,18 @@ func (b *Bot) AnswerInlineQuery(query *Query, response *QueryResponse) error {
 		return err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Description string
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
 	return nil
@@ -616,18 +616,18 @@ func (b *Bot) AnswerCallbackQuery(callback *Callback, response *CallbackResponse
 		return err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Description string
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
 	return nil
@@ -645,23 +645,23 @@ func (b *Bot) GetFile(fileID string) (File, error) {
 		return File{}, err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Description string
 		Result      File
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return File{}, errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return File{}, errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return File{}, errors.Errorf("api error: %s", responseReceived.Description)
 
 	}
 
-	return responseRecieved.Result, nil
+	return responseReceived.Result, nil
 }
 
 // LeaveChat makes bot leave a group, supergroup or channel.
@@ -674,19 +674,19 @@ func (b *Bot) LeaveChat(recipient Recipient) error {
 		return err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Description string
 		Result      bool
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
 	return nil
@@ -707,22 +707,22 @@ func (b *Bot) GetChat(recipient Recipient) (Chat, error) {
 		return Chat{}, err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Description string
 		Result      Chat
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return Chat{}, errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return Chat{}, errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return Chat{}, errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
-	return responseRecieved.Result, nil
+	return responseReceived.Result, nil
 }
 
 // GetChatAdministrators return list of administrators in a chat.
@@ -741,22 +741,22 @@ func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChatMember, error) {
 		return []ChatMember{}, err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Result      []ChatMember
 		Description string `json:"description"`
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return []ChatMember{}, errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return []ChatMember{}, errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return []ChatMember{}, errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
-	return responseRecieved.Result, nil
+	return responseReceived.Result, nil
 }
 
 // GetChatMembersCount return the number of members in a chat.
@@ -771,22 +771,22 @@ func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
 		return 0, err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Result      int
 		Description string `json:"description"`
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return 0, errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return 0, errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return 0, errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
-	return responseRecieved.Result, nil
+	return responseReceived.Result, nil
 }
 
 // GetUserProfilePhotos return list of profile pictures for a user.
@@ -801,22 +801,22 @@ func (b *Bot) GetUserProfilePhotos(recipient Recipient) (UserProfilePhotos, erro
 		return UserProfilePhotos{}, err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Result      UserProfilePhotos
 		Description string `json:"description"`
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return UserProfilePhotos{}, errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return UserProfilePhotos{}, errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return UserProfilePhotos{}, errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
-	return responseRecieved.Result, nil
+	return responseReceived.Result, nil
 }
 
 // GetChatMember return information about a member of a chat.
@@ -832,22 +832,22 @@ func (b *Bot) GetChatMember(recipient Recipient, user User) (ChatMember, error) 
 		return ChatMember{}, err
 	}
 
-	var responseRecieved struct {
+	var responseReceived struct {
 		Ok          bool
 		Result      ChatMember
 		Description string `json:"description"`
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(responseJSON, &responseReceived)
 	if err != nil {
 		return ChatMember{}, errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return ChatMember{}, errors.Errorf("api error: %s", responseRecieved.Description)
+	if !responseReceived.Ok {
+		return ChatMember{}, errors.Errorf("api error: %s", responseReceived.Description)
 	}
 
-	return responseRecieved.Result, nil
+	return responseReceived.Result, nil
 }
 
 // GetFileDirectURL returns direct url for files using FileId which you can get from File object
