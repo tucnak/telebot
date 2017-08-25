@@ -9,15 +9,20 @@ type Recipient interface {
 	Destination() string
 }
 
-// User object represents a Telegram user, bot
-//
-// object represents a group chat if Title is empty.
+// User object represents a Telegram user or bot.
 type User struct {
 	ID        int    `json:"id"`
 	FirstName string `json:"first_name"`
 
+	// Optional!
 	LastName string `json:"last_name"`
 	Username string `json:"username"`
+
+	// True for bots.
+	IsBot bool `json:"is_bot"`
+
+	// Optional. IETF language tag of the user's language.
+	Language string `json:"language_code"`
 }
 
 // Destination is internal user ID.
@@ -31,15 +36,28 @@ func (u User) Destination() string {
 type Chat struct {
 	ID int64 `json:"id"`
 
-	// See telebot.ChatType and consts.
-	Type ChatType `json:"type"`
-
 	// Won't be there for ChatPrivate.
 	Title string `json:"title"`
 
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Username  string `json:"username"`
+
+	// Group/channel-specific values (see telebot.ChatType):
+	Type          ChatType  `json:"type"`
+	Photo         ChatPhoto `json:"photo"`
+	Description   string    `json:"description"`
+	InviteLink    string    `json:"invite_link"`
+	AllAdminGroup bool      `json:"all_members_are_administrators"`
+	PinnedMessage *Message  `json:"pinned_message"`
+}
+
+// ChatPhoto object represents small/big file IDs for the group pic.
+//
+// Both are download-only.
+type ChatPhoto struct {
+	SmallFileID string `json:"small_file_id"`
+	BigFileID   string `json:"big_file_id"`
 }
 
 // Destination is internal chat ID.
