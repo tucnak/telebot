@@ -267,7 +267,7 @@ func (b *Bot) SendAudio(recipient Recipient, audio *Audio, options *SendOptions)
 	}
 
 	filename := audio.filename
-	*audio = responseRecieved.Result.Audio
+	*audio = *responseRecieved.Result.Audio
 	audio.filename = filename
 
 	return nil
@@ -318,7 +318,7 @@ func (b *Bot) SendDocument(recipient Recipient, doc *Document, options *SendOpti
 	}
 
 	filename := doc.filename
-	*doc = responseRecieved.Result.Document
+	*doc = *responseRecieved.Result.Document
 	doc.filename = filename
 
 	return nil
@@ -369,7 +369,7 @@ func (b *Bot) SendSticker(recipient Recipient, sticker *Sticker, options *SendOp
 	}
 
 	filename := sticker.filename
-	*sticker = responseRecieved.Result.Sticker
+	*sticker = *responseRecieved.Result.Sticker
 	sticker.filename = filename
 
 	return nil
@@ -420,7 +420,7 @@ func (b *Bot) SendVideo(recipient Recipient, video *Video, options *SendOptions)
 	}
 
 	filename := video.filename
-	*video = responseRecieved.Result.Video
+	*video = *responseRecieved.Result.Video
 	video.filename = filename
 
 	return nil

@@ -14,10 +14,10 @@ type Message struct {
 	Unixtime int `json:"date"`
 
 	// For forwarded messages, sender of the original message.
-	OriginalSender User `json:"forward_from"`
+	OriginalSender *User `json:"forward_from"`
 
 	// For forwarded messages, chat of the original message when forwarded from a channel.
-	OriginalChat Chat `json:"forward_from_chat"`
+	OriginalChat *Chat `json:"forward_from_chat"`
 
 	// For forwarded messages, unixtime of the original message.
 	OriginalUnixtime int `json:"forward_date"`
@@ -32,27 +32,27 @@ type Message struct {
 	Text string `json:"text"`
 
 	// For an audio recording, information about it.
-	Audio Audio `json:"audio"`
+	Audio *Audio `json:"audio"`
 
 	// For a general file, information about it.
-	Document Document `json:"document"`
+	Document *Document `json:"document"`
 
 	// For a photo, available thumbnails.
 	Photo []Thumbnail `json:"photo"`
 
 	// For a sticker, information about it.
-	Sticker Sticker `json:"sticker"`
+	Sticker *Sticker `json:"sticker"`
 
 	// For a video, information about it.
-	Video Video `json:"video"`
+	Video *Video `json:"video"`
 
 	// For a contact, contact information itself.
-	Contact Contact `json:"contact"`
+	Contact *Contact `json:"contact"`
 
 	// For a location, its longitude and latitude.
-	Location Location `json:"location"`
+	Location *Location `json:"location"`
 
-	// A group chat message belongs to, empty if personal.
+	// A group chat message belongs to.
 	Chat Chat `json:"chat"`
 
 	// For a service message, represents a user,
@@ -61,7 +61,7 @@ type Message struct {
 	// Sender leads to User, capable of invite.
 	//
 	// UserJoined might be the Bot itself.
-	UserJoined User `json:"new_chat_member"`
+	UserJoined *User `json:"new_chat_member"`
 
 	// For a service message, represents a user,
 	// that just left chat, this message came from.
@@ -70,7 +70,7 @@ type Message struct {
 	// capable of this kick.
 	//
 	// UserLeft might be the Bot itself.
-	UserLeft User `json:"left_chat_member"`
+	UserLeft *User `json:"left_chat_member"`
 
 	// For a service message, represents a new title
 	// for chat this message came from.
@@ -154,7 +154,7 @@ func (m *Message) Time() time.Time {
 // IsForwarded says whether message is forwarded copy of another
 // message or not.
 func (m *Message) IsForwarded() bool {
-	return m.OriginalSender != User{} || m.OriginalChat != Chat{}
+	return m.OriginalSender != nil || m.OriginalChat != nil
 }
 
 // IsReply says whether message is reply to another message or not.
@@ -177,11 +177,11 @@ func (m *Message) IsPersonal() bool {
 func (m *Message) IsService() bool {
 	service := false
 
-	if (m.UserJoined != User{}) {
+	if m.UserJoined != nil {
 		service = true
 	}
 
-	if (m.UserLeft != User{}) {
+	if m.UserLeft != nil {
 		service = true
 	}
 
