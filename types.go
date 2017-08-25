@@ -179,11 +179,11 @@ type Callback struct {
 	ID string `json:"id"`
 
 	// For message sent to channels, Sender may be empty
-	Sender User `json:"from"`
+	Sender *User `json:"from"`
 
 	// Message will be set if the button that originated the query
 	// was attached to a message sent by a bot.
-	Message Message `json:"message"`
+	Message *Message `json:"message"`
 
 	// MessageID will be set if the button was attached to a message
 	// sent via the bot in inline mode.
@@ -244,7 +244,7 @@ type MessageEntity struct {
 	URL string `json:"url,omitempty"`
 
 	// (Optional) For EntityTMention entity type only.
-	User User `json:"user,omitempty"`
+	User *User `json:"user,omitempty"`
 }
 
 // ChatMember object represents information about a single chat member.
