@@ -15,7 +15,7 @@ via group chats / channels. These accounts serve as an interface to your code.
 Telebot offers a pretty convenient interface to Bots API and uses default HTTP
 client. Ideally, you wouldn't need to worry about actual networking at all.
 
-	go get gopkg.in/tucnak/telebot.v0
+	go get gopkg.in/tucnak/telebot.v1
 
 (after setting up your `GOPATH` properly).
 
@@ -33,7 +33,7 @@ import (
 	"os"
 	"time"
 
-	tb "gopkg.in/tucnak/telebot.v0"
+	tb "gopkg.in/tucnak/telebot.v1"
 )
 
 func main() {
@@ -66,7 +66,7 @@ import (
 	"time"
 	"os"
 
-	tb "gopkg.in/tucnak/telebot.v0"
+	tb "gopkg.in/tucnak/telebot.v1"
 )
 
 func main() {
