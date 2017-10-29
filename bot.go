@@ -23,6 +23,7 @@ type Bot struct {
 	Errors chan error
 
 	tree *radix.Tree
+	shutdown chan bool
 }
 
 // NewBot does try to build a Bot with token `token`, which
@@ -45,14 +46,7 @@ func NewBot(token string) (*Bot, error) {
 // Listen starts a new polling goroutine, one that periodically looks for
 // updates and delivers new messages to the subscription channel.
 func (b *Bot) Listen(subscription chan Message, timeout time.Duration) {
-	go b.poll(subscription, nil, nil, timeout, nil)
-}
-
-// ListenWithShutdown starts a new polling goroutine, one that periodically looks for
-// updates and delivers new messages to the subscription channel.
-// If shutdown channel received any value, close messages channels
-func (b *Bot) ListenWithShutdown(subscription chan Message, timeout time.Duration, shutdown <-chan bool) {
-	go b.poll(subscription, nil, nil, timeout, shutdown)
+	go b.poll(subscription, nil, nil, timeout)
 }
 
 // Start periodically polls messages, updates and callbacks into their
@@ -60,7 +54,14 @@ func (b *Bot) ListenWithShutdown(subscription chan Message, timeout time.Duratio
 //
 // NOTE: It's a blocking method!
 func (b *Bot) Start(timeout time.Duration) {
-	b.poll(b.Messages, b.Queries, b.Callbacks, timeout, nil)
+	b.poll(b.Messages, b.Queries, b.Callbacks, timeout)
+}
+
+// Stop method closes shutdown channel, which is used by listen
+// updates cycle. As soon as shutdown was closed poll cycle close
+// all messages channels
+func (b *Bot) Stop() {
+	close(b.shutdown)
 }
 
 func (b *Bot) debug(err error) {
@@ -74,72 +75,57 @@ func (b *Bot) poll(
 	queries chan Query,
 	callbacks chan Callback,
 	timeout time.Duration,
-	shutdown <-chan bool,
 ) {
+	b.shutdown = make(chan bool)
 	var latestUpdate int64
-	if shutdown != nil {
-		for {
-			select {
-			case <-shutdown:
-				if messages != nil {
-					close(messages)
-				}
-				if queries != nil {
-					close(queries)
-				}
-				if callbacks != nil {
-					close(callbacks)
-				}
-				return
-			default:
-				b.handleUpdates(&latestUpdate, messages, queries, callbacks, timeout)
+
+	for {
+		select {
+		case <-b.shutdown:
+			if messages != nil {
+				close(messages)
 			}
-		}
-	} else {
-		for {
-			b.handleUpdates(&latestUpdate, messages, queries, callbacks, timeout)
-		}
-	}
-}
+			if queries != nil {
+				close(queries)
+			}
+			if callbacks != nil {
+				close(callbacks)
+			}
+			return
+		default:
+			updates, err := b.getUpdates(latestUpdate+1, timeout)
 
-func (b *Bot) handleUpdates(
-	latestUpdate *int64,
-	messages chan Message,
-	queries chan Query,
-	callbacks chan Callback,
-	timeout time.Duration,
-) {
-	*latestUpdate = *latestUpdate + 1
-	updates, err := b.getUpdates(*latestUpdate, timeout)
-
-	if err != nil {
-		b.debug(errors.Wrap(err, "getUpdates() failed"))
-		return
-	}
-
-	for _, update := range updates {
-		if update.Payload != nil /* if message */ {
-			if messages == nil {
+			if err != nil {
+				b.debug(errors.Wrap(err, "getUpdates() failed"))
 				continue
 			}
 
-			messages <- *update.Payload
-		} else if update.Query != nil /* if query */ {
-			if queries == nil {
-				continue
-			}
+			for _, update := range updates {
+				if update.Payload != nil /* if message */ {
+					if messages == nil {
+						continue
+					}
 
-			queries <- *update.Query
-		} else if update.Callback != nil {
-			if callbacks == nil {
-				continue
-			}
+					messages <- *update.Payload
+				} else if update.Query != nil /* if query */ {
+					if queries == nil {
+						continue
+					}
 
-			callbacks <- *update.Callback
+					queries <- *update.Query
+				} else if update.Callback != nil {
+					if callbacks == nil {
+						continue
+					}
+
+					callbacks <- *update.Callback
+				}
+
+				latestUpdate = update.ID
+			}
 		}
-
-		*latestUpdate = update.ID
 	}
+
 }
 
 // SendMessage sends a text message to recipient.
