@@ -61,6 +61,7 @@ func (b *Bot) Start(timeout time.Duration) {
 // updates cycle. As soon as shutdown was closed poll cycle close
 // all messages channels
 func (b *Bot) Stop() {
+	defer func() { recover() }()
 	close(b.shutdown)
 }
 
