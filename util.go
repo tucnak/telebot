@@ -91,11 +91,12 @@ func embedSendOptions(params map[string]string, opt *SendOptions) {
 	}
 
 	if opt.ReplyMarkup != nil {
-		forceReply := opt.ReplyMarkup.ForceReply
-		customKeyboard := (opt.ReplyMarkup.CustomKeyboard != nil)
-		inlineKeyboard := opt.ReplyMarkup.InlineKeyboard != nil
-		hiddenKeyboard := opt.ReplyMarkup.HideCustomKeyboard
-		if forceReply || customKeyboard || hiddenKeyboard || inlineKeyboard {
+		force := opt.ReplyMarkup.ForceReply
+		reply := opt.ReplyMarkup.ReplyKeyboard != nil
+		inline := opt.ReplyMarkup.InlineKeyboard != nil
+		hidden := opt.ReplyMarkup.HideReplyKeyboard
+		resize := opt.ReplyMarkup.ResizeReplyKeyboard
+		if force || reply || inline || hidden || resize {
 			replyMarkup, _ := json.Marshal(opt.ReplyMarkup)
 			params["reply_markup"] = string(replyMarkup)
 		}

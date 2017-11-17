@@ -43,30 +43,35 @@ type SendOptions struct {
 
 // ReplyMarkup specifies convenient options for bot-user communications.
 type ReplyMarkup struct {
-	InlineKeyboard [][]InlineButton `json:"inline_keyboard,omitempty"`
-
 	// ForceReply forces Telegram clients to display
 	// a reply interface to the user (act as if the user
 	// has selected the bot‘s message and tapped "Reply").
 	ForceReply bool `json:"force_reply,omitempty"`
 
-	// CustomKeyboard is a grid, consisting of keyboard buttons.
+	// InlineKeyboard is a grid of InlineButtons displayed in the message.
+	//
+	// Note: DO NOT confuse with ReplyKeyboard and other keyboard properties!
+	InlineKeyboard [][]InlineButton `json:"inline_keyboard,omitempty"`
+
+	// ReplyKeyboard is a grid, consisting of keyboard buttons.
 	//
 	// Note: you don't need to set HideCustomKeyboard field to show custom keyboard.
-	CustomKeyboard [][]KeyboardButton `json:"keyboard,omitempty"`
+	ReplyKeyboard [][]KeyboardButton `json:"keyboard,omitempty"`
 
 	// Requests clients to hide the custom keyboard.
 	//
 	// Note: You dont need to set CustomKeyboard field to hide custom keyboard.
-	HideCustomKeyboard bool `json:"hide_keyboard,omitempty"`
+	HideReplyKeyboard bool `json:"hide_keyboard,omitempty"`
 
 	// Requests clients to resize the keyboard vertically for optimal fit
-	// (e.g., make the keyboard smaller if there are just two rows of buttons).
+	// (e.g. make the keyboard smaller if there are just two rows of buttons).
+	//
 	// Defaults to false, in which case the custom keyboard is always of the
 	// same height as the app's standard keyboard.
-	ResizeKeyboard bool `json:"resize_keyboard,omitempty"`
+	ResizeReplyKeyboard bool `json:"resize_keyboard,omitempty"`
 
-	// Requests clients to hide the keyboard as soon as it's been used.
+	// Requests clients to hide the reply keyboard as soon as it's been used.
+	//
 	// Defaults to false.
 	OneTimeKeyboard bool `json:"one_time_keyboard,omitempty"`
 

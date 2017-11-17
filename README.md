@@ -139,17 +139,10 @@ err = bot.Send(recipient, audio)
 ## Reply markup
 ```go
 // Send a selective force reply message.
-bot.Send(user, "pong", &tb.SendOptions{
-		ReplyMarkup: &tb.ReplyMarkup{
-			ForceReply: true,
-			Selective: true,
-			CustomKeyboard: [][]string{
-				[]string{"1", "2", "3"},
-				[]string{"4", "5", "6"},
-				[]string{"7", "8", "9"},
-				[]string{"*", "0", "#"},
-			},
-		},
-	},
-)
+bot.Send(user, "pong", &tb.ReplyMarkup{
+    ForceReply: true,
+    Selective: true,
+
+    ReplyKeyboard: keys,
+})
 ```
