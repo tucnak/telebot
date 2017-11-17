@@ -62,7 +62,7 @@ func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 	}
 	embedSendOptions(params, opt)
 
-	msg, err := b.sendObject(&d.File, "audio", params)
+	msg, err := b.sendObject(&d.File, "document", params)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func (v *Venue) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	}
 	embedSendOptions(params, opt)
 
-	respJSON, err := b.sendCommand("sendLocation", params)
+	respJSON, err := b.sendCommand("sendVenue", params)
 	if err != nil {
 		return nil, err
 	}
