@@ -4,19 +4,23 @@
 [![GoDoc](https://godoc.org/github.com/tucnak/telebot?status.svg)](https://godoc.org/github.com/tucnak/telebot)
 [![Travis](https://travis-ci.org/tucnak/telebot.svg?branch=master)](https://travis-ci.org/tucnak/telebot)
 
-Bots are special Telegram accounts designed to handle messages automatically. Users can interact with bots
-by sending them command messages in private or group chats. These accounts serve as an interface for
-code running somewhere on your server.
+**NOTE:** We are currently working on completing both v1 and v2 of our API.
+You can track the progress [here](https://github.com/tucnak/telebot/milestone/1)
+and [here](https://github.com/tucnak/telebot/issues/93).
 
-Telebot offers a convenient wrapper to Bots API, so you shouldn't even
-bother about networking at all. You may install it with
+Bots are special Telegram accounts designed to handle messages automatically.
+Users can interact with bots by sending them command messages in private or
+via group chats / channels. These accounts serve as an interface to your code.
 
-	go get github.com/tucnak/telebot
+Telebot offers a pretty convenient interface to Bots API and uses default HTTP
+client. Ideally, you wouldn't need to worry about actual networking at all.
+
+	go get gopkg.in/tucnak/telebot.v1
 
 (after setting up your `GOPATH` properly).
 
 We highly recommend you to keep your bot access token outside the code base,
-preferably as an environmental variable:
+preferably in an environmental variable:
 
 	export BOT_TOKEN=<your token here>
 
@@ -29,17 +33,17 @@ import (
 	"os"
 	"time"
 
-	"github.com/tucnak/telebot"
+	tb "gopkg.in/tucnak/telebot.v1"
 )
 
 func main() {
-	bot, err := telebot.NewBot(os.Getenv("BOT_TOKEN"))
+	bot, err := tb.NewBot(os.Getenv("BOT_TOKEN"))
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	messages := make(chan telebot.Message, 100)
-	bot.Listen(messages, 1*time.Second)
+	messages := make(chan tb.Message, 100)
+	bot.Listen(messages, 10 * time.Second)
 
 	for message := range messages {
 		if message.Text == "/hi" {
@@ -61,52 +65,53 @@ import (
 	"log"
 	"time"
 	"os"
-	"github.com/tucnak/telebot"
+
+	tb "gopkg.in/tucnak/telebot.v1"
 )
 
 func main() {
-	bot, err := telebot.NewBot(os.Getenv("BOT_TOKEN"))
+	bot, err := tb.NewBot(os.Getenv("BOT_TOKEN"))
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	bot.Messages = make(chan telebot.Message, 100)
-	bot.Queries = make(chan telebot.Query, 1000)
+	bot.Messages = make(chan tb.Message, 100)
+	bot.Queries = make(chan tb.Query, 1000)
 
 	go messages(bot)
 	go queries(bot)
 
-	bot.Start(1 * time.Second)
+	bot.Start(10 * time.Second)
 }
 
-func messages(bot *telebot.Bot) {
+func messages(bot *tb.Bot) {
 	for message := range bot.Messages {
 		log.Printf("Received a message from %s with the text: %s\n",
 			message.Sender.Username, message.Text)
 	}
 }
 
-func queries(bot *telebot.Bot) {
+func queries(bot *tb.Bot) {
 	for query := range bot.Queries {
 		log.Println("--- new query ---")
 		log.Println("from:", query.From.Username)
 		log.Println("text:", query.Text)
 
 		// Create an article (a link) object to show in results.
-		article := &telebot.InlineQueryResultArticle{
+		article := &tb.InlineQueryResultArticle{
 			Title: "Telebot",
 			URL:   "https://github.com/tucnak/telebot",
-			InputMessageContent: &telebot.InputTextMessageContent{
+			InputMessageContent: &tb.InputTextMessageContent{
 				Text:		   "Telebot is a Telegram bot framework.",
 				DisablePreview: false,
 			},
 		}
 
 		// Build the list of results (make sure to pass pointers!).
-		results := []telebot.InlineQueryResult{article}
+		results := []tb.InlineQueryResult{article}
 
 		// Build a response object to answer the query.
-		response := telebot.QueryResponse{
+		response := tb.QueryResponse{
 			Results:	results,
 			IsPersonal: true,
 		}
@@ -123,12 +128,12 @@ func queries(bot *telebot.Bot) {
 Telebot lets you upload files from the file system:
 
 ```go
-boom, err := telebot.NewFile("boom.ogg")
+boom, err := tb.NewFile("boom.ogg")
 if err != nil {
 	return err
 }
 
-audio := telebot.Audio{File: boom}
+audio := tb.Audio{File: boom}
 
 // Next time you send &audio, telebot won't issue
 // an upload, but would re-use existing file.
@@ -140,12 +145,11 @@ Sometimes you wanna send a little complicated messages with some optional parame
 
 ```go
 // Send a selective force reply message.
-bot.SendMessage(user, "pong", &telebot.SendOptions{
-		ReplyMarkup: telebot.ReplyMarkup{
+bot.SendMessage(user, "pong", &tb.SendOptions{
+		ReplyMarkup: tb.ReplyMarkup{
 			ForceReply: true,
 			Selective: true,
 			CustomKeyboard: [][]string{
-
 				[]string{"1", "2", "3"},
 				[]string{"4", "5", "6"},
 				[]string{"7", "8", "9"},
