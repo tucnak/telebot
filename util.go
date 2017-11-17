@@ -27,6 +27,24 @@ func extractMsgResponse(respJSON []byte) (*Message, error) {
 	return resp.Result, nil
 }
 
+func extractOkResponse(respJSON []byte) error {
+	var resp struct {
+		Ok          bool
+		Description string
+	}
+
+	err := json.Unmarshal(respJSON, &resp)
+	if err != nil {
+		return errors.Wrap(err, "bad response json")
+	}
+
+	if !resp.Ok {
+		return errors.Errorf("api error: %s", resp.Description)
+	}
+
+	return nil
+}
+
 func extractOptions(how []interface{}) *SendOptions {
 	var options *SendOptions
 

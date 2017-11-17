@@ -149,6 +149,20 @@ func (b *Bot) Forward(to Recipient, what *Message, how ...interface{}) (*Message
 	return extractMsgResponse(respJSON)
 }
 
+func (b *Bot) Delete(what *Message) error {
+	params := map[string]string{
+		"chat_id":    what.Chat.Destination(),
+		"message_id": strconv.Itoa(what.ID),
+	}
+
+	respJSON, err := b.sendCommand("deleteMessage", params)
+	if err != nil {
+		return err
+	}
+
+	return extractOkResponse(respJSON)
+}
+
 // SendChatAction updates a chat action for recipient.
 //
 // Chat action is a status message that recipient would see where

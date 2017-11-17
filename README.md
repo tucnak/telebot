@@ -4,10 +4,6 @@
 [![GoDoc](https://godoc.org/github.com/tucnak/telebot?status.svg)](https://godoc.org/github.com/tucnak/telebot)
 [![Travis](https://travis-ci.org/tucnak/telebot.svg?branch=master)](https://travis-ci.org/tucnak/telebot)
 
-**NOTE:** We are currently working on completing both v1 and v2 of our API.
-You can track the progress [here](https://github.com/tucnak/telebot/milestone/1)
-and [here](https://github.com/tucnak/telebot/issues/93).
-
 Bots are special Telegram accounts designed to handle messages automatically.
 Users can interact with bots by sending them command messages in private or
 via group chats / channels. These accounts serve as an interface to your code.
@@ -15,7 +11,7 @@ via group chats / channels. These accounts serve as an interface to your code.
 Telebot offers a pretty convenient interface to Bots API and uses default HTTP
 client. Ideally, you wouldn't need to worry about actual networking at all.
 
-	go get gopkg.in/tucnak/telebot.v1
+	go get gopkg.in/tucnak/telebot.v2
 
 (after setting up your `GOPATH` properly).
 
@@ -33,7 +29,7 @@ import (
 	"os"
 	"time"
 
-	tb "gopkg.in/tucnak/telebot.v1"
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 func main() {
@@ -45,10 +41,9 @@ func main() {
 	messages := make(chan tb.Message, 100)
 	bot.Listen(messages, 10 * time.Second)
 
-	for message := range messages {
-		if message.Text == "/hi" {
-			bot.SendMessage(message.Chat,
-				"Hello, "+message.Sender.FirstName+"!", nil)
+	for msg := range messages {
+		if msg.Text == "/hi" {
+			bot.Send(msg.Chat, "Hello, "+msg.Sender.FirstName+"!")
 		}
 	}
 }
@@ -66,7 +61,7 @@ import (
 	"time"
 	"os"
 
-	tb "gopkg.in/tucnak/telebot.v1"
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 func main() {
@@ -128,25 +123,24 @@ func queries(bot *tb.Bot) {
 Telebot lets you upload files from the file system:
 
 ```go
-boom, err := tb.NewFile("boom.ogg")
+f, err := tb.NewFile("boom.ogg")
 if err != nil {
 	return err
 }
 
-audio := tb.Audio{File: boom}
+audio := &tb.Audio{File: f}
 
-// Next time you send &audio, telebot won't issue
-// an upload, but would re-use existing file.
-err = bot.SendAudio(recipient, &audio, nil)
+// Next time you'll be sending this very *Audio, Telebot won't
+// re-upload the same file but rather use the copy from the
+// server.
+err = bot.Send(recipient, audio)
 ```
 
 ## Reply markup
-Sometimes you wanna send a little complicated messages with some optional parameters. The third argument of all `Send*` methods accepts `telebot.SendOptions`, capable of defining an advanced reply markup:
-
 ```go
 // Send a selective force reply message.
-bot.SendMessage(user, "pong", &tb.SendOptions{
-		ReplyMarkup: tb.ReplyMarkup{
+bot.Send(user, "pong", &tb.SendOptions{
+		ReplyMarkup: &tb.ReplyMarkup{
 			ForceReply: true,
 			Selective: true,
 			CustomKeyboard: [][]string{
