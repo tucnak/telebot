@@ -8,8 +8,8 @@ import (
 type Message struct {
 	ID int `json:"message_id"`
 
-	// For message sent to channels, Sender may be empty
-	Sender User `json:"from"`
+	// For message sent to channels, Sender will be nil
+	Sender *User `json:"from"`
 
 	Unixtime int `json:"date"`
 
@@ -138,11 +138,7 @@ type Message struct {
 }
 
 // Origin returns an origin of message: group chat / personal.
-func (m *Message) Origin() User {
-	// if m.IsPersonal() {
-	// 	return m.Chat
-	// }
-
+func (m *Message) Origin() *User {
 	return m.Sender
 }
 

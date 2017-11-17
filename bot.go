@@ -102,7 +102,6 @@ func (b *Bot) poll(
 			latestUpdate = update.ID
 		}
 	}
-
 }
 
 // SendMessage sends a text message to recipient.
@@ -947,7 +946,7 @@ func (b *Bot) EditMessageCaption(recipient Recipient, messageID int, caption str
 
 	if inlineKeyboard != nil {
 		embedSendOptions(params, &SendOptions{
-			ReplyMarkup: ReplyMarkup{
+			ReplyMarkup: &ReplyMarkup{
 				InlineKeyboard: inlineKeyboard.InlineKeyboard,
 			},
 		})
@@ -988,7 +987,7 @@ func (b *Bot) EditInlineMessageCaption(messageID string, caption string, inlineK
 
 	if inlineKeyboard != nil {
 		embedSendOptions(params, &SendOptions{
-			ReplyMarkup: ReplyMarkup{
+			ReplyMarkup: &ReplyMarkup{
 				InlineKeyboard: inlineKeyboard.InlineKeyboard,
 			},
 		})
@@ -1029,7 +1028,7 @@ func (b *Bot) EditMessageReplyMarkup(recipient Recipient, messageID int, inlineK
 
 	if inlineKeyboard != nil {
 		embedSendOptions(params, &SendOptions{
-			ReplyMarkup: ReplyMarkup{
+			ReplyMarkup: &ReplyMarkup{
 				InlineKeyboard: inlineKeyboard.InlineKeyboard,
 			},
 		})
@@ -1069,7 +1068,7 @@ func (b *Bot) EditInlineMessageReplyMarkup(messageID string, caption string, inl
 
 	if inlineKeyboard != nil {
 		embedSendOptions(params, &SendOptions{
-			ReplyMarkup: ReplyMarkup{
+			ReplyMarkup: &ReplyMarkup{
 				InlineKeyboard: inlineKeyboard.InlineKeyboard,
 			},
 		})

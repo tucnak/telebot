@@ -4,19 +4,19 @@ package telebot
 // be appled to messages sent.
 type SendOptions struct {
 	// If the message is a reply, original message.
-	ReplyTo Message
+	ReplyTo *Message `json:"omitempty"`
 
 	// See ReplyMarkup struct definition.
-	ReplyMarkup ReplyMarkup
+	ReplyMarkup *ReplyMarkup `json:"omitempty"`
 
 	// For text messages, disables previews for links in this message.
-	DisableWebPagePreview bool
+	DisableWebPagePreview bool `json:"omitempty"`
 
 	// Sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound.
-	DisableNotification bool
+	DisableNotification bool `json:"omitempty"`
 
 	// ParseMode controls how client apps render your message.
-	ParseMode ParseMode
+	ParseMode ParseMode `json:"omitempty"`
 }
 
 // ReplyMarkup specifies convenient options for bot-user communications.
