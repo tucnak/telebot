@@ -71,32 +71,22 @@ type Update struct {
 	Query    *Query    `json:"inline_query"`
 }
 
-// Thumbnail object represents an image/sticker of a particular size.
-type Thumbnail struct {
+// Photo object represents a photo (with or without caption).
+type Photo struct {
 	File
 
 	Width  int `json:"width"`
 	Height int `json:"height"`
+
+	Caption string `json:"caption,omitempty"`
 }
 
-// Photo object represents a photo with caption.
-type Photo struct {
-	File
-
-	Thumbnail
-
-	Caption string
-}
-
-// Audio object represents an audio file (voice note).
+// Audio object represents an audio file.
 type Audio struct {
 	File
 
 	// Duration of the recording in seconds as defined by sender.
 	Duration int `json:"duration"`
-
-	// FileSize (optional) of the audio file.
-	FileSize int `json:"file_size"`
 
 	// Title (optional) as defined by sender or by audio tags.
 	Title string `json:"title"`
@@ -106,6 +96,21 @@ type Audio struct {
 
 	// MIME type (optional) of the file as defined by sender.
 	Mime string `json:"mime_type"`
+
+	Caption string `json:"caption,omitempty"`
+}
+
+// Voice object represents a voice note.
+type Voice struct {
+	File
+
+	// Duration of the recording in seconds as defined by sender.
+	Duration int `json:"duration"`
+
+	// MIME type (optional) of the file as defined by sender.
+	Mime string `json:"mime_type"`
+
+	Caption string `json:"caption,omitempty"`
 }
 
 // Document object represents a general file (as opposed to Photo or Audio).
@@ -114,13 +119,15 @@ type Document struct {
 	File
 
 	// Document thumbnail as defined by sender.
-	Preview Thumbnail `json:"thumb"`
+	Preview Photo `json:"thumb"`
 
 	// Original filename as defined by sender.
 	FileName string `json:"file_name"`
 
 	// MIME type of the file as defined by sender.
 	Mime string `json:"mime_type"`
+
+	Caption string `json:"caption,omitempty"`
 }
 
 // Sticker object represents a WebP image, so-called sticker.
@@ -131,7 +138,10 @@ type Sticker struct {
 	Height int `json:"height"`
 
 	// Sticker thumbnail in .webp or .jpg format.
-	Preview Thumbnail `json:"thumb"`
+	Thumbnail Photo `json:"thumb"`
+
+	// Associated emoji
+	Emoji string `json:"emoji"`
 }
 
 // Video object represents an MP4-encoded video.
@@ -141,11 +151,46 @@ type Video struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
 
-	// Text description of the video as defined by sender (usually empty).
-	Caption string `json:"caption"`
+	// Text description of the video as defined by sender.
+	Caption string `json:"caption,omitempty"`
 
 	// Video thumbnail.
-	Preview Thumbnail `json:"thumb"`
+	Thumbnail Photo `json:"thumb"`
+}
+
+// This object represents a video message (available in Telegram apps
+// as of v.4.0).
+type VideoNote struct {
+	File
+
+	// Duration of the recording in seconds as defined by sender.
+	Duration int `json:"duration"`
+
+	// Video note thumbnail.
+	Thumbnail Photo `json:"thumb"`
+}
+
+// Contact object represents a contact to Telegram user
+type Contact struct {
+	UserID      int    `json:"user_id"`
+	PhoneNumber string `json:"phone_number"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+}
+
+// Location object represents geographic position.
+type Location struct {
+	Lat float32 `json:"latitude"`
+	Lng float32 `json:"longitude"`
+}
+
+// Venue object represents a venue location with name, address and
+// optional foursquare ID.
+type Venue struct {
+	Location     Location `json:"location"`
+	Title        string   `json:"title"`
+	Address      string   `json:"address"`
+	FoursquareID string   `json:"foursquare_id,omitempty"`
 }
 
 // KeyboardButton represents a button displayed on in a message.
@@ -162,20 +207,6 @@ type InlineKeyboardMarkup struct {
 	// Array of button rows, each represented by
 	// an Array of KeyboardButton objects.
 	InlineKeyboard [][]KeyboardButton `json:"inline_keyboard,omitempty"`
-}
-
-// Contact object represents a contact to Telegram user
-type Contact struct {
-	UserID      int    `json:"user_id"`
-	PhoneNumber string `json:"phone_number"`
-	FirstName   string `json:"first_name"`
-	LastName    string `json:"last_name"`
-}
-
-// Location object represents geographic position.
-type Location struct {
-	Latitude  float32 `json:"latitude"`
-	Longitude float32 `json:"longitude"`
 }
 
 // Callback object represents a query from a callback button in an
@@ -220,36 +251,6 @@ type CallbackResponse struct {
 	// note that this will only work if the query comes from a callback_game button.
 	// Otherwise, you may use links like telegram.me/your_bot?start=XXXX that open your bot with a parameter.
 	URL string `json:"url,omitempty"`
-}
-
-// Venue object represents a venue location with name, address and
-// optional foursquare ID.
-type Venue struct {
-	Location     Location `json:"location"`
-	Title        string   `json:"title"`
-	Address      string   `json:"address"`
-	FoursquareID string   `json:"foursquare_id,omitempty"`
-}
-
-// MessageEntity object represents "special" parts of text messages,
-// including hashtags, usernames, URLs, etc.
-type MessageEntity struct {
-	// Specifies entity type.
-	Type EntityType `json:"type"`
-
-	// Offset in UTF-16 code units to the start of the entity.
-	Offset int `json:"offset"`
-
-	// Length of the entity in UTF-16 code units.
-	Length int `json:"length"`
-
-	// (Optional) For EntityTextLink entity type only.
-	//
-	// URL will be opened after user taps on the text.
-	URL string `json:"url,omitempty"`
-
-	// (Optional) For EntityTMention entity type only.
-	User *User `json:"user,omitempty"`
 }
 
 // ChatMember object represents information about a single chat member.

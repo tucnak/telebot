@@ -11,7 +11,10 @@ type Message struct {
 	// For message sent to channels, Sender will be nil
 	Sender *User `json:"from"`
 
-	Unixtime int `json:"date"`
+	Unixtime int64 `json:"date"`
+
+	// (Optional) Time of last edit in Unix
+	LastEdited int64 `json:"edit_date"`
 
 	// For forwarded messages, sender of the original message.
 	OriginalSender *User `json:"forward_from"`
@@ -28,8 +31,11 @@ type Message struct {
 	// itself is a reply.
 	ReplyTo *Message `json:"reply_to_message"`
 
-	// For a text message, the actual UTF-8 text of the message
+	// For a text message, the actual UTF-8 text of the message.
 	Text string `json:"text"`
+
+	// Author signature (in channels).
+	Signature string `json:"author_signature"`
 
 	// For an audio recording, information about it.
 	Audio *Audio `json:"audio"`
@@ -37,11 +43,17 @@ type Message struct {
 	// For a general file, information about it.
 	Document *Document `json:"document"`
 
-	// For a photo, available thumbnails.
-	Photo []Thumbnail `json:"photo"`
+	// For a photo, all available sizes (thumnails).
+	Photo []Photo `json:"photo"`
 
 	// For a sticker, information about it.
 	Sticker *Sticker `json:"sticker"`
+
+	// For a voice message, information about it.
+	Voice *Voice `json:"voice"`
+
+	// For a video note, information about it.
+	VideoNote *VideoNote `json:"video_note"`
 
 	// For a video, information about it.
 	Video *Video `json:"video"`
@@ -82,7 +94,7 @@ type Message struct {
 	// thumbnails of new chat photo.
 	//
 	// Sender would lead to a User, capable of change.
-	NewChatPhoto []Thumbnail `json:"new_chat_photo"`
+	NewChatPhoto []Photo `json:"new_chat_photo"`
 
 	// For a service message, true if chat photo just
 	// got removed.
@@ -132,9 +144,31 @@ type Message struct {
 	// Sender would lead to creator of the migration.
 	MigrateFrom int64 `json:"migrate_from_chat_id"`
 
-	Entities []MessageEntity `json:"entities,omitempty"`
+	Entities        []MessageEntity `json:"entities,omitempty"`
+	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
 
 	Caption string `json:"caption,omitempty"`
+}
+
+// MessageEntity object represents "special" parts of text messages,
+// including hashtags, usernames, URLs, etc.
+type MessageEntity struct {
+	// Specifies entity type.
+	Type EntityType `json:"type"`
+
+	// Offset in UTF-16 code units to the start of the entity.
+	Offset int `json:"offset"`
+
+	// Length of the entity in UTF-16 code units.
+	Length int `json:"length"`
+
+	// (Optional) For EntityTextLink entity type only.
+	//
+	// URL will be opened after user taps on the text.
+	URL string `json:"url,omitempty"`
+
+	// (Optional) For EntityTMention entity type only.
+	User *User `json:"user,omitempty"`
 }
 
 // Origin returns an origin of message: group chat / personal.

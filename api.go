@@ -97,6 +97,10 @@ func (b *Bot) sendFile(method, name, path string, params map[string]string) ([]b
 func (b *Bot) sendObject(f *File, what string, params map[string]string) (*Message, error) {
 	sendWhat := "send" + strings.Title(what)
 
+	if what == "videoNote" {
+		what = "video_note"
+	}
+
 	var respJSON []byte
 	var err error
 
