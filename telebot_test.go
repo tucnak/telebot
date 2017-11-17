@@ -28,8 +28,8 @@ func TestBot(t *testing.T) {
 
 func TestRecipient(_ *testing.T) {
 	bot := Bot{}
-	bot.SendMessage(User{}, "", nil)
-	bot.SendMessage(Chat{}, "", nil)
+	bot.Send(&User{}, "")
+	bot.Send(&Chat{}, "")
 }
 
 func TestFile(t *testing.T) {
