@@ -1,5 +1,6 @@
 package telebot
 
+// Option is a shorcut flag for certain SendOptions.
 type Option int
 
 const (
@@ -11,12 +12,6 @@ const (
 
 	// ReplyMarkup.ForceReply
 	ForceReply
-
-	// ReplyMarkup.HideCustomKeyboard
-	HideKeyboard
-
-	// ReplyMarkup.ResizeKeyboard
-	ResizeKeyboard
 
 	// ReplyMarkup.OneTimeKeyboard
 	OneTimeKeyboard
@@ -57,11 +52,6 @@ type ReplyMarkup struct {
 	//
 	// Note: you don't need to set HideCustomKeyboard field to show custom keyboard.
 	ReplyKeyboard [][]KeyboardButton `json:"keyboard,omitempty"`
-
-	// Requests clients to hide the custom keyboard.
-	//
-	// Note: You dont need to set CustomKeyboard field to hide custom keyboard.
-	HideReplyKeyboard bool `json:"hide_keyboard,omitempty"`
 
 	// Requests clients to resize the keyboard vertically for optimal fit
 	// (e.g. make the keyboard smaller if there are just two rows of buttons).

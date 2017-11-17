@@ -46,27 +46,67 @@ func extractOkResponse(respJSON []byte) error {
 }
 
 func extractOptions(how []interface{}) *SendOptions {
-	var options *SendOptions
+	var opts *SendOptions
 
-	for _, object := range how {
-		switch option := object.(type) {
+	for _, prop := range how {
+		switch opt := prop.(type) {
 		case *SendOptions:
-			options = option
+			opts = opt
 			break
 
 		case *ReplyMarkup:
-			if options == nil {
-				options = &SendOptions{}
+			if opts == nil {
+				opts = &SendOptions{}
 			}
-			options.ReplyMarkup = option
+			opts.ReplyMarkup = opt
+			break
+
+		case Option:
+			if opts == nil {
+				opts = &SendOptions{}
+			}
+
+			switch opt {
+			case NoPreview:
+				opts.DisableWebPagePreview = true
+				break
+
+			case Silent:
+				opts.DisableNotification = true
+				break
+
+			case ForceReply:
+				if opts.ReplyMarkup == nil {
+					opts.ReplyMarkup = &ReplyMarkup{}
+				}
+				opts.ReplyMarkup.ForceReply = true
+				break
+
+			case OneTimeKeyboard:
+				if opts.ReplyMarkup == nil {
+					opts.ReplyMarkup = &ReplyMarkup{}
+				}
+				opts.ReplyMarkup.OneTimeKeyboard = true
+				break
+
+			default:
+				panic("telebot: unsupported option")
+			}
+			break
+
+		case ParseMode:
+			if opts == nil {
+				opts = &SendOptions{}
+			}
+			opts.ParseMode = opt
 			break
 
 		default:
-			panic(fmt.Sprintf("telebot: %v is not a send-option", option))
+			panic(fmt.Sprintf("telebot: %v is not a send-option", opt))
 		}
 	}
 
-	return options
+	return opts
 }
 
 func embedSendOptions(params map[string]string, opt *SendOptions) {
@@ -91,14 +131,7 @@ func embedSendOptions(params map[string]string, opt *SendOptions) {
 	}
 
 	if opt.ReplyMarkup != nil {
-		force := opt.ReplyMarkup.ForceReply
-		reply := opt.ReplyMarkup.ReplyKeyboard != nil
-		inline := opt.ReplyMarkup.InlineKeyboard != nil
-		hidden := opt.ReplyMarkup.HideReplyKeyboard
-		resize := opt.ReplyMarkup.ResizeReplyKeyboard
-		if force || reply || inline || hidden || resize {
-			replyMarkup, _ := json.Marshal(opt.ReplyMarkup)
-			params["reply_markup"] = string(replyMarkup)
-		}
+		replyMarkup, _ := json.Marshal(opt.ReplyMarkup)
+		params["reply_markup"] = string(replyMarkup)
 	}
 }

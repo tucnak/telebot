@@ -3,6 +3,9 @@ package telebot
 import "strconv"
 
 // Sendable is any object that can send itself.
+//
+// This is pretty cool, since it lets bots implement
+// custom Sendables with certain properties.
 type Sendable interface {
 	Send(*Bot, Recipient, *SendOptions) (*Message, error)
 }

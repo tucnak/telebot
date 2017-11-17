@@ -104,6 +104,20 @@ func (b *Bot) poll(
 	}
 }
 
+// Send accepts 2+ arguments, starting with destination chat, followed by
+// some Sendable (or string!) and optional send options.
+//
+// Note: since most arguments are of type interface{}, make sure to pass
+//       them by-pointer, NOT by-value, which will result in a panic.
+//
+// What is a send option exactly? It can be one of the following types:
+//
+// - Option (a shorcut flag for popular options)
+// - *SendOptions (the actual object accepted by Telegram API)
+// - *ReplyMarkup (a component of SendOptions)
+// - ParseMode (HTML, Markdown, etc)
+//
+// This function will panic upon unsupported payloads and options!
 func (b *Bot) Send(to Recipient, what interface{}, how ...interface{}) (*Message, error) {
 	options := extractOptions(how)
 
@@ -117,6 +131,9 @@ func (b *Bot) Send(to Recipient, what interface{}, how ...interface{}) (*Message
 	}
 }
 
+// Reply behaves just like Send() with an exception of "reply-to" indicator.
+//
+// This function will panic upon unsupported payloads and options!
 func (b *Bot) Reply(to *Message, what interface{}, how ...interface{}) (*Message, error) {
 	options := extractOptions(how)
 	if options == nil {
@@ -128,6 +145,10 @@ func (b *Bot) Reply(to *Message, what interface{}, how ...interface{}) (*Message
 	return b.Send(to.Chat, what, options)
 }
 
+// Forward behaves just like Send() but of all options it
+// only supports Silent (see Bots API).
+//
+// This function will panic upon unsupported payloads and options!
 func (b *Bot) Forward(to Recipient, what *Message, how ...interface{}) (*Message, error) {
 	params := map[string]string{
 		"chat_id":      to.Destination(),
@@ -149,6 +170,16 @@ func (b *Bot) Forward(to Recipient, what *Message, how ...interface{}) (*Message
 	return extractMsgResponse(respJSON)
 }
 
+// Delete removes the message, including service messages,
+// with the following limitations:
+//
+// - A message can only be deleted if it was sent less than 48 hours ago.
+// - Bots can delete outgoing messages in groups and supergroups.
+// - Bots granted can_post_messages permissions can delete outgoing
+//   messages in channels.
+// - If the bot is an administrator of a group, it can delete any message there.
+// - If the bot has can_delete_messages permission in a supergroup or a
+//   channel, it can delete any message there.
 func (b *Bot) Delete(what *Message) error {
 	params := map[string]string{
 		"chat_id":    what.Chat.Destination(),
