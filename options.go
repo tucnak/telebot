@@ -43,17 +43,17 @@ type SendOptions struct {
 
 // ReplyMarkup specifies convenient options for bot-user communications.
 type ReplyMarkup struct {
-	InlineKeyboard [][]KeyboardButton `json:"inline_keyboard,omitempty"`
+	InlineKeyboard [][]InlineButton `json:"inline_keyboard,omitempty"`
 
 	// ForceReply forces Telegram clients to display
 	// a reply interface to the user (act as if the user
 	// has selected the bot‘s message and tapped "Reply").
 	ForceReply bool `json:"force_reply,omitempty"`
 
-	// CustomKeyboard is Array of button rows, each represented by an Array of Strings.
+	// CustomKeyboard is a grid, consisting of keyboard buttons.
 	//
 	// Note: you don't need to set HideCustomKeyboard field to show custom keyboard.
-	CustomKeyboard [][]string `json:"keyboard,omitempty"`
+	CustomKeyboard [][]KeyboardButton `json:"keyboard,omitempty"`
 
 	// Requests clients to hide the custom keyboard.
 	//

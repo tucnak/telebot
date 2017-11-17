@@ -193,9 +193,18 @@ type Venue struct {
 	FoursquareID string   `json:"foursquare_id,omitempty"`
 }
 
-// KeyboardButton represents a button displayed on in a message.
+// KeyboardButton represents a button displayed in reply-keyboard.
 type KeyboardButton struct {
-	Text        string `json:"text"`
+	Text string `json:"text"`
+
+	Contact  bool `json:"request_contact,omitempty"`
+	Location bool `json:"request_location,omitempty"`
+}
+
+// InlineButton represents a button displayed in the message.
+type InlineButton struct {
+	Text string `json:"text"`
+
 	URL         string `json:"url,omitempty"`
 	Data        string `json:"callback_data,omitempty"`
 	InlineQuery string `json:"switch_inline_query,omitempty"`
@@ -206,7 +215,7 @@ type KeyboardButton struct {
 type InlineKeyboardMarkup struct {
 	// Array of button rows, each represented by
 	// an Array of KeyboardButton objects.
-	InlineKeyboard [][]KeyboardButton `json:"inline_keyboard,omitempty"`
+	InlineKeyboard [][]InlineButton `json:"inline_keyboard,omitempty"`
 }
 
 // Callback object represents a query from a callback button in an
