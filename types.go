@@ -2,6 +2,11 @@ package telebot
 
 import "strconv"
 
+// Sendable is any object that can send itself.
+type Sendable interface {
+	Send(*Bot, Recipient, *SendOptions) (*Message, error)
+}
+
 // Recipient is basically any possible endpoint you can send
 // messages to. It's usually a distinct user or a chat.
 type Recipient interface {
@@ -21,7 +26,7 @@ type User struct {
 }
 
 // Destination is internal user ID.
-func (u User) Destination() string {
+func (u *User) Destination() string {
 	return strconv.Itoa(u.ID)
 }
 
@@ -43,7 +48,7 @@ type Chat struct {
 }
 
 // Destination is internal chat ID.
-func (c Chat) Destination() string {
+func (c *Chat) Destination() string {
 	ret := "@" + c.Username
 	if c.Type != "channel" {
 		ret = strconv.FormatInt(c.ID, 10)
@@ -52,7 +57,7 @@ func (c Chat) Destination() string {
 }
 
 // IsGroupChat returns true if chat object represents a group chat.
-func (c Chat) IsGroupChat() bool {
+func (c *Chat) IsGroupChat() bool {
 	return c.Type != "private"
 }
 

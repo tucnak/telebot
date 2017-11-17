@@ -1,5 +1,27 @@
 package telebot
 
+type Option int
+
+const (
+	// SendOptions.DisableWebPagePreview
+	NoPreview Option = iota
+
+	// SendOptions.DisableNotification
+	Silent
+
+	// ReplyMarkup.ForceReply
+	ForceReply
+
+	// ReplyMarkup.HideCustomKeyboard
+	HideKeyboard
+
+	// ReplyMarkup.ResizeKeyboard
+	ResizeKeyboard
+
+	// ReplyMarkup.OneTimeKeyboard
+	OneTimeKeyboard
+)
+
 // SendOptions represents a set of custom options that could
 // be appled to messages sent.
 type SendOptions struct {
@@ -21,6 +43,8 @@ type SendOptions struct {
 
 // ReplyMarkup specifies convenient options for bot-user communications.
 type ReplyMarkup struct {
+	InlineKeyboard [][]KeyboardButton `json:"inline_keyboard,omitempty"`
+
 	// ForceReply forces Telegram clients to display
 	// a reply interface to the user (act as if the user
 	// has selected the bot‘s message and tapped "Reply").
@@ -31,20 +55,20 @@ type ReplyMarkup struct {
 	// Note: you don't need to set HideCustomKeyboard field to show custom keyboard.
 	CustomKeyboard [][]string `json:"keyboard,omitempty"`
 
-	InlineKeyboard [][]KeyboardButton `json:"inline_keyboard,omitempty"`
+	// Requests clients to hide the custom keyboard.
+	//
+	// Note: You dont need to set CustomKeyboard field to hide custom keyboard.
+	HideCustomKeyboard bool `json:"hide_keyboard,omitempty"`
 
 	// Requests clients to resize the keyboard vertically for optimal fit
 	// (e.g., make the keyboard smaller if there are just two rows of buttons).
 	// Defaults to false, in which case the custom keyboard is always of the
 	// same height as the app's standard keyboard.
 	ResizeKeyboard bool `json:"resize_keyboard,omitempty"`
-	// Requests clients to hide the keyboard as soon as it's been used. Defaults to false.
-	OneTimeKeyboard bool `json:"one_time_keyboard,omitempty"`
 
-	// Requests clients to hide the custom keyboard.
-	//
-	// Note: You dont need to set CustomKeyboard field to hide custom keyboard.
-	HideCustomKeyboard bool `json:"hide_keyboard,omitempty"`
+	// Requests clients to hide the keyboard as soon as it's been used.
+	// Defaults to false.
+	OneTimeKeyboard bool `json:"one_time_keyboard,omitempty"`
 
 	// Use this param if you want to force reply from
 	// specific users only.

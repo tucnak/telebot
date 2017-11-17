@@ -104,404 +104,49 @@ func (b *Bot) poll(
 	}
 }
 
-// SendMessage sends a text message to recipient.
-func (b *Bot) SendMessage(recipient Recipient, message string, options *SendOptions) (*Message, error) {
+func (b *Bot) Send(to Recipient, what interface{}, how ...interface{}) (*Message, error) {
+	options := extractOptions(how)
+
+	switch object := what.(type) {
+	case string:
+		return b.sendText(to, object, options)
+	case Sendable:
+		return object.Send(b, to, options)
+	default:
+		panic(fmt.Sprintf("telebot: object %v is not Sendable", object))
+	}
+}
+
+func (b *Bot) Reply(to *Message, what interface{}, how ...interface{}) (*Message, error) {
+	options := extractOptions(how)
+	if options == nil {
+		options = &SendOptions{}
+	}
+
+	options.ReplyTo = to
+
+	return b.Send(to.Chat, what, options)
+}
+
+func (b *Bot) Forward(to Recipient, what *Message, how ...interface{}) (*Message, error) {
 	params := map[string]string{
-		"chat_id": recipient.Destination(),
-		"text":    message,
+		"chat_id":      to.Destination(),
+		"from_chat_id": strconv.Itoa(what.Origin().ID),
+		"message_id":   strconv.Itoa(what.ID),
 	}
 
-	if options != nil {
-		embedSendOptions(params, options)
+	options := extractOptions(how)
+	if options == nil {
+		options = &SendOptions{}
 	}
+	embedSendOptions(params, options)
 
-	responseJSON, err := b.sendCommand("sendMessage", params)
+	respJSON, err := b.sendCommand("forwardMessage", params)
 	if err != nil {
 		return nil, err
 	}
 
-	var responseRecieved struct {
-		Ok          bool
-		Result      Message
-		Description string
-	}
-
-	err = json.Unmarshal(responseJSON, &responseRecieved)
-	if err != nil {
-		return nil, errors.Wrap(err, "bad response json")
-	}
-
-	if !responseRecieved.Ok {
-		return nil, errors.Errorf("api error: %s", responseRecieved.Description)
-	}
-
-	return &responseRecieved.Result, nil
-}
-
-// ForwardMessage forwards a message to recipient.
-func (b *Bot) ForwardMessage(recipient Recipient, message Message) error {
-	params := map[string]string{
-		"chat_id":      recipient.Destination(),
-		"from_chat_id": strconv.Itoa(message.Origin().ID),
-		"message_id":   strconv.Itoa(message.ID),
-	}
-
-	responseJSON, err := b.sendCommand("forwardMessage", params)
-	if err != nil {
-		return err
-	}
-
-	var responseRecieved struct {
-		Ok          bool
-		Description string
-	}
-
-	err = json.Unmarshal(responseJSON, &responseRecieved)
-	if err != nil {
-		return errors.Wrap(err, "bad response json")
-	}
-
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
-	}
-
-	return nil
-}
-
-// SendPhoto sends a photo object to recipient.
-//
-// On success, photo object would be aliased to its copy on
-// the Telegram servers, so sending the same photo object
-// again, won't issue a new upload, but would make a use
-// of existing file on Telegram servers.
-func (b *Bot) SendPhoto(recipient Recipient, photo *Photo, options *SendOptions) (*Message, error) {
-	params := map[string]string{
-		"chat_id": recipient.Destination(),
-		"caption": photo.Caption,
-	}
-
-	if options != nil {
-		embedSendOptions(params, options)
-	}
-
-	var responseJSON []byte
-	var err error
-
-	if photo.Exists() {
-		params["photo"] = photo.FileID
-		responseJSON, err = b.sendCommand("sendPhoto", params)
-	} else {
-		responseJSON, err = b.sendFile("sendPhoto", "photo", photo.filename, params)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	var responseRecieved struct {
-		Ok          bool
-		Result      Message
-		Description string
-	}
-
-	err = json.Unmarshal(responseJSON, &responseRecieved)
-	if err != nil {
-		return nil, errors.Wrap(err, "bad response json")
-	}
-
-	if !responseRecieved.Ok {
-		return nil, errors.Errorf("api error: %s", responseRecieved.Description)
-	}
-
-	thumbnails := &responseRecieved.Result.Photo
-	filename := photo.filename
-	photo.File = (*thumbnails)[len(*thumbnails)-1].File
-	photo.filename = filename
-
-	return &responseRecieved.Result, nil
-}
-
-// SendAudio sends an audio object to recipient.
-//
-// On success, audio object would be aliased to its copy on
-// the Telegram servers, so sending the same audio object
-// again, won't issue a new upload, but would make a use
-// of existing file on Telegram servers.
-func (b *Bot) SendAudio(recipient Recipient, audio *Audio, options *SendOptions) error {
-	params := map[string]string{
-		"chat_id": recipient.Destination(),
-	}
-
-	if options != nil {
-		embedSendOptions(params, options)
-	}
-
-	var responseJSON []byte
-	var err error
-
-	if audio.Exists() {
-		params["audio"] = audio.FileID
-		responseJSON, err = b.sendCommand("sendAudio", params)
-	} else {
-		responseJSON, err = b.sendFile("sendAudio", "audio", audio.filename, params)
-	}
-
-	if err != nil {
-		return err
-	}
-
-	var responseRecieved struct {
-		Ok          bool
-		Result      Message
-		Description string
-	}
-
-	err = json.Unmarshal(responseJSON, &responseRecieved)
-	if err != nil {
-		return errors.Wrap(err, "bad response json")
-	}
-
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
-	}
-
-	filename := audio.filename
-	*audio = *responseRecieved.Result.Audio
-	audio.filename = filename
-
-	return nil
-}
-
-// SendDocument sends a general document object to recipient.
-//
-// On success, document object would be aliased to its copy on
-// the Telegram servers, so sending the same document object
-// again, won't issue a new upload, but would make a use
-// of existing file on Telegram servers.
-func (b *Bot) SendDocument(recipient Recipient, doc *Document, options *SendOptions) error {
-	params := map[string]string{
-		"chat_id": recipient.Destination(),
-	}
-
-	if options != nil {
-		embedSendOptions(params, options)
-	}
-
-	var responseJSON []byte
-	var err error
-
-	if doc.Exists() {
-		params["document"] = doc.FileID
-		responseJSON, err = b.sendCommand("sendDocument", params)
-	} else {
-		responseJSON, err = b.sendFile("sendDocument", "document", doc.filename, params)
-	}
-
-	if err != nil {
-		return err
-	}
-
-	var responseRecieved struct {
-		Ok          bool
-		Result      Message
-		Description string
-	}
-
-	err = json.Unmarshal(responseJSON, &responseRecieved)
-	if err != nil {
-		return errors.Wrap(err, "bad response json")
-	}
-
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
-	}
-
-	filename := doc.filename
-	*doc = *responseRecieved.Result.Document
-	doc.filename = filename
-
-	return nil
-}
-
-// SendSticker sends a general document object to recipient.
-//
-// On success, sticker object would be aliased to its copy on
-// the Telegram servers, so sending the same sticker object
-// again, won't issue a new upload, but would make a use
-// of existing file on Telegram servers.
-func (b *Bot) SendSticker(recipient Recipient, sticker *Sticker, options *SendOptions) error {
-	params := map[string]string{
-		"chat_id": recipient.Destination(),
-	}
-
-	if options != nil {
-		embedSendOptions(params, options)
-	}
-
-	var responseJSON []byte
-	var err error
-
-	if sticker.Exists() {
-		params["sticker"] = sticker.FileID
-		responseJSON, err = b.sendCommand("sendSticker", params)
-	} else {
-		responseJSON, err = b.sendFile("sendSticker", "sticker", sticker.filename, params)
-	}
-
-	if err != nil {
-		return err
-	}
-
-	var responseRecieved struct {
-		Ok          bool
-		Result      Message
-		Description string
-	}
-
-	err = json.Unmarshal(responseJSON, &responseRecieved)
-	if err != nil {
-		return errors.Wrap(err, "bad response json")
-	}
-
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
-	}
-
-	filename := sticker.filename
-	*sticker = *responseRecieved.Result.Sticker
-	sticker.filename = filename
-
-	return nil
-}
-
-// SendVideo sends a general document object to recipient.
-//
-// On success, video object would be aliased to its copy on
-// the Telegram servers, so sending the same video object
-// again, won't issue a new upload, but would make a use
-// of existing file on Telegram servers.
-func (b *Bot) SendVideo(recipient Recipient, video *Video, options *SendOptions) error {
-	params := map[string]string{
-		"chat_id": recipient.Destination(),
-	}
-
-	if options != nil {
-		embedSendOptions(params, options)
-	}
-
-	var responseJSON []byte
-	var err error
-
-	if video.Exists() {
-		params["video"] = video.FileID
-		responseJSON, err = b.sendCommand("sendVideo", params)
-	} else {
-		responseJSON, err = b.sendFile("sendVideo", "video", video.filename, params)
-	}
-
-	if err != nil {
-		return err
-	}
-
-	var responseRecieved struct {
-		Ok          bool
-		Result      Message
-		Description string
-	}
-
-	err = json.Unmarshal(responseJSON, &responseRecieved)
-	if err != nil {
-		return errors.Wrap(err, "bad response json")
-	}
-
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
-	}
-
-	filename := video.filename
-	*video = *responseRecieved.Result.Video
-	video.filename = filename
-
-	return nil
-}
-
-// SendLocation sends a general document object to recipient.
-//
-// On success, video object would be aliased to its copy on
-// the Telegram servers, so sending the same video object
-// again, won't issue a new upload, but would make a use
-// of existing file on Telegram servers.
-func (b *Bot) SendLocation(recipient Recipient, geo *Location, options *SendOptions) error {
-	params := map[string]string{
-		"chat_id":   recipient.Destination(),
-		"latitude":  fmt.Sprintf("%f", geo.Latitude),
-		"longitude": fmt.Sprintf("%f", geo.Longitude),
-	}
-
-	if options != nil {
-		embedSendOptions(params, options)
-	}
-
-	responseJSON, err := b.sendCommand("sendLocation", params)
-	if err != nil {
-		return err
-	}
-
-	var responseRecieved struct {
-		Ok          bool
-		Result      Message
-		Description string
-	}
-
-	err = json.Unmarshal(responseJSON, &responseRecieved)
-	if err != nil {
-		return errors.Wrap(err, "bad response json")
-	}
-
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
-	}
-
-	return nil
-}
-
-// SendVenue sends a venue object to recipient.
-func (b *Bot) SendVenue(recipient Recipient, venue *Venue, options *SendOptions) error {
-	params := map[string]string{
-		"chat_id":   recipient.Destination(),
-		"latitude":  fmt.Sprintf("%f", venue.Location.Latitude),
-		"longitude": fmt.Sprintf("%f", venue.Location.Longitude),
-		"title":     venue.Title,
-		"address":   venue.Address}
-	if venue.FoursquareID != "" {
-		params["foursquare_id"] = venue.FoursquareID
-	}
-
-	if options != nil {
-		embedSendOptions(params, options)
-	}
-
-	responseJSON, err := b.sendCommand("sendVenue", params)
-	if err != nil {
-		return err
-	}
-
-	var responseRecieved struct {
-		Ok          bool
-		Result      Message
-		Description string
-	}
-
-	err = json.Unmarshal(responseJSON, &responseRecieved)
-	if err != nil {
-		return errors.Wrap(err, "bad response json")
-	}
-
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
-	}
-
-	return nil
+	return extractMsgResponse(respJSON)
 }
 
 // SendChatAction updates a chat action for recipient.

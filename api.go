@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -93,38 +94,24 @@ func (b *Bot) sendFile(method, name, path string, params map[string]string) ([]b
 	return json, nil
 }
 
-func embedSendOptions(params map[string]string, options *SendOptions) {
-	if options == nil {
-		return
+func (b *Bot) sendObject(f *File, what string, params map[string]string) (*Message, error) {
+	sendWhat := "send" + strings.Title(what)
+
+	var respJSON []byte
+	var err error
+
+	if f.Exists() {
+		params[what] = f.FileID
+		respJSON, err = b.sendCommand(sendWhat, params)
+	} else {
+		respJSON, err = b.sendFile(sendWhat, what, f.filename, params)
 	}
 
-	if options.ReplyTo.ID != 0 {
-		params["reply_to_message_id"] = strconv.Itoa(options.ReplyTo.ID)
+	if err != nil {
+		return nil, err
 	}
 
-	if options.DisableWebPagePreview {
-		params["disable_web_page_preview"] = "true"
-	}
-
-	if options.DisableNotification {
-		params["disable_notification"] = "true"
-	}
-
-	if options.ParseMode != ModeDefault {
-		params["parse_mode"] = string(options.ParseMode)
-	}
-
-	// Processing force_reply:
-	{
-		forceReply := options.ReplyMarkup.ForceReply
-		customKeyboard := (options.ReplyMarkup.CustomKeyboard != nil)
-		inlineKeyboard := options.ReplyMarkup.InlineKeyboard != nil
-		hiddenKeyboard := options.ReplyMarkup.HideCustomKeyboard
-		if forceReply || customKeyboard || hiddenKeyboard || inlineKeyboard {
-			replyMarkup, _ := json.Marshal(options.ReplyMarkup)
-			params["reply_markup"] = string(replyMarkup)
-		}
-	}
+	return extractMsgResponse(respJSON)
 }
 
 func (b *Bot) getMe() (User, error) {
