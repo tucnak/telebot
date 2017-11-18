@@ -267,15 +267,23 @@ type CallbackResponse struct {
 
 // ChatMember object represents information about a single chat member.
 type ChatMember struct {
-	User   User   `json:"user"`
-	Status string `json:"status"`
-}
+	User   *User        `json:"user"`
+	Status MemberStatus `json:"status"`
 
-// UserProfilePhotos object represent a user's profile pictures.
-type UserProfilePhotos struct {
-	// Total number of profile pictures the target user has.
-	Count int `json:"total_count"`
+	// Due for banned/restricted, Unixtime.
+	Until int64 `json:"until_date,omitempty"`
 
-	// Requested profile pictures (in up to 4 sizes each).
-	Photos [][]Photo `json:"photos"`
+	CanBeEdited        bool `json:"can_be_edited,omitempty"`
+	CanChangeInfo      bool `json:"can_change_info,omitempty"`
+	CanPostMessages    bool `json:"can_post_messages,omitempty"`
+	CanEditMessages    bool `json:"can_edit_messages,omitempty"`
+	CanDeleteMessages  bool `json:"can_delete_messages,omitempty"`
+	CanInviteUsers     bool `json:"can_invite_users,omitempty"`
+	CanRestrictMembers bool `json:"can_restrict_members,omitempty"`
+	CanPinMessages     bool `json:"can_pin_messages,omitempty"`
+	CanPromoteMembers  bool `json:"can_promote_members,omitempty"`
+	CanSendMessages    bool `json:"can_send_messages,omitempty"`
+	CanSendMedia       bool `json:"can_send_media_messages,omitempty"`
+	CanSendOther       bool `json:"can_send_other_messages,omitempty"`
+	CanAddPreviews     bool `json:"can_add_web_page_previews,omitempty"`
 }

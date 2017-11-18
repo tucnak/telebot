@@ -36,8 +36,10 @@ const (
 	UploadingVideo    ChatAction = "upload_video"
 	UploadingAudio    ChatAction = "upload_audio"
 	UploadingDocument ChatAction = "upload_document"
+	UploadingVNote    ChatAction = "upload_video_note"
 	RecordingVideo    ChatAction = "record_video"
 	RecordingAudio    ChatAction = "record_audio"
+	RecordingVNote    ChatAction = "record_video_note"
 	FindingLocation   ChatAction = "find_location"
 )
 
@@ -75,4 +77,16 @@ const (
 	ChatGroup      ChatType = "group"
 	ChatSuperGroup ChatType = "supergroup"
 	ChatChannel    ChatType = "channel"
+)
+
+// MemberStatus is one's chat status
+type MemberStatus string
+
+const (
+	Creator       MemberStatus = "creator"
+	Administrator MemberStatus = "administrator"
+	Member        MemberStatus = "member"
+	Restricted    MemberStatus = "restricted"
+	Left          MemberStatus = "left"
+	Kicked        MemberStatus = "kicked"
 )

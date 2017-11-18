@@ -209,62 +209,12 @@ func (b *Bot) SendChatAction(recipient Recipient, action ChatAction) error {
 		"action":  string(action),
 	}
 
-	responseJSON, err := b.sendCommand("sendChatAction", params)
+	respJSON, err := b.sendCommand("sendChatAction", params)
 	if err != nil {
 		return err
 	}
 
-	var responseRecieved struct {
-		Ok          bool
-		Description string
-	}
-
-	err = json.Unmarshal(responseJSON, &responseRecieved)
-	if err != nil {
-		return errors.Wrap(err, "bad response json")
-	}
-
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
-	}
-
-	return nil
-}
-
-// Respond publishes a set of responses for an inline query.
-// This function is deprecated in favor of AnswerInlineQuery.
-func (b *Bot) Respond(query Query, results []Result) error {
-	params := map[string]string{
-		"inline_query_id": query.ID,
-	}
-
-	if res, err := json.Marshal(results); err == nil {
-		params["results"] = string(res)
-	} else {
-		b.debug(errors.Wrapf(err, "failed to respond to \"%s\"", query.Text))
-		return err
-	}
-
-	responseJSON, err := b.sendCommand("answerInlineQuery", params)
-	if err != nil {
-		return err
-	}
-
-	var responseRecieved struct {
-		Ok          bool
-		Description string
-	}
-
-	err = json.Unmarshal(responseJSON, &responseRecieved)
-	if err != nil {
-		return errors.Wrap(err, "bad response json")
-	}
-
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
-	}
-
-	return nil
+	return extractOkResponse(respJSON)
 }
 
 // AnswerInlineQuery sends a response for a given inline query. A query can
@@ -273,26 +223,12 @@ func (b *Bot) Respond(query Query, results []Result) error {
 func (b *Bot) AnswerInlineQuery(query *Query, response *QueryResponse) error {
 	response.QueryID = query.ID
 
-	responseJSON, err := b.sendCommand("answerInlineQuery", response)
+	respJSON, err := b.sendCommand("answerInlineQuery", response)
 	if err != nil {
 		return err
 	}
 
-	var responseRecieved struct {
-		Ok          bool
-		Description string
-	}
-
-	err = json.Unmarshal(responseJSON, &responseRecieved)
-	if err != nil {
-		return errors.Wrap(err, "bad response json")
-	}
-
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
-	}
-
-	return nil
+	return extractOkResponse(respJSON)
 }
 
 // AnswerCallbackQuery sends a response for a given callback query. A callback can
@@ -301,57 +237,44 @@ func (b *Bot) AnswerInlineQuery(query *Query, response *QueryResponse) error {
 func (b *Bot) AnswerCallbackQuery(callback *Callback, response *CallbackResponse) error {
 	response.CallbackID = callback.ID
 
-	responseJSON, err := b.sendCommand("answerCallbackQuery", response)
+	respJSON, err := b.sendCommand("answerCallbackQuery", response)
 	if err != nil {
 		return err
 	}
 
-	var responseRecieved struct {
-		Ok          bool
-		Description string
-	}
-
-	err = json.Unmarshal(responseJSON, &responseRecieved)
-	if err != nil {
-		return errors.Wrap(err, "bad response json")
-	}
-
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
-	}
-
-	return nil
+	return extractOkResponse(respJSON)
 }
 
 // GetFile returns full file object including File.FilePath, which allow you to load file from Telegram
 //
 // Usually File objects does not contain any FilePath so you need to perform additional request
-func (b *Bot) GetFile(fileID string) (File, error) {
+func (b *Bot) GetFile(fileID string) (*File, error) {
 	params := map[string]string{
 		"file_id": fileID,
 	}
-	responseJSON, err := b.sendCommand("getFile", params)
+
+	respJSON, err := b.sendCommand("getFile", params)
 	if err != nil {
-		return File{}, err
+		return nil, err
 	}
 
-	var responseRecieved struct {
+	var resp struct {
 		Ok          bool
 		Description string
-		Result      File
+		Result      *File
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(respJSON, &resp)
 	if err != nil {
-		return File{}, errors.Wrap(err, "bad response json")
+		return nil, errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return File{}, errors.Errorf("api error: %s", responseRecieved.Description)
+	if !resp.Ok {
+		return nil, errors.Errorf("api error: %s", resp.Description)
 
 	}
 
-	return responseRecieved.Result, nil
+	return resp.Result, nil
 }
 
 // LeaveChat makes bot leave a group, supergroup or channel.
@@ -359,27 +282,13 @@ func (b *Bot) LeaveChat(recipient Recipient) error {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 	}
-	responseJSON, err := b.sendCommand("leaveChat", params)
+
+	respJSON, err := b.sendCommand("leaveChat", params)
 	if err != nil {
 		return err
 	}
 
-	var responseRecieved struct {
-		Ok          bool
-		Description string
-		Result      bool
-	}
-
-	err = json.Unmarshal(responseJSON, &responseRecieved)
-	if err != nil {
-		return errors.Wrap(err, "bad response json")
-	}
-
-	if !responseRecieved.Ok {
-		return errors.Errorf("api error: %s", responseRecieved.Description)
-	}
-
-	return nil
+	return extractOkResponse(respJSON)
 }
 
 // GetChat get up to date information about the chat.
@@ -388,31 +297,32 @@ func (b *Bot) LeaveChat(recipient Recipient) error {
 // current username of a user, group or channel, etc.
 //
 // Returns a Chat object on success.
-func (b *Bot) GetChat(recipient Recipient) (Chat, error) {
+func (b *Bot) GetChat(recipient Recipient) (*Chat, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 	}
-	responseJSON, err := b.sendCommand("getChat", params)
+
+	respJSON, err := b.sendCommand("getChat", params)
 	if err != nil {
-		return Chat{}, err
+		return nil, err
 	}
 
-	var responseRecieved struct {
+	var resp struct {
 		Ok          bool
 		Description string
-		Result      Chat
+		Result      *Chat
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(respJSON, &resp)
 	if err != nil {
-		return Chat{}, errors.Wrap(err, "bad response json")
+		return nil, errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return Chat{}, errors.Errorf("api error: %s", responseRecieved.Description)
+	if !resp.Ok {
+		return nil, errors.Errorf("api error: %s", resp.Description)
 	}
 
-	return responseRecieved.Result, nil
+	return resp.Result, nil
 }
 
 // GetChatAdministrators return list of administrators in a chat.
@@ -426,27 +336,28 @@ func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChatMember, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 	}
-	responseJSON, err := b.sendCommand("getChatAdministrators", params)
+
+	respJSON, err := b.sendCommand("getChatAdministrators", params)
 	if err != nil {
-		return []ChatMember{}, err
+		return nil, err
 	}
 
-	var responseRecieved struct {
+	var resp struct {
 		Ok          bool
 		Result      []ChatMember
 		Description string `json:"description"`
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(respJSON, &resp)
 	if err != nil {
-		return []ChatMember{}, errors.Wrap(err, "bad response json")
+		return nil, errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return []ChatMember{}, errors.Errorf("api error: %s", responseRecieved.Description)
+	if !resp.Ok {
+		return nil, errors.Errorf("api error: %s", resp.Description)
 	}
 
-	return responseRecieved.Result, nil
+	return resp.Result, nil
 }
 
 // GetChatMembersCount return the number of members in a chat.
@@ -456,88 +367,95 @@ func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 	}
-	responseJSON, err := b.sendCommand("getChatMembersCount", params)
+
+	respJSON, err := b.sendCommand("getChatMembersCount", params)
 	if err != nil {
 		return 0, err
 	}
 
-	var responseRecieved struct {
+	var resp struct {
 		Ok          bool
 		Result      int
 		Description string `json:"description"`
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(respJSON, &resp)
 	if err != nil {
 		return 0, errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return 0, errors.Errorf("api error: %s", responseRecieved.Description)
+	if !resp.Ok {
+		return 0, errors.Errorf("api error: %s", resp.Description)
 	}
 
-	return responseRecieved.Result, nil
+	return resp.Result, nil
 }
 
 // GetUserProfilePhotos return list of profile pictures for a user.
 //
-// Returns a UserProfilePhotos object.
-func (b *Bot) GetUserProfilePhotos(recipient Recipient) (UserProfilePhotos, error) {
+// Returns a list[photos][sizes].
+func (b *Bot) GetUserProfilePhotos(recipient Recipient) ([][]Photo, error) {
 	params := map[string]string{
 		"user_id": recipient.Destination(),
 	}
-	responseJSON, err := b.sendCommand("getUserProfilePhotos", params)
+
+	respJSON, err := b.sendCommand("getUserProfilePhotos", params)
 	if err != nil {
-		return UserProfilePhotos{}, err
+		return nil, err
 	}
 
-	var responseRecieved struct {
-		Ok          bool
-		Result      UserProfilePhotos
+	var resp struct {
+		Ok     bool
+		Result struct {
+			Count  int       `json:"total_count"`
+			Photos [][]Photo `json:"photos"`
+		}
+
 		Description string `json:"description"`
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(respJSON, &resp)
 	if err != nil {
-		return UserProfilePhotos{}, errors.Wrap(err, "bad response json")
+		return nil, errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return UserProfilePhotos{}, errors.Errorf("api error: %s", responseRecieved.Description)
+	if !resp.Ok {
+		return nil, errors.Errorf("api error: %s", resp.Description)
 	}
 
-	return responseRecieved.Result, nil
+	return resp.Result.Photos, nil
 }
 
 // GetChatMember return information about a member of a chat.
 //
 // Returns a ChatMember object on success.
-func (b *Bot) GetChatMember(recipient Recipient, user User) (ChatMember, error) {
+func (b *Bot) GetChatMember(recipient Recipient, user User) (*ChatMember, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 		"user_id": user.Destination(),
 	}
-	responseJSON, err := b.sendCommand("getChatMember", params)
+
+	respJSON, err := b.sendCommand("getChatMember", params)
 	if err != nil {
-		return ChatMember{}, err
+		return nil, err
 	}
 
-	var responseRecieved struct {
+	var resp struct {
 		Ok          bool
-		Result      ChatMember
+		Result      *ChatMember
 		Description string `json:"description"`
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(respJSON, &resp)
 	if err != nil {
-		return ChatMember{}, errors.Wrap(err, "bad response json")
+		return nil, errors.Wrap(err, "bad response json")
 	}
 
-	if !responseRecieved.Ok {
-		return ChatMember{}, errors.Errorf("api error: %s", responseRecieved.Description)
+	if !resp.Ok {
+		return nil, errors.Errorf("api error: %s", resp.Description)
 	}
 
-	return responseRecieved.Result, nil
+	return resp.Result, nil
 }
 
 // GetFileDirectURL returns direct url for files using FileId which you can get from File object
@@ -563,27 +481,27 @@ func (b *Bot) EditMessageText(recipient Recipient, messageID int, message string
 		embedSendOptions(params, sendOptions)
 	}
 
-	responseJSON, err := b.sendCommand("editMessageText", params)
+	respJSON, err := b.sendCommand("editMessageText", params)
 	if err != nil {
 		return nil, err
 	}
 
-	var responseRecieved struct {
+	var resp struct {
 		Ok          bool
 		Description string
 		Message     Message `json:"result"`
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(respJSON, &resp)
 	if err != nil {
 		return nil, err
 	}
 
-	if !responseRecieved.Ok {
-		return nil, fmt.Errorf("telebot: %s", responseRecieved.Description)
+	if !resp.Ok {
+		return nil, fmt.Errorf("telebot: %s", resp.Description)
 	}
 
-	return &responseRecieved.Message, err
+	return &resp.Message, err
 
 }
 
@@ -600,27 +518,27 @@ func (b *Bot) EditInlineMessageText(messageID string, message string, sendOption
 		embedSendOptions(params, sendOptions)
 	}
 
-	responseJSON, err := b.sendCommand("editMessageText", params)
+	respJSON, err := b.sendCommand("editMessageText", params)
 	if err != nil {
 		return nil, err
 	}
 
-	var responseRecieved struct {
+	var resp struct {
 		Ok          bool
 		Description string
 		Message     Message `json:"result"`
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(respJSON, &resp)
 	if err != nil {
 		return nil, err
 	}
 
-	if !responseRecieved.Ok {
-		return nil, fmt.Errorf("telebot: %s", responseRecieved.Description)
+	if !resp.Ok {
+		return nil, fmt.Errorf("telebot: %s", resp.Description)
 	}
 
-	return &responseRecieved.Message, err
+	return &resp.Message, err
 
 }
 
@@ -642,27 +560,27 @@ func (b *Bot) EditMessageCaption(recipient Recipient, messageID int, caption str
 		})
 	}
 
-	responseJSON, err := b.sendCommand("editMessageCaption", params)
+	respJSON, err := b.sendCommand("editMessageCaption", params)
 	if err != nil {
 		return nil, err
 	}
 
-	var responseRecieved struct {
+	var resp struct {
 		Ok          bool
 		Description string
 		Message     Message `json:"result"`
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(respJSON, &resp)
 	if err != nil {
 		return nil, err
 	}
 
-	if !responseRecieved.Ok {
-		return nil, fmt.Errorf("telebot: %s", responseRecieved.Description)
+	if !resp.Ok {
+		return nil, fmt.Errorf("telebot: %s", resp.Description)
 	}
 
-	return &responseRecieved.Message, err
+	return &resp.Message, err
 
 }
 
@@ -683,27 +601,27 @@ func (b *Bot) EditInlineMessageCaption(messageID string, caption string, inlineK
 		})
 	}
 
-	responseJSON, err := b.sendCommand("editMessageCaption", params)
+	respJSON, err := b.sendCommand("editMessageCaption", params)
 	if err != nil {
 		return nil, err
 	}
 
-	var responseRecieved struct {
+	var resp struct {
 		Ok          bool
 		Description string
 		Message     Message `json:"result"`
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(respJSON, &resp)
 	if err != nil {
 		return nil, err
 	}
 
-	if !responseRecieved.Ok {
-		return nil, fmt.Errorf("telebot: %s", responseRecieved.Description)
+	if !resp.Ok {
+		return nil, fmt.Errorf("telebot: %s", resp.Description)
 	}
 
-	return &responseRecieved.Message, err
+	return &resp.Message, err
 
 }
 
@@ -724,27 +642,27 @@ func (b *Bot) EditMessageReplyMarkup(recipient Recipient, messageID int, inlineK
 		})
 	}
 
-	responseJSON, err := b.sendCommand("editMessageReplyMarkup", params)
+	respJSON, err := b.sendCommand("editMessageReplyMarkup", params)
 	if err != nil {
 		return nil, err
 	}
 
-	var responseRecieved struct {
+	var resp struct {
 		Ok          bool
 		Description string
 		Message     Message `json:"result"`
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(respJSON, &resp)
 	if err != nil {
 		return nil, err
 	}
 
-	if !responseRecieved.Ok {
-		return nil, fmt.Errorf("telebot: %s", responseRecieved.Description)
+	if !resp.Ok {
+		return nil, fmt.Errorf("telebot: %s", resp.Description)
 	}
 
-	return &responseRecieved.Message, err
+	return &resp.Message, err
 
 }
 
@@ -764,26 +682,26 @@ func (b *Bot) EditInlineMessageReplyMarkup(messageID string, caption string, inl
 		})
 	}
 
-	responseJSON, err := b.sendCommand("editMessageReplyMarkup", params)
+	respJSON, err := b.sendCommand("editMessageReplyMarkup", params)
 	if err != nil {
 		return nil, err
 	}
 
-	var responseRecieved struct {
+	var resp struct {
 		Ok          bool
 		Description string
 		Message     Message `json:"result"`
 	}
 
-	err = json.Unmarshal(responseJSON, &responseRecieved)
+	err = json.Unmarshal(respJSON, &resp)
 	if err != nil {
 		return nil, err
 	}
 
-	if !responseRecieved.Ok {
-		return nil, fmt.Errorf("telebot: %s", responseRecieved.Description)
+	if !resp.Ok {
+		return nil, fmt.Errorf("telebot: %s", resp.Description)
 	}
 
-	return &responseRecieved.Message, err
+	return &resp.Message, err
 
 }
