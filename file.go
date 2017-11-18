@@ -33,7 +33,7 @@ func FromDisk(filename string) File {
 	return File{FileLocal: filename}
 }
 
-// FromURL constructs a new file on provided HTTPS URL.
+// FromURL constructs a new file on provided HTTP URL.
 //
 // Note, it returns File, not *File for a very good reason:
 // in telebot, File is pretty much an embeddable struct,

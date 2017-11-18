@@ -485,11 +485,14 @@ func (b *Bot) GetFileDirectURL(fileID string) (string, error) {
 // EditMessageText used to edit already sent message with known recepient and message id.
 //
 // On success, returns edited message object
-func (b *Bot) Edit(chatID string, messageID int, message string, how ...interface{}) (*Message, error) {
+func (b *Bot) Edit(originalMsg Editable, newText string, how ...interface{}) (*Message, error) {
+	messageID, chatID := originalMsg.MessageSig()
+	// TODO: add support for inline messages (chatID = 0)
+
 	params := map[string]string{
-		"chat_id":    chatID,
+		"chat_id":    strconv.FormatInt(chatID, 10),
 		"message_id": strconv.Itoa(messageID),
-		"text":       message,
+		"text":       newText,
 	}
 
 	options := extractOptions(how)
