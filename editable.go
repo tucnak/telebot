@@ -19,10 +19,10 @@ type Editable interface {
 // a larger struct, which is often the case (you might
 // want to store some metadata alongside, or might not.)
 type StoredMessage struct {
-	MessageID string `sql:"message_id" json:"message_id"`
-	ChatID    int64  `sql:"chat_id" json:"chat_id"`
+	MessageID int   `sql:"message_id" json:"message_id"`
+	ChatID    int64 `sql:"chat_id" json:"chat_id"`
 }
 
-func (x StoredMessage) MessageSig() (int, int) {
+func (x StoredMessage) MessageSig() (int, int64) {
 	return x.MessageID, x.ChatID
 }

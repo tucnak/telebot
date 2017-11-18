@@ -11,7 +11,11 @@ type Message struct {
 	// For message sent to channels, Sender will be nil
 	Sender *User `json:"from"`
 
+	// Unixtime, use Message.Time() to get time.Time
 	Unixtime int64 `json:"date"`
+
+	// A group chat message belongs to.
+	Chat *Chat `json:"chat"`
 
 	// (Optional) Time of last edit in Unix
 	LastEdited int64 `json:"edit_date"`
@@ -19,13 +23,15 @@ type Message struct {
 	// For forwarded messages, sender of the original message.
 	OriginalSender *User `json:"forward_from"`
 
-	// For forwarded messages, chat of the original message when forwarded from a channel.
+	// For forwarded messages, chat of the original message when
+	// forwarded from a channel.
 	OriginalChat *Chat `json:"forward_from_chat"`
 
 	// For forwarded messages, unixtime of the original message.
 	OriginalUnixtime int `json:"forward_date"`
 
 	// For replies, ReplyTo represents the original message.
+	//
 	// Note that the Message object in this field will not
 	// contain further ReplyTo fields even if it
 	// itself is a reply.
@@ -34,11 +40,19 @@ type Message struct {
 	// For a text message, the actual UTF-8 text of the message.
 	Text string `json:"text"`
 
+	// For text messages, special entities like usernames, URLs, bot commands,
+	// etc. that appear in the text.
+	Entities []MessageEntity `json:"entities,omitempty"`
+
 	// Author signature (in channels).
 	Signature string `json:"author_signature"`
 
 	// Some messages containing media, may as well have a caption.
 	Caption string `json:"caption,omitempty"`
+
+	// For messages with a caption, special entities like usernames, URLs,
+	// bot commands, etc. that appear in the caption.
+	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
 
 	// For an audio recording, information about it.
 	Audio *Audio `json:"audio"`
@@ -66,9 +80,6 @@ type Message struct {
 
 	// For a location, its longitude and latitude.
 	Location *Location `json:"location"`
-
-	// A group chat message belongs to.
-	Chat *Chat `json:"chat"`
 
 	// For a service message, represents a user,
 	// that just got added to chat, this message came from.
@@ -146,9 +157,6 @@ type Message struct {
 	//
 	// Sender would lead to creator of the migration.
 	MigrateFrom int64 `json:"migrate_from_chat_id"`
-
-	Entities        []MessageEntity `json:"entities,omitempty"`
-	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
 }
 
 // MessageEntity object represents "special" parts of text messages,
@@ -220,7 +228,7 @@ func (m *Message) IsService() bool {
 	fact = fact || m.ChatPhotoDeleted
 	fact = fact || m.ChatCreated
 	fact = fact || m.SuperGroupCreated
-	fact = fact || (m.MigrateTo != m.MigrateFrom != 0)
+	fact = fact || (m.MigrateTo != m.MigrateFrom)
 
 	return fact
 }

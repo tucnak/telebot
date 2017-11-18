@@ -20,7 +20,7 @@ type Sendable interface {
 
 func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id": to.Destination(),
+		"chat_id": to.Recipient(),
 		"caption": p.Caption,
 	}
 
@@ -41,7 +41,7 @@ func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 
 func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id": to.Destination(),
+		"chat_id": to.Recipient(),
 		"caption": a.Caption,
 	}
 	embedSendOptions(params, opt)
@@ -60,7 +60,7 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 
 func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id": to.Destination(),
+		"chat_id": to.Recipient(),
 		"caption": d.Caption,
 	}
 	embedSendOptions(params, opt)
@@ -79,7 +79,7 @@ func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 
 func (s *Sticker) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id": to.Destination(),
+		"chat_id": to.Recipient(),
 	}
 	embedSendOptions(params, opt)
 
@@ -97,7 +97,7 @@ func (s *Sticker) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 
 func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id": to.Destination(),
+		"chat_id": to.Recipient(),
 		"caption": v.Caption,
 	}
 	embedSendOptions(params, opt)
@@ -116,8 +116,7 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 
 func (v *Voice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id": to.Destination(),
-		"caption": v.Caption,
+		"chat_id": to.Recipient(),
 	}
 	embedSendOptions(params, opt)
 
@@ -135,7 +134,7 @@ func (v *Voice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 
 func (v *VideoNote) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id": to.Destination(),
+		"chat_id": to.Recipient(),
 	}
 	embedSendOptions(params, opt)
 
@@ -153,7 +152,7 @@ func (v *VideoNote) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 
 func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id":   to.Destination(),
+		"chat_id":   to.Recipient(),
 		"latitude":  fmt.Sprintf("%f", x.Lat),
 		"longitude": fmt.Sprintf("%f", x.Lng),
 	}
@@ -169,7 +168,7 @@ func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 
 func (v *Venue) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id":       to.Destination(),
+		"chat_id":       to.Recipient(),
 		"latitude":      fmt.Sprintf("%f", v.Location.Lat),
 		"longitude":     fmt.Sprintf("%f", v.Location.Lng),
 		"title":         v.Title,

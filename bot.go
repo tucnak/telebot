@@ -106,7 +106,7 @@ func (b *Bot) poll(
 
 func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id": to.Destination(),
+		"chat_id": to.Recipient(),
 		"text":    text,
 	}
 	embedSendOptions(params, opt)
@@ -166,8 +166,8 @@ func (b *Bot) Reply(to *Message, what interface{}, how ...interface{}) (*Message
 // This function will panic upon unsupported payloads and options!
 func (b *Bot) Forward(to Recipient, what *Message, how ...interface{}) (*Message, error) {
 	params := map[string]string{
-		"chat_id":      to.Destination(),
-		"from_chat_id": strconv.Itoa(what.Origin().ID),
+		"chat_id":      to.Recipient(),
+		"from_chat_id": what.Chat.Recipient(),
 		"message_id":   strconv.Itoa(what.ID),
 	}
 
@@ -197,7 +197,7 @@ func (b *Bot) Forward(to Recipient, what *Message, how ...interface{}) (*Message
 //   channel, it can delete any message there.
 func (b *Bot) Delete(what *Message) error {
 	params := map[string]string{
-		"chat_id":    what.Chat.Destination(),
+		"chat_id":    what.Chat.Recipient(),
 		"message_id": strconv.Itoa(what.ID),
 	}
 
@@ -220,7 +220,7 @@ func (b *Bot) Delete(what *Message) error {
 // actions, these are aligned as constants of this package.
 func (b *Bot) SendChatAction(recipient Recipient, action ChatAction) error {
 	params := map[string]string{
-		"chat_id": recipient.Destination(),
+		"chat_id": recipient.Recipient(),
 		"action":  string(action),
 	}
 
@@ -295,7 +295,7 @@ func (b *Bot) GetFile(fileID string) (*File, error) {
 // LeaveChat makes bot leave a group, supergroup or channel.
 func (b *Bot) LeaveChat(recipient Recipient) error {
 	params := map[string]string{
-		"chat_id": recipient.Destination(),
+		"chat_id": recipient.Recipient(),
 	}
 
 	respJSON, err := b.sendCommand("leaveChat", params)
@@ -314,7 +314,7 @@ func (b *Bot) LeaveChat(recipient Recipient) error {
 // Returns a Chat object on success.
 func (b *Bot) GetChat(recipient Recipient) (*Chat, error) {
 	params := map[string]string{
-		"chat_id": recipient.Destination(),
+		"chat_id": recipient.Recipient(),
 	}
 
 	respJSON, err := b.sendCommand("getChat", params)
@@ -349,7 +349,7 @@ func (b *Bot) GetChat(recipient Recipient) (*Chat, error) {
 // no administrators were appointed, only the creator will be returned.
 func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChatMember, error) {
 	params := map[string]string{
-		"chat_id": recipient.Destination(),
+		"chat_id": recipient.Recipient(),
 	}
 
 	respJSON, err := b.sendCommand("getChatAdministrators", params)
@@ -380,7 +380,7 @@ func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChatMember, error) {
 // Returns Int on success.
 func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
 	params := map[string]string{
-		"chat_id": recipient.Destination(),
+		"chat_id": recipient.Recipient(),
 	}
 
 	respJSON, err := b.sendCommand("getChatMembersCount", params)
@@ -411,7 +411,7 @@ func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
 // Returns a list[photos][sizes].
 func (b *Bot) GetUserProfilePhotos(recipient Recipient) ([][]Photo, error) {
 	params := map[string]string{
-		"user_id": recipient.Destination(),
+		"user_id": recipient.Recipient(),
 	}
 
 	respJSON, err := b.sendCommand("getUserProfilePhotos", params)
@@ -446,8 +446,8 @@ func (b *Bot) GetUserProfilePhotos(recipient Recipient) ([][]Photo, error) {
 // Returns a ChatMember object on success.
 func (b *Bot) GetChatMember(recipient Recipient, user User) (ChatMember, error) {
 	params := map[string]string{
-		"chat_id": recipient.Destination(),
-		"user_id": user.Destination(),
+		"chat_id": recipient.Recipient(),
+		"user_id": user.Recipient(),
 	}
 
 	respJSON, err := b.sendCommand("getChatMember", params)
@@ -545,7 +545,7 @@ func (b *Bot) EditInlineMessageText(messageID string, message string, sendOption
 // On success, returns edited message object
 func (b *Bot) EditMessageCaption(recipient Recipient, messageID int, caption string, inlineKeyboard *InlineKeyboardMarkup) (*Message, error) {
 	params := map[string]string{
-		"chat_id":    recipient.Destination(),
+		"chat_id":    recipient.Recipient(),
 		"message_id": strconv.Itoa(messageID),
 		"caption":    caption,
 	}
@@ -628,7 +628,7 @@ func (b *Bot) EditInlineMessageCaption(messageID string, caption string, inlineK
 // On success, returns edited message object
 func (b *Bot) EditMessageReplyMarkup(recipient Recipient, messageID int, inlineKeyboard *InlineKeyboardMarkup) (*Message, error) {
 	params := map[string]string{
-		"chat_id":    recipient.Destination(),
+		"chat_id":    recipient.Recipient(),
 		"message_id": strconv.Itoa(messageID),
 	}
 

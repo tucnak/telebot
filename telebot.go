@@ -90,3 +90,13 @@ const (
 	Left          MemberStatus = "left"
 	Kicked        MemberStatus = "kicked"
 )
+
+// MaskFeature defines sticker mask position.
+type MaskFeature string
+
+const (
+	FeatureForehead MaskFeature = "forehead"
+	FeatureEyes     MaskFeature = "eyes"
+	FeatureMouth    MaskFeature = "mouth"
+	FeatureChin     MaskFeature = "chin"
+)

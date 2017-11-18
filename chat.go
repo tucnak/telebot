@@ -4,11 +4,11 @@ import "strconv"
 
 // User object represents a Telegram user, bot
 type User struct {
-	ID        int    `json:"id"`
-	FirstName string `json:"first_name"`
+	ID int `json:"id"`
 
-	LastName string `json:"last_name"`
-	Username string `json:"username"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Username  string `json:"username"`
 }
 
 // Recipient returns user ID (see Recipient interface).

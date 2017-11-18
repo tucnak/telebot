@@ -52,20 +52,3 @@ func TestFile(t *testing.T) {
 		t.Fatal("File doesn't preserve its original filename.")
 	}
 }
-
-func TestChat(t *testing.T) {
-	user := Chat{Type: "group", Title: "bazinga"}
-
-	// According to API, chat object with group Type is a group chat.
-	if !user.IsGroupChat() {
-		t.Fatal("Can't tell private and group chats apart!")
-	}
-
-	// Reverse.
-	user.Title = ""
-	user.Type = "private"
-
-	if user.IsGroupChat() {
-		t.Fatal("Can't tell private and group chats apart!")
-	}
-}

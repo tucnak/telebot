@@ -88,6 +88,10 @@ type ReplyMarkup struct {
 }
 
 // KeyboardButton represents a button displayed in reply-keyboard.
+//
+// Set either Contact or Location to true in order to request
+// sensitive info, such as user's phone number or current location.
+// (Available in private chats only)
 type KeyboardButton struct {
 	Text string `json:"text"`
 
