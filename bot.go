@@ -104,6 +104,21 @@ func (b *Bot) poll(
 	}
 }
 
+func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, error) {
+	params := map[string]string{
+		"chat_id": to.Destination(),
+		"text":    text,
+	}
+	embedSendOptions(params, opt)
+
+	respJSON, err := b.sendCommand("sendMessage", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMsgResponse(respJSON)
+}
+
 // Send accepts 2+ arguments, starting with destination chat, followed by
 // some Sendable (or string!) and optional send options.
 //
@@ -429,7 +444,7 @@ func (b *Bot) GetUserProfilePhotos(recipient Recipient) ([][]Photo, error) {
 // GetChatMember return information about a member of a chat.
 //
 // Returns a ChatMember object on success.
-func (b *Bot) GetChatMember(recipient Recipient, user User) (*ChatMember, error) {
+func (b *Bot) GetChatMember(recipient Recipient, user User) (ChatMember, error) {
 	params := map[string]string{
 		"chat_id": recipient.Destination(),
 		"user_id": user.Destination(),
@@ -437,22 +452,22 @@ func (b *Bot) GetChatMember(recipient Recipient, user User) (*ChatMember, error)
 
 	respJSON, err := b.sendCommand("getChatMember", params)
 	if err != nil {
-		return nil, err
+		return ChatMember{}, err
 	}
 
 	var resp struct {
 		Ok          bool
-		Result      *ChatMember
+		Result      ChatMember
 		Description string `json:"description"`
 	}
 
 	err = json.Unmarshal(respJSON, &resp)
 	if err != nil {
-		return nil, errors.Wrap(err, "bad response json")
+		return ChatMember{}, errors.Wrap(err, "bad response json")
 	}
 
 	if !resp.Ok {
-		return nil, errors.Errorf("api error: %s", resp.Description)
+		return ChatMember{}, errors.Errorf("api error: %s", resp.Description)
 	}
 
 	return resp.Result, nil
@@ -470,39 +485,22 @@ func (b *Bot) GetFileDirectURL(fileID string) (string, error) {
 // EditMessageText used to edit already sent message with known recepient and message id.
 //
 // On success, returns edited message object
-func (b *Bot) EditMessageText(recipient Recipient, messageID int, message string, sendOptions *SendOptions) (*Message, error) {
+func (b *Bot) Edit(chatID string, messageID int, message string, how ...interface{}) (*Message, error) {
 	params := map[string]string{
-		"chat_id":    recipient.Destination(),
+		"chat_id":    chatID,
 		"message_id": strconv.Itoa(messageID),
 		"text":       message,
 	}
 
-	if sendOptions != nil {
-		embedSendOptions(params, sendOptions)
-	}
+	options := extractOptions(how)
+	embedSendOptions(params, options)
 
 	respJSON, err := b.sendCommand("editMessageText", params)
 	if err != nil {
 		return nil, err
 	}
 
-	var resp struct {
-		Ok          bool
-		Description string
-		Message     Message `json:"result"`
-	}
-
-	err = json.Unmarshal(respJSON, &resp)
-	if err != nil {
-		return nil, err
-	}
-
-	if !resp.Ok {
-		return nil, fmt.Errorf("telebot: %s", resp.Description)
-	}
-
-	return &resp.Message, err
-
+	return extractMsgResponse(respJSON)
 }
 
 // EditInlineMessageText used to edit already sent inline message with known inline message id.

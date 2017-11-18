@@ -1,6 +1,11 @@
 package telebot
 
-// Option is a shorcut flag for certain SendOptions.
+// Option is a shorcut flag type for certain message features
+// (so-called options). It means that instead of passing
+// fully-fledged SendOptions* to Send(), you can use these
+// flags instead.
+//
+// Supported options are defined as iota-constants.
 type Option int
 
 const (
@@ -17,8 +22,13 @@ const (
 	OneTimeKeyboard
 )
 
-// SendOptions represents a set of custom options that could
-// be appled to messages sent.
+// SendOptions has most complete control over in what way the message
+// must be sent, providing an API-complete set of custom properties
+// and options.
+//
+// Despite its power, SendOptions is rather inconvenient to use all
+// the way through bot logic, so you might want to consider storing
+// and re-using it somewhere or be using Option flags instead.
 type SendOptions struct {
 	// If the message is a reply, original message.
 	ReplyTo *Message
@@ -36,7 +46,9 @@ type SendOptions struct {
 	ParseMode ParseMode
 }
 
-// ReplyMarkup specifies convenient options for bot-user communications.
+// ReplyMarkup controls two convenient options for bot-user communications
+// such as reply keyboard and inline "keyboard" (a grid of buttons as a part
+// of the message).
 type ReplyMarkup struct {
 	// ForceReply forces Telegram clients to display
 	// a reply interface to the user (act as if the user
@@ -73,4 +85,29 @@ type ReplyMarkup struct {
 	// 2) If the bot's message is a reply (has SendOptions.ReplyTo),
 	//       sender of the original message.
 	Selective bool `json:"selective,omitempty"`
+}
+
+// KeyboardButton represents a button displayed in reply-keyboard.
+type KeyboardButton struct {
+	Text string `json:"text"`
+
+	Contact  bool `json:"request_contact,omitempty"`
+	Location bool `json:"request_location,omitempty"`
+}
+
+// InlineKeyboardMarkup represents an inline keyboard that appears
+// right next to the message it belongs to.
+type InlineKeyboardMarkup struct {
+	// Array of button rows, each represented by
+	// an Array of KeyboardButton objects.
+	InlineKeyboard [][]InlineButton `json:"inline_keyboard,omitempty"`
+}
+
+// InlineButton represents a button displayed in the message.
+type InlineButton struct {
+	Text string `json:"text"`
+
+	URL         string `json:"url,omitempty"`
+	Data        string `json:"callback_data,omitempty"`
+	InlineQuery string `json:"switch_inline_query,omitempty"`
 }

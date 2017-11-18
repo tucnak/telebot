@@ -8,6 +8,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+func wrapSystem(err error) error {
+	return errors.Wrap(err, "system error")
+}
+
 func extractMsgResponse(respJSON []byte) (*Message, error) {
 	var resp struct {
 		Ok          bool

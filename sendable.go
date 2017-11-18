@@ -2,19 +2,20 @@ package telebot
 
 import "fmt"
 
-func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, error) {
-	params := map[string]string{
-		"chat_id": to.Destination(),
-		"text":    text,
-	}
-	embedSendOptions(params, opt)
+// Recipient is any possible endpoint you can send
+// messages to: either user, group or a channel.
+type Recipient interface {
+	// Must return legit Telegram chat_id or username
+	Recipient() string
+}
 
-	respJSON, err := b.sendCommand("sendMessage", params)
-	if err != nil {
-		return nil, err
-	}
-
-	return extractMsgResponse(respJSON)
+// Sendable is any object that can send itself.
+//
+// This is pretty cool, since it lets bots implement
+// custom Sendables for complex kind of media or
+// chat objects spanning across multiple messages.
+type Sendable interface {
+	Send(*Bot, Recipient, *SendOptions) (*Message, error)
 }
 
 func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {

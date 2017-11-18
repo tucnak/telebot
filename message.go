@@ -37,6 +37,9 @@ type Message struct {
 	// Author signature (in channels).
 	Signature string `json:"author_signature"`
 
+	// Some messages containing media, may as well have a caption.
+	Caption string `json:"caption,omitempty"`
+
 	// For an audio recording, information about it.
 	Audio *Audio `json:"audio"`
 
@@ -146,8 +149,6 @@ type Message struct {
 
 	Entities        []MessageEntity `json:"entities,omitempty"`
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-
-	Caption string `json:"caption,omitempty"`
 }
 
 // MessageEntity object represents "special" parts of text messages,
@@ -171,11 +172,6 @@ type MessageEntity struct {
 	User *User `json:"user,omitempty"`
 }
 
-// Origin returns an origin of message: group chat / personal.
-func (m *Message) Origin() *User {
-	return m.Sender
-}
-
 // Time returns the moment of message creation in local time.
 func (m *Message) Time() time.Time {
 	return time.Unix(int64(m.Unixtime), 0)
@@ -184,18 +180,28 @@ func (m *Message) Time() time.Time {
 // IsForwarded says whether message is forwarded copy of another
 // message or not.
 func (m *Message) IsForwarded() bool {
-	return m.OriginalSender != nil || m.OriginalChat != nil
+	return m.OriginalChat != nil
 }
 
-// IsReply says whether message is reply to another message or not.
+// IsReply says whether message is a reply to another message.
 func (m *Message) IsReply() bool {
 	return m.ReplyTo != nil
 }
 
-// IsPersonal returns true, if message is a personal message,
-// returns false if sent to group chat.
-func (m *Message) IsPersonal() bool {
-	return !m.Chat.IsGroupChat()
+// IsPrivate returns true, if it's a personal message.
+func (m *Message) Private() bool {
+	return m.Chat.Type == ChatPrivate
+}
+
+// FromGroup returns true, if message came from a group OR
+// a super group.
+func (m *Message) FromGroup() bool {
+	return m.Chat.Type == ChatGroup || m.Chat.Type == ChatSuperGroup
+}
+
+// FromChannel returns true, if message came from a channel.
+func (m *Message) FromChannel() bool {
+	return m.Chat.Type == ChatChannel
 }
 
 // IsService returns true, if message is a service message,
@@ -205,31 +211,16 @@ func (m *Message) IsPersonal() bool {
 // typically occur on some global action. For instance, when
 // anyone leaves the chat or chat title changes.
 func (m *Message) IsService() bool {
-	service := false
+	fact := false
 
-	if m.UserJoined != nil {
-		service = true
-	}
+	fact = fact || (m.UserJoined != nil)
+	fact = fact || (m.UserLeft != nil)
+	fact = fact || (m.NewChatTitle != "")
+	fact = fact || (len(m.NewChatPhoto) > 0)
+	fact = fact || m.ChatPhotoDeleted
+	fact = fact || m.ChatCreated
+	fact = fact || m.SuperGroupCreated
+	fact = fact || (m.MigrateTo != m.MigrateFrom != 0)
 
-	if m.UserLeft != nil {
-		service = true
-	}
-
-	if m.NewChatTitle != "" {
-		service = true
-	}
-
-	if len(m.NewChatPhoto) > 0 {
-		service = true
-	}
-
-	if m.ChatPhotoDeleted {
-		service = true
-	}
-
-	if m.ChatCreated {
-		service = true
-	}
-
-	return service
+	return fact
 }

@@ -17,10 +17,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-func wrapSystem(err error) error {
-	return errors.Wrap(err, "system error")
-}
-
 func (b *Bot) sendCommand(method string, payload interface{}) ([]byte, error) {
 	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.Token, method)
 
@@ -143,6 +139,16 @@ func (b *Bot) getMe() (User, error) {
 
 }
 
+// Update object represents an incoming update.
+type Update struct {
+	ID      int64    `json:"update_id"`
+	Payload *Message `json:"message"`
+
+	// optional
+	Callback *Callback `json:"callback_query"`
+	Query    *Query    `json:"inline_query"`
+}
+
 func (b *Bot) getUpdates(offset int64, timeout time.Duration) (upd []Update, err error) {
 	params := map[string]string{
 		"offset":  strconv.FormatInt(offset, 10),
@@ -154,22 +160,22 @@ func (b *Bot) getUpdates(offset int64, timeout time.Duration) (upd []Update, err
 		return
 	}
 
-	var updatesRecieved struct {
+	var updatesReceived struct {
 		Ok          bool
 		Result      []Update
 		Description string
 	}
 
-	err = json.Unmarshal(updatesJSON, &updatesRecieved)
+	err = json.Unmarshal(updatesJSON, &updatesReceived)
 	if err != nil {
 		err = errors.Wrap(err, "bad response json")
 		return
 	}
 
-	if !updatesRecieved.Ok {
-		err = errors.Errorf("api error: %s", updatesRecieved.Description)
+	if !updatesReceived.Ok {
+		err = errors.Errorf("api error: %s", updatesReceived.Description)
 		return
 	}
 
-	return updatesRecieved.Result, nil
+	return updatesReceived.Result, nil
 }
