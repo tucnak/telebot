@@ -31,10 +31,8 @@ func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		return nil, err
 	}
 
-	thumbnails := msg.Photo
-	fname := p.filename
-	p.File = thumbnails[len(thumbnails)-1].File
-	p.filename = fname
+	msg.Photo.File.importLocal(&p.File)
+	*p = *msg.Photo
 
 	return msg, nil
 }
@@ -51,9 +49,8 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		return nil, err
 	}
 
-	fname := a.filename
+	msg.Audio.File.importLocal(&a.File)
 	*a = *msg.Audio
-	a.filename = fname
 
 	return msg, nil
 }
@@ -70,9 +67,8 @@ func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 		return nil, err
 	}
 
-	fname := d.filename
+	msg.Document.File.importLocal(&d.File)
 	*d = *msg.Document
-	d.filename = fname
 
 	return msg, nil
 }
@@ -88,9 +84,8 @@ func (s *Sticker) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 		return nil, err
 	}
 
-	fname := s.filename
+	msg.Sticker.File.importLocal(&s.File)
 	*s = *msg.Sticker
-	s.filename = fname
 
 	return msg, nil
 }
@@ -107,9 +102,8 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		return nil, err
 	}
 
-	fname := v.filename
+	msg.Video.File.importLocal(&v.File)
 	*v = *msg.Video
-	v.filename = fname
 
 	return msg, nil
 }
@@ -125,9 +119,8 @@ func (v *Voice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		return nil, err
 	}
 
-	fname := v.filename
+	msg.Voice.File.importLocal(&v.File)
 	*v = *msg.Voice
-	v.filename = fname
 
 	return msg, nil
 }
@@ -143,9 +136,8 @@ func (v *VideoNote) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 		return nil, err
 	}
 
-	fname := v.filename
+	msg.VideoNote.File.importLocal(&v.File)
 	*v = *msg.VideoNote
-	v.filename = fname
 
 	return msg, nil
 }

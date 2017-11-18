@@ -60,8 +60,8 @@ type Message struct {
 	// For a general file, information about it.
 	Document *Document `json:"document"`
 
-	// For a photo, all available sizes (thumnails).
-	Photo []Photo `json:"photo"`
+	// For a photo, all available sizes (thumbnails).
+	Photo *Photo `json:"photo"`
 
 	// For a sticker, information about it.
 	Sticker *Sticker `json:"sticker"`

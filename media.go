@@ -1,6 +1,21 @@
 package telebot
 
-// Photo object represents a photo (with or without caption).
+import (
+	"encoding/json"
+	"fmt"
+)
+
+type photoSize struct {
+	File
+
+	Width  int `json:"width"`
+	Height int `json:"height"`
+
+	// (Optional)
+	Caption string `json:"caption,omitempty"`
+}
+
+// Photo object represents a single photo file.
 type Photo struct {
 	File
 
@@ -9,6 +24,31 @@ type Photo struct {
 
 	// (Optional)
 	Caption string `json:"caption,omitempty"`
+}
+
+func (p *Photo) UnmarshalJSON(jsonStr []byte) error {
+	fmt.Println(string(jsonStr))
+	var hq photoSize
+
+	if jsonStr[0] == '{' {
+		if err := json.Unmarshal(jsonStr, &hq); err != nil {
+			return err
+		}
+	} else {
+		var sizes []photoSize
+
+		if err := json.Unmarshal(jsonStr, &sizes); err != nil {
+			return err
+		}
+
+		hq = sizes[len(sizes)-1]
+	}
+
+	p.File = hq.File
+	p.Width = hq.Width
+	p.Height = hq.Height
+
+	return nil
 }
 
 // Audio object represents an audio file.
