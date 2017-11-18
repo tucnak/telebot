@@ -31,7 +31,7 @@ func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		return nil, err
 	}
 
-	msg.Photo.File.importLocal(&p.File)
+	msg.Photo.File.stealRef(&p.File)
 	*p = *msg.Photo
 
 	return msg, nil
@@ -49,7 +49,7 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		return nil, err
 	}
 
-	msg.Audio.File.importLocal(&a.File)
+	msg.Audio.File.stealRef(&a.File)
 	*a = *msg.Audio
 
 	return msg, nil
@@ -67,7 +67,7 @@ func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 		return nil, err
 	}
 
-	msg.Document.File.importLocal(&d.File)
+	msg.Document.File.stealRef(&d.File)
 	*d = *msg.Document
 
 	return msg, nil
@@ -84,7 +84,7 @@ func (s *Sticker) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 		return nil, err
 	}
 
-	msg.Sticker.File.importLocal(&s.File)
+	msg.Sticker.File.stealRef(&s.File)
 	*s = *msg.Sticker
 
 	return msg, nil
@@ -102,7 +102,7 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		return nil, err
 	}
 
-	msg.Video.File.importLocal(&v.File)
+	msg.Video.File.stealRef(&v.File)
 	*v = *msg.Video
 
 	return msg, nil
@@ -119,7 +119,7 @@ func (v *Voice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		return nil, err
 	}
 
-	msg.Voice.File.importLocal(&v.File)
+	msg.Voice.File.stealRef(&v.File)
 	*v = *msg.Voice
 
 	return msg, nil
@@ -136,7 +136,7 @@ func (v *VideoNote) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 		return nil, err
 	}
 
-	msg.VideoNote.File.importLocal(&v.File)
+	msg.VideoNote.File.stealRef(&v.File)
 	*v = *msg.VideoNote
 
 	return msg, nil

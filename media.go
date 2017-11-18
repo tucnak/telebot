@@ -1,9 +1,6 @@
 package telebot
 
-import (
-	"encoding/json"
-	"fmt"
-)
+import "encoding/json"
 
 type photoSize struct {
 	File
@@ -27,7 +24,6 @@ type Photo struct {
 }
 
 func (p *Photo) UnmarshalJSON(jsonStr []byte) error {
-	fmt.Println(string(jsonStr))
 	var hq photoSize
 
 	if jsonStr[0] == '{' {

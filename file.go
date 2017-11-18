@@ -46,12 +46,14 @@ func FromURL(u *url.URL) File {
 	return File{FileURL: u}
 }
 
-func (f *File) importLocal(g *File) {
-	if !g.OnDisk() {
-		return
+func (f *File) stealRef(g *File) {
+	if g.OnDisk() {
+		f.FileLocal = g.FileLocal
 	}
 
-	f.FileLocal = g.FileLocal
+	if g.FileURL != nil {
+		f.FileURL = g.FileURL
+	}
 }
 
 // InCloud tells whether the file is present on Telegram servers.

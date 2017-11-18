@@ -103,6 +103,9 @@ func (b *Bot) sendObject(f *File, what string, params map[string]string) (*Messa
 	if f.InCloud() {
 		params[what] = f.FileID
 		respJSON, err = b.sendCommand(sendWhat, params)
+	} else if f.FileURL != nil {
+		params[what] = f.FileURL.String()
+		respJSON, err = b.sendCommand(sendWhat, params)
 	} else {
 		respJSON, err = b.sendFile(sendWhat, what, f.FileLocal, params)
 	}
