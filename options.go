@@ -21,19 +21,19 @@ const (
 // be appled to messages sent.
 type SendOptions struct {
 	// If the message is a reply, original message.
-	ReplyTo *Message `json:"omitempty"`
+	ReplyTo *Message
 
 	// See ReplyMarkup struct definition.
-	ReplyMarkup *ReplyMarkup `json:"omitempty"`
+	ReplyMarkup *ReplyMarkup
 
 	// For text messages, disables previews for links in this message.
-	DisableWebPagePreview bool `json:"omitempty"`
+	DisableWebPagePreview bool
 
 	// Sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound.
-	DisableNotification bool `json:"omitempty"`
+	DisableNotification bool
 
 	// ParseMode controls how client apps render your message.
-	ParseMode ParseMode `json:"omitempty"`
+	ParseMode ParseMode
 }
 
 // ReplyMarkup specifies convenient options for bot-user communications.
