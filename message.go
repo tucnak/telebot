@@ -18,7 +18,7 @@ type Message struct {
 	Chat *Chat `json:"chat"`
 
 	// (Optional) Time of last edit in Unix
-	LastEdited int64 `json:"edit_date"`
+	LastEdit int64 `json:"edit_date"`
 
 	// For forwarded messages, sender of the original message.
 	OriginalSender *User `json:"forward_from"`
@@ -188,6 +188,11 @@ func (m *Message) MessageSig() (int, int64) {
 // Time returns the moment of message creation in local time.
 func (m *Message) Time() time.Time {
 	return time.Unix(int64(m.Unixtime), 0)
+}
+
+// LastEdited returns time.Time of last edit.
+func (m *Message) LastEdited() time.Time {
+	return time.Unix(int64(m.LastEdit), 0)
 }
 
 // IsForwarded says whether message is forwarded copy of another

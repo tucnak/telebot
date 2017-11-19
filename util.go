@@ -118,7 +118,7 @@ func embedSendOptions(params map[string]string, opt *SendOptions) {
 		return
 	}
 
-	if opt.ReplyTo.ID != 0 {
+	if opt.ReplyTo != nil && opt.ReplyTo.ID != 0 {
 		params["reply_to_message_id"] = strconv.Itoa(opt.ReplyTo.ID)
 	}
 

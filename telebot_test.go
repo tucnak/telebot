@@ -33,22 +33,15 @@ func TestRecipient(_ *testing.T) {
 }
 
 func TestFile(t *testing.T) {
-	file, err := NewFile("telebot.go")
-	if err != nil {
-		t.Fatal(err)
-	}
+	file := FromDisk("telebot.go")
 
-	if file.Exists() {
+	if file.InCloud() {
 		t.Fatal("Newly created file can't exist on Telegram servers!")
 	}
 
 	file.FileID = "magic"
 
-	if !file.Exists() {
-		t.Fatal("File with defined FileID is supposed to exist, fail.")
-	}
-
-	if file.Local() != "telebot.go" {
+	if file.FileLocal != "telebot.go" {
 		t.Fatal("File doesn't preserve its original filename.")
 	}
 }

@@ -133,14 +133,14 @@ func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, e
 // - ParseMode (HTML, Markdown, etc)
 //
 // This function will panic upon unsupported payloads and options!
-func (b *Bot) Send(to Recipient, what interface{}, how ...interface{}) (*Message, error) {
-	options := extractOptions(how)
+func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Message, error) {
+	sendOpts := extractOptions(options)
 
 	switch object := what.(type) {
 	case string:
-		return b.sendText(to, object, options)
+		return b.sendText(to, object, sendOpts)
 	case Sendable:
-		return object.Send(b, to, options)
+		return object.Send(b, to, sendOpts)
 	default:
 		panic(fmt.Sprintf("telebot: object %v is not Sendable", object))
 	}
@@ -149,35 +149,91 @@ func (b *Bot) Send(to Recipient, what interface{}, how ...interface{}) (*Message
 // Reply behaves just like Send() with an exception of "reply-to" indicator.
 //
 // This function will panic upon unsupported payloads and options!
-func (b *Bot) Reply(to *Message, what interface{}, how ...interface{}) (*Message, error) {
-	options := extractOptions(how)
-	if options == nil {
-		options = &SendOptions{}
+func (b *Bot) Reply(to *Message, what interface{}, options ...interface{}) (*Message, error) {
+	sendOpts := extractOptions(options)
+	if sendOpts == nil {
+		sendOpts = &SendOptions{}
 	}
 
-	options.ReplyTo = to
+	sendOpts.ReplyTo = to
 
-	return b.Send(to.Chat, what, options)
+	return b.Send(to.Chat, what, sendOpts)
 }
 
 // Forward behaves just like Send() but of all options it
 // only supports Silent (see Bots API).
 //
 // This function will panic upon unsupported payloads and options!
-func (b *Bot) Forward(to Recipient, what *Message, how ...interface{}) (*Message, error) {
+func (b *Bot) Forward(to Recipient, what *Message, options ...interface{}) (*Message, error) {
 	params := map[string]string{
 		"chat_id":      to.Recipient(),
 		"from_chat_id": what.Chat.Recipient(),
 		"message_id":   strconv.Itoa(what.ID),
 	}
 
-	options := extractOptions(how)
-	if options == nil {
-		options = &SendOptions{}
+	sendOpts := extractOptions(options)
+	if sendOpts == nil {
+		sendOpts = &SendOptions{}
 	}
-	embedSendOptions(params, options)
+	embedSendOptions(params, sendOpts)
 
 	respJSON, err := b.sendCommand("forwardMessage", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMsgResponse(respJSON)
+}
+
+// Edit is magic, it lets you change already sent message.
+//
+// Use cases:
+//
+//     b.Edit(msg, msg.Text, newMarkup)
+//     b.Edit(msg, "new <b>text</b>", tb.ModeHTML)
+//
+func (b *Bot) Edit(originalMsg Editable, text string, options ...interface{}) (*Message, error) {
+	messageID, chatID := originalMsg.MessageSig()
+	// TODO: add support for inline messages (chatID = 0)
+
+	params := map[string]string{"text": text}
+
+	// if inline message
+	if chatID == 0 {
+		params["inline_message_id"] = strconv.Itoa(messageID)
+	} else {
+		params["chat_id"] = strconv.FormatInt(chatID, 10)
+		params["message_id"] = strconv.Itoa(messageID)
+	}
+
+	sendOpts := extractOptions(options)
+	embedSendOptions(params, sendOpts)
+
+	respJSON, err := b.sendCommand("editMessageText", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMsgResponse(respJSON)
+}
+
+// EditCaption used to edit already sent photo caption with known recepient and message id.
+//
+// On success, returns edited message object
+func (b *Bot) EditCaption(originalMsg Editable, caption string) (*Message, error) {
+	messageID, chatID := originalMsg.MessageSig()
+
+	params := map[string]string{"caption": caption}
+
+	// if inline message
+	if chatID == 0 {
+		params["inline_message_id"] = strconv.Itoa(messageID)
+	} else {
+		params["chat_id"] = strconv.FormatInt(chatID, 10)
+		params["message_id"] = strconv.Itoa(messageID)
+	}
+
+	respJSON, err := b.sendCommand("editMessageCaption", params)
 	if err != nil {
 		return nil, err
 	}
@@ -195,10 +251,12 @@ func (b *Bot) Forward(to Recipient, what *Message, how ...interface{}) (*Message
 // - If the bot is an administrator of a group, it can delete any message there.
 // - If the bot has can_delete_messages permission in a supergroup or a
 //   channel, it can delete any message there.
-func (b *Bot) Delete(what *Message) error {
+func (b *Bot) Delete(message Editable) error {
+	messageID, chatID := message.MessageSig()
+
 	params := map[string]string{
-		"chat_id":    what.Chat.Recipient(),
-		"message_id": strconv.Itoa(what.ID),
+		"chat_id":    strconv.FormatInt(chatID, 10),
+		"message_id": strconv.Itoa(messageID),
 	}
 
 	respJSON, err := b.sendCommand("deleteMessage", params)
@@ -480,229 +538,4 @@ func (b *Bot) GetFileDirectURL(fileID string) (string, error) {
 		return "", err
 	}
 	return "https://api.telegram.org/file/bot" + b.Token + "/" + f.FilePath, nil
-}
-
-// EditMessageText used to edit already sent message with known recepient and message id.
-//
-// On success, returns edited message object
-func (b *Bot) Edit(originalMsg Editable, newText string, how ...interface{}) (*Message, error) {
-	messageID, chatID := originalMsg.MessageSig()
-	// TODO: add support for inline messages (chatID = 0)
-
-	params := map[string]string{
-		"chat_id":    strconv.FormatInt(chatID, 10),
-		"message_id": strconv.Itoa(messageID),
-		"text":       newText,
-	}
-
-	options := extractOptions(how)
-	embedSendOptions(params, options)
-
-	respJSON, err := b.sendCommand("editMessageText", params)
-	if err != nil {
-		return nil, err
-	}
-
-	return extractMsgResponse(respJSON)
-}
-
-// EditInlineMessageText used to edit already sent inline message with known inline message id.
-//
-// On success, returns edited message object
-func (b *Bot) EditInlineMessageText(messageID string, message string, sendOptions *SendOptions) (*Message, error) {
-	params := map[string]string{
-		"inline_message_id": messageID,
-		"text":              message,
-	}
-
-	if sendOptions != nil {
-		embedSendOptions(params, sendOptions)
-	}
-
-	respJSON, err := b.sendCommand("editMessageText", params)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		Ok          bool
-		Description string
-		Message     Message `json:"result"`
-	}
-
-	err = json.Unmarshal(respJSON, &resp)
-	if err != nil {
-		return nil, err
-	}
-
-	if !resp.Ok {
-		return nil, fmt.Errorf("telebot: %s", resp.Description)
-	}
-
-	return &resp.Message, err
-
-}
-
-// EditMessageCaption used to edit already sent photo caption with known recepient and message id.
-//
-// On success, returns edited message object
-func (b *Bot) EditMessageCaption(recipient Recipient, messageID int, caption string, inlineKeyboard *InlineKeyboardMarkup) (*Message, error) {
-	params := map[string]string{
-		"chat_id":    recipient.Recipient(),
-		"message_id": strconv.Itoa(messageID),
-		"caption":    caption,
-	}
-
-	if inlineKeyboard != nil {
-		embedSendOptions(params, &SendOptions{
-			ReplyMarkup: &ReplyMarkup{
-				InlineKeyboard: inlineKeyboard.InlineKeyboard,
-			},
-		})
-	}
-
-	respJSON, err := b.sendCommand("editMessageCaption", params)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		Ok          bool
-		Description string
-		Message     Message `json:"result"`
-	}
-
-	err = json.Unmarshal(respJSON, &resp)
-	if err != nil {
-		return nil, err
-	}
-
-	if !resp.Ok {
-		return nil, fmt.Errorf("telebot: %s", resp.Description)
-	}
-
-	return &resp.Message, err
-
-}
-
-// EditInlineMessageCaption used to edit already sent photo caption with known inline message id.
-//
-// On success, returns edited message object
-func (b *Bot) EditInlineMessageCaption(messageID string, caption string, inlineKeyboard *InlineKeyboardMarkup) (*Message, error) {
-	params := map[string]string{
-		"inline_message_id": messageID,
-		"caption":           caption,
-	}
-
-	if inlineKeyboard != nil {
-		embedSendOptions(params, &SendOptions{
-			ReplyMarkup: &ReplyMarkup{
-				InlineKeyboard: inlineKeyboard.InlineKeyboard,
-			},
-		})
-	}
-
-	respJSON, err := b.sendCommand("editMessageCaption", params)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		Ok          bool
-		Description string
-		Message     Message `json:"result"`
-	}
-
-	err = json.Unmarshal(respJSON, &resp)
-	if err != nil {
-		return nil, err
-	}
-
-	if !resp.Ok {
-		return nil, fmt.Errorf("telebot: %s", resp.Description)
-	}
-
-	return &resp.Message, err
-
-}
-
-// EditMessageReplyMarkup used to edit already sent message inline keyboard markup with known recepient and message id.
-//
-// On success, returns edited message object
-func (b *Bot) EditMessageReplyMarkup(recipient Recipient, messageID int, inlineKeyboard *InlineKeyboardMarkup) (*Message, error) {
-	params := map[string]string{
-		"chat_id":    recipient.Recipient(),
-		"message_id": strconv.Itoa(messageID),
-	}
-
-	if inlineKeyboard != nil {
-		embedSendOptions(params, &SendOptions{
-			ReplyMarkup: &ReplyMarkup{
-				InlineKeyboard: inlineKeyboard.InlineKeyboard,
-			},
-		})
-	}
-
-	respJSON, err := b.sendCommand("editMessageReplyMarkup", params)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		Ok          bool
-		Description string
-		Message     Message `json:"result"`
-	}
-
-	err = json.Unmarshal(respJSON, &resp)
-	if err != nil {
-		return nil, err
-	}
-
-	if !resp.Ok {
-		return nil, fmt.Errorf("telebot: %s", resp.Description)
-	}
-
-	return &resp.Message, err
-
-}
-
-// EditInlineMessageReplyMarkup used to edit already sent message inline keyboard markup with known inline message id.
-//
-// On success, returns edited message object
-func (b *Bot) EditInlineMessageReplyMarkup(messageID string, caption string, inlineKeyboard *InlineKeyboardMarkup) (*Message, error) {
-	params := map[string]string{
-		"inline_message_id": messageID,
-	}
-
-	if inlineKeyboard != nil {
-		embedSendOptions(params, &SendOptions{
-			ReplyMarkup: &ReplyMarkup{
-				InlineKeyboard: inlineKeyboard.InlineKeyboard,
-			},
-		})
-	}
-
-	respJSON, err := b.sendCommand("editMessageReplyMarkup", params)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		Ok          bool
-		Description string
-		Message     Message `json:"result"`
-	}
-
-	err = json.Unmarshal(respJSON, &resp)
-	if err != nil {
-		return nil, err
-	}
-
-	if !resp.Ok {
-		return nil, fmt.Errorf("telebot: %s", resp.Description)
-	}
-
-	return &resp.Message, err
-
 }
