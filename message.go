@@ -180,19 +180,19 @@ type MessageEntity struct {
 	User *User `json:"user,omitempty"`
 }
 
-// MessageSig() satisfies Editable interface (see Editable.)
+// MessageSig satisfies Editable interface (see Editable.)
 func (m *Message) MessageSig() (int, int64) {
 	return m.ID, m.Chat.ID
 }
 
 // Time returns the moment of message creation in local time.
 func (m *Message) Time() time.Time {
-	return time.Unix(int64(m.Unixtime), 0)
+	return time.Unix(m.Unixtime, 0)
 }
 
 // LastEdited returns time.Time of last edit.
 func (m *Message) LastEdited() time.Time {
-	return time.Unix(int64(m.LastEdit), 0)
+	return time.Unix(m.LastEdit, 0)
 }
 
 // IsForwarded says whether message is forwarded copy of another
@@ -206,7 +206,7 @@ func (m *Message) IsReply() bool {
 	return m.ReplyTo != nil
 }
 
-// IsPrivate returns true, if it's a personal message.
+// Private returns true, if it's a personal message.
 func (m *Message) Private() bool {
 	return m.Chat.Type == ChatPrivate
 }

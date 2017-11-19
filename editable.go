@@ -10,7 +10,9 @@ package telebot
 // could easily implement MessageSig() making
 // instances of stored messages editable.
 type Editable interface {
-	// For inline messages, return chatID = 0
+	// MessageSig is a "message signature".
+	//
+	// For inline messages, return chatID = 0.
 	MessageSig() (messageID int, chatID int64)
 }
 

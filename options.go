@@ -9,16 +9,16 @@ package telebot
 type Option int
 
 const (
-	// SendOptions.DisableWebPagePreview
+	// NoPreview = SendOptions.DisableWebPagePreview
 	NoPreview Option = iota
 
-	// SendOptions.DisableNotification
+	// Silent = SendOptions.DisableNotification
 	Silent
 
-	// ReplyMarkup.ForceReply
+	// ForceReply = ReplyMarkup.ForceReply
 	ForceReply
 
-	// ReplyMarkup.OneTimeKeyboard
+	// OneTimeKeyboard = ReplyMarkup.OneTimeKeyboard
 	OneTimeKeyboard
 )
 
@@ -50,11 +50,6 @@ type SendOptions struct {
 // such as reply keyboard and inline "keyboard" (a grid of buttons as a part
 // of the message).
 type ReplyMarkup struct {
-	// ForceReply forces Telegram clients to display
-	// a reply interface to the user (act as if the user
-	// has selected the bot‘s message and tapped "Reply").
-	ForceReply bool `json:"force_reply,omitempty"`
-
 	// InlineKeyboard is a grid of InlineButtons displayed in the message.
 	//
 	// Note: DO NOT confuse with ReplyKeyboard and other keyboard properties!
@@ -64,6 +59,11 @@ type ReplyMarkup struct {
 	//
 	// Note: you don't need to set HideCustomKeyboard field to show custom keyboard.
 	ReplyKeyboard [][]KeyboardButton `json:"keyboard,omitempty"`
+
+	// ForceReply forces Telegram clients to display
+	// a reply interface to the user (act as if the user
+	// has selected the bot‘s message and tapped "Reply").
+	ForceReply bool `json:"force_reply,omitempty"`
 
 	// Requests clients to resize the keyboard vertically for optimal fit
 	// (e.g. make the keyboard smaller if there are just two rows of buttons).

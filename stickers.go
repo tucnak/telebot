@@ -13,5 +13,11 @@ type Sticker struct {
 	MaskPosition *MaskPosition `json:"mask_position,omitempty"`
 }
 
+// MaskPosition describes the position on faces where
+// a mask should be placed by default.
 type MaskPosition struct {
+	Feature MaskFeature `json:"point"`
+	XShift  float32     `json:"x_shift"`
+	YShift  float32     `json:"y_shift"`
+	Scale   float32     `json:"scale"`
 }

@@ -83,8 +83,8 @@ type InlineQueryResults []InlineQueryResult
 //
 // If ID of some result appears empty, it gets set to a new hash.
 // JSON-specific Type gets infered from the actual (specific) IQR type.
-func (results *InlineQueryResults) MarshalJSON() ([]byte, error) {
-	for i, result := range *results {
+func (results InlineQueryResults) MarshalJSON() ([]byte, error) {
+	for i, result := range results {
 		if result.GetID() == "" {
 			hash, err := hashstructure.Hash(result, inlineQueryHashOptions)
 			if err != nil {
@@ -101,7 +101,7 @@ func (results *InlineQueryResults) MarshalJSON() ([]byte, error) {
 		}
 	}
 
-	return json.Marshal([]InlineQueryResult(*results))
+	return json.Marshal([]InlineQueryResult(results))
 }
 
 func inferIQR(result InlineQueryResult) error {
@@ -133,9 +133,4 @@ func inferIQR(result InlineQueryResult) error {
 	}
 
 	return nil
-}
-
-// Result is a deprecated type, superseded by InlineQueryResult.
-type Result interface {
-	MarshalJSON() ([]byte, error)
 }

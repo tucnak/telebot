@@ -318,32 +318,34 @@ func (b *Bot) AnswerCallbackQuery(callback *Callback, response *CallbackResponse
 	return extractOkResponse(respJSON)
 }
 
-// GetFile returns full file object including File.FilePath, which allow you to load file from Telegram
+// FileByID returns full file object including File.FilePath, allowing you to
+// download the file from the server.
 //
-// Usually File objects does not contain any FilePath so you need to perform additional request
-func (b *Bot) GetFile(fileID string) (*File, error) {
+// Usually, Telegram-provided File objects miss FilePath so you might need to
+// perform an additional request to fetch them.
+func (b *Bot) FileByID(fileID string) (File, error) {
 	params := map[string]string{
 		"file_id": fileID,
 	}
 
 	respJSON, err := b.sendCommand("getFile", params)
 	if err != nil {
-		return nil, err
+		return File{}, err
 	}
 
 	var resp struct {
 		Ok          bool
 		Description string
-		Result      *File
+		Result      File
 	}
 
 	err = json.Unmarshal(respJSON, &resp)
 	if err != nil {
-		return nil, errors.Wrap(err, "bad response json")
+		return File{}, errors.Wrap(err, "bad response json")
 	}
 
 	if !resp.Ok {
-		return nil, errors.Errorf("api error: %s", resp.Description)
+		return File{}, errors.Errorf("api error: %s", resp.Description)
 
 	}
 
@@ -364,15 +366,15 @@ func (b *Bot) LeaveChat(recipient Recipient) error {
 	return extractOkResponse(respJSON)
 }
 
-// GetChat get up to date information about the chat.
+// ChatByID fetches chat info of its ID.
 //
 // Including current name of the user for one-on-one conversations,
 // current username of a user, group or channel, etc.
 //
 // Returns a Chat object on success.
-func (b *Bot) GetChat(recipient Recipient) (*Chat, error) {
+func (b *Bot) ChatByID(id string) (*Chat, error) {
 	params := map[string]string{
-		"chat_id": recipient.Recipient(),
+		"chat_id": id,
 	}
 
 	respJSON, err := b.sendCommand("getChat", params)
@@ -398,16 +400,15 @@ func (b *Bot) GetChat(recipient Recipient) (*Chat, error) {
 	return resp.Result, nil
 }
 
-// GetChatAdministrators return list of administrators in a chat.
+// AdminsOf return a member list of chat admins.
 //
 // On success, returns an Array of ChatMember objects that
 // contains information about all chat administrators except other bots.
-//
 // If the chat is a group or a supergroup and
 // no administrators were appointed, only the creator will be returned.
-func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChatMember, error) {
+func (b *Bot) AdminsOf(chat *Chat) ([]ChatMember, error) {
 	params := map[string]string{
-		"chat_id": recipient.Recipient(),
+		"chat_id": chat.Recipient(),
 	}
 
 	respJSON, err := b.sendCommand("getChatAdministrators", params)
@@ -433,12 +434,10 @@ func (b *Bot) GetChatAdministrators(recipient Recipient) ([]ChatMember, error) {
 	return resp.Result, nil
 }
 
-// GetChatMembersCount return the number of members in a chat.
-//
-// Returns Int on success.
-func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
+// Len return the number of members in a chat.
+func (b *Bot) Len(chat *Chat) (int, error) {
 	params := map[string]string{
-		"chat_id": recipient.Recipient(),
+		"chat_id": chat.Recipient(),
 	}
 
 	respJSON, err := b.sendCommand("getChatMembersCount", params)
@@ -464,12 +463,10 @@ func (b *Bot) GetChatMembersCount(recipient Recipient) (int, error) {
 	return resp.Result, nil
 }
 
-// GetUserProfilePhotos return list of profile pictures for a user.
-//
-// Returns a list[photos][sizes].
-func (b *Bot) GetUserProfilePhotos(recipient Recipient) ([][]Photo, error) {
+// ProfilePhotosOf return list of profile pictures for a user.
+func (b *Bot) ProfilePhotosOf(user *User) ([]Photo, error) {
 	params := map[string]string{
-		"user_id": recipient.Recipient(),
+		"user_id": user.Recipient(),
 	}
 
 	respJSON, err := b.sendCommand("getUserProfilePhotos", params)
@@ -480,8 +477,8 @@ func (b *Bot) GetUserProfilePhotos(recipient Recipient) ([][]Photo, error) {
 	var resp struct {
 		Ok     bool
 		Result struct {
-			Count  int       `json:"total_count"`
-			Photos [][]Photo `json:"photos"`
+			Count  int     `json:"total_count"`
+			Photos []Photo `json:"photos"`
 		}
 
 		Description string `json:"description"`
@@ -502,9 +499,9 @@ func (b *Bot) GetUserProfilePhotos(recipient Recipient) ([][]Photo, error) {
 // GetChatMember return information about a member of a chat.
 //
 // Returns a ChatMember object on success.
-func (b *Bot) GetChatMember(recipient Recipient, user User) (ChatMember, error) {
+func (b *Bot) GetChatMember(chat *Chat, user *User) (ChatMember, error) {
 	params := map[string]string{
-		"chat_id": recipient.Recipient(),
+		"chat_id": chat.Recipient(),
 		"user_id": user.Recipient(),
 	}
 
@@ -533,7 +530,7 @@ func (b *Bot) GetChatMember(recipient Recipient, user User) (ChatMember, error) 
 
 // GetFileDirectURL returns direct url for files using FileId which you can get from File object
 func (b *Bot) GetFileDirectURL(fileID string) (string, error) {
-	f, err := b.GetFile(fileID)
+	f, err := b.FileByID(fileID)
 	if err != nil {
 		return "", err
 	}

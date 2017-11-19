@@ -56,14 +56,12 @@ func extractOptions(how []interface{}) *SendOptions {
 		switch opt := prop.(type) {
 		case *SendOptions:
 			opts = opt
-			break
 
 		case *ReplyMarkup:
 			if opts == nil {
 				opts = &SendOptions{}
 			}
 			opts.ReplyMarkup = opt
-			break
 
 		case Option:
 			if opts == nil {
@@ -73,37 +71,27 @@ func extractOptions(how []interface{}) *SendOptions {
 			switch opt {
 			case NoPreview:
 				opts.DisableWebPagePreview = true
-				break
-
 			case Silent:
 				opts.DisableNotification = true
-				break
-
 			case ForceReply:
 				if opts.ReplyMarkup == nil {
 					opts.ReplyMarkup = &ReplyMarkup{}
 				}
 				opts.ReplyMarkup.ForceReply = true
-				break
-
 			case OneTimeKeyboard:
 				if opts.ReplyMarkup == nil {
 					opts.ReplyMarkup = &ReplyMarkup{}
 				}
 				opts.ReplyMarkup.OneTimeKeyboard = true
-				break
-
 			default:
 				panic("telebot: unsupported option")
 			}
-			break
 
 		case ParseMode:
 			if opts == nil {
 				opts = &SendOptions{}
 			}
 			opts.ParseMode = opt
-			break
 
 		default:
 			panic(fmt.Sprintf("telebot: %v is not a send-option", opt))

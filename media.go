@@ -23,6 +23,12 @@ type Photo struct {
 	Caption string `json:"caption,omitempty"`
 }
 
+// UnmarshalJSON is custom unmarshaller required to abstract
+// away the hassle of treating different thumbnail sizes.
+// Instead, Telebot chooses the hi-res one and just sticks to
+// it.
+//
+// I really do find it a beautiful solution.
 func (p *Photo) UnmarshalJSON(jsonStr []byte) error {
 	var hq photoSize
 
@@ -125,9 +131,9 @@ type Contact struct {
 // Location object represents geographic position.
 type Location struct {
 	// Latitude
-	Lat float64 `json:"latitude"`
+	Lat float32 `json:"latitude"`
 	// Longitude
-	Lng float64 `json:"longitude"`
+	Lng float32 `json:"longitude"`
 }
 
 // Venue object represents a venue location with name, address and
