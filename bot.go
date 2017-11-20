@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/armon/go-radix"
 	"github.com/pkg/errors"
@@ -12,8 +11,10 @@ import (
 
 // Bot represents a separate Telegram bot instance.
 type Bot struct {
-	Token     string
-	Identity  User
+	Token    string
+	Identity *User
+
+	Updates   chan Update
 	Messages  chan Message
 	Queries   chan Query
 	Callbacks chan Callback
@@ -27,10 +28,27 @@ type Bot struct {
 
 // NewBot does try to build a Bot with token `token`, which
 // is a secret API key assigned to particular bot.
-func NewBot(token string) (*Bot, error) {
+func NewBot(pref Settings) (*Bot, error) {
+	if pref.Updates == 0 {
+		pref.Updates = 100
+	}
+
 	bot := &Bot{
-		Token: token,
-		tree:  radix.New(),
+		Token:   pref.Token,
+		Updates: make(chan Update, pref.Updates),
+		tree:    radix.New(),
+	}
+
+	if pref.Messages != 0 {
+		bot.Messages = make(chan Message, pref.Messages)
+	}
+
+	if pref.Queries != 0 {
+		bot.Queries = make(chan Query, pref.Queries)
+	}
+
+	if pref.Callbacks != 0 {
+		bot.Callbacks = make(chan Callback, pref.Callbacks)
 	}
 
 	user, err := bot.getMe()
@@ -42,81 +60,24 @@ func NewBot(token string) (*Bot, error) {
 	return bot, nil
 }
 
-// Listen starts a new polling goroutine, one that periodically looks for
-// updates and delivers new messages to the subscription channel.
-func (b *Bot) Listen(subscription chan Message, timeout time.Duration) {
-	go b.poll(subscription, nil, nil, timeout)
-}
+// Settings represents a utility struct for passing certain
+// properties of a bot around and is required to make bots.
+type Settings struct {
+	// Telegram token
+	Token string
 
-// Start periodically polls messages, updates and callbacks into their
-// corresponding channels of the bot object.
-//
-// NOTE: It's a blocking method!
-func (b *Bot) Start(timeout time.Duration) {
-	b.poll(b.Messages, b.Queries, b.Callbacks, timeout)
-}
+	// Telegram serves three types of updates: messages,
+	// inline queries and callbacks.
+	//
+	// The following three variables set the capacity of
+	// each of the receiving channels.
+	Updates   int // Default: 100
+	Messages  int
+	Queries   int
+	Callbacks int
 
-func (b *Bot) debug(err error) {
-	if b.Errors != nil {
-		b.Errors <- errors.WithStack(err)
-	}
-}
-
-func (b *Bot) poll(
-	messages chan Message,
-	queries chan Query,
-	callbacks chan Callback,
-	timeout time.Duration,
-) {
-	var latestUpdate int64
-
-	for {
-		updates, err := b.getUpdates(latestUpdate+1, timeout)
-
-		if err != nil {
-			b.debug(errors.Wrap(err, "getUpdates() failed"))
-			continue
-		}
-
-		for _, update := range updates {
-			if update.Payload != nil /* if message */ {
-				if messages == nil {
-					continue
-				}
-
-				messages <- *update.Payload
-			} else if update.Query != nil /* if query */ {
-				if queries == nil {
-					continue
-				}
-
-				queries <- *update.Query
-			} else if update.Callback != nil {
-				if callbacks == nil {
-					continue
-				}
-
-				callbacks <- *update.Callback
-			}
-
-			latestUpdate = update.ID
-		}
-	}
-}
-
-func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, error) {
-	params := map[string]string{
-		"chat_id": to.Recipient(),
-		"text":    text,
-	}
-	embedSendOptions(params, opt)
-
-	respJSON, err := b.sendCommand("sendMessage", params)
-	if err != nil {
-		return nil, err
-	}
-
-	return extractMsgResponse(respJSON)
+	// Poller is the provider of Updates.
+	Poller Poller
 }
 
 // Send accepts 2+ arguments, starting with destination chat, followed by
@@ -148,8 +109,8 @@ func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Mes
 
 // Reply behaves just like Send() with an exception of "reply-to" indicator.
 //
-// This function will panic upon unsupported payloads and options!
 func (b *Bot) Reply(to *Message, what interface{}, options ...interface{}) (*Message, error) {
+	// This function will panic upon unsupported payloads and options!
 	sendOpts := extractOptions(options)
 	if sendOpts == nil {
 		sendOpts = &SendOptions{}
@@ -496,10 +457,10 @@ func (b *Bot) ProfilePhotosOf(user *User) ([]Photo, error) {
 	return resp.Result.Photos, nil
 }
 
-// GetChatMember return information about a member of a chat.
+// ChatMemberOf return information about a member of a chat.
 //
 // Returns a ChatMember object on success.
-func (b *Bot) GetChatMember(chat *Chat, user *User) (ChatMember, error) {
+func (b *Bot) ChatMemberOf(chat *Chat, user *User) (ChatMember, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 		"user_id": user.Recipient(),
@@ -529,7 +490,7 @@ func (b *Bot) GetChatMember(chat *Chat, user *User) (ChatMember, error) {
 }
 
 // GetFileDirectURL returns direct url for files using FileId which you can get from File object
-func (b *Bot) GetFileDirectURL(fileID string) (string, error) {
+func (b *Bot) FileURLByID(fileID string) (string, error) {
 	f, err := b.FileByID(fileID)
 	if err != nil {
 		return "", err

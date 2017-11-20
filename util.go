@@ -12,6 +12,27 @@ func wrapSystem(err error) error {
 	return errors.Wrap(err, "system error")
 }
 
+func (b *Bot) debug(err error) {
+	if b.Errors != nil {
+		b.Errors <- errors.WithStack(err)
+	}
+}
+
+func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, error) {
+	params := map[string]string{
+		"chat_id": to.Recipient(),
+		"text":    text,
+	}
+	embedSendOptions(params, opt)
+
+	respJSON, err := b.sendCommand("sendMessage", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMsgResponse(respJSON)
+}
+
 func extractMsgResponse(respJSON []byte) (*Message, error) {
 	var resp struct {
 		Ok          bool

@@ -117,52 +117,42 @@ func (b *Bot) sendObject(f *File, what string, params map[string]string) (*Messa
 	return extractMsgResponse(respJSON)
 }
 
-func (b *Bot) getMe() (User, error) {
+func (b *Bot) getMe() (*User, error) {
 	meJSON, err := b.sendCommand("getMe", nil)
 	if err != nil {
-		return User{}, err
+		return nil, err
 	}
 
 	var botInfo struct {
 		Ok          bool
-		Result      User
+		Result      *User
 		Description string
 	}
 
 	err = json.Unmarshal(meJSON, &botInfo)
 	if err != nil {
-		return User{}, errors.Wrap(err, "bad response json")
+		return nil, errors.Wrap(err, "bad response json")
 	}
 
 	if !botInfo.Ok {
-		return User{}, errors.Errorf("api error: %s", botInfo.Description)
+		return nil, errors.Errorf("api error: %s", botInfo.Description)
 	}
 
 	return botInfo.Result, nil
 
 }
 
-// Update object represents an incoming update.
-type Update struct {
-	ID      int64    `json:"update_id"`
-	Payload *Message `json:"message"`
-
-	// optional
-	Callback *Callback `json:"callback_query"`
-	Query    *Query    `json:"inline_query"`
-}
-
-func (b *Bot) getUpdates(offset int64, timeout time.Duration) (upd []Update, err error) {
+func (b *Bot) getUpdates(offset int, timeout time.Duration) (upd []Update, err error) {
 	params := map[string]string{
-		"offset":  strconv.FormatInt(offset, 10),
-		"timeout": strconv.FormatInt(int64(timeout/time.Second), 10),
+		"offset":  strconv.Itoa(offset),
+		"timeout": strconv.Itoa(int(timeout / time.Second)),
 	}
 	updatesJSON, errCommand := b.sendCommand("getUpdates", params)
 	if errCommand != nil {
 		err = errCommand
 		return
-	}
 
+	}
 	var updatesReceived struct {
 		Ok          bool
 		Result      []Update
