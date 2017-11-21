@@ -10,7 +10,7 @@ import (
 //
 // All pollers must implement Poll(), which accepts bot
 // pointer and subscription channel and start polling
-// asynchronously straight away.
+// synchronously straight away.
 type Poller interface {
 	// Poll is supposed to take the bot object
 	// subscription channel and start polling

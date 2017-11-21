@@ -27,6 +27,21 @@
 //
 package telebot
 
+// Endpoint is one of the possible events Handle() can deal with.
+//
+// For convenience, all Telebot-provided endpoints start with
+// an "alert" character \a.
+type Endpoint string
+
+const (
+	OnMessage           Endpoint = "\amessage"
+	OnEditedMessage     Endpoint = "\aedited_msg"
+	OnQuery             Endpoint = "\aquery"
+	OnCallback          Endpoint = "\acallback"
+	OnChannelPost       Endpoint = "\achan_post"
+	OnEditedChannelPost Endpoint = "\achan_post"
+)
+
 // ChatAction is a client-side status indicating bot activity.
 type ChatAction string
 

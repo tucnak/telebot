@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/armon/go-radix"
 	"github.com/pkg/errors"
 )
 
 // Bot represents a separate Telegram bot instance.
 type Bot struct {
-	Token    string
-	Identity *User
+	Token string
+	Me    *User
 
 	Updates   chan Update
 	Messages  chan Message
@@ -23,7 +22,10 @@ type Bot struct {
 	// will use it to report all occuring errors.
 	Errors chan error
 
-	tree *radix.Tree
+	// Poller is the update provider.
+	Poller Poller
+
+	handlers map[string]interface{}
 }
 
 // NewBot does try to build a Bot with token `token`, which
@@ -36,7 +38,9 @@ func NewBot(pref Settings) (*Bot, error) {
 	bot := &Bot{
 		Token:   pref.Token,
 		Updates: make(chan Update, pref.Updates),
-		tree:    radix.New(),
+		Poller:  pref.Poller,
+
+		handlers: make(map[string]interface{}),
 	}
 
 	if pref.Messages != 0 {
@@ -56,7 +60,7 @@ func NewBot(pref Settings) (*Bot, error) {
 		return nil, err
 	}
 
-	bot.Identity = user
+	bot.Me = user
 	return bot, nil
 }
 
@@ -95,9 +99,30 @@ type Update struct {
 // Start brings bot into motion by consuming incoming
 // updates (see Bot.Updates channel).
 func (b *Bot) Start() {
+	if b.Poller == nil {
+		panic("telebot: can't start without a poller")
+	}
+
+	go b.Poller.Poll(b, b.Updates)
+
+	if b.Messages != nil {
+		go b.handleMessages(b.Messages)
+	}
+
+	if b.Queries != nil {
+		go b.handleQueries(b.Queries)
+	}
+
+	if b.Callbacks != nil {
+		go b.handleCallbacks(b.Callbacks)
+	}
+
+	fmt.Println("start ranging...")
 	for upd := range b.Updates {
+		fmt.Println(upd)
 		if b.Messages != nil {
 			if upd.Message != nil {
+				fmt.Println("receiving 1:", upd.Message.Text)
 				b.Messages <- *upd.Message
 				continue
 			}
