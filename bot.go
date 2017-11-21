@@ -111,6 +111,10 @@ func (b *Bot) Start() {
 
 			// Text message
 			if m.Text != "" {
+				if m.Text[0] == '\a' {
+					continue
+				}
+
 				match := cmdRx.FindAllStringSubmatch(m.Text, -1)
 
 				// Command found
