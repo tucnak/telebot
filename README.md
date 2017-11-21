@@ -15,7 +15,7 @@ via group chats / channels. These accounts serve as an interface to your code.
 Telebot offers a pretty convenient interface to Bots API and uses default HTTP
 client. Ideally, you wouldn't need to worry about actual networking at all.
 
-	go get gopkg.in/tucnak/telebot.v1
+	go get github.com/tucnak/telebot
 
 (after setting up your `GOPATH` properly).
 
