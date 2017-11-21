@@ -43,8 +43,8 @@ func main() {
 ```
 
 Simple, innit? Telebot's routing system takes care of deliviering updates
-to their "endpoints", so in order to get handle any meaningful event,
-all you have to do is just plug your handler to one of them endpoints
+to their "endpoints", so in order to get to handle any meaningful event,
+all you have to do is just plug your function to one of them endpoints
 and you're ready to go! You might want to switch-case handle more specific
 scenarios later.
 
@@ -64,8 +64,90 @@ b.Handle(tb.Callback, func (c *Callback) {
 })
 ```
 
-Moreover, this API is completely extensible, so new handy endpoints might
-appear in the following minor versions of this package.
+Now there's about 10 supported endpoints (see package consts). Let me know
+if you'd like to see some endpoint or endpoint idea implemented. This system
+is completely extensible, so I can introduce them without braking
+backwards-compatibity.
+
+## Message CRUD: `Send()`, `Edit()`, `Delete()`
+These are the three most important functions for manipulating Telebot messages.
+`Send()` takes a Recipient (could be user, chat, channel) and a Sendable. All
+telebot-provided media types (Photo, Audio, Video, etc.) are Sendable.
+
+```go
+// Sendable is any object that can send itself.
+//
+// This is pretty cool, since it lets bots implement
+// custom Sendables for complex kind of media or
+// chat objects spanning across multiple messages.
+type Sendable interface {
+    Send(*Bot, Recipient, *SendOptions) (*Message, error)
+}
+```
+
+If you want to edit some existing message, you don't really need to store the
+original `*Message` object. In fact, upon edit, Telegram only requires two IDs:
+ChatID and MessageID. And it doesn't really require the whole Message. Also you
+might want to store references to certain messages in the database, so for me it
+made sense for *any* Go struct to be editable as Telegram message, to implement
+Editable interface:
+```go
+// Editable is an interface for all objects that
+// provide "message signature", a pair of 32-bit
+// message ID and 64-bit chat ID, both required
+// for edit operations.
+//
+// Use case: DB model struct for messages to-be
+// edited with, say two collums: msg_id,chat_id
+// could easily implement MessageSig() making
+// instances of stored messages editable.
+type Editable interface {
+	// MessageSig is a "message signature".
+	//
+	// For inline messages, return chatID = 0.
+	MessageSig() (messageID int, chatID int64)
+}
+```
+
+For example, `Message` type is Editable. Here is an implementation of `StoredMessage`
+type, provided by telebot, mostly for demonstration purposes:
+```go
+// StoredMessage is an example struct suitable for being
+// stored in the database as-is or being embedded into
+// a larger struct, which is often the case (you might
+// want to store some metadata alongside, or might not.)
+type StoredMessage struct {
+	MessageID int   `sql:"message_id" json:"message_id"`
+	ChatID    int64 `sql:"chat_id" json:"chat_id"`
+}
+
+func (x StoredMessage) MessageSig() (int, int64) {
+	return x.MessageID, x.ChatID
+}
+```
+
+Why bother at all? Well, it lets you do things like this:
+```go
+// just two integer columns in the database
+var msgs []StoredMessage
+db.Find(&msgs) // gorm syntax
+
+for _, msg := range msgs {
+    bot.Edit(&msg, "Updated text.")
+    // or
+    bot.Delete(&msg)
+}
+```
+
+I find it incredibly neat. Worth noting, at this point of time there exists
+another method in the Edit family, `EditCaption()` which is of a pretty
+rare use, so I didn't bother to include it into `Edit()`:
+```go
+var m *Message
+
+// change caption of a photo, audio, etc.
+bot.EditCaption(m, "new caption")
+```
 
 ## Inline mode
 Docs TBA.
