@@ -83,7 +83,7 @@ func (b *Bot) Handle(endpoint string, handler interface{}) {
 	b.handlers[endpoint] = handler
 }
 
-var cmdRx = regexp.MustCompile(`^\/(\w+)(@(\w+))?(\s|$)`)
+var cmdRx = regexp.MustCompile(`^(\/\w+)(@(\w+))?(\s|$)`)
 
 func (b *Bot) handleCommand(m *Message, cmdName, cmdBot string) bool {
 	// Group-syntax: "/cmd@bot"
