@@ -6,16 +6,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Update object represents an incoming update.
-type Update struct {
-	ID int `json:"update_id"`
-
-	// Either.
-	Message  *Message  `json:"message"`
-	Callback *Callback `json:"callback_query"`
-	Query    *Query    `json:"inline_query"`
-}
-
 // Poller is a provider of Updates.
 //
 // All pollers must implement Poll(), which accepts bot

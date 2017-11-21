@@ -80,6 +80,55 @@ type Settings struct {
 	Poller Poller
 }
 
+// Update object represents an incoming update.
+type Update struct {
+	ID int `json:"update_id"`
+
+	Message           *Message  `json:"message,omitempty"`
+	EditedMessage     *Message  `json:"edited_message,omitempty"`
+	ChannelPost       *Message  `json:"channel_post,omitempty"`
+	EditedChannelPost *Message  `json:"edited_channel_post,omitempty"`
+	Callback          *Callback `json:"callback_query,omitempty"`
+	Query             *Query    `json:"inline_query,omitempty"`
+}
+
+// Start brings bot into motion by consuming incoming
+// updates (see Bot.Updates channel).
+func (b *Bot) Start() {
+	for upd := range b.Updates {
+		if b.Messages != nil {
+			if upd.Message != nil {
+				b.Messages <- *upd.Message
+				continue
+			}
+
+			if upd.EditedMessage != nil {
+				b.Messages <- *upd.EditedMessage
+				continue
+			}
+
+			if upd.ChannelPost != nil {
+				b.Messages <- *upd.ChannelPost
+				continue
+			}
+
+			if upd.EditedChannelPost != nil {
+				b.Messages <- *upd.EditedChannelPost
+				continue
+			}
+		}
+
+		if upd.Callback != nil && b.Callbacks != nil {
+			b.Callbacks <- *upd.Callback
+			continue
+		}
+
+		if upd.Query != nil && b.Queries != nil {
+			b.Queries <- *upd.Query
+		}
+	}
+}
+
 // Send accepts 2+ arguments, starting with destination chat, followed by
 // some Sendable (or string!) and optional send options.
 //
