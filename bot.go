@@ -3,30 +3,12 @@ package telebot
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 )
-
-// Bot represents a separate Telegram bot instance.
-type Bot struct {
-	Token string
-	Me    *User
-
-	Updates   chan Update
-	Messages  chan Message
-	Queries   chan Query
-	Callbacks chan Callback
-
-	// Telebot debugging channel. If present, Telebot
-	// will use it to report all occuring errors.
-	Errors chan error
-
-	// Poller is the update provider.
-	Poller Poller
-
-	handlers map[string]interface{}
-}
 
 // NewBot does try to build a Bot with token `token`, which
 // is a secret API key assigned to particular bot.
@@ -43,18 +25,6 @@ func NewBot(pref Settings) (*Bot, error) {
 		handlers: make(map[string]interface{}),
 	}
 
-	if pref.Messages != 0 {
-		bot.Messages = make(chan Message, pref.Messages)
-	}
-
-	if pref.Queries != 0 {
-		bot.Queries = make(chan Query, pref.Queries)
-	}
-
-	if pref.Callbacks != 0 {
-		bot.Callbacks = make(chan Callback, pref.Callbacks)
-	}
-
 	user, err := bot.getMe()
 	if err != nil {
 		return nil, err
@@ -64,21 +34,25 @@ func NewBot(pref Settings) (*Bot, error) {
 	return bot, nil
 }
 
+// Bot represents a separate Telegram bot instance.
+type Bot struct {
+	Me      *User
+	Token   string
+	Updates chan Update
+	Poller  Poller
+	Errors  chan error
+
+	handlers map[string]interface{}
+}
+
 // Settings represents a utility struct for passing certain
 // properties of a bot around and is required to make bots.
 type Settings struct {
 	// Telegram token
 	Token string
 
-	// Telegram serves three types of updates: messages,
-	// inline queries and callbacks.
-	//
-	// The following three variables set the capacity of
-	// each of the receiving channels.
-	Updates   int // Default: 100
-	Messages  int
-	Queries   int
-	Callbacks int
+	// Updates channel capacity
+	Updates int // Default: 100
 
 	// Poller is the provider of Updates.
 	Poller Poller
@@ -96,6 +70,32 @@ type Update struct {
 	Query             *Query    `json:"inline_query,omitempty"`
 }
 
+// Handle lets you set the handler for some command name or
+// one of the supported endpoints.
+//
+// See Endpoint.
+func (b *Bot) Handle(endpoint string, handler interface{}) {
+	b.handlers[endpoint] = handler
+}
+
+var cmdRx = regexp.MustCompile(`^\/(\w+)(@(\w+))?(\s|$)`)
+
+func (b *Bot) handleCommand(m *Message, cmdName, cmdBot string) bool {
+	// Group-syntax: "/cmd@bot"
+	if cmdBot != "" && !strings.EqualFold(b.Me.Username, cmdBot) {
+		return false
+	}
+
+	if handler, ok := b.handlers[cmdName]; ok {
+		if handler, ok := handler.(func(*Message)); ok {
+			go handler(m)
+			return true
+		}
+	}
+
+	return false
+}
+
 // Start brings bot into motion by consuming incoming
 // updates (see Bot.Updates channel).
 func (b *Bot) Start() {
@@ -105,51 +105,75 @@ func (b *Bot) Start() {
 
 	go b.Poller.Poll(b, b.Updates)
 
-	if b.Messages != nil {
-		go b.handleMessages(b.Messages)
-	}
-
-	if b.Queries != nil {
-		go b.handleQueries(b.Queries)
-	}
-
-	if b.Callbacks != nil {
-		go b.handleCallbacks(b.Callbacks)
-	}
-
-	fmt.Println("start ranging...")
 	for upd := range b.Updates {
-		fmt.Println(upd)
-		if b.Messages != nil {
-			if upd.Message != nil {
-				fmt.Println("receiving 1:", upd.Message.Text)
-				b.Messages <- *upd.Message
-				continue
+		if upd.Message != nil {
+			m := upd.Message
+
+			// Text message
+			if m.Text != "" {
+				match := cmdRx.FindAllStringSubmatch(m.Text, -1)
+
+				// Command found
+				if match != nil {
+					if b.handleCommand(m, match[0][1], match[0][3]) {
+						continue
+					}
+				}
 			}
 
-			if upd.EditedMessage != nil {
-				b.Messages <- *upd.EditedMessage
-				continue
+			// OnMessage
+			if handler, ok := b.handlers[string(OnMessage)]; ok {
+				if handler, ok := handler.(func(*Message)); ok {
+					go handler(m)
+					continue
+				}
 			}
-
-			if upd.ChannelPost != nil {
-				b.Messages <- *upd.ChannelPost
-				continue
-			}
-
-			if upd.EditedChannelPost != nil {
-				b.Messages <- *upd.EditedChannelPost
-				continue
-			}
-		}
-
-		if upd.Callback != nil && b.Callbacks != nil {
-			b.Callbacks <- *upd.Callback
 			continue
 		}
 
-		if upd.Query != nil && b.Queries != nil {
-			b.Queries <- *upd.Query
+		if upd.EditedMessage != nil {
+			if handler, ok := b.handlers[OnEditedMessage]; ok {
+				if handler, ok := handler.(func(*Message)); ok {
+					handler(upd.EditedMessage)
+				}
+			}
+			continue
+		}
+
+		if upd.ChannelPost != nil {
+			if handler, ok := b.handlers[OnChannelPost]; ok {
+				if handler, ok := handler.(func(*Message)); ok {
+					handler(upd.ChannelPost)
+				}
+			}
+			continue
+		}
+
+		if upd.EditedChannelPost != nil {
+			if handler, ok := b.handlers[OnEditedChannelPost]; ok {
+				if handler, ok := handler.(func(*Message)); ok {
+					handler(upd.EditedChannelPost)
+				}
+			}
+			continue
+		}
+
+		if upd.Callback != nil {
+			if handler, ok := b.handlers[OnCallback]; ok {
+				if handler, ok := handler.(func(*Callback)); ok {
+					handler(upd.Callback)
+				}
+			}
+			continue
+		}
+
+		if upd.Query != nil {
+			if handler, ok := b.handlers[OnQuery]; ok {
+				if handler, ok := handler.(func(*Query)); ok {
+					handler(upd.Query)
+				}
+			}
+			continue
 		}
 	}
 }
@@ -570,4 +594,29 @@ func (b *Bot) FileURLByID(fileID string) (string, error) {
 		return "", err
 	}
 	return "https://api.telegram.org/file/bot" + b.Token + "/" + f.FilePath, nil
+}
+
+func (b *Bot) handleMessages(messages chan Message) {
+	for m := range messages {
+
+		// Text message
+		if m.Text != "" {
+			match := cmdRx.FindAllStringSubmatch(m.Text, -1)
+
+			// Command found
+			if match != nil {
+				if b.handleCommand(&m, match[0][1], match[0][3]) {
+					continue
+				}
+			}
+		}
+
+		// OnMessage
+		if handler, ok := b.handlers[string(OnMessage)]; ok {
+			if handler, ok := handler.(func(*Message)); ok {
+				go handler(&m)
+				continue
+			}
+		}
+	}
 }
