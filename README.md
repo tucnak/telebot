@@ -11,130 +11,98 @@ via group chats / channels. These accounts serve as an interface to your code.
 Telebot offers a pretty convenient interface to Bots API and uses default HTTP
 client. Ideally, you wouldn't need to worry about actual networking at all.
 
-	go get gopkg.in/tucnak/telebot.v2
+```bash
+go get gopkg.in/tucnak/telebot.v2
+```
 
 (after setting up your `GOPATH` properly).
 
 We highly recommend you to keep your bot access token outside the code base,
 preferably in an environmental variable:
 
-	export BOT_TOKEN=<your token here>
+```bash
+export BOT_TOKEN=<your token here>
+```
 
 Take a look at a minimal functional bot setup:
 ```go
-package main
-
 import (
-	"log"
-	"os"
-	"time"
-
-	tb "gopkg.in/tucnak/telebot.v2"
+    "time"
+    tb "gopkg.in/tucnak/telebot.v2"
 )
 
 func main() {
-	bot, err := tb.NewBot(os.Getenv("BOT_TOKEN"))
-	if err != nil {
-		log.Fatalln(err)
-	}
+    b, err := tb.NewBot(tb.Settings{
+        Token: "TOKEN_HERE",
+        Poller: &tb.LongPoller{10 * time.Second},
+    })
 
-	messages := make(chan tb.Message, 100)
-	bot.Listen(messages, 10 * time.Second)
+    if err != nil {
+        return
+    }
 
-	for msg := range messages {
-		if msg.Text == "/hi" {
-			bot.Send(msg.Chat, "Hello, "+msg.Sender.FirstName+"!")
-		}
-	}
+    b.Handle(tb.OnMessage, func(m *tb.Message) {
+        b.Send(m.From, "hello world")
+    }
+
+    b.Start()
 }
 ```
 
 ## Inline mode
 As of January 4, 2016, Telegram added inline mode support for bots. Here's
-a nice way to handle both incoming messages and inline queries in the meantime:
+a nice way to handle both incoming messages and inline queries:
 
 ```go
-package main
-
 import (
-	"log"
-	"time"
-	"os"
-
-	tb "gopkg.in/tucnak/telebot.v2"
+    "time"
+    tb "gopkg.in/tucnak/telebot.v2"
 )
 
 func main() {
-	bot, err := tb.NewBot(os.Getenv("BOT_TOKEN"))
-	if err != nil {
-		log.Fatalln(err)
-	}
+    b, err := tb.NewBot(tb.Settings{
+        Token: "TOKEN_HERE",
+        Poller: &tb.LongPoller{10 * time.Second},
+    })
 
-	bot.Messages = make(chan tb.Message, 100)
-	bot.Queries = make(chan tb.Query, 1000)
+    if err != nil {
+        return
+    }
 
-	go messages(bot)
-	go queries(bot)
+    b.Handle(tb.OnMessage, func(m *tb.Message) {
+        b.Send(m.From, "hello world")
+    }
 
-	bot.Start(10 * time.Second)
-}
+    b.Handle(tb.OnQuery, func(q *tb.Query) {
+        b.Answer(q, ...)
+    }
 
-func messages(bot *tb.Bot) {
-	for message := range bot.Messages {
-		log.Printf("Received a message from %s with the text: %s\n",
-			message.Sender.Username, message.Text)
-	}
-}
-
-func queries(bot *tb.Bot) {
-	for query := range bot.Queries {
-		log.Println("--- new query ---")
-		log.Println("from:", query.From.Username)
-		log.Println("text:", query.Text)
-
-		// Create an article (a link) object to show in results.
-		article := &tb.InlineQueryResultArticle{
-			Title: "Telebot",
-			URL:   "https://github.com/tucnak/telebot",
-			InputMessageContent: &tb.InputTextMessageContent{
-				Text:		   "Telebot is a Telegram bot framework.",
-				DisablePreview: false,
-			},
-		}
-
-		// Build the list of results (make sure to pass pointers!).
-		results := []tb.InlineQueryResult{article}
-
-		// Build a response object to answer the query.
-		response := tb.QueryResponse{
-			Results:	results,
-			IsPersonal: true,
-		}
-
-		// Send it.
-		if err := bot.AnswerInlineQuery(&query, &response); err != nil {
-			log.Println("Failed to respond to query:", err)
-		}
-	}
+    b.Start()
 }
 ```
 
 ## Files
-Telebot lets you upload files from the file system:
+Telebot allows to both upload and download certain files.
 
 ```go
-f, err := tb.NewFile("boom.ogg")
-if err != nil {
-	return err
-}
+a := &tb.Audio{File: tb.FromDisk("file.ogg")}
 
-audio := &tb.Audio{File: f}
+fmt.Println(a.OnDisk()) // true
+fmt.Println(a.InCloud()) // false
 
 // Next time you'll be sending this very *Audio, Telebot won't
 // re-upload the same file but rather use the copy from the
 // server.
-err = bot.Send(recipient, audio)
+bot.Send(recipient, a)
+
+fmt.Println(a.OnDisk()) // true
+fmt.Println(a.InCloud()) // true
+fmt.Println(a.FileID) // <telegram file id: ABC-DEF1234ghIkl-zyx57W2v1u123ew11>
 ```
+
+You might want to save certain files in order to avoid re-upploading. Feel free
+to marshal them into whatever format, Files only contain public fields, so no
+data will be lost.
 
 ## Reply markup
 ```go

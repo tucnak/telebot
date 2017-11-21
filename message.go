@@ -9,7 +9,7 @@ type Message struct {
 	ID int `json:"message_id"`
 
 	// For message sent to channels, Sender will be nil
-	Sender *User `json:"from"`
+	From *User `json:"from"`
 
 	// Unixtime, use Message.Time() to get time.Time
 	Unixtime int64 `json:"date"`

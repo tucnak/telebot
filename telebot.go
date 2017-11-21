@@ -1,29 +1,28 @@
-// Package telebot provides a handy wrapper for interactions
-// with Telegram bots.
+// Package telebot is a framework for Telegram bots.
 //
-// Here is an example of helloworld bot implementation:
+// Example:
 //
-//	import (
-//		"time"
-//		"github.com/tucnak/telebot"
-//	)
+//		import (
+//			"time"
+//			tb "gopkg.in/tucnak/telebot.v2"
+//		)
 //
-//	func main() {
-//		bot, err := telebot.NewBot("SECRET_TOKEN")
-//		if err != nil {
-//			return
-//		}
+//		func main() {
+//			b, err := tb.NewBot(tb.Settings{
+//				Token: "TOKEN_HERE",
+//				Poller: &tb.LongPoller{10 * time.Second},
+//			})
 //
-//		messages := make(chan telebot.Message)
-//		bot.Listen(messages, 1*time.Second)
-//
-//		for message := range messages {
-//			if message.Text == "/hi" {
-//				bot.SendMessage(message.Chat,
-//					"Hello, "+message.Sender.FirstName+"!", nil)
+//			if err != nil {
+//				return
 //			}
+//
+//			b.Handle(tb.OnMessage, func(m *tb.Message) {
+//				b.Send(m.From, "hello world")
+//			}
+//
+//			b.Start()
 //		}
-//	}
 //
 package telebot
 
