@@ -36,7 +36,7 @@ func main() {
 
     b.Handle("/hello", func(m *tb.Message) {
         b.Send(m.From, "hello world")
-    }
+    })
 
     b.Start()
 }
@@ -53,7 +53,7 @@ b, _ := tb.NewBot(settings)
 
 b.Handle("/help", func (m *Message) {
     // help command handler
-}
+})
 
 b.Handle(tb.OnChannelPost, func (m *Message) {
     // channel post messages only
@@ -62,7 +62,6 @@ b.Handle(tb.OnChannelPost, func (m *Message) {
 b.Handle(tb.Callback, func (c *Callback) {
     // incoming bot callbacks
 })
-}
 ```
 
 Moreover, this API is completely extensible, so new handy endpoints might
