@@ -336,7 +336,7 @@ func (b *Bot) Delete(message Editable) error {
 	return extractOkResponse(respJSON)
 }
 
-// SendChatAction updates a chat action for recipient.
+// Action updates a chat action for recipient.
 //
 // Chat action is a status message that recipient would see where
 // you typically see "Harry is typing" status message. The only
@@ -345,7 +345,7 @@ func (b *Bot) Delete(message Editable) error {
 //
 // Currently, Telegram supports only a narrow range of possible
 // actions, these are aligned as constants of this package.
-func (b *Bot) SendChatAction(recipient Recipient, action ChatAction) error {
+func (b *Bot) Action(recipient Recipient, action ChatAction) error {
 	params := map[string]string{
 		"chat_id": recipient.Recipient(),
 		"action":  string(action),
@@ -421,10 +421,10 @@ func (b *Bot) FileByID(fileID string) (File, error) {
 	return resp.Result, nil
 }
 
-// LeaveChat makes bot leave a group, supergroup or channel.
-func (b *Bot) LeaveChat(recipient Recipient) error {
+// Leave makes bot leave a group, supergroup or channel.
+func (b *Bot) Leave(chat *Chat) error {
 	params := map[string]string{
-		"chat_id": recipient.Recipient(),
+		"chat_id": chat.Recipient(),
 	}
 
 	respJSON, err := b.sendCommand("leaveChat", params)
@@ -568,7 +568,7 @@ func (b *Bot) ProfilePhotosOf(user *User) ([]Photo, error) {
 // ChatMemberOf return information about a member of a chat.
 //
 // Returns a ChatMember object on success.
-func (b *Bot) ChatMemberOf(chat *Chat, user *User) (ChatMember, error) {
+func (b *Bot) ChatMemberOf(chat *Chat, user *User) (*ChatMember, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 		"user_id": user.Recipient(),
@@ -576,22 +576,22 @@ func (b *Bot) ChatMemberOf(chat *Chat, user *User) (ChatMember, error) {
 
 	respJSON, err := b.sendCommand("getChatMember", params)
 	if err != nil {
-		return ChatMember{}, err
+		return nil, err
 	}
 
 	var resp struct {
 		Ok          bool
-		Result      ChatMember
+		Result      *ChatMember
 		Description string `json:"description"`
 	}
 
 	err = json.Unmarshal(respJSON, &resp)
 	if err != nil {
-		return ChatMember{}, errors.Wrap(err, "bad response json")
+		return nil, errors.Wrap(err, "bad response json")
 	}
 
 	if !resp.Ok {
-		return ChatMember{}, errors.Errorf("api error: %s", resp.Description)
+		return nil, errors.Errorf("api error: %s", resp.Description)
 	}
 
 	return resp.Result, nil

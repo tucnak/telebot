@@ -148,3 +148,8 @@ func embedSendOptions(params map[string]string, opt *SendOptions) {
 		params["reply_markup"] = string(replyMarkup)
 	}
 }
+
+func embedRights(p map[string]string, prv Rights) {
+	jsonRepr, _ := json.Marshal(prv)
+	json.Unmarshal(jsonRepr, p)
+}
