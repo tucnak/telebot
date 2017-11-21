@@ -41,7 +41,7 @@ func main() {
         return
     }
 
-    b.Handle(tb.OnMessage, func(m *tb.Message) {
+    b.Handle("/hello", func(m *tb.Message) {
         b.Send(m.From, "hello world")
     }
 

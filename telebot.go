@@ -51,7 +51,6 @@ const (
 	UploadingVNote    ChatAction = "upload_video_note"
 	RecordingVideo    ChatAction = "record_video"
 	RecordingAudio    ChatAction = "record_audio"
-	RecordingVNote    ChatAction = "record_video_note"
 	FindingLocation   ChatAction = "find_location"
 )
 

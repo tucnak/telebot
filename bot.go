@@ -73,7 +73,12 @@ type Update struct {
 // Handle lets you set the handler for some command name or
 // one of the supported endpoints.
 //
-// See Endpoint.
+// Example:
+//
+//     tb.Handle("/help", func (m *tb.Message) {})
+//     tb.Handle(tb.OnEditedMessage, func (m *tb.Message) {})
+//     tb.Handle(tb.OnQuery, func (q *tb.Query) {})
+//
 func (b *Bot) Handle(endpoint string, handler interface{}) {
 	b.handlers[endpoint] = handler
 }
@@ -190,10 +195,10 @@ func (b *Bot) Start() {
 //
 // What is a send option exactly? It can be one of the following types:
 //
-// - Option (a shorcut flag for popular options)
-// - *SendOptions (the actual object accepted by Telegram API)
-// - *ReplyMarkup (a component of SendOptions)
-// - ParseMode (HTML, Markdown, etc)
+//     - *SendOptions (the actual object accepted by Telegram API)
+//     - *ReplyMarkup (a component of SendOptions)
+//     - Option (a shorcut flag for popular options)
+//     - ParseMode (HTML, Markdown, etc)
 //
 // This function will panic upon unsupported payloads and options!
 func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Message, error) {
@@ -307,13 +312,14 @@ func (b *Bot) EditCaption(originalMsg Editable, caption string) (*Message, error
 // Delete removes the message, including service messages,
 // with the following limitations:
 //
-// - A message can only be deleted if it was sent less than 48 hours ago.
-// - Bots can delete outgoing messages in groups and supergroups.
-// - Bots granted can_post_messages permissions can delete outgoing
-//   messages in channels.
-// - If the bot is an administrator of a group, it can delete any message there.
-// - If the bot has can_delete_messages permission in a supergroup or a
-//   channel, it can delete any message there.
+//     * A message can only be deleted if it was sent less than 48 hours ago.
+//     * Bots can delete outgoing messages in groups and supergroups.
+//     * Bots granted can_post_messages permissions can delete outgoing
+//       messages in channels.
+//     * If the bot is an administrator of a group, it can delete any message there.
+//     * If the bot has can_delete_messages permission in a supergroup or a
+//       channel, it can delete any message there.
+//
 func (b *Bot) Delete(message Editable) error {
 	messageID, chatID := message.MessageSig()
 
@@ -591,36 +597,11 @@ func (b *Bot) ChatMemberOf(chat *Chat, user *User) (ChatMember, error) {
 	return resp.Result, nil
 }
 
-// GetFileDirectURL returns direct url for files using FileId which you can get from File object
+// FileURLByID returns direct url for files using FileId which you can get from File object
 func (b *Bot) FileURLByID(fileID string) (string, error) {
 	f, err := b.FileByID(fileID)
 	if err != nil {
 		return "", err
 	}
 	return "https://api.telegram.org/file/bot" + b.Token + "/" + f.FilePath, nil
-}
-
-func (b *Bot) handleMessages(messages chan Message) {
-	for m := range messages {
-
-		// Text message
-		if m.Text != "" {
-			match := cmdRx.FindAllStringSubmatch(m.Text, -1)
-
-			// Command found
-			if match != nil {
-				if b.handleCommand(&m, match[0][1], match[0][3]) {
-					continue
-				}
-			}
-		}
-
-		// OnMessage
-		if handler, ok := b.handlers[string(OnMessage)]; ok {
-			if handler, ok := handler.(func(*Message)); ok {
-				go handler(&m)
-				continue
-			}
-		}
-	}
 }
