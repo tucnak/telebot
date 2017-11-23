@@ -31,12 +31,28 @@ package telebot
 // For convenience, all Telebot-provided endpoints start with
 // an "alert" character \a.
 const (
+	// Basic generic message handlers.
+	//
+	// Handler: func(*Message)
 	OnMessage           = "\amessage"
 	OnEditedMessage     = "\aedited_msg"
-	OnQuery             = "\aquery"
-	OnCallback          = "\acallback"
 	OnChannelPost       = "\achan_post"
 	OnEditedChannelPost = "\achan_post"
+
+	// Will fire on callback requests.
+	//
+	// Handler: func(*Callback)
+	OnCallback = "\acallback"
+
+	// Will fire on incoming inline queries.
+	//
+	// Handler: func(*Query)
+	OnQuery = "\aquery"
+
+	// Will fire when bot gets added to some chat,
+	//
+	// Handler: func(*Message)
+	OnAddedToGroup = "\aadded_to_group"
 )
 
 // ChatAction is a client-side status indicating bot activity.

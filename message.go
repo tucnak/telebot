@@ -110,6 +110,11 @@ type Message struct {
 	// Sender would lead to a User, capable of change.
 	NewChatPhoto []Photo `json:"new_chat_photo"`
 
+	// For a service message, new members that were added to
+	// the group or supergroup and information about them
+	// (the bot itself may be one of these members).
+	NewChatMembers []User `json:"new_chat_members"`
+
 	// For a service message, true if chat photo just
 	// got removed.
 	//

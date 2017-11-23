@@ -130,6 +130,20 @@ func (b *Bot) Start() {
 				}
 			}
 
+			wasAdded := m.NewChatMembers != nil &&
+				isUserInList(b.Me, m.NewChatMembers)
+
+			if m.ChatCreated || wasAdded {
+				if handler, ok := b.handlers[string(OnAddedToGroup)]; ok {
+					if handler, ok := handler.(func(*Message)); ok {
+						go handler(m)
+						continue
+					}
+				}
+
+				continue
+			}
+
 			// OnMessage
 			if handler, ok := b.handlers[string(OnMessage)]; ok {
 				if handler, ok := handler.(func(*Message)); ok {

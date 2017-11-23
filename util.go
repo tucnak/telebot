@@ -18,6 +18,16 @@ func (b *Bot) debug(err error) {
 	}
 }
 
+func isUserInList(user *User, list []User) bool {
+	for _, user2 := range list {
+		if user.ID == user2.ID {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
 		"chat_id": to.Recipient(),
