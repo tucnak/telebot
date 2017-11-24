@@ -1,5 +1,5 @@
 # Telebot
->"I never knew creating bots in Telegram was so _easy_!"
+>"I never knew creating Telegram bots could so _sexy_!"
 
 [![GoDoc](https://godoc.org/gopkg.in/tucnak/telebot.v2?status.svg)](https://godoc.org/gopkg.in/tucnak/telebot.v2)
 [![Travis](https://travis-ci.org/tucnak/telebot.svg?branch=v2)](https://travis-ci.org/tucnak/telebot)
@@ -8,12 +8,12 @@
 go get gopkg.in/tucnak/telebot.v2
 ```
 
-Telebot is a bot framework for Telegram Bots API. This package provides a super convenient API
-for command routing, message and inline query requests, as well as callbacks. Actually, I went a
-couple steps further and instead of making a 1:1 API wrapper I focused on the beauty of API and
-bot performance. All the methods of telebot API are _extremely_ easy to remember and later, get
-used to. Telebot is agnostic to the source of updates as long as it implements the Poller interface.
-Poller means you can plug your telebot into virtually any bot infrastructure, if you have any. Also,
+Telebot is a bot framework for [Telegram](https://telegram.org) [Bot API](https://core.telegram.org/bots/api).
+This package provides the best of its kind API for command routing, inline query requests and keyboards, as well
+as callbacks. Actually, I went a couple steps further, so instead of making a 1:1 API wrapper I chose to focus on
+the beauty of API and performance. All the methods of telebot API are _extremely_ easy to memorize and get
+used to. Telebot is agnostic to the source of updates as long as the source implements the `Poller` interface.
+`Poller` means you can plug your telebot into virtually any existing bot infrastructure, if you have any. Also,
 consider Telebot a highload-ready solution. I'll soon benchmark the most popular actions and if
 necessary, optimize against them without sacrificing API quality.
 
@@ -43,10 +43,9 @@ func main() {
 ```
 
 Simple, innit? Telebot's routing system takes care of deliviering updates
-to their "endpoints", so in order to get to handle any meaningful event,
+to their endpoints, so in order to get to handle any meaningful event,
 all you have to do is just plug your function to one of them endpoints
-and you're ready to go! You might want to switch-case handle more specific
-scenarios later.
+and you're ready to go!
 
 ```go
 b, _ := tb.NewBot(settings)
@@ -60,8 +59,14 @@ b.Handle(tb.OnChannelPost, func (m *Message) {
 })
 
 b.Handle(tb.Callback, func (c *Callback) {
-    // incoming bot callbacks
+    // incoming bot callbacks that weren't
+    // captured by specific callback handlers.
 })
+
+b.Handle(tb.OnMessage, func(m *Message) {
+    // all messages that couldn't fall into
+    // any specific endpoint will get here.
+}
 ```
 
 Now there's about 10 supported endpoints (see package consts). Let me know
@@ -110,7 +115,7 @@ type Editable interface {
 ```
 
 For example, `Message` type is Editable. Here is an implementation of `StoredMessage`
-type, provided by telebot, mostly for demonstration purposes:
+type, provided by telebot:
 ```go
 // StoredMessage is an example struct suitable for being
 // stored in the database as-is or being embedded into
@@ -126,7 +131,7 @@ func (x StoredMessage) MessageSig() (int, int64) {
 }
 ```
 
-Why bother at all? Well, it lets you do things like this:
+Why bother at all? Well, it allows you to do things like this:
 ```go
 // just two integer columns in the database
 var msgs []StoredMessage
@@ -141,7 +146,8 @@ for _, msg := range msgs {
 
 I find it incredibly neat. Worth noting, at this point of time there exists
 another method in the Edit family, `EditCaption()` which is of a pretty
-rare use, so I didn't bother to include it into `Edit()`:
+rare use, so I didn't bother including it to `Edit()`, which would inevitably
+lead to unnecessary complications.
 ```go
 var m *Message
 
@@ -153,9 +159,11 @@ bot.EditCaption(m, "new caption")
 Docs TBA.
 
 ## Files
-Telebot allows to both upload (from disk / by URL) and download (from Telegram)
-and files in bot's scope. Telegram allows files up to 20 MB in size.
+>Telegram allows files up to 20 MB in size.
 
+Telebot allows to both upload (from disk / by URL) and download (from Telegram)
+and files in bot's scope. Also, sending any kind of media with a File created
+from disk will upload the file to Telegram automatically:
 ```go
 a := &tb.Audio{File: tb.FromDisk("file.ogg")}
 
@@ -174,7 +182,7 @@ fmt.Println(a.InCloud()) // true
 fmt.Println(a.FileID) // <telegram file id: ABC-DEF1234ghIkl-zyx57W2v1u123ew11>
 ```
 
-You might want to save certain files in order to avoid re-upploading. Feel free
+You might want to save certain `File`s in order to avoid re-uploading. Feel free
 to marshal them into whatever format, `File` only contain public fields, so no
 data will ever be lost.
 
