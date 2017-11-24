@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/mitchellh/hashstructure"
+	"github.com/pkg/errors"
 )
 
 // inlineQueryHashOptions sets the HashOptions to be used when hashing
@@ -39,11 +40,12 @@ type Query struct {
 // See also: https://core.telegram.org/bots/api#answerinlinequery
 type QueryResponse struct {
 	// The ID of the query to which this is a response.
-	// It is not necessary to specify this field manually.
+	//
+	// Note: Telebot sets this field automatically!
 	QueryID string `json:"inline_query_id"`
 
 	// The results for the inline query.
-	Results InlineQueryResults `json:"results"`
+	Results Results `json:"results"`
 
 	// (Optional) The maximum amount of time in seconds that the result
 	// of the inline query may be cached on the server.
@@ -70,66 +72,64 @@ type QueryResponse struct {
 	SwitchPMParameter string `json:"switch_pm_parameter,omitempty"`
 }
 
-// InlineQueryResult represents one result of an inline query.
-type InlineQueryResult interface {
-	GetID() string
-	SetID(string)
+// Result represents one result of an inline query.
+type Result interface {
+	ResultID() string
+	SetResultID(string)
 }
 
-// InlineQueryResults is a slice wrapper for convenient marshalling.
-type InlineQueryResults []InlineQueryResult
+// Results is a slice wrapper for convenient marshalling.
+type Results []Result
 
 // MarshalJSON makes sure IQRs have proper IDs and Type variables set.
 //
 // If ID of some result appears empty, it gets set to a new hash.
 // JSON-specific Type gets infered from the actual (specific) IQR type.
-func (results InlineQueryResults) MarshalJSON() ([]byte, error) {
-	for i, result := range results {
-		if result.GetID() == "" {
+func (results Results) MarshalJSON() ([]byte, error) {
+	for _, result := range results {
+		if result.ResultID() == "" {
 			hash, err := hashstructure.Hash(result, inlineQueryHashOptions)
 			if err != nil {
-				return nil, fmt.Errorf("telebot: can't hash IQR #%d: %s",
-					i, err)
+				return nil, errors.Wrap(err, "telebot: can't hash the result")
 			}
 
-			result.SetID(strconv.FormatUint(hash, 16))
+			result.SetResultID(strconv.FormatUint(hash, 16))
 		}
 
 		if err := inferIQR(result); err != nil {
-			return nil, fmt.Errorf("telebot: can't infer type of IQR #%d: %s",
-				i, err)
+			return nil, err
 		}
 	}
 
-	return json.Marshal([]InlineQueryResult(results))
+	return json.Marshal(results)
 }
 
-func inferIQR(result InlineQueryResult) error {
+func inferIQR(result Result) error {
 	switch r := result.(type) {
-	case *InlineQueryResultArticle:
+	case *ArticleResult:
 		r.Type = "article"
-	case *InlineQueryResultAudio:
+	case *AudioResult:
 		r.Type = "audio"
-	case *InlineQueryResultContact:
+	case *ContactResult:
 		r.Type = "contact"
-	case *InlineQueryResultDocument:
+	case *DocumentResult:
 		r.Type = "document"
-	case *InlineQueryResultGif:
+	case *GifResult:
 		r.Type = "gif"
-	case *InlineQueryResultLocation:
+	case *LocationResult:
 		r.Type = "location"
-	case *InlineQueryResultMpeg4Gif:
+	case *Mpeg4GifResult:
 		r.Type = "mpeg4_gif"
-	case *InlineQueryResultPhoto:
+	case *PhotoResult:
 		r.Type = "photo"
-	case *InlineQueryResultVenue:
+	case *VenueResult:
 		r.Type = "venue"
-	case *InlineQueryResultVideo:
+	case *VideoResult:
 		r.Type = "video"
-	case *InlineQueryResultVoice:
+	case *VoiceResult:
 		r.Type = "voice"
 	default:
-		return fmt.Errorf("%T is not an IQR", result)
+		return fmt.Errorf("result %v is not supported", result)
 	}
 
 	return nil

@@ -350,7 +350,7 @@ func (b *Bot) Delete(message Editable) error {
 	return extractOkResponse(respJSON)
 }
 
-// Action updates a chat action for recipient.
+// Notify updates the chat action for recipient.
 //
 // Chat action is a status message that recipient would see where
 // you typically see "Harry is typing" status message. The only
@@ -359,7 +359,7 @@ func (b *Bot) Delete(message Editable) error {
 //
 // Currently, Telegram supports only a narrow range of possible
 // actions, these are aligned as constants of this package.
-func (b *Bot) Action(recipient Recipient, action ChatAction) error {
+func (b *Bot) Notify(recipient Recipient, action ChatAction) error {
 	params := map[string]string{
 		"chat_id": recipient.Recipient(),
 		"action":  string(action),
@@ -373,12 +373,10 @@ func (b *Bot) Action(recipient Recipient, action ChatAction) error {
 	return extractOkResponse(respJSON)
 }
 
-// AnswerInlineQuery sends a response for a given inline query. A query can
-// only be responded to once, subsequent attempts to respond to the same query
+// Answer sends a response for a given inline query. A query can only
+// be responded to once, subsequent attempts to respond to the same query
 // will result in an error.
-func (b *Bot) AnswerInlineQuery(query *Query, response *QueryResponse) error {
-	response.QueryID = query.ID
-
+func (b *Bot) Answer(query *Query, response *QueryResponse) error {
 	respJSON, err := b.sendCommand("answerInlineQuery", response)
 	if err != nil {
 		return err
@@ -387,10 +385,10 @@ func (b *Bot) AnswerInlineQuery(query *Query, response *QueryResponse) error {
 	return extractOkResponse(respJSON)
 }
 
-// AnswerCallbackQuery sends a response for a given callback query. A callback can
+// Respond sends a response for a given callback query. A callback can
 // only be responded to once, subsequent attempts to respond to the same callback
 // will result in an error.
-func (b *Bot) AnswerCallbackQuery(callback *Callback, response *CallbackResponse) error {
+func (b *Bot) Respond(callback *Callback, response *CallbackResponse) error {
 	response.CallbackID = callback.ID
 
 	respJSON, err := b.sendCommand("answerCallbackQuery", response)

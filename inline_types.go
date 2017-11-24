@@ -1,30 +1,35 @@
 package telebot
 
-// InlineQueryResultBase must be embedded into all IQRs.
-type InlineQueryResultBase struct {
+// ResultBase must be embedded into all IQRs.
+type ResultBase struct {
 	// Unique identifier for this result, 1-64 Bytes.
 	// If left unspecified, a 64-bit FNV-1 hash will be calculated
-	// from the other fields and used automatically.
 	ID string `json:"id",hash:"ignore"`
 
 	// Ignore. This field gets set automatically.
 	Type string `json:"type",hash:"ignore"`
+
+	// Content of the message to be sent.
+	Content *InputMessageContent `json:"input_message_content,omitempty"`
+
+	// Optional. Inline keyboard attached to the message.
+	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 }
 
-// GetID is part of IQRBase's implementation of IQR interface.
-func (result *InlineQueryResultBase) GetID() string {
-	return result.ID
+// ResultID returns ResultBase.ID.
+func (r *ResultBase) ResultID() string {
+	return r.ID
 }
 
-// SetID is part of IQRBase's implementation of IQR interface.
-func (result *InlineQueryResultBase) SetID(id string) {
-	result.ID = id
+// SetResultID sets ResultBase.ID.
+func (r *ResultBase) SetResultID(id string) {
+	r.ID = id
 }
 
-// InlineQueryResultArticle represents a link to an article or web page.
+// ArticleResult represents a link to an article or web page.
 // See also: https://core.telegram.org/bots/api#inlinequeryresultarticle
-type InlineQueryResultArticle struct {
-	InlineQueryResultBase
+type ArticleResult struct {
+	ResultBase
 
 	// Title of the result.
 	Title string `json:"title"`
@@ -32,12 +37,6 @@ type InlineQueryResultArticle struct {
 	// Message text. Shortcut (and mutually exclusive to) specifying
 	// InputMessageContent.
 	Text string `json:"message_text,omitempty"`
-
-	// Content of the message to be sent.
-	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
-
-	// Optional. Inline keyboard attached to the message.
-	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 
 	// Optional. URL of the result.
 	URL string `json:"url,omitempty"`
@@ -48,43 +47,31 @@ type InlineQueryResultArticle struct {
 	// Optional. Short description of the result.
 	Description string `json:"description,omitempty"`
 
-	// Optional. Url of the thumbnail for the result.
+	// Optional. URL of the thumbnail for the result.
 	ThumbURL string `json:"thumb_url,omitempty"`
-
-	// Optional. Thumbnail width.
-	ThumbWidth int `json:"thumb_width,omitempty"`
-
-	// Optional. Thumbnail height.
-	ThumbHeight int `json:"thumb_height,omitempty"`
 }
 
-// InlineQueryResultAudio represents a link to an mp3 audio file.
-type InlineQueryResultAudio struct {
-	InlineQueryResultBase
-
-	// A valid URL for the audio file.
-	AudioURL string `json:"audio_url"`
+// AudioResult represents a link to an mp3 audio file.
+type AudioResult struct {
+	ResultBase
 
 	// Title.
 	Title string `json:"title"`
+
+	// A valid URL for the audio file.
+	URL string `json:"audio_url"`
 
 	// Optional. Performer.
 	Performer string `json:"performer,omitempty"`
 
 	// Optional. Audio duration in seconds.
 	Duration int `json:"audio_duration,omitempty"`
-
-	// Optional. Inline keyboard attached to the message.
-	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-
-	// Optional. Content of the message to be sent instead of the audio.
-	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-// InlineQueryResultContact represents a contact with a phone number.
+// ContentResult represents a contact with a phone number.
 // See also: https://core.telegram.org/bots/api#inlinequeryresultcontact
-type InlineQueryResultContact struct {
-	InlineQueryResultBase
+type ContactResult struct {
+	ResultBase
 
 	// Contact's phone number.
 	PhoneNumber string `json:"phone_number"`
@@ -95,36 +82,24 @@ type InlineQueryResultContact struct {
 	// Optional. Contact's last name.
 	LastName string `json:"last_name,omitempty"`
 
-	// Optional. Inline keyboard attached to the message.
-	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-
-	// Optional. Content of the message to be sent instead of the audio.
-	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
-
-	// Optional. Url of the thumbnail for the result.
+	// Optional. URL of the thumbnail for the result.
 	ThumbURL string `json:"thumb_url,omitempty"`
-
-	// Optional. Thumbnail width.
-	ThumbWidth int `json:"thumb_width,omitempty"`
-
-	// Optional. Thumbnail height.
-	ThumbHeight int `json:"thumb_height,omitempty"`
 }
 
-// InlineQueryResultDocument represents a link to a file.
+// DocumentResult represents a link to a file.
 // See also: https://core.telegram.org/bots/api#inlinequeryresultdocument
-type InlineQueryResultDocument struct {
-	InlineQueryResultBase
+type DocumentResult struct {
+	ResultBase
 
 	// Title for the result.
 	Title string `json:"title"`
 
 	// A valid URL for the file
-	DocumentURL string `json:"document_url"`
+	URL string `json:"document_url"`
 
 	// Mime type of the content of the file, either “application/pdf” or
 	// “application/zip”.
-	MimeType string `json:"mime_type"`
+	MIME string `json:"mime_type"`
 
 	// Optional. Caption of the document to be sent, 0-200 characters.
 	Caption string `json:"caption,omitempty"`
@@ -132,38 +107,23 @@ type InlineQueryResultDocument struct {
 	// Optional. Short description of the result.
 	Description string `json:"description,omitempty"`
 
-	// Optional. Inline keyboard attached to the message.
-	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-
-	// Optional. Content of the message to be sent instead of the audio.
-	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
-
 	// Optional. URL of the thumbnail (jpeg only) for the file.
 	ThumbURL string `json:"thumb_url,omitempty"`
-
-	// Optional. Thumbnail width.
-	ThumbWidth int `json:"thumb_width,omitempty"`
-
-	// Optional. Thumbnail height.
-	ThumbHeight int `json:"thumb_height,omitempty"`
 }
 
-// InlineQueryResultGif represents a link to an animated GIF file.
+// GifResult represents a link to an animated GIF file.
 // See also: https://core.telegram.org/bots/api#inlinequeryresultgif
-type InlineQueryResultGif struct {
-	InlineQueryResultBase
+type GifResult struct {
+	ResultBase
 
 	// A valid URL for the GIF file. File size must not exceed 1MB.
-	GifURL string `json:"gif_url"`
-
-	// URL of the static thumbnail for the result (jpeg or gif).
-	ThumbURL string `json:"thumb_url"`
+	URL string `json:"gif_url"`
 
 	// Optional. Width of the GIF.
-	GifWidth int `json:"gif_width,omitempty"`
+	Width int `json:"gif_width,omitempty"`
 
 	// Optional. Height of the GIF.
-	GifHeight int `json:"gif_height,omitempty"`
+	Height int `json:"gif_height,omitempty"`
 
 	// Optional. Title for the result.
 	Title string `json:"title,omitempty"`
@@ -171,48 +131,29 @@ type InlineQueryResultGif struct {
 	// Optional. Caption of the GIF file to be sent, 0-200 characters.
 	Caption string `json:"caption,omitempty"`
 
-	// Optional. Inline keyboard attached to the message.
-	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-
-	// Optional. Content of the message to be sent instead of the audio.
-	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
+	// URL of the static thumbnail for the result (jpeg or gif).
+	ThumbURL string `json:"thumb_url"`
 }
 
-// InlineQueryResultLocation represents a location on a map.
+// LocationResult represents a location on a map.
 // See also: https://core.telegram.org/bots/api#inlinequeryresultlocation
-type InlineQueryResultLocation struct {
-	InlineQueryResultBase
+type LocationResult struct {
+	ResultBase
 
-	// Latitude of the location in degrees.
-	Latitude float32 `json:"latitude"`
-
-	// Longitude of the location in degrees.
-	Longitude float32 `json:"longitude"`
+	Location
 
 	// Location title.
 	Title string `json:"title"`
 
-	// Optional. Inline keyboard attached to the message.
-	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-
-	// Optional. Content of the message to be sent instead of the audio.
-	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
-
 	// Optional. Url of the thumbnail for the result.
 	ThumbURL string `json:"thumb_url,omitempty"`
-
-	// Optional. Thumbnail width.
-	ThumbWidth int `json:"thumb_width,omitempty"`
-
-	// Optional. Thumbnail height.
-	ThumbHeight int `json:"thumb_height,omitempty"`
 }
 
-// InlineQueryResultMpeg4Gif represents a link to a video animation
+// ResultMpeg4Gif represents a link to a video animation
 // (H.264/MPEG-4 AVC video without sound).
 // See also: https://core.telegram.org/bots/api#inlinequeryresultmpeg4gif
-type InlineQueryResultMpeg4Gif struct {
-	InlineQueryResultBase
+type Mpeg4GifResult struct {
+	ResultBase
 
 	// A valid URL for the MP4 file.
 	URL string `json:"mpeg4_url"`
@@ -231,31 +172,22 @@ type InlineQueryResultMpeg4Gif struct {
 
 	// Optional. Caption of the MPEG-4 file to be sent, 0-200 characters.
 	Caption string `json:"caption,omitempty"`
-
-	// Optional. Inline keyboard attached to the message.
-	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-
-	// Optional. Content of the message to be sent instead of the audio.
-	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-// InlineQueryResultPhoto represents a link to a photo.
+// ResultResult represents a link to a photo.
 // See also: https://core.telegram.org/bots/api#inlinequeryresultphoto
-type InlineQueryResultPhoto struct {
-	InlineQueryResultBase
+type PhotoResult struct {
+	ResultBase
 
 	// A valid URL of the photo. Photo must be in jpeg format.
 	// Photo size must not exceed 5MB.
-	PhotoURL string `json:"photo_url"`
-
-	// URL of the thumbnail for the photo.
-	ThumbURL string `json:"thumb_url"`
+	URL string `json:"photo_url"`
 
 	// Optional. Width of the photo.
-	PhotoWidth int `json:"photo_width,omitempty"`
+	Width int `json:"photo_width,omitempty"`
 
 	// Optional. Height of the photo.
-	PhotoHeight int `json:"photo_height,omitempty"`
+	Height int `json:"photo_height,omitempty"`
 
 	// Optional. Title for the result.
 	Title string `json:"title,omitempty"`
@@ -266,23 +198,16 @@ type InlineQueryResultPhoto struct {
 	// Optional. Caption of the photo to be sent, 0-200 characters.
 	Caption string `json:"caption,omitempty"`
 
-	// Optional. Inline keyboard attached to the message.
-	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-
-	// Optional. Content of the message to be sent instead of the audio.
-	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
+	// URL of the thumbnail for the photo.
+	ThumbURL string `json:"thumb_url"`
 }
 
-// InlineQueryResultVenue represents a venue.
+// VenueResult represents a venue.
 // See also: https://core.telegram.org/bots/api#inlinequeryresultvenue
-type InlineQueryResultVenue struct {
-	InlineQueryResultBase
+type VenueResult struct {
+	ResultBase
 
-	// Latitude of the venue location in degrees.
-	Latitude float32 `json:"latitude"`
-
-	// Longitude of the venue location in degrees.
-	Longitude float32 `json:"longitude"`
+	Location
 
 	// Title of the venue.
 	Title string `json:"title"`
@@ -293,33 +218,21 @@ type InlineQueryResultVenue struct {
 	// Optional. Foursquare identifier of the venue if known.
 	FoursquareID string `json:"foursquare_id,omitempty"`
 
-	// Optional. Inline keyboard attached to the message.
-	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-
-	// Optional. Content of the message to be sent instead of the audio.
-	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
-
-	// Optional. Url of the thumbnail for the result.
+	// Optional. URL of the thumbnail for the result.
 	ThumbURL string `json:"thumb_url,omitempty"`
-
-	// Optional. Thumbnail width.
-	ThumbWidth int `json:"thumb_width,omitempty"`
-
-	// Optional. Thumbnail height.
-	ThumbHeight int `json:"thumb_height,omitempty"`
 }
 
-// InlineQueryResultVideo represents a link to a page containing an embedded
+// VideoResult represents a link to a page containing an embedded
 // video player or a video file.
 // See also: https://core.telegram.org/bots/api#inlinequeryresultvideo
-type InlineQueryResultVideo struct {
-	InlineQueryResultBase
+type VideoResult struct {
+	ResultBase
 
 	// A valid URL for the embedded video player or video file.
-	VideoURL string `json:"video_url"`
+	URL string `json:"video_url"`
 
 	// Mime type of the content of video url, “text/html” or “video/mp4”.
-	MimeType string `json:"mime_type"`
+	MIME string `json:"mime_type"`
 
 	// URL of the thumbnail (jpeg only) for the video.
 	ThumbURL string `json:"thumb_url"`
@@ -331,42 +244,31 @@ type InlineQueryResultVideo struct {
 	Caption string `json:"caption,omitempty"`
 
 	// Optional. Video width.
-	VideoWidth int `json:"video_width,omitempty"`
+	Width int `json:"video_width,omitempty"`
 
 	// Optional. Video height.
-	VideoHeight int `json:"video_height,omitempty"`
+	Height int `json:"video_height,omitempty"`
 
 	// Optional. Video duration in seconds.
-	VideoDuration int `json:"video_duration,omitempty"`
+	Duration int `json:"video_duration,omitempty"`
 
 	// Optional. Short description of the result.
 	Description string `json:"description,omitempty"`
-
-	// Optional. Inline keyboard attached to the message.
-	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-
-	// Optional. Content of the message to be sent instead of the audio.
-	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-// InlineQueryResultVoice represents a link to a voice recording in a
-// .ogg container encoded with OPUS.
+// VoiceResult represents a link to a voice recording in an .ogg
+// container encoded with OPUS.
+//
 // See also: https://core.telegram.org/bots/api#inlinequeryresultvoice
-type InlineQueryResultVoice struct {
-	InlineQueryResultBase
+type VoiceResult struct {
+	ResultBase
 
 	// A valid URL for the voice recording.
-	VoiceURL string `json:"voice_url"`
+	URL string `json:"voice_url"`
 
 	// Recording title.
 	Title string `json:"title"`
 
 	// Optional. Recording duration in seconds.
-	VoiceDuration int `json:"voice_duration"`
-
-	// Optional. Inline keyboard attached to the message.
-	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-
-	// Optional. Content of the message to be sent instead of the audio.
-	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
+	Duration int `json:"voice_duration"`
 }
