@@ -3,6 +3,9 @@ package telebot
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -476,6 +479,41 @@ func (b *Bot) FileByID(fileID string) (File, error) {
 	}
 
 	return resp.Result, nil
+}
+
+// Download saves the file from Telegram servers locally.
+//
+// Maximum file size to download is 20 MB.
+func (b *Bot) Download(f *File, localFilename string) error {
+	g, err := b.FileByID(f.FileID)
+	if err != nil {
+		return err
+	}
+
+	url := fmt.Sprintf("https://api.telegram.org/file/bot%s/%s",
+		b.Token, g.FilePath)
+
+	out, err := os.Create(localFilename)
+	if err != nil {
+		return wrapSystem(err)
+	}
+	defer out.Close()
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return wrapSystem(err)
+	}
+	defer resp.Body.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return wrapSystem(err)
+	}
+
+	g.FileLocal = localFilename
+	*f = g
+
+	return nil
 }
 
 // Leave makes bot leave a group, supergroup or channel.
