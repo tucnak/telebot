@@ -23,6 +23,7 @@ type Bot struct {
 	Errors chan error
 
 	tree *radix.Tree
+	shutdown chan bool
 }
 
 // NewBot does try to build a Bot with token `token`, which
@@ -56,6 +57,14 @@ func (b *Bot) Start(timeout time.Duration) {
 	b.poll(b.Messages, b.Queries, b.Callbacks, timeout)
 }
 
+// Stop method closes shutdown channel, which is used by listen
+// updates cycle. As soon as shutdown was closed poll cycle close
+// all messages channels
+func (b *Bot) Stop() {
+	defer func() { recover() }()
+	close(b.shutdown)
+}
+
 func (b *Bot) debug(err error) {
 	if b.Errors != nil {
 		b.Errors <- errors.WithStack(err)
@@ -68,38 +77,53 @@ func (b *Bot) poll(
 	callbacks chan Callback,
 	timeout time.Duration,
 ) {
+	b.shutdown = make(chan bool)
 	var latestUpdate int64
 
 	for {
-		updates, err := b.getUpdates(latestUpdate+1, timeout)
+		select {
+		case <-b.shutdown:
+			if messages != nil {
+				close(messages)
+			}
+			if queries != nil {
+				close(queries)
+			}
+			if callbacks != nil {
+				close(callbacks)
+			}
+			return
+		default:
+			updates, err := b.getUpdates(latestUpdate+1, timeout)
 
-		if err != nil {
-			b.debug(errors.Wrap(err, "getUpdates() failed"))
-			continue
-		}
-
-		for _, update := range updates {
-			if update.Payload != nil /* if message */ {
-				if messages == nil {
-					continue
-				}
-
-				messages <- *update.Payload
-			} else if update.Query != nil /* if query */ {
-				if queries == nil {
-					continue
-				}
-
-				queries <- *update.Query
-			} else if update.Callback != nil {
-				if callbacks == nil {
-					continue
-				}
-
-				callbacks <- *update.Callback
+			if err != nil {
+				b.debug(errors.Wrap(err, "getUpdates() failed"))
+				continue
 			}
 
-			latestUpdate = update.ID
+			for _, update := range updates {
+				if update.Payload != nil /* if message */ {
+					if messages == nil {
+						continue
+					}
+
+					messages <- *update.Payload
+				} else if update.Query != nil /* if query */ {
+					if queries == nil {
+						continue
+					}
+
+					queries <- *update.Query
+				} else if update.Callback != nil {
+					if callbacks == nil {
+						continue
+					}
+
+					callbacks <- *update.Callback
+				}
+
+				latestUpdate = update.ID
+			}
 		}
 	}
 
