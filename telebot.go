@@ -18,7 +18,7 @@
 //			}
 //
 //			b.Handle(tb.OnMessage, func(m *tb.Message) {
-//				b.Send(m.From, "hello world")
+//				b.Send(m.Sender, "hello world")
 //			}
 //
 //			b.Start()
@@ -31,13 +31,23 @@ package telebot
 // For convenience, all Telebot-provided endpoints start with
 // an "alert" character \a.
 const (
-	// Basic generic message handlers.
+	// Basic message handlers.
 	//
 	// Handler: func(*Message)
-	OnMessage           = "\amessage"
+	OnText              = "\atext"
+	OnPhoto             = "\aphoto"
+	OnAudio             = "\aaudio"
+	OnDocument          = "\adocument"
+	OnSticker           = "\asticker"
+	OnVideo             = "\avideo"
+	OnVoice             = "\avoice"
+	OnVideoNote         = "\avideo_note"
+	OnContact           = "\acontact"
+	OnLocation          = "\alocation"
+	OnVenue             = "\avenue"
 	OnEditedMessage     = "\aedited_msg"
 	OnChannelPost       = "\achan_post"
-	OnEditedChannelPost = "\achan_post"
+	OnEditedChannelPost = "\achan_edited_post"
 
 	// Will fire on callback requests.
 	//
@@ -49,7 +59,8 @@ const (
 	// Handler: func(*Query)
 	OnQuery = "\aquery"
 
-	// Will fire when bot gets added to some chat,
+	// Will fire when bot gets added to some group,
+	// including ones just created.
 	//
 	// Handler: func(*Message)
 	OnAddedToGroup = "\aadded_to_group"

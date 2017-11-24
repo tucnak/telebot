@@ -75,9 +75,9 @@ type Update struct {
 //
 // Example:
 //
-//     tb.Handle("/help", func (m *tb.Message) {})
-//     tb.Handle(tb.OnEditedMessage, func (m *tb.Message) {})
-//     tb.Handle(tb.OnQuery, func (q *tb.Query) {})
+//     tb.b.handle("/help", func (m *tb.Message) {})
+//     tb.b.handle(tb.OnEditedMessage, func (m *tb.Message) {})
+//     tb.b.handle(tb.OnQuery, func (q *tb.Query) {})
 //
 func (b *Bot) Handle(endpoint string, handler interface{}) {
 	b.handlers[endpoint] = handler
@@ -114,70 +114,52 @@ func (b *Bot) Start() {
 		if upd.Message != nil {
 			m := upd.Message
 
-			// Text message
+			// Commands
 			if m.Text != "" {
+				// Filtering malicious messsages
 				if m.Text[0] == '\a' {
 					continue
 				}
 
 				match := cmdRx.FindAllStringSubmatch(m.Text, -1)
 
-				// Command found
-				if match != nil {
-					if b.handleCommand(m, match[0][1], match[0][3]) {
-						continue
-					}
-				}
-			}
-
-			wasAdded := m.NewChatMembers != nil &&
-				isUserInList(b.Me, m.NewChatMembers)
-
-			if m.ChatCreated || wasAdded {
-				if handler, ok := b.handlers[string(OnAddedToGroup)]; ok {
-					if handler, ok := handler.(func(*Message)); ok {
-						go handler(m)
-						continue
-					}
+				// Command found - handle and continue
+				if match != nil && b.handleCommand(m, match[0][1], match[0][3]) {
+					continue
 				}
 
+				// OnText
+				b.handle(OnText, m)
 				continue
 			}
 
-			// OnMessage
-			if handler, ok := b.handlers[string(OnMessage)]; ok {
-				if handler, ok := handler.(func(*Message)); ok {
-					go handler(m)
-					continue
-				}
+			// on media
+			if b.handleMedia(m) {
+				continue
 			}
+
+			// OnAddedToGrop
+			wasAdded := m.NewChatMembers != nil && isUserInList(b.Me, m.NewChatMembers)
+			if m.GroupCreated || wasAdded {
+				b.handle(OnAddedToGroup, m)
+				continue
+			}
+
 			continue
 		}
 
 		if upd.EditedMessage != nil {
-			if handler, ok := b.handlers[OnEditedMessage]; ok {
-				if handler, ok := handler.(func(*Message)); ok {
-					handler(upd.EditedMessage)
-				}
-			}
+			b.handle(OnEditedMessage, upd.EditedMessage)
 			continue
 		}
 
 		if upd.ChannelPost != nil {
-			if handler, ok := b.handlers[OnChannelPost]; ok {
-				if handler, ok := handler.(func(*Message)); ok {
-					handler(upd.ChannelPost)
-				}
-			}
+			b.handle(OnChannelPost, upd.ChannelPost)
 			continue
 		}
 
 		if upd.EditedChannelPost != nil {
-			if handler, ok := b.handlers[OnEditedChannelPost]; ok {
-				if handler, ok := handler.(func(*Message)); ok {
-					handler(upd.EditedChannelPost)
-				}
-			}
+			b.handle(OnEditedChannelPost, upd.EditedChannelPost)
 			continue
 		}
 
@@ -199,6 +181,69 @@ func (b *Bot) Start() {
 			continue
 		}
 	}
+}
+
+func (b *Bot) handle(end string, m *Message) bool {
+	handler, ok := b.handlers[end]
+	if !ok {
+		return false
+	}
+
+	if handler, ok := handler.(func(*Message)); ok {
+		go handler(m)
+		return true
+	} else {
+		return false
+	}
+}
+
+func (b *Bot) handleMedia(m *Message) bool {
+	if m.Photo != nil {
+		b.handle(OnPhoto, m)
+		return true
+	}
+
+	if m.Audio != nil {
+		b.handle(OnAudio, m)
+		return true
+	}
+
+	if m.Document != nil {
+		b.handle(OnDocument, m)
+		return true
+	}
+
+	if m.Sticker != nil {
+		b.handle(OnSticker, m)
+		return true
+	}
+
+	if m.Video != nil {
+		b.handle(OnVideo, m)
+		return true
+	}
+
+	if m.VideoNote != nil {
+		b.handle(OnVideoNote, m)
+		return true
+	}
+
+	if m.Contact != nil {
+		b.handle(OnContact, m)
+		return true
+	}
+
+	if m.Location != nil {
+		b.handle(OnLocation, m)
+		return true
+	}
+
+	if m.Venue != nil {
+		b.handle(OnVenue, m)
+		return true
+	}
+
+	return false
 }
 
 // Send accepts 2+ arguments, starting with destination chat, followed by

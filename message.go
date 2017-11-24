@@ -9,12 +9,12 @@ type Message struct {
 	ID int `json:"message_id"`
 
 	// For message sent to channels, Sender will be nil
-	From *User `json:"from"`
+	Sender *User `json:"from"`
 
 	// Unixtime, use Message.Time() to get time.Time
 	Unixtime int64 `json:"date"`
 
-	// A group chat message belongs to.
+	// Conversation the message belongs to.
 	Chat *Chat `json:"chat"`
 
 	// (Optional) Time of last edit in Unix
@@ -81,6 +81,9 @@ type Message struct {
 	// For a location, its longitude and latitude.
 	Location *Location `json:"location"`
 
+	// For a venue, information about it.
+	Venue *Venue `json:"venue"`
+
 	// For a service message, represents a user,
 	// that just got added to chat, this message came from.
 	//
@@ -127,7 +130,7 @@ type Message struct {
 	// initial group chat members.
 	//
 	// Sender would lead to creator of the chat.
-	ChatCreated bool `json:"group_chat_created"`
+	GroupCreated bool `json:"group_chat_created"`
 
 	// For a service message, true if super group has been created.
 	//
@@ -236,13 +239,12 @@ func (m *Message) FromChannel() bool {
 func (m *Message) IsService() bool {
 	fact := false
 
-	fact = fact || (m.UserJoined != nil)
-	fact = fact || (m.UserLeft != nil)
-	fact = fact || (m.NewChatTitle != "")
-	fact = fact || (len(m.NewChatPhoto) > 0)
+	fact = fact || m.UserJoined != nil
+	fact = fact || m.UserLeft != nil
+	fact = fact || m.NewChatTitle != ""
+	fact = fact || len(m.NewChatPhoto) > 0
 	fact = fact || m.ChatPhotoDeleted
-	fact = fact || m.ChatCreated
-	fact = fact || m.SuperGroupCreated
+	fact = fact || m.GroupCreated || m.SuperGroupCreated
 	fact = fact || (m.MigrateTo != m.MigrateFrom)
 
 	return fact

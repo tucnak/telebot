@@ -35,7 +35,7 @@ func main() {
     }
 
     b.Handle("/hello", func(m *tb.Message) {
-        b.Send(m.From, "hello world")
+        b.Send(m.Sender, "hello world")
     })
 
     b.Start()
@@ -50,6 +50,15 @@ and you're ready to go!
 ```go
 b, _ := tb.NewBot(settings)
 
+b.Handle(tb.OnText, func(m *Message) {
+    // all text messages that weren't captured
+    // by existing handlers
+}
+
+b.Handle(tb.OnPhoto, func(m *Message) {
+    // photos only
+}
+
 b.Handle("/help", func (m *Message) {
     // help command handler
 })
@@ -62,14 +71,9 @@ b.Handle(tb.Callback, func (c *Callback) {
     // incoming bot callbacks that weren't
     // captured by specific callback handlers.
 })
-
-b.Handle(tb.OnMessage, func(m *Message) {
-    // all messages that couldn't fall into
-    // any specific endpoint will get here.
-}
 ```
 
-Now there's about 10 supported endpoints (see package consts). Let me know
+Now there's a dozen of supported endpoints (see package consts). Let me know
 if you'd like to see some endpoint or endpoint idea implemented. This system
 is completely extensible, so I can introduce them without braking
 backwards-compatibity.
