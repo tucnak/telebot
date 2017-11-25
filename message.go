@@ -108,7 +108,7 @@ type Message struct {
 	NewChatTitle string `json:"new_chat_title"`
 
 	// For a service message, represents all available
-	// thumbnails of new chat photo.
+	// thumbnails of the new chat photo.
 	//
 	// Sender would lead to a User, capable of change.
 	NewChatPhoto []Photo `json:"new_chat_photo"`

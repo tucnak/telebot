@@ -1,7 +1,6 @@
 package telebot
 
 import (
-	"net/url"
 	"os"
 )
 
@@ -14,10 +13,10 @@ type File struct {
 	FilePath string `json:"file_path"`
 
 	// file on local file system.
-	FileLocal string
+	FileLocal string `json:"file_local"`
 
 	// file on the internet
-	FileURL *url.URL
+	FileURL string `json:"file_url"`
 }
 
 // FromDisk constructs a new local (on-disk) file object.
@@ -42,8 +41,8 @@ func FromDisk(filename string) File {
 //
 //     photo := &tb.Photo{File: tb.FromURL("https://site.com/picture.jpg")}
 //
-func FromURL(u *url.URL) File {
-	return File{FileURL: u}
+func FromURL(url string) File {
+	return File{FileURL: url}
 }
 
 func (f *File) stealRef(g *File) {
@@ -51,7 +50,7 @@ func (f *File) stealRef(g *File) {
 		f.FileLocal = g.FileLocal
 	}
 
-	if g.FileURL != nil {
+	if g.FileURL != "" {
 		f.FileURL = g.FileURL
 	}
 }

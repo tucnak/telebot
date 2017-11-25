@@ -1,15 +1,21 @@
 package telebot
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
-type photoSize struct {
-	File
+// Album lets you group multiple media (so-called InputMedia)
+// into a single messsage.
+//
+// On older clients albums look like N regular messages.
+type Album []InputMedia
 
-	Width  int `json:"width"`
-	Height int `json:"height"`
-
-	// (Optional)
-	Caption string `json:"caption,omitempty"`
+// InputMedia is a generic type for all kinds of media you
+// can put into an album.
+type InputMedia interface {
+	// As some files must be uploaded (instead of referencing)
+	// outer layers of Telebot require it.
+	MediaFile() *File
 }
 
 // Photo object represents a single photo file.
@@ -21,6 +27,18 @@ type Photo struct {
 
 	// (Optional)
 	Caption string `json:"caption,omitempty"`
+}
+
+type photoSize struct {
+	File
+	Width   int    `json:"width"`
+	Height  int    `json:"height"`
+	Caption string `json:"caption,omitempty"`
+}
+
+// MediaFile returns &Photo.File
+func (p *Photo) MediaFile() *File {
+	return &p.File
 }
 
 // UnmarshalJSON is custom unmarshaller required to abstract
@@ -58,7 +76,7 @@ type Audio struct {
 	File
 
 	// Duration of the recording in seconds as defined by sender.
-	Duration int `json:"duration"`
+	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
 	Caption   string `json:"caption,omitempty"`
@@ -83,16 +101,22 @@ type Document struct {
 
 // Video object represents a video file.
 type Video struct {
-	Audio
+	File
 
 	Width  int `json:"width"`
 	Height int `json:"height"`
 
-	Duration int `json:"duration"`
+	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
+	Caption   string `json:"caption,omitempty"`
 	Thumbnail *Photo `json:"thumb,omitempty"`
 	MIME      string `json:"mime_type,omitempty"`
+}
+
+// MediaFile returns &Video.File
+func (v *Video) MediaFile() *File {
+	return &v.File
 }
 
 // Voice object represents a voice note.

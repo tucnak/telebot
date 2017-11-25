@@ -5,7 +5,7 @@
 [![Travis](https://travis-ci.org/tucnak/telebot.svg?branch=v2)](https://travis-ci.org/tucnak/telebot)
 
 ```bash
-go get gopkg.in/tucnak/telebot.v2
+go get -u gopkg.in/tucnak/telebot.v2
 ```
 
 Telebot is a bot framework for [Telegram](https://telegram.org) [Bot API](https://core.telegram.org/bots/api).

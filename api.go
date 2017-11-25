@@ -39,52 +39,59 @@ func (b *Bot) sendCommand(method string, payload interface{}) ([]byte, error) {
 	return json, nil
 }
 
-func (b *Bot) sendFile(method, name, path string, params map[string]string) ([]byte, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return []byte{}, wrapSystem(err)
-	}
-	defer file.Close()
-
+func (b *Bot) sendFiles(
+	method string,
+	files map[string]string,
+	params map[string]string) ([]byte, error) {
+	// ---
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile(name, filepath.Base(path))
-	if err != nil {
-		return []byte{}, wrapSystem(err)
-	}
 
-	if _, err = io.Copy(part, file); err != nil {
-		return []byte{}, wrapSystem(err)
+	for name, path := range files {
+		file, err := os.Open(path)
+		if err != nil {
+			return nil, wrapSystem(err)
+		}
+		defer file.Close()
+
+		part, err := writer.CreateFormFile(name, filepath.Base(path))
+		if err != nil {
+			return nil, wrapSystem(err)
+		}
+
+		if _, err = io.Copy(part, file); err != nil {
+			return nil, wrapSystem(err)
+		}
 	}
 
 	for field, value := range params {
 		writer.WriteField(field, value)
 	}
 
-	if err = writer.Close(); err != nil {
-		return []byte{}, wrapSystem(err)
+	if err := writer.Close(); err != nil {
+		return nil, wrapSystem(err)
 	}
 
 	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.Token, method)
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
-		return []byte{}, wrapSystem(err)
+		return nil, wrapSystem(err)
 	}
 
 	req.Header.Add("Content-Type", writer.FormDataContentType())
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, "http.Post failed")
+		return nil, errors.Wrap(err, "http.Post failed")
 	}
 
 	if resp.StatusCode == http.StatusInternalServerError {
-		return []byte{}, errors.New("api error: internal server error")
+		return nil, errors.New("api error: internal server error")
 	}
 
 	json, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return []byte{}, wrapSystem(err)
+		return nil, wrapSystem(err)
 	}
 
 	return json, nil
@@ -103,11 +110,12 @@ func (b *Bot) sendObject(f *File, what string, params map[string]string) (*Messa
 	if f.InCloud() {
 		params[what] = f.FileID
 		respJSON, err = b.sendCommand(sendWhat, params)
-	} else if f.FileURL != nil {
-		params[what] = f.FileURL.String()
+	} else if f.FileURL != "" {
+		params[what] = f.FileURL
 		respJSON, err = b.sendCommand(sendWhat, params)
 	} else {
-		respJSON, err = b.sendFile(sendWhat, what, f.FileLocal, params)
+		respJSON, err = b.sendFiles(sendWhat,
+			map[string]string{what: f.FileLocal}, params)
 	}
 
 	if err != nil {

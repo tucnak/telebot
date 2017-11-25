@@ -276,8 +276,97 @@ func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Mes
 	}
 }
 
-// Reply behaves just like Send() with an exception of "reply-to" indicator.
+// SendAlbum is used when sending multiple instances of media as a single
+// message (so-called album).
 //
+// From all existing options, it only supports telebot.Silent.
+func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Message, error) {
+	media := make([]string, len(a))
+	files := make(map[string]string)
+
+	for i, x := range a {
+		var (
+			f                    *File
+			caption              string
+			mediaRepr, mediaType string
+		)
+
+		switch y := x.(type) {
+		case *Photo:
+			f = &y.File
+			mediaType = "photo"
+			caption = y.Caption
+		case *Video:
+			f = &y.File
+			mediaType = "video"
+			caption = y.Caption
+		default:
+			return nil, errors.Errorf("telebot: album entry #%d is not valid", i)
+		}
+
+		if f.InCloud() {
+			mediaRepr = f.FileID
+		} else if f.FileURL != "" {
+			mediaRepr = f.FileURL
+		} else if f.OnDisk() {
+			mediaRepr = fmt.Sprintf("attach://%d", i)
+			files[strconv.Itoa(i)] = f.FileLocal
+		} else {
+			return nil, errors.Errorf(
+				"telebot: album entry #%d doesn't exist anywhere", i)
+		}
+
+		jsonRepr, _ := json.Marshal(map[string]string{
+			"type":    mediaType,
+			"media":   mediaRepr,
+			"caption": caption,
+		})
+
+		media[i] = string(jsonRepr)
+	}
+
+	params := map[string]string{
+		"chat_id": to.Recipient(),
+		"media":   "[" + strings.Join(media, ",") + "]",
+	}
+
+	sendOpts := extractOptions(options)
+	embedSendOptions(params, sendOpts)
+
+	respJSON, err := b.sendFiles("sendMediaGroup", files, params)
+
+	var resp struct {
+		Ok          bool
+		Result      []Message
+		Description string
+	}
+
+	err = json.Unmarshal(respJSON, &resp)
+	if err != nil {
+		return nil, errors.Wrap(err, "bad response json")
+	}
+
+	if !resp.Ok {
+		return nil, errors.Errorf("api error: %s", resp.Description)
+	}
+
+	for attachName, _ := range files {
+		i, _ := strconv.Atoi(attachName)
+
+		var newID string
+		if resp.Result[i].Photo != nil {
+			newID = resp.Result[i].Photo.FileID
+		} else {
+			newID = resp.Result[i].Video.FileID
+		}
+
+		a[i].MediaFile().FileID = newID
+	}
+
+	return resp.Result, nil
+}
+
+// Reply behaves just like Send() with an exception of "reply-to" indicator.
 func (b *Bot) Reply(to *Message, what interface{}, options ...interface{}) (*Message, error) {
 	// This function will panic upon unsupported payloads and options!
 	sendOpts := extractOptions(options)
@@ -302,9 +391,6 @@ func (b *Bot) Forward(to Recipient, what *Message, options ...interface{}) (*Mes
 	}
 
 	sendOpts := extractOptions(options)
-	if sendOpts == nil {
-		sendOpts = &SendOptions{}
-	}
 	embedSendOptions(params, sendOpts)
 
 	respJSON, err := b.sendCommand("forwardMessage", params)
