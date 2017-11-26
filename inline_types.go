@@ -66,6 +66,9 @@ type AudioResult struct {
 
 	// Optional. Audio duration in seconds.
 	Duration int `json:"audio_duration,omitempty"`
+
+	// If Cache != "", it'll be used instead
+	Cache string `json:"audio_file_id,omitempty"`
 }
 
 // ContentResult represents a contact with a phone number.
@@ -109,6 +112,9 @@ type DocumentResult struct {
 
 	// Optional. URL of the thumbnail (jpeg only) for the file.
 	ThumbURL string `json:"thumb_url,omitempty"`
+
+	// If Cache != "", it'll be used instead
+	Cache string `json:"document_file_id,omitempty"`
 }
 
 // GifResult represents a link to an animated GIF file.
@@ -133,6 +139,9 @@ type GifResult struct {
 
 	// URL of the static thumbnail for the result (jpeg or gif).
 	ThumbURL string `json:"thumb_url"`
+
+	// If Cache != "", it'll be used instead
+	Cache string `json:"gif_file_id,omitempty"`
 }
 
 // LocationResult represents a location on a map.
@@ -172,6 +181,9 @@ type Mpeg4GifResult struct {
 
 	// Optional. Caption of the MPEG-4 file to be sent, 0-200 characters.
 	Caption string `json:"caption,omitempty"`
+
+	// If Cache != "", it'll be used instead
+	Cache string `json:"mpeg4_file_id,omitempty"`
 }
 
 // ResultResult represents a link to a photo.
@@ -200,6 +212,9 @@ type PhotoResult struct {
 
 	// URL of the thumbnail for the photo.
 	ThumbURL string `json:"thumb_url"`
+
+	// If Cache != "", it'll be used instead
+	Cache string `json:"photo_file_id,omitempty"`
 }
 
 // VenueResult represents a venue.
@@ -254,6 +269,9 @@ type VideoResult struct {
 
 	// Optional. Short description of the result.
 	Description string `json:"description,omitempty"`
+
+	// If Cache != "", it'll be used instead
+	Cache string `json:"video_file_id,omitempty"`
 }
 
 // VoiceResult represents a link to a voice recording in an .ogg
@@ -271,4 +289,15 @@ type VoiceResult struct {
 
 	// Optional. Recording duration in seconds.
 	Duration int `json:"voice_duration"`
+
+	// If Cache != "", it'll be used instead
+	Cache string `json:"voice_file_id,omitempty"`
+}
+
+// StickerResult represents an inline cached sticker response.
+type StickerResult struct {
+	ResultBase
+
+	// If Cache != "", it'll be used instead
+	Cache string `json:"sticker_file_id,omitempty"`
 }

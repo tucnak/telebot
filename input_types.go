@@ -30,11 +30,8 @@ func (input *InputTextMessageContent) IsInputMessageContent() bool {
 // to be sent as the result of an inline query.
 // See also: https://core.telegram.org/bots/api#inputlocationmessagecontent
 type InputLocationMessageContent struct {
-	// Latitude of the location in degrees.
-	Latitude float32 `json:"latitude"`
-
-	// Longitude of the location in degrees.
-	Longitude float32 `json:"longitude"`
+	Lat float32 `json:"latitude"`
+	Lng float32 `json:"longitude"`
 }
 
 func (input *InputLocationMessageContent) IsInputMessageContent() bool {
@@ -45,11 +42,8 @@ func (input *InputLocationMessageContent) IsInputMessageContent() bool {
 // be sent as the result of an inline query.
 // See also: https://core.telegram.org/bots/api#inputvenuemessagecontent
 type InputVenueMessageContent struct {
-	// Latitude of the location in degrees.
-	Latitude float32 `json:"latitude"`
-
-	// Longitude of the location in degrees.
-	Longitude float32 `json:"longitude"`
+	Lat float32 `json:"latitude"`
+	Lng float32 `json:"longitude"`
 
 	// Name of the venue.
 	Title string `json:"title"`

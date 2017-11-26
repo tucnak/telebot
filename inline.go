@@ -26,8 +26,8 @@ type Query struct {
 	// Sender.
 	From User `json:"from"`
 
-	// (Optional) Sender location, only for bots that request user location.
-	Location Location `json:"location"`
+	// Sender location, only for bots that request user location.
+	Location *Location `json:"location"`
 
 	// Text of the query (up to 512 characters).
 	Text string `json:"query"`
@@ -128,6 +128,8 @@ func inferIQR(result Result) error {
 		r.Type = "video"
 	case *VoiceResult:
 		r.Type = "voice"
+	case *StickerResult:
+		r.Type = "sticker"
 	default:
 		return fmt.Errorf("result %v is not supported", result)
 	}
