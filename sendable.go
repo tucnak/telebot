@@ -152,9 +152,10 @@ func (v *VideoNote) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 // Send delivers media through bot b to recipient.
 func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id":   to.Recipient(),
-		"latitude":  fmt.Sprintf("%f", x.Lat),
-		"longitude": fmt.Sprintf("%f", x.Lng),
+		"chat_id":     to.Recipient(),
+		"latitude":    fmt.Sprintf("%f", x.Lat),
+		"longitude":   fmt.Sprintf("%f", x.Lng),
+		"live_period": fmt.Sprintf("%d", x.LivePeriod),
 	}
 	embedSendOptions(params, opt)
 

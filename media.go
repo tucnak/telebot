@@ -158,6 +158,10 @@ type Location struct {
 	Lat float32 `json:"latitude"`
 	// Longitude
 	Lng float32 `json:"longitude"`
+
+	// Period in seconds for which the location will be updated
+	// (see Live Locations, should be between 60 and 86400.)
+	LivePeriod int `json:"live_period,omitempty"`
 }
 
 // Venue object represents a venue location with name, address and

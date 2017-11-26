@@ -501,11 +501,24 @@ func (b *Bot) Forward(to Recipient, what *Message, options ...interface{}) (*Mes
 //     b.Edit(msg, msg.Text, newMarkup)
 //     b.Edit(msg, "new <b>text</b>", tb.ModeHTML)
 //
-func (b *Bot) Edit(originalMsg Editable, text string, options ...interface{}) (*Message, error) {
-	messageID, chatID := originalMsg.MessageSig()
+//     // Edit live location:
+//     b.Edit(liveMsg, tb.Location{42.1337, 69.4242})
+//
+func (b *Bot) Edit(message Editable, what interface{}, options ...interface{}) (*Message, error) {
+	messageID, chatID := message.MessageSig()
 	// TODO: add support for inline messages (chatID = 0)
 
-	params := map[string]string{"text": text}
+	params := map[string]string{}
+
+	switch v := what.(type) {
+	case string:
+		params["text"] = v
+	case Location:
+		params["latitude"] = fmt.Sprintf("%f", v.Lat)
+		params["longitude"] = fmt.Sprintf("%f", v.Lng)
+	default:
+		panic("telebot: unsupported what argument")
+	}
 
 	// if inline message
 	if chatID == 0 {
@@ -693,6 +706,146 @@ func (b *Bot) Download(f *File, localFilename string) error {
 	*f = g
 
 	return nil
+}
+
+// StopLiveLocation should be called to stop broadcasting live message location
+// before Location.LivePeriod expires.
+//
+// It supports telebot.ReplyMarkup.
+func (b *Bot) StopLiveLocation(message Editable, options ...interface{}) (*Message, error) {
+	messageID, chatID := message.MessageSig()
+
+	params := map[string]string{
+		"chat_id":    fmt.Sprintf("%d", chatID),
+		"message_id": fmt.Sprintf("%d", messageID),
+	}
+
+	sendOpts := extractOptions(options)
+	embedSendOptions(params, sendOpts)
+
+	respJSON, err := b.sendCommand("stopMessageLiveLocation", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMsgResponse(respJSON)
+}
+
+// GetInviteLink should be used to export chat's invite link.
+func (b *Bot) GetInviteLink(chat *Chat) (string, error) {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+
+	respJSON, err := b.sendCommand("exportChatInviteLink", params)
+	if err != nil {
+		return "", err
+	}
+
+	var resp struct {
+		Ok          bool
+		Description string
+		Result      string
+	}
+
+	err = json.Unmarshal(respJSON, &resp)
+	if err != nil {
+		return "", errors.Wrap(err, "bad response json")
+	}
+
+	if !resp.Ok {
+		return "", errors.Errorf("api error: %s", resp.Description)
+	}
+
+	return resp.Result, nil
+}
+
+// SetChatTitle should be used to update group title.
+func (b *Bot) SetGroupTitle(chat *Chat, newTitle string) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+		"title":   newTitle,
+	}
+
+	respJSON, err := b.sendCommand("setChatTitle", params)
+	if err != nil {
+		return err
+	}
+
+	return extractOkResponse(respJSON)
+}
+
+// SetGroupDescription should be used to update group title.
+func (b *Bot) SetGroupDescription(chat *Chat, description string) error {
+	params := map[string]string{
+		"chat_id":     chat.Recipient(),
+		"description": description,
+	}
+
+	respJSON, err := b.sendCommand("setChatDescription", params)
+	if err != nil {
+		return err
+	}
+
+	return extractOkResponse(respJSON)
+}
+
+// SetGroupPhoto should be used to update group photo.
+func (b *Bot) SetGroupPhoto(chat *Chat, p *Photo) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+
+	respJSON, err := b.sendFiles("setChatPhoto",
+		map[string]string{"photo": p.FileLocal}, params)
+	if err != nil {
+		return err
+	}
+
+	return extractOkResponse(respJSON)
+}
+
+// SetGroupStickerSet should be used to update group's group sticker set.
+func (b *Bot) SetGroupStickerSet(chat *Chat, setName string) error {
+	params := map[string]string{
+		"chat_id":          chat.Recipient(),
+		"sticker_set_name": setName,
+	}
+
+	respJSON, err := b.sendCommand("setChatStickerSet", params)
+	if err != nil {
+		return err
+	}
+
+	return extractOkResponse(respJSON)
+}
+
+// DeleteGroupPhoto should be used to just remove group photo.
+func (b *Bot) DeleteGroupPhoto(chat *Chat) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+
+	respJSON, err := b.sendCommand("deleteGroupPhoto", params)
+	if err != nil {
+		return err
+	}
+
+	return extractOkResponse(respJSON)
+}
+
+// DeleteGroupStickerSet should be used to just remove group sticker set.
+func (b *Bot) DeleteGroupStickerSet(chat *Chat) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+
+	respJSON, err := b.sendCommand("deleteChatStickerSet", params)
+	if err != nil {
+		return err
+	}
+
+	return extractOkResponse(respJSON)
 }
 
 // Leave makes bot leave a group, supergroup or channel.
