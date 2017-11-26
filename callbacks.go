@@ -1,5 +1,11 @@
 package telebot
 
+// CallbackEndpoint is an interface any element capable
+// of responding to a callback `\f<unique>`.
+type CallbackEndpoint interface {
+	CallbackUnique() string
+}
+
 // Callback object represents a query from a callback button in an
 // inline keyboard.
 type Callback struct {
@@ -46,4 +52,23 @@ type CallbackResponse struct {
 	// callback button. Otherwise, you may use deep-linking:
 	// https://telegram.me/your_bot?start=XXXX
 	URL string `json:"url,omitempty"`
+}
+
+// InlineButton represents a button displayed in the message.
+type InlineButton struct {
+	// Unique slagish name for this kind of button,
+	// try to be as specific as possible.
+	//
+	// It will be used as a callback endpoint.
+	Unique string `json:"unique,omitempty"`
+
+	Text        string `json:"text"`
+	URL         string `json:"url,omitempty"`
+	Data        string `json:"callback_data,omitempty"`
+	InlineQuery string `json:"switch_inline_query,omitempty"`
+}
+
+// CallbackUnique returns InlineButto.Unique
+func (t *InlineButton) CallbackUnique() string {
+	return t.Unique
 }

@@ -78,15 +78,27 @@ type Update struct {
 //
 // Example:
 //
-//     tb.b.handle("/help", func (m *tb.Message) {})
-//     tb.b.handle(tb.OnEditedMessage, func (m *tb.Message) {})
-//     tb.b.handle(tb.OnQuery, func (q *tb.Query) {})
+//     b.handle("/help", func (m *tb.Message) {})
+//     b.handle(tb.OnEdited, func (m *tb.Message) {})
+//     b.handle(tb.OnQuery, func (q *tb.Query) {})
 //
-func (b *Bot) Handle(endpoint string, handler interface{}) {
-	b.handlers[endpoint] = handler
+//     // make a hook for one of your preserved (by-pointer)
+//     // inline buttons.
+//     b.handle(&inlineButton, func (c *tb.Callback) {})
+//
+func (b *Bot) Handle(endpoint interface{}, handler interface{}) {
+	switch end := endpoint.(type) {
+	case string:
+		b.handlers[end] = handler
+	case CallbackEndpoint:
+		b.handlers["\f"+end.CallbackUnique()] = handler
+	}
 }
 
-var cmdRx = regexp.MustCompile(`^(\/\w+)(@(\w+))?(\s|$)`)
+var (
+	cmdRx   = regexp.MustCompile(`^(\/\w+)(@(\w+))?(\s|$)`)
+	cbackRx = regexp.MustCompile(`^\f(\w+)\|(.+)$`)
+)
 
 func (b *Bot) handleCommand(m *Message, cmdName, cmdBot string) bool {
 	// Group-syntax: "/cmd@bot"
@@ -217,6 +229,27 @@ func (b *Bot) Start() {
 		}
 
 		if upd.Callback != nil {
+			if upd.Callback.Data != "" {
+				data := upd.Callback.Data
+
+				if data[0] == '\f' {
+					match := cbackRx.FindAllStringSubmatch(data, -1)
+
+					if match != nil {
+						unique, payload := match[0][1], match[0][2]
+
+						if handler, ok := b.handlers["\f"+unique]; ok {
+							if handler, ok := handler.(func(*Callback)); ok {
+								upd.Callback.Data = payload
+								handler(upd.Callback)
+								continue
+							}
+						}
+
+					}
+				}
+			}
+
 			if handler, ok := b.handlers[OnCallback]; ok {
 				if handler, ok := handler.(func(*Callback)); ok {
 					handler(upd.Callback)
@@ -245,9 +278,9 @@ func (b *Bot) handle(end string, m *Message) bool {
 	if handler, ok := handler.(func(*Message)); ok {
 		go handler(m)
 		return true
-	} else {
-		return false
 	}
+
+	return false
 }
 
 func (b *Bot) handleMedia(m *Message) bool {
@@ -384,6 +417,9 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 	embedSendOptions(params, sendOpts)
 
 	respJSON, err := b.sendFiles("sendMediaGroup", files, params)
+	if err != nil {
+		return nil, err
+	}
 
 	var resp struct {
 		Ok          bool

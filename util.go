@@ -154,6 +154,18 @@ func embedSendOptions(params map[string]string, opt *SendOptions) {
 	}
 
 	if opt.ReplyMarkup != nil {
+		keys := opt.ReplyMarkup.InlineKeyboard
+		if len(keys) > 0 && len(keys[0]) > 0 {
+			for i, _ := range keys {
+				for j, _ := range keys[i] {
+					key := &keys[i][j]
+					if key.Unique != "" {
+						key.Data = "\f" + key.Unique + "|" + key.Data
+					}
+				}
+			}
+		}
+
 		replyMarkup, _ := json.Marshal(opt.ReplyMarkup)
 		params["reply_markup"] = string(replyMarkup)
 	}

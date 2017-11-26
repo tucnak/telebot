@@ -106,12 +106,3 @@ type InlineKeyboardMarkup struct {
 	// an Array of KeyboardButton objects.
 	InlineKeyboard [][]InlineButton `json:"inline_keyboard,omitempty"`
 }
-
-// InlineButton represents a button displayed in the message.
-type InlineButton struct {
-	Text string `json:"text"`
-
-	URL         string `json:"url,omitempty"`
-	Data        string `json:"callback_data,omitempty"`
-	InlineQuery string `json:"switch_inline_query,omitempty"`
-}
