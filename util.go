@@ -33,7 +33,7 @@ func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, e
 		"chat_id": to.Recipient(),
 		"text":    text,
 	}
-	b.embedSendOptions(params, opt)
+	embedSendOptions(params, opt)
 
 	respJSON, err := b.sendCommand("sendMessage", params)
 	if err != nil {
@@ -132,7 +132,7 @@ func extractOptions(how []interface{}) *SendOptions {
 	return opts
 }
 
-func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
+func embedSendOptions(params map[string]string, opt *SendOptions) {
 	if opt == nil {
 		return
 	}
@@ -160,12 +160,7 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 				for j, _ := range keys[i] {
 					key := &keys[i][j]
 					if key.Unique != "" {
-						data := "\f" + key.Unique + "|" + key.Data
-						if b.Guard != nil {
-							data = b.Guard.Encrypt(data, b.Secret)
-						}
-
-						key.Data = data
+						key.Data = "\f" + key.Unique + "|" + key.Data
 					}
 				}
 			}
