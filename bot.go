@@ -54,6 +54,7 @@ type Bot struct {
 
 	Errors   chan error
 	handlers map[string]interface{}
+	stop     chan struct{}
 }
 
 // Settings represents a utility struct for passing certain
@@ -137,7 +138,8 @@ func (b *Bot) Start() {
 		panic("telebot: can't start without a poller")
 	}
 
-	go b.Poller.Poll(b, b.Updates)
+	b.stop = make(chan struct{})
+	go b.Poller.Poll(b, b.Updates, b.stop)
 
 	for upd := range b.Updates {
 		if upd.Message != nil {
@@ -348,6 +350,11 @@ func (b *Bot) handleMedia(m *Message) bool {
 	}
 
 	return false
+}
+
+// Stop gracefully shuts the poller down.
+func (b *Bot) Stop() {
+	close(b.stop)
 }
 
 // Send accepts 2+ arguments, starting with destination chat, followed by
