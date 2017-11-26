@@ -45,9 +45,27 @@ const (
 	OnContact           = "\acontact"
 	OnLocation          = "\alocation"
 	OnVenue             = "\avenue"
-	OnEditedMessage     = "\aedited_msg"
+	OnEdited            = "\aedited"
+	OnPinned            = "\apinned"
 	OnChannelPost       = "\achan_post"
 	OnEditedChannelPost = "\achan_edited_post"
+
+	// Will fire when bot is added to a group.
+	OnAddedToGroup = "\aadded_to_group"
+	// Group events:
+	OnUserJoined        = "\auser_joined"
+	OnUserLeft          = "\auser_left"
+	OnNewGroupTitle     = "\anew_chat_title"
+	OnNewGroupPhoto     = "\anew_chat_photo"
+	OnGroupPhotoDeleted = "\achat_photo_del"
+
+	// Migration happens when group switches to
+	// a super group. You might want to update
+	// your internal references to this chat
+	// upon switching as its ID will change.
+	//
+	// Handler: func(from, to int64)
+	OnMigration = "\amigration"
 
 	// Will fire on callback requests.
 	//
@@ -58,12 +76,6 @@ const (
 	//
 	// Handler: func(*Query)
 	OnQuery = "\aquery"
-
-	// Will fire when bot gets added to some group,
-	// including ones just created.
-	//
-	// Handler: func(*Message)
-	OnAddedToGroup = "\aadded_to_group"
 )
 
 // ChatAction is a client-side status indicating bot activity.

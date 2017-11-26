@@ -17,9 +17,6 @@ type Message struct {
 	// Conversation the message belongs to.
 	Chat *Chat `json:"chat"`
 
-	// (Optional) Time of last edit in Unix
-	LastEdit int64 `json:"edit_date"`
-
 	// For forwarded messages, sender of the original message.
 	OriginalSender *User `json:"forward_from"`
 
@@ -37,15 +34,22 @@ type Message struct {
 	// itself is a reply.
 	ReplyTo *Message `json:"reply_to_message"`
 
+	// (Optional) Time of last edit in Unix
+	LastEdit int64 `json:"edit_date"`
+
+	// AlbumID is the unique identifier of a media message group
+	// this message belongs to.
+	AlbumID string `json:"media_group_id"`
+
+	// Author signature (in channels).
+	Signature string `json:"author_signature"`
+
 	// For a text message, the actual UTF-8 text of the message.
 	Text string `json:"text"`
 
 	// For text messages, special entities like usernames, URLs, bot commands,
 	// etc. that appear in the text.
 	Entities []MessageEntity `json:"entities,omitempty"`
-
-	// Author signature (in channels).
-	Signature string `json:"author_signature"`
 
 	// Some messages containing media, may as well have a caption.
 	Caption string `json:"caption,omitempty"`
@@ -57,7 +61,7 @@ type Message struct {
 	// For an audio recording, information about it.
 	Audio *Audio `json:"audio"`
 
-	// For a general file, information about it.
+	// For a gneral file, information about it.
 	Document *Document `json:"document"`
 
 	// For a photo, all available sizes (thumbnails).
@@ -105,24 +109,24 @@ type Message struct {
 	// for chat this message came from.
 	//
 	// Sender would lead to a User, capable of change.
-	NewChatTitle string `json:"new_chat_title"`
+	NewGroupTitle string `json:"new_chat_title"`
 
 	// For a service message, represents all available
 	// thumbnails of the new chat photo.
 	//
 	// Sender would lead to a User, capable of change.
-	NewChatPhoto []Photo `json:"new_chat_photo"`
+	NewGroupPhoto *Photo `json:"new_chat_photo"`
 
 	// For a service message, new members that were added to
 	// the group or supergroup and information about them
 	// (the bot itself may be one of these members).
-	NewChatMembers []User `json:"new_chat_members"`
+	UsersJoined []User `json:"new_chat_members"`
 
 	// For a service message, true if chat photo just
 	// got removed.
 	//
 	// Sender would lead to a User, capable of change.
-	ChatPhotoDeleted bool `json:"delete_chat_photo"`
+	GroupPhotoDeleted bool `json:"delete_chat_photo"`
 
 	// For a service message, true if group has been created.
 	//
@@ -165,6 +169,11 @@ type Message struct {
 	//
 	// Sender would lead to creator of the migration.
 	MigrateFrom int64 `json:"migrate_from_chat_id"`
+
+	// Specified message was pinned. Note that the Message object
+	// in this field will not contain further ReplyTo fields even
+	// if it is itself a reply.
+	PinnedMessage *Message `json:"pinned_message"`
 }
 
 // MessageEntity object represents "special" parts of text messages,
@@ -240,10 +249,11 @@ func (m *Message) IsService() bool {
 	fact := false
 
 	fact = fact || m.UserJoined != nil
+	fact = fact || len(m.UsersJoined) > 0
 	fact = fact || m.UserLeft != nil
-	fact = fact || m.NewChatTitle != ""
-	fact = fact || len(m.NewChatPhoto) > 0
-	fact = fact || m.ChatPhotoDeleted
+	fact = fact || m.NewGroupTitle != ""
+	fact = fact || m.NewGroupPhoto != nil
+	fact = fact || m.GroupPhotoDeleted
 	fact = fact || m.GroupCreated || m.SuperGroupCreated
 	fact = fact || (m.MigrateTo != m.MigrateFrom)
 

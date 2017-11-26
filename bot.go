@@ -117,6 +117,11 @@ func (b *Bot) Start() {
 		if upd.Message != nil {
 			m := upd.Message
 
+			if m.PinnedMessage != nil {
+				b.handle(OnPinned, m)
+				continue
+			}
+
 			// Commands
 			if m.Text != "" {
 				// Filtering malicious messsages
@@ -142,9 +147,54 @@ func (b *Bot) Start() {
 			}
 
 			// OnAddedToGrop
-			wasAdded := m.NewChatMembers != nil && isUserInList(b.Me, m.NewChatMembers)
-			if m.GroupCreated || wasAdded {
+			wasAdded := m.UserJoined.ID == b.Me.ID ||
+				m.UsersJoined != nil && isUserInList(b.Me, m.UsersJoined)
+			if m.GroupCreated || m.SuperGroupCreated || wasAdded {
 				b.handle(OnAddedToGroup, m)
+				continue
+			}
+
+			if m.UserJoined != nil {
+				b.handle(OnUserJoined, m)
+				continue
+			}
+
+			if m.UsersJoined != nil {
+				for _, user := range m.UsersJoined {
+					m.UserJoined = &user
+					b.handle(OnUserJoined, m)
+				}
+
+				continue
+			}
+
+			if m.UserLeft != nil {
+				b.handle(OnUserLeft, m)
+				continue
+			}
+
+			if m.NewGroupTitle != "" {
+				b.handle(OnNewGroupTitle, m)
+				continue
+			}
+
+			if m.NewGroupPhoto != nil {
+				b.handle(OnNewGroupPhoto, m)
+				continue
+			}
+
+			if m.GroupPhotoDeleted {
+				b.handle(OnGroupPhotoDeleted, m)
+				continue
+			}
+
+			if m.MigrateTo != 0 {
+				if handler, ok := b.handlers[OnMigration]; ok {
+					if handler, ok := handler.(func(int64, int64)); ok {
+						handler(m.MigrateFrom, m.MigrateTo)
+					}
+				}
+
 				continue
 			}
 
@@ -152,7 +202,7 @@ func (b *Bot) Start() {
 		}
 
 		if upd.EditedMessage != nil {
-			b.handle(OnEditedMessage, upd.EditedMessage)
+			b.handle(OnEdited, upd.EditedMessage)
 			continue
 		}
 
