@@ -20,10 +20,16 @@ func NewBot(pref Settings) (*Bot, error) {
 		pref.Updates = 100
 	}
 
+	if pref.Guard != nil && pref.Secret == "" {
+		panic("telebot: can't set guard with no secret")
+	}
+
 	bot := &Bot{
 		Token:   pref.Token,
 		Updates: make(chan Update, pref.Updates),
+		Secret:  pref.Secret,
 		Poller:  pref.Poller,
+		Guard:   pref.Guard,
 
 		handlers: make(map[string]interface{}),
 	}
@@ -41,10 +47,12 @@ func NewBot(pref Settings) (*Bot, error) {
 type Bot struct {
 	Me      *User
 	Token   string
+	Secret  string
 	Updates chan Update
 	Poller  Poller
-	Errors  chan error
+	Guard   Guard
 
+	Errors   chan error
 	handlers map[string]interface{}
 }
 
@@ -59,6 +67,12 @@ type Settings struct {
 
 	// Poller is the provider of Updates.
 	Poller Poller
+
+	// Callback guard (de-)encrypts callback data.
+	Guard Guard
+
+	// Bot secret will be used when encrypting callback data.
+	Secret string
 }
 
 // Update object represents an incoming update.
@@ -231,6 +245,10 @@ func (b *Bot) Start() {
 		if upd.Callback != nil {
 			if upd.Callback.Data != "" {
 				data := upd.Callback.Data
+
+				if b.Guard != nil {
+					data = b.Guard.Decrypt(data, b.Secret)
+				}
 
 				if data[0] == '\f' {
 					match := cbackRx.FindAllStringSubmatch(data, -1)
@@ -414,7 +432,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	respJSON, err := b.sendFiles("sendMediaGroup", files, params)
 	if err != nil {
@@ -477,7 +495,7 @@ func (b *Bot) Forward(to Recipient, what *Message, options ...interface{}) (*Mes
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	respJSON, err := b.sendCommand("forwardMessage", params)
 	if err != nil {
@@ -509,7 +527,7 @@ func (b *Bot) Edit(originalMsg Editable, text string, options ...interface{}) (*
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	respJSON, err := b.sendCommand("editMessageText", params)
 	if err != nil {
@@ -714,7 +732,7 @@ func (b *Bot) Pin(message Editable, options ...interface{}) error {
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	respJSON, err := b.sendCommand("pinChatMessage", params)
 	if err != nil {

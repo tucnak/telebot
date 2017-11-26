@@ -25,7 +25,7 @@ func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"caption": p.Caption,
 	}
 
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&p.File, "photo", params)
 	if err != nil {
@@ -44,7 +44,7 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"chat_id": to.Recipient(),
 		"caption": a.Caption,
 	}
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&a.File, "audio", params)
 	if err != nil {
@@ -63,7 +63,7 @@ func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 		"chat_id": to.Recipient(),
 		"caption": d.Caption,
 	}
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&d.File, "document", params)
 	if err != nil {
@@ -81,7 +81,7 @@ func (s *Sticker) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 	params := map[string]string{
 		"chat_id": to.Recipient(),
 	}
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&s.File, "sticker", params)
 	if err != nil {
@@ -100,7 +100,7 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"chat_id": to.Recipient(),
 		"caption": v.Caption,
 	}
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&v.File, "video", params)
 	if err != nil {
@@ -118,7 +118,7 @@ func (v *Voice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
 		"chat_id": to.Recipient(),
 	}
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&v.File, "voice", params)
 	if err != nil {
@@ -136,7 +136,7 @@ func (v *VideoNote) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 	params := map[string]string{
 		"chat_id": to.Recipient(),
 	}
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&v.File, "videoNote", params)
 	if err != nil {
@@ -156,7 +156,7 @@ func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 		"latitude":  fmt.Sprintf("%f", x.Lat),
 		"longitude": fmt.Sprintf("%f", x.Lng),
 	}
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	respJSON, err := b.sendCommand("sendLocation", params)
 	if err != nil {
@@ -176,7 +176,7 @@ func (v *Venue) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"address":       v.Address,
 		"foursquare_id": v.FoursquareID,
 	}
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	respJSON, err := b.sendCommand("sendVenue", params)
 	if err != nil {
