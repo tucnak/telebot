@@ -138,6 +138,62 @@ func (b *Bot) SendMessage(recipient Recipient, message string, options *SendOpti
 	return nil
 }
 
+//EditMessageText edit the message
+func (b *Bot) EditMessageText(message Message, text string, options *SendOptions) error {
+	params := map[string]string{
+		"chat_id":    message.Chat.Destination(),
+		"text":       text,
+		"message_id": strconv.Itoa(message.ID),
+	}
+	if options != nil {
+		embedSendOptions(params, options)
+	}
+	responseJSON, err := sendCommand("editMessageText", b.Token, params)
+	if err != nil {
+		return err
+	}
+	var responseRecived struct {
+		Ok          bool
+		Description string
+	}
+	err = json.Unmarshal(responseJSON, &responseRecived)
+	if err != nil {
+		return err
+	}
+	if !responseRecived.Ok {
+		return fmt.Errorf("telebot: %s", responseRecived.Description)
+	}
+	return nil
+}
+
+//EditMessageCaption use to edit photos caption
+func (b *Bot) EditMessageCaption(message Message, caption string, options *SendOptions) error {
+	params := map[string]string{
+		"chat_id":    message.Chat.Destination(),
+		"caption":    caption,
+		"message_id": strconv.Itoa(message.ID),
+	}
+	if options != nil {
+		embedSendOptions(params, options)
+	}
+	responseJSON, err := sendCommand("editMessageCaption", b.Token, params)
+	if err != nil {
+		return err
+	}
+	var responseRecived struct {
+		Ok          bool
+		Description string
+	}
+	err = json.Unmarshal(responseJSON, &responseRecived)
+	if err != nil {
+		return err
+	}
+	if !responseRecived.Ok {
+		return fmt.Errorf("telebot: %s", responseRecived.Description)
+	}
+	return nil
+}
+
 // ForwardMessage forwards a message to recipient.
 func (b *Bot) ForwardMessage(recipient Recipient, message Message) error {
 	params := map[string]string{

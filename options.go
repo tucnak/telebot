@@ -54,4 +54,6 @@ type ReplyMarkup struct {
 	// 2) If the bot's message is a reply (has SendOptions.ReplyTo),
 	//       sender of the original message.
 	Selective bool `json:"selective,omitempty"`
+	//Use this param to clear your custom keyboard
+	RemoveCustomKeyboard bool `json:"remove_keyboard,omitempty"`
 }
