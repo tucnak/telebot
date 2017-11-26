@@ -1,8 +1,11 @@
 package telebot
 
 import (
+	"encoding/json"
 	"strconv"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 // Rights is a list of privileges available to chat members.
@@ -136,4 +139,67 @@ func (b *Bot) Promote(chat *Chat, member *ChatMember) error {
 	}
 
 	return extractOkResponse(respJSON)
+}
+
+// AdminsOf return a member list of chat admins.
+//
+// On success, returns an Array of ChatMember objects that
+// contains information about all chat administrators except other bots.
+// If the chat is a group or a supergroup and
+// no administrators were appointed, only the creator will be returned.
+func (b *Bot) AdminsOf(chat *Chat) ([]ChatMember, error) {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+
+	respJSON, err := b.sendCommand("getChatAdministrators", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Ok          bool
+		Result      []ChatMember
+		Description string `json:"description"`
+	}
+
+	err = json.Unmarshal(respJSON, &resp)
+	if err != nil {
+		return nil, errors.Wrap(err, "bad response json")
+	}
+
+	if !resp.Ok {
+		return nil, errors.Errorf("api error: %s", resp.Description)
+	}
+
+	return resp.Result, nil
+}
+
+// Len return the number of members in a chat.
+func (b *Bot) Len(chat *Chat) (int, error) {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+
+	respJSON, err := b.sendCommand("getChatMembersCount", params)
+	if err != nil {
+		return 0, err
+	}
+
+	var resp struct {
+		Ok          bool
+		Result      int
+		Description string `json:"description"`
+	}
+
+	err = json.Unmarshal(respJSON, &resp)
+	if err != nil {
+		return 0, errors.Wrap(err, "bad response json")
+	}
+
+	if !resp.Ok {
+		return 0, errors.Errorf("api error: %s", resp.Description)
+	}
+
+	return resp.Result, nil
 }

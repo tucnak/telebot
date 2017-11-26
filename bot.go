@@ -616,6 +616,44 @@ func (b *Bot) Leave(chat *Chat) error {
 	return extractOkResponse(respJSON)
 }
 
+// Use this method to pin a message in a supergroup or a channel.
+//
+// It supports telebot.Silent option.
+func (b *Bot) Pin(message Editable, options ...interface{}) error {
+	messageID, chatID := message.MessageSig()
+
+	params := map[string]string{
+		"chat_id":    strconv.FormatInt(chatID, 10),
+		"message_id": strconv.Itoa(messageID),
+	}
+
+	sendOpts := extractOptions(options)
+	embedSendOptions(params, sendOpts)
+
+	respJSON, err := b.sendCommand("pinChatMessage", params)
+	if err != nil {
+		return err
+	}
+
+	return extractOkResponse(respJSON)
+}
+
+// Use this method to unpin a message in a supergroup or a channel.
+//
+// It supports telebot.Silent option.
+func (b *Bot) Unpin(chat *Chat) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+
+	respJSON, err := b.sendCommand("upinChatMessage", params)
+	if err != nil {
+		return err
+	}
+
+	return extractOkResponse(respJSON)
+}
+
 // ChatByID fetches chat info of its ID.
 //
 // Including current name of the user for one-on-one conversations,
@@ -645,69 +683,6 @@ func (b *Bot) ChatByID(id string) (*Chat, error) {
 
 	if !resp.Ok {
 		return nil, errors.Errorf("api error: %s", resp.Description)
-	}
-
-	return resp.Result, nil
-}
-
-// AdminsOf return a member list of chat admins.
-//
-// On success, returns an Array of ChatMember objects that
-// contains information about all chat administrators except other bots.
-// If the chat is a group or a supergroup and
-// no administrators were appointed, only the creator will be returned.
-func (b *Bot) AdminsOf(chat *Chat) ([]ChatMember, error) {
-	params := map[string]string{
-		"chat_id": chat.Recipient(),
-	}
-
-	respJSON, err := b.sendCommand("getChatAdministrators", params)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		Ok          bool
-		Result      []ChatMember
-		Description string `json:"description"`
-	}
-
-	err = json.Unmarshal(respJSON, &resp)
-	if err != nil {
-		return nil, errors.Wrap(err, "bad response json")
-	}
-
-	if !resp.Ok {
-		return nil, errors.Errorf("api error: %s", resp.Description)
-	}
-
-	return resp.Result, nil
-}
-
-// Len return the number of members in a chat.
-func (b *Bot) Len(chat *Chat) (int, error) {
-	params := map[string]string{
-		"chat_id": chat.Recipient(),
-	}
-
-	respJSON, err := b.sendCommand("getChatMembersCount", params)
-	if err != nil {
-		return 0, err
-	}
-
-	var resp struct {
-		Ok          bool
-		Result      int
-		Description string `json:"description"`
-	}
-
-	err = json.Unmarshal(respJSON, &resp)
-	if err != nil {
-		return 0, errors.Wrap(err, "bad response json")
-	}
-
-	if !resp.Ok {
-		return 0, errors.Errorf("api error: %s", resp.Description)
 	}
 
 	return resp.Result, nil
