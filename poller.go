@@ -15,6 +15,9 @@ type Poller interface {
 	// Poll is supposed to take the bot object
 	// subscription channel and start polling
 	// for Updates immediately.
+	//
+	// Poller must listen for stop constantly and close
+	// it as soon as it's done polling.
 	Poll(b *Bot, updates chan Update, stop chan struct{})
 }
 
@@ -47,15 +50,21 @@ func (p *MiddlewarePoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 	}
 
 	middle := make(chan Update, cap)
-	stop2 := make(chan struct{})
+	stopPoller := make(chan struct{})
 
-	go p.Poller.Poll(b, middle, stop2)
+	go p.Poller.Poll(b, middle, stopPoller)
 
 	for {
 		select {
+		// call to stop
 		case <-stop:
-			close(stop2)
+			stopPoller <- struct{}{}
+
+		// poller is done
+		case <-stopPoller:
+			close(stop)
 			return
+
 		case upd := <-middle:
 			if p.filter(&upd) {
 				dest <- upd
@@ -67,28 +76,28 @@ func (p *MiddlewarePoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 // LongPoller is a classic LongPoller with timeout.
 type LongPoller struct {
 	Timeout time.Duration
+
+	LastUpdateID int
 }
 
 // Poll does long polling.
 func (p *LongPoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
-	var latestUpd int
+	go func(stop chan struct{}) {
+		<-stop
+		close(stop)
+	}(stop)
 
 	for {
-		select {
-		case <-stop:
-			return
-		default:
-			updates, err := b.getUpdates(latestUpd+1, p.Timeout)
+		updates, err := b.getUpdates(p.LastUpdateID+1, p.Timeout)
 
-			if err != nil {
-				b.debug(errors.Wrap(err, "getUpdates() failed"))
-				continue
-			}
+		if err != nil {
+			b.debug(errors.Wrap(err, "getUpdates() failed"))
+			continue
+		}
 
-			for _, update := range updates {
-				latestUpd = update.ID
-				dest <- update
-			}
+		for _, update := range updates {
+			p.LastUpdateID = update.ID
+			dest <- update
 		}
 	}
 }

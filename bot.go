@@ -26,6 +26,7 @@ func NewBot(pref Settings) (*Bot, error) {
 		Poller:  pref.Poller,
 
 		handlers: make(map[string]interface{}),
+		stop:     make(chan struct{}),
 	}
 
 	user, err := bot.getMe()
@@ -124,150 +125,167 @@ func (b *Bot) Start() {
 		panic("telebot: can't start without a poller")
 	}
 
-	b.stop = make(chan struct{})
-	go b.Poller.Poll(b, b.Updates, b.stop)
+	stopPoller := make(chan struct{})
 
-	for upd := range b.Updates {
-		if upd.Message != nil {
-			m := upd.Message
+	go b.Poller.Poll(b, b.Updates, stopPoller)
 
-			if m.PinnedMessage != nil {
-				b.handle(OnPinned, m)
-				continue
+	for {
+		select {
+		// handle incoming updates
+		case upd := <-b.Updates:
+			b.incomingUpdate(&upd)
+
+		// call to stop polling
+		case <-b.stop:
+			stopPoller <- struct{}{}
+
+		// polling has stopped
+		case <-stopPoller:
+			return
+		}
+	}
+}
+
+func (b *Bot) incomingUpdate(upd *Update) {
+	if upd.Message != nil {
+		m := upd.Message
+
+		if m.PinnedMessage != nil {
+			b.handle(OnPinned, m)
+			return
+		}
+
+		// Commands
+		if m.Text != "" {
+			// Filtering malicious messsages
+			if m.Text[0] == '\a' {
+				return
 			}
 
-			// Commands
-			if m.Text != "" {
-				// Filtering malicious messsages
-				if m.Text[0] == '\a' {
-					continue
-				}
+			match := cmdRx.FindAllStringSubmatch(m.Text, -1)
 
-				match := cmdRx.FindAllStringSubmatch(m.Text, -1)
-
-				// Command found - handle and continue
-				if match != nil && b.handleCommand(m, match[0][1], match[0][3]) {
-					continue
-				}
-
-				// OnText
-				b.handle(OnText, m)
-				continue
+			// Command found - handle and return
+			if match != nil && b.handleCommand(m, match[0][1], match[0][3]) {
+				return
 			}
 
-			// on media
-			if b.handleMedia(m) {
-				continue
-			}
+			// OnText
+			b.handle(OnText, m)
+			return
+		}
 
-			// OnAddedToGrop
-			wasAdded := m.UserJoined.ID == b.Me.ID ||
-				m.UsersJoined != nil && isUserInList(b.Me, m.UsersJoined)
-			if m.GroupCreated || m.SuperGroupCreated || wasAdded {
-				b.handle(OnAddedToGroup, m)
-				continue
-			}
+		// on media
+		if b.handleMedia(m) {
+			return
+		}
 
-			if m.UserJoined != nil {
+		// OnAddedToGrop
+		wasAdded := m.UserJoined.ID == b.Me.ID ||
+			m.UsersJoined != nil && isUserInList(b.Me, m.UsersJoined)
+		if m.GroupCreated || m.SuperGroupCreated || wasAdded {
+			b.handle(OnAddedToGroup, m)
+			return
+		}
+
+		if m.UserJoined != nil {
+			b.handle(OnUserJoined, m)
+			return
+		}
+
+		if m.UsersJoined != nil {
+			for _, user := range m.UsersJoined {
+				m.UserJoined = &user
 				b.handle(OnUserJoined, m)
-				continue
 			}
 
-			if m.UsersJoined != nil {
-				for _, user := range m.UsersJoined {
-					m.UserJoined = &user
-					b.handle(OnUserJoined, m)
+			return
+		}
+
+		if m.UserLeft != nil {
+			b.handle(OnUserLeft, m)
+			return
+		}
+
+		if m.NewGroupTitle != "" {
+			b.handle(OnNewGroupTitle, m)
+			return
+		}
+
+		if m.NewGroupPhoto != nil {
+			b.handle(OnNewGroupPhoto, m)
+			return
+		}
+
+		if m.GroupPhotoDeleted {
+			b.handle(OnGroupPhotoDeleted, m)
+			return
+		}
+
+		if m.MigrateTo != 0 {
+			if handler, ok := b.handlers[OnMigration]; ok {
+				if handler, ok := handler.(func(int64, int64)); ok {
+					handler(m.MigrateFrom, m.MigrateTo)
 				}
-
-				continue
 			}
 
-			if m.UserLeft != nil {
-				b.handle(OnUserLeft, m)
-				continue
-			}
-
-			if m.NewGroupTitle != "" {
-				b.handle(OnNewGroupTitle, m)
-				continue
-			}
-
-			if m.NewGroupPhoto != nil {
-				b.handle(OnNewGroupPhoto, m)
-				continue
-			}
-
-			if m.GroupPhotoDeleted {
-				b.handle(OnGroupPhotoDeleted, m)
-				continue
-			}
-
-			if m.MigrateTo != 0 {
-				if handler, ok := b.handlers[OnMigration]; ok {
-					if handler, ok := handler.(func(int64, int64)); ok {
-						handler(m.MigrateFrom, m.MigrateTo)
-					}
-				}
-
-				continue
-			}
-
-			continue
+			return
 		}
 
-		if upd.EditedMessage != nil {
-			b.handle(OnEdited, upd.EditedMessage)
-			continue
-		}
+		return
+	}
 
-		if upd.ChannelPost != nil {
-			b.handle(OnChannelPost, upd.ChannelPost)
-			continue
-		}
+	if upd.EditedMessage != nil {
+		b.handle(OnEdited, upd.EditedMessage)
+		return
+	}
 
-		if upd.EditedChannelPost != nil {
-			b.handle(OnEditedChannelPost, upd.EditedChannelPost)
-			continue
-		}
+	if upd.ChannelPost != nil {
+		b.handle(OnChannelPost, upd.ChannelPost)
+		return
+	}
 
-		if upd.Callback != nil {
-			if upd.Callback.Data != "" {
-				data := upd.Callback.Data
+	if upd.EditedChannelPost != nil {
+		b.handle(OnEditedChannelPost, upd.EditedChannelPost)
+		return
+	}
 
-				if data[0] == '\f' {
-					match := cbackRx.FindAllStringSubmatch(data, -1)
+	if upd.Callback != nil {
+		if upd.Callback.Data != "" {
+			data := upd.Callback.Data
 
-					if match != nil {
-						unique, payload := match[0][1], match[0][2]
+			if data[0] == '\f' {
+				match := cbackRx.FindAllStringSubmatch(data, -1)
 
-						if handler, ok := b.handlers["\f"+unique]; ok {
-							if handler, ok := handler.(func(*Callback)); ok {
-								upd.Callback.Data = payload
-								handler(upd.Callback)
-								continue
-							}
+				if match != nil {
+					unique, payload := match[0][1], match[0][2]
+
+					if handler, ok := b.handlers["\f"+unique]; ok {
+						if handler, ok := handler.(func(*Callback)); ok {
+							upd.Callback.Data = payload
+							handler(upd.Callback)
+							return
 						}
-
 					}
-				}
-			}
 
-			if handler, ok := b.handlers[OnCallback]; ok {
-				if handler, ok := handler.(func(*Callback)); ok {
-					handler(upd.Callback)
 				}
 			}
-			continue
 		}
 
-		if upd.Query != nil {
-			if handler, ok := b.handlers[OnQuery]; ok {
-				if handler, ok := handler.(func(*Query)); ok {
-					handler(upd.Query)
-				}
+		if handler, ok := b.handlers[OnCallback]; ok {
+			if handler, ok := handler.(func(*Callback)); ok {
+				handler(upd.Callback)
 			}
-			continue
 		}
+		return
+	}
+
+	if upd.Query != nil {
+		if handler, ok := b.handlers[OnQuery]; ok {
+			if handler, ok := handler.(func(*Query)); ok {
+				handler(upd.Query)
+			}
+		}
+		return
 	}
 }
 
@@ -336,7 +354,7 @@ func (b *Bot) handleMedia(m *Message) bool {
 
 // Stop gracefully shuts the poller down.
 func (b *Bot) Stop() {
-	close(b.stop)
+	b.stop <- struct{}{}
 }
 
 // Send accepts 2+ arguments, starting with destination chat, followed by
