@@ -100,22 +100,11 @@ func (b *Bot) Handle(endpoint interface{}, handler interface{}) {
 }
 
 var (
-	cmdRx   = regexp.MustCompile(`^(\/\w+)(@(\w+))?(\s|$)`)
+	cmdRx   = regexp.MustCompile(`^(\/\w+)(@(\w+))?(\s|$)(.+)?`)
 	cbackRx = regexp.MustCompile(`^\f(\w+)\|(.+)$`)
 )
 
 func (b *Bot) handleCommand(m *Message, cmdName, cmdBot string) bool {
-	// Group-syntax: "/cmd@bot"
-	if cmdBot != "" && !strings.EqualFold(b.Me.Username, cmdBot) {
-		return false
-	}
-
-	if handler, ok := b.handlers[cmdName]; ok {
-		if handler, ok := handler.(func(*Message)); ok {
-			go handler(m)
-			return true
-		}
-	}
 
 	return false
 }
@@ -167,8 +156,33 @@ func (b *Bot) incomingUpdate(upd *Update) {
 			match := cmdRx.FindAllStringSubmatch(m.Text, -1)
 
 			// Command found - handle and return
-			if match != nil && b.handleCommand(m, match[0][1], match[0][3]) {
-				return
+			if match != nil {
+				// Syntax: "/<command>@<bot> <payload>"
+				command, botName := match[0][1], match[0][3]
+				m.Payload = match[0][5]
+
+				if botName != "" && !strings.EqualFold(b.Me.Username, botName) {
+					return
+				}
+
+				if handler, ok := b.handlers[command]; ok {
+					if handler, ok := handler.(func(*Message)); ok {
+						go handler(m)
+						return
+					} else {
+						panic("telebot: " + command + " handler is bad")
+					}
+				}
+			}
+
+			// Keyboard buttons
+			if handler, ok := b.handlers[m.Text]; ok {
+				if handler, ok := handler.(func(*Message)); ok {
+					go handler(m)
+					return
+				} else {
+					panic("telebot: `" + m.Text + "` handler is bad")
+				}
 			}
 
 			// OnText
@@ -226,7 +240,7 @@ func (b *Bot) incomingUpdate(upd *Update) {
 		if m.MigrateTo != 0 {
 			if handler, ok := b.handlers[OnMigration]; ok {
 				if handler, ok := handler.(func(int64, int64)); ok {
-					handler(m.MigrateFrom, m.MigrateTo)
+					go handler(m.MigrateFrom, m.MigrateTo)
 				}
 			}
 

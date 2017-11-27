@@ -47,6 +47,11 @@ type Message struct {
 	// For a text message, the actual UTF-8 text of the message.
 	Text string `json:"text"`
 
+	// For registered commands, will contain the string payload:
+	//
+	// Ex: `/command <payload>` or `/command@botname <payload>`
+	Payload string `json:"-"`
+
 	// For text messages, special entities like usernames, URLs, bot commands,
 	// etc. that appear in the text.
 	Entities []MessageEntity `json:"entities,omitempty"`
