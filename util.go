@@ -2,29 +2,26 @@ package telebot
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"github.com/pkg/errors"
 )
 
-func wrapSystem(err error) error {
-	return errors.Wrap(err, "system error")
-}
-
 func (b *Bot) debug(err error) {
-	if b.Errors != nil {
-		b.Errors <- errors.WithStack(err)
+	if b.reporter != nil {
+		b.reporter(errors.WithStack(err))
 	}
 }
 
-func isUserInList(user *User, list []User) bool {
-	for _, user2 := range list {
-		if user.ID == user2.ID {
-			return true
+func (b *Bot) deferDebug() {
+	if r := recover(); r != nil {
+		if err, ok := r.(error); ok {
+			b.debug(err)
+		} else if str, ok := r.(string); ok {
+			b.debug(fmt.Errorf("%s", str))
 		}
 	}
-
-	return false
 }
 
 func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, error) {
@@ -40,6 +37,20 @@ func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, e
 	}
 
 	return extractMsgResponse(respJSON)
+}
+
+func wrapSystem(err error) error {
+	return errors.Wrap(err, "system error")
+}
+
+func isUserInList(user *User, list []User) bool {
+	for _, user2 := range list {
+		if user.ID == user2.ID {
+			return true
+		}
+	}
+
+	return false
 }
 
 func extractMsgResponse(respJSON []byte) (*Message, error) {
@@ -114,7 +125,7 @@ func extractOptions(how []interface{}) *SendOptions {
 				}
 				opts.ReplyMarkup.OneTimeKeyboard = true
 			default:
-				panic("telebot: unsupported option")
+				panic("telebot: unsupported flag-option")
 			}
 
 		case ParseMode:

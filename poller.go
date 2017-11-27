@@ -34,10 +34,10 @@ type MiddlewarePoller struct {
 	Capacity int // Default: 1
 }
 
-// Middleware constructs a middleware poller.
-func Middleware(p Poller, filter func(*Update) bool) *MiddlewarePoller {
+// NewMiddlewarePoller wait for it... constructs a new middleware poller.
+func NewMiddlewarePoller(original Poller, filter func(*Update) bool) *MiddlewarePoller {
 	return &MiddlewarePoller{
-		Poller: p,
+		Poller: original,
 		filter: filter,
 	}
 }

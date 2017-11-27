@@ -27,6 +27,7 @@ func NewBot(pref Settings) (*Bot, error) {
 
 		handlers: make(map[string]interface{}),
 		stop:     make(chan struct{}),
+		reporter: pref.Reporter,
 	}
 
 	user, err := bot.getMe()
@@ -44,9 +45,9 @@ type Bot struct {
 	Token   string
 	Updates chan Update
 	Poller  Poller
-	Errors  chan error
 
 	handlers map[string]interface{}
+	reporter func(error)
 	stop     chan struct{}
 }
 
@@ -61,6 +62,10 @@ type Settings struct {
 
 	// Poller is the provider of Updates.
 	Poller Poller
+
+	// Reporter is a callback function that will get called
+	// on any panics recovered from endpoint handlers.
+	Reporter func(error)
 }
 
 // Update object represents an incoming update.
@@ -157,7 +162,7 @@ func (b *Bot) incomingUpdate(upd *Update) {
 
 			// Command found - handle and return
 			if match != nil {
-				// Syntax: "/<command>@<bot> <payload>"
+				// Syntax: "</command>@<bot> <payload>"
 				command, botName := match[0][1], match[0][3]
 				m.Payload = match[0][5]
 
@@ -165,24 +170,14 @@ func (b *Bot) incomingUpdate(upd *Update) {
 					return
 				}
 
-				if handler, ok := b.handlers[command]; ok {
-					if handler, ok := handler.(func(*Message)); ok {
-						go handler(m)
-						return
-					} else {
-						panic("telebot: " + command + " handler is bad")
-					}
+				if b.handle(command, m) {
+					return
 				}
 			}
 
-			// Keyboard buttons
-			if handler, ok := b.handlers[m.Text]; ok {
-				if handler, ok := handler.(func(*Message)); ok {
-					go handler(m)
-					return
-				} else {
-					panic("telebot: `" + m.Text + "` handler is bad")
-				}
+			// 1:1 satisfaction
+			if b.handle(m.Text, m) {
+				return
 			}
 
 			// OnText
@@ -240,7 +235,15 @@ func (b *Bot) incomingUpdate(upd *Update) {
 		if m.MigrateTo != 0 {
 			if handler, ok := b.handlers[OnMigration]; ok {
 				if handler, ok := handler.(func(int64, int64)); ok {
-					go handler(m.MigrateFrom, m.MigrateTo)
+					// i'm not 100% sure that any of the values
+					// won't be cached, so I pass them all in:
+					go func(b *Bot, handler func(int64, int64), from, to int64) {
+						defer b.deferDebug()
+						handler(from, to)
+					}(b, handler, m.MigrateFrom, m.MigrateTo)
+
+				} else {
+					panic("telebot: migration handler is bad")
 				}
 			}
 
@@ -278,7 +281,13 @@ func (b *Bot) incomingUpdate(upd *Update) {
 					if handler, ok := b.handlers["\f"+unique]; ok {
 						if handler, ok := handler.(func(*Callback)); ok {
 							upd.Callback.Data = payload
-							handler(upd.Callback)
+							// i'm not 100% sure that any of the values
+							// won't be cached, so I pass them all in:
+							go func(b *Bot, handler func(*Callback), c *Callback) {
+								defer b.deferDebug()
+								handler(c)
+							}(b, handler, upd.Callback)
+
 							return
 						}
 					}
@@ -289,7 +298,15 @@ func (b *Bot) incomingUpdate(upd *Update) {
 
 		if handler, ok := b.handlers[OnCallback]; ok {
 			if handler, ok := handler.(func(*Callback)); ok {
-				handler(upd.Callback)
+				// i'm not 100% sure that any of the values
+				// won't be cached, so I pass them all in:
+				go func(b *Bot, handler func(*Callback), c *Callback) {
+					defer b.deferDebug()
+					handler(c)
+				}(b, handler, upd.Callback)
+
+			} else {
+				panic("telebot: callback handler is bad")
 			}
 		}
 		return
@@ -298,7 +315,15 @@ func (b *Bot) incomingUpdate(upd *Update) {
 	if upd.Query != nil {
 		if handler, ok := b.handlers[OnQuery]; ok {
 			if handler, ok := handler.(func(*Query)); ok {
-				handler(upd.Query)
+				// i'm not 100% sure that any of the values
+				// won't be cached, so I pass them all in:
+				go func(b *Bot, handler func(*Query), q *Query) {
+					defer b.deferDebug()
+					handler(q)
+				}(b, handler, upd.Query)
+
+			} else {
+				panic("telebot: query handler is bad")
 			}
 		}
 		return
@@ -312,7 +337,13 @@ func (b *Bot) handle(end string, m *Message) bool {
 	}
 
 	if handler, ok := handler.(func(*Message)); ok {
-		go handler(m)
+		// i'm not 100% sure that any of the values
+		// won't be cached, so I pass them all in:
+		go func(b *Bot, handler func(*Message), m *Message) {
+			defer b.deferDebug()
+			handler(m)
+		}(b, handler, m)
+
 		return true
 	}
 
