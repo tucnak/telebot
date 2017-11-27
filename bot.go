@@ -94,6 +94,8 @@ func (b *Bot) Handle(endpoint interface{}, handler interface{}) {
 		b.handlers[end] = handler
 	case CallbackEndpoint:
 		b.handlers["\f"+end.CallbackUnique()] = handler
+	default:
+		panic("telebot: unsupported endpoint")
 	}
 }
 
@@ -380,7 +382,7 @@ func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Mes
 	case Sendable:
 		return object.Send(b, to, sendOpts)
 	default:
-		panic(fmt.Sprintf("telebot: object %v is not Sendable", object))
+		panic("telebot: unsupported sendable")
 	}
 }
 

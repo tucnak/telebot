@@ -68,7 +68,12 @@ type InlineButton struct {
 	InlineQuery string `json:"switch_inline_query,omitempty"`
 }
 
-// CallbackUnique returns InlineButto.Unique
+// CallbackUnique returns InlineButto.Unique.
 func (t *InlineButton) CallbackUnique() string {
 	return t.Unique
+}
+
+// CallbackUnique returns KeyboardButton.Text.
+func (t *KeyboardButton) CallbackUnique() string {
+	return t.Text
 }

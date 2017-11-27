@@ -2,7 +2,6 @@ package telebot
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -125,7 +124,7 @@ func extractOptions(how []interface{}) *SendOptions {
 			opts.ParseMode = opt
 
 		default:
-			panic(fmt.Sprintf("telebot: %v is not a send-option", opt))
+			panic("telebot: unsupported send-option")
 		}
 	}
 
@@ -160,6 +159,7 @@ func embedSendOptions(params map[string]string, opt *SendOptions) {
 				for j, _ := range keys[i] {
 					key := &keys[i][j]
 					if key.Unique != "" {
+						// Format: "\f<callback_name>|<data>"
 						key.Data = "\f" + key.Unique + "|" + key.Data
 					}
 				}
