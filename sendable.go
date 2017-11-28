@@ -159,7 +159,7 @@ func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 	}
 	embedSendOptions(params, opt)
 
-	respJSON, err := b.sendCommand("sendLocation", params)
+	respJSON, err := b.Raw("sendLocation", params)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +179,7 @@ func (v *Venue) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	}
 	embedSendOptions(params, opt)
 
-	respJSON, err := b.sendCommand("sendVenue", params)
+	respJSON, err := b.Raw("sendVenue", params)
 	if err != nil {
 		return nil, err
 	}

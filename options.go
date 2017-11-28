@@ -58,7 +58,7 @@ type ReplyMarkup struct {
 	// ReplyKeyboard is a grid, consisting of keyboard buttons.
 	//
 	// Note: you don't need to set HideCustomKeyboard field to show custom keyboard.
-	ReplyKeyboard [][]KeyboardButton `json:"keyboard,omitempty"`
+	ReplyKeyboard [][]ReplyButton `json:"keyboard,omitempty"`
 
 	// ForceReply forces Telegram clients to display
 	// a reply interface to the user (act as if the user
@@ -87,12 +87,12 @@ type ReplyMarkup struct {
 	Selective bool `json:"selective,omitempty"`
 }
 
-// KeyboardButton represents a button displayed in reply-keyboard.
+// ReplyButton represents a button displayed in reply-keyboard.
 //
 // Set either Contact or Location to true in order to request
 // sensitive info, such as user's phone number or current location.
 // (Available in private chats only.)
-type KeyboardButton struct {
+type ReplyButton struct {
 	Text string `json:"text"`
 
 	Contact  bool `json:"request_contact,omitempty"`

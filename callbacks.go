@@ -74,6 +74,6 @@ func (t *InlineButton) CallbackUnique() string {
 }
 
 // CallbackUnique returns KeyboardButton.Text.
-func (t *KeyboardButton) CallbackUnique() string {
+func (t *ReplyButton) CallbackUnique() string {
 	return t.Text
 }

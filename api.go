@@ -17,7 +17,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (b *Bot) sendCommand(method string, payload interface{}) ([]byte, error) {
+// Raw lets you call any method of Bot API manually.
+func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.Token, method)
 
 	var buf bytes.Buffer
@@ -109,10 +110,10 @@ func (b *Bot) sendObject(f *File, what string, params map[string]string) (*Messa
 
 	if f.InCloud() {
 		params[what] = f.FileID
-		respJSON, err = b.sendCommand(sendWhat, params)
+		respJSON, err = b.Raw(sendWhat, params)
 	} else if f.FileURL != "" {
 		params[what] = f.FileURL
-		respJSON, err = b.sendCommand(sendWhat, params)
+		respJSON, err = b.Raw(sendWhat, params)
 	} else {
 		respJSON, err = b.sendFiles(sendWhat,
 			map[string]string{what: f.FileLocal}, params)
@@ -126,7 +127,7 @@ func (b *Bot) sendObject(f *File, what string, params map[string]string) (*Messa
 }
 
 func (b *Bot) getMe() (*User, error) {
-	meJSON, err := b.sendCommand("getMe", nil)
+	meJSON, err := b.Raw("getMe", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +156,7 @@ func (b *Bot) getUpdates(offset int, timeout time.Duration) (upd []Update, err e
 		"offset":  strconv.Itoa(offset),
 		"timeout": strconv.Itoa(int(timeout / time.Second)),
 	}
-	updatesJSON, errCommand := b.sendCommand("getUpdates", params)
+	updatesJSON, errCommand := b.Raw("getUpdates", params)
 	if errCommand != nil {
 		err = errCommand
 		return

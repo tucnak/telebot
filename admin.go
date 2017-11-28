@@ -62,7 +62,7 @@ func (b *Bot) Ban(chat *Chat, member *ChatMember) error {
 		"until_date": strconv.FormatInt(member.RestrictedUntil, 10),
 	}
 
-	respJSON, err := b.sendCommand("kickChatMember", params)
+	respJSON, err := b.Raw("kickChatMember", params)
 	if err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func (b *Bot) Unban(chat *Chat, user *User) error {
 		"user_id": user.Recipient(),
 	}
 
-	respJSON, err := b.sendCommand("unbanChatMember", params)
+	respJSON, err := b.Raw("unbanChatMember", params)
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func (b *Bot) Restrict(chat *Chat, member *ChatMember) error {
 
 	embedRights(params, prv)
 
-	respJSON, err := b.sendCommand("restrictChatMember", params)
+	respJSON, err := b.Raw("restrictChatMember", params)
 	if err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func (b *Bot) Promote(chat *Chat, member *ChatMember) error {
 
 	embedRights(params, prv)
 
-	respJSON, err := b.sendCommand("promoteChatMember", params)
+	respJSON, err := b.Raw("promoteChatMember", params)
 	if err != nil {
 		return err
 	}
@@ -152,7 +152,7 @@ func (b *Bot) AdminsOf(chat *Chat) ([]ChatMember, error) {
 		"chat_id": chat.Recipient(),
 	}
 
-	respJSON, err := b.sendCommand("getChatAdministrators", params)
+	respJSON, err := b.Raw("getChatAdministrators", params)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +181,7 @@ func (b *Bot) Len(chat *Chat) (int, error) {
 		"chat_id": chat.Recipient(),
 	}
 
-	respJSON, err := b.sendCommand("getChatMembersCount", params)
+	respJSON, err := b.Raw("getChatMembersCount", params)
 	if err != nil {
 		return 0, err
 	}

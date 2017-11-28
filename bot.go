@@ -551,7 +551,7 @@ func (b *Bot) Forward(to Recipient, what *Message, options ...interface{}) (*Mes
 	sendOpts := extractOptions(options)
 	embedSendOptions(params, sendOpts)
 
-	respJSON, err := b.sendCommand("forwardMessage", params)
+	respJSON, err := b.Raw("forwardMessage", params)
 	if err != nil {
 		return nil, err
 	}
@@ -596,7 +596,7 @@ func (b *Bot) Edit(message Editable, what interface{}, options ...interface{}) (
 	sendOpts := extractOptions(options)
 	embedSendOptions(params, sendOpts)
 
-	respJSON, err := b.sendCommand("editMessageText", params)
+	respJSON, err := b.Raw("editMessageText", params)
 	if err != nil {
 		return nil, err
 	}
@@ -620,7 +620,7 @@ func (b *Bot) EditCaption(originalMsg Editable, caption string) (*Message, error
 		params["message_id"] = strconv.Itoa(messageID)
 	}
 
-	respJSON, err := b.sendCommand("editMessageCaption", params)
+	respJSON, err := b.Raw("editMessageCaption", params)
 	if err != nil {
 		return nil, err
 	}
@@ -647,7 +647,7 @@ func (b *Bot) Delete(message Editable) error {
 		"message_id": strconv.Itoa(messageID),
 	}
 
-	respJSON, err := b.sendCommand("deleteMessage", params)
+	respJSON, err := b.Raw("deleteMessage", params)
 	if err != nil {
 		return err
 	}
@@ -670,7 +670,7 @@ func (b *Bot) Notify(recipient Recipient, action ChatAction) error {
 		"action":  string(action),
 	}
 
-	respJSON, err := b.sendCommand("sendChatAction", params)
+	respJSON, err := b.Raw("sendChatAction", params)
 	if err != nil {
 		return err
 	}
@@ -682,7 +682,7 @@ func (b *Bot) Notify(recipient Recipient, action ChatAction) error {
 // be responded to once, subsequent attempts to respond to the same query
 // will result in an error.
 func (b *Bot) Answer(query *Query, response *QueryResponse) error {
-	respJSON, err := b.sendCommand("answerInlineQuery", response)
+	respJSON, err := b.Raw("answerInlineQuery", response)
 	if err != nil {
 		return err
 	}
@@ -696,7 +696,7 @@ func (b *Bot) Answer(query *Query, response *QueryResponse) error {
 func (b *Bot) Respond(callback *Callback, response *CallbackResponse) error {
 	response.CallbackID = callback.ID
 
-	respJSON, err := b.sendCommand("answerCallbackQuery", response)
+	respJSON, err := b.Raw("answerCallbackQuery", response)
 	if err != nil {
 		return err
 	}
@@ -714,7 +714,7 @@ func (b *Bot) FileByID(fileID string) (File, error) {
 		"file_id": fileID,
 	}
 
-	respJSON, err := b.sendCommand("getFile", params)
+	respJSON, err := b.Raw("getFile", params)
 	if err != nil {
 		return File{}, err
 	}
@@ -788,7 +788,7 @@ func (b *Bot) StopLiveLocation(message Editable, options ...interface{}) (*Messa
 	sendOpts := extractOptions(options)
 	embedSendOptions(params, sendOpts)
 
-	respJSON, err := b.sendCommand("stopMessageLiveLocation", params)
+	respJSON, err := b.Raw("stopMessageLiveLocation", params)
 	if err != nil {
 		return nil, err
 	}
@@ -802,7 +802,7 @@ func (b *Bot) GetInviteLink(chat *Chat) (string, error) {
 		"chat_id": chat.Recipient(),
 	}
 
-	respJSON, err := b.sendCommand("exportChatInviteLink", params)
+	respJSON, err := b.Raw("exportChatInviteLink", params)
 	if err != nil {
 		return "", err
 	}
@@ -832,7 +832,7 @@ func (b *Bot) SetGroupTitle(chat *Chat, newTitle string) error {
 		"title":   newTitle,
 	}
 
-	respJSON, err := b.sendCommand("setChatTitle", params)
+	respJSON, err := b.Raw("setChatTitle", params)
 	if err != nil {
 		return err
 	}
@@ -847,7 +847,7 @@ func (b *Bot) SetGroupDescription(chat *Chat, description string) error {
 		"description": description,
 	}
 
-	respJSON, err := b.sendCommand("setChatDescription", params)
+	respJSON, err := b.Raw("setChatDescription", params)
 	if err != nil {
 		return err
 	}
@@ -877,7 +877,7 @@ func (b *Bot) SetGroupStickerSet(chat *Chat, setName string) error {
 		"sticker_set_name": setName,
 	}
 
-	respJSON, err := b.sendCommand("setChatStickerSet", params)
+	respJSON, err := b.Raw("setChatStickerSet", params)
 	if err != nil {
 		return err
 	}
@@ -891,7 +891,7 @@ func (b *Bot) DeleteGroupPhoto(chat *Chat) error {
 		"chat_id": chat.Recipient(),
 	}
 
-	respJSON, err := b.sendCommand("deleteGroupPhoto", params)
+	respJSON, err := b.Raw("deleteGroupPhoto", params)
 	if err != nil {
 		return err
 	}
@@ -905,7 +905,7 @@ func (b *Bot) DeleteGroupStickerSet(chat *Chat) error {
 		"chat_id": chat.Recipient(),
 	}
 
-	respJSON, err := b.sendCommand("deleteChatStickerSet", params)
+	respJSON, err := b.Raw("deleteChatStickerSet", params)
 	if err != nil {
 		return err
 	}
@@ -919,7 +919,7 @@ func (b *Bot) Leave(chat *Chat) error {
 		"chat_id": chat.Recipient(),
 	}
 
-	respJSON, err := b.sendCommand("leaveChat", params)
+	respJSON, err := b.Raw("leaveChat", params)
 	if err != nil {
 		return err
 	}
@@ -941,7 +941,7 @@ func (b *Bot) Pin(message Editable, options ...interface{}) error {
 	sendOpts := extractOptions(options)
 	embedSendOptions(params, sendOpts)
 
-	respJSON, err := b.sendCommand("pinChatMessage", params)
+	respJSON, err := b.Raw("pinChatMessage", params)
 	if err != nil {
 		return err
 	}
@@ -957,7 +957,7 @@ func (b *Bot) Unpin(chat *Chat) error {
 		"chat_id": chat.Recipient(),
 	}
 
-	respJSON, err := b.sendCommand("upinChatMessage", params)
+	respJSON, err := b.Raw("upinChatMessage", params)
 	if err != nil {
 		return err
 	}
@@ -976,7 +976,7 @@ func (b *Bot) ChatByID(id string) (*Chat, error) {
 		"chat_id": id,
 	}
 
-	respJSON, err := b.sendCommand("getChat", params)
+	respJSON, err := b.Raw("getChat", params)
 	if err != nil {
 		return nil, err
 	}
@@ -1005,7 +1005,7 @@ func (b *Bot) ProfilePhotosOf(user *User) ([]Photo, error) {
 		"user_id": user.Recipient(),
 	}
 
-	respJSON, err := b.sendCommand("getUserProfilePhotos", params)
+	respJSON, err := b.Raw("getUserProfilePhotos", params)
 	if err != nil {
 		return nil, err
 	}
@@ -1041,7 +1041,7 @@ func (b *Bot) ChatMemberOf(chat *Chat, user *User) (*ChatMember, error) {
 		"user_id": user.Recipient(),
 	}
 
-	respJSON, err := b.sendCommand("getChatMember", params)
+	respJSON, err := b.Raw("getChatMember", params)
 	if err != nil {
 		return nil, err
 	}

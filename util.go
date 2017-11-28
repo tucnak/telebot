@@ -31,7 +31,7 @@ func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, e
 	}
 	embedSendOptions(params, opt)
 
-	respJSON, err := b.sendCommand("sendMessage", params)
+	respJSON, err := b.Raw("sendMessage", params)
 	if err != nil {
 		return nil, err
 	}
