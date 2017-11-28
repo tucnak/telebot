@@ -8,68 +8,92 @@
 go get -u gopkg.in/tucnak/telebot.v2
 ```
 
+* [Overview](#overview)
+* [Getting Started](#getting-started)
+	- [Poller](#poller)
+	- [Commands](#commands)
+	- [Files](#files)
+	- [Sendable](#sendable)
+	- [Editable](#editable)
+	- [Keyboards](#keyboards)
+	- [Inline mode](#inline-mode)
+	- [Groups](#groups)
+	- [Payments API](#payments-api)
+* [Contributing](#contributing)
+* [Donate](#donate)
+* [License](#license)
+
+# Overview
 Telebot is a bot framework for [Telegram](https://telegram.org) [Bot API](https://core.telegram.org/bots/api).
 This package provides the best of its kind API for command routing, inline query requests and keyboards, as well
 as callbacks. Actually, I went a couple steps further, so instead of making a 1:1 API wrapper I chose to focus on
-the beauty of API and performance. All the methods of telebot API are _extremely_ easy to memorize and get
-used to. Telebot is agnostic to the source of updates as long as the source implements the `Poller` interface.
-`Poller` means you can plug your telebot into virtually any existing bot infrastructure, if you have any. Also,
-consider Telebot a highload-ready solution. I'll soon benchmark the most popular actions and if
-necessary, optimize against them without sacrificing API quality.
+the beauty of API and performance. Some of the strong sides of telebot are:
 
-Take a look at the minimal telebot setup:
+* Concise API with effective! reflection
+* Command routing
+* Middleware
+* Transparent File API
+* Effortless bot callbacks
+
+All the methods of telebot API are _extremely_ easy to memorize and get used to. Also, consider Telebot a
+highload-ready solution. I'll test and benchmark the most popular actions and if necessary, optimize
+against them without sacrificing API quality.
+
+# Getting Started
+Let's take a look at the minimal telebot setup:
 ```go
+package main
+
 import (
-    "time"
-    tb "gopkg.in/tucnak/telebot.v2"
+	"time"
+
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 func main() {
-    b, err := tb.NewBot(tb.Settings{
-        Token: "TOKEN_HERE",
-        Poller: &tb.LongPoller{10 * time.Second},
-    })
+	b, err := tb.NewBot(tb.Settings{
+		Token:  "TOKEN_HERE",
+		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
+	})
 
-    if err != nil {
-        return
-    }
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 
-    b.Handle("/hello", func(m *tb.Message) {
-        b.Send(m.Sender, "hello world")
-    })
+	b.Handle("/hello", func(m *tb.Message) {
+		b.Send(m.Sender, "hello world")
+	})
 
-    b.Start()
+	b.Start()
 }
+
 ```
 
 Simple, innit? Telebot's routing system takes care of deliviering updates
 to their endpoints, so in order to get to handle any meaningful event,
-all you have to do is just plug your function to one of them endpoints
-and you're ready to go!
+all you got to do is just plug your function to one of the Telebot-provided
+endpoints. You can find the full list
+[here](https://godoc.org/gopkg.in/tucnak/telebot.v2#pkg-constants).
 
 ```go
 b, _ := tb.NewBot(settings)
 
 b.Handle(tb.OnText, func(m *Message) {
-    // all text messages that weren't captured
-    // by existing handlers
+	// all the text messages that weren't
+	// captured by existing handlers
 }
 
 b.Handle(tb.OnPhoto, func(m *Message) {
-    // photos only
+	// photos only
 }
 
-b.Handle("/help", func (m *Message) {
-    // help command handler
-})
-
 b.Handle(tb.OnChannelPost, func (m *Message) {
-    // channel post messages only
+	// channel posts only
 })
 
-b.Handle(tb.Callback, func (c *Callback) {
-    // incoming bot callbacks that weren't
-    // captured by specific callback handlers.
+b.Handle(tb.Query, func (c *Callback) {
+	// incoming inline queries
 })
 ```
 
@@ -78,10 +102,111 @@ if you'd like to see some endpoint or endpoint idea implemented. This system
 is completely extensible, so I can introduce them without braking
 backwards-compatibity.
 
-## Message CRUD: `Send()`, `Edit()`, `Delete()`
-These are the three most important functions for manipulating Telebot messages.
-`Send()` takes a Recipient (could be user, chat, channel) and a Sendable. All
-telebot-provided media types (Photo, Audio, Video, etc.) are Sendable.
+## Poller
+Telebot doesn't really care how you provide it with incoming updates, as long
+as you set it up with a Poller:
+```go
+// Poller is a provider of Updates.
+//
+// All pollers must implement Poll(), which accepts bot
+// pointer and subscription channel and start polling
+// synchronously straight away.
+type Poller interface {
+	// Poll is supposed to take the bot object
+	// subscription channel and start polling
+	// for Updates immediately.
+	//
+	// Poller must listen for stop constantly and close
+	// it as soon as it's done polling.
+	Poll(b *Bot, updates chan Update, stop chan struct{})
+}
+```
+
+Telegram Bot API supports long polling and webhook integration. I don't really
+care about webhooks, so the only concrete Poller you'll find in the library
+is the `LongPoller`. Poller means you can plug telebot into whatever existing
+bot infrastructure (load balancers?) you need, if you need to. Another great thing
+about pollers is that you can chain them, making some sort of middleware:
+```go
+poller := &tb.LongPoller{Timeout: 15 * time.Second}
+spamProtected := tb.NewMiddlewarePoller(poller, func(upd *tb.Update) bool {
+	if upd.Message == nil {
+		return true
+	}
+
+	if strings.Contains(upd.Message.Text, "spam") {
+		return false
+	}
+
+	return true
+})
+
+bot, _ := tb.NewBot(tb.Settings{
+	// ...
+	Poller: spamProtected, 
+})
+
+// graceful shutdown
+go func() {
+	<-time.After(N * time.Second)
+	bot.Stop()
+})()
+
+bot.Start() // blocks until shutdown
+
+fmt.Println(poller.LastUpdateID) // 134237
+```
+
+## Commands
+When handling commands, Telebot supports both direct (`/command`) and group-like
+syntax (`/command@botname`) and will never deliver messages addressed to some
+other bot, even if [privacy mode](https://core.telegram.org/bots#privacy-mode) is off.
+For simplified deep-linking, telebot also extracts payload:
+```go
+// Command: /start <PAYLOAD>
+b.Handle("/start", func(m *tb.Message) {
+	if !m.Private() {
+		return
+	}
+	
+	fmt.Println(m.Payload) // <PAYLOAD>
+})
+```
+
+## Files
+>Telegram allows files up to 20 MB in size.
+
+Telebot allows to both upload (from disk / by URL) and download (from Telegram)
+and files in bot's scope. Also, sending any kind of media with a File created
+from disk will upload the file to Telegram automatically:
+```go
+a := &tb.Audio{File: tb.FromDisk("file.ogg")}
+
+fmt.Println(a.OnDisk()) // true
+fmt.Println(a.InCloud()) // false
+
+// Will upload the file from disk and send it to recipient
+bot.Send(recipient, a)
+
+// Next time you'll be sending this very *Audio, Telebot won't
+// re-upload the same file but rather utilize its Telegram FileID
+bot.Send(otherRecipient, a)
+
+fmt.Println(a.OnDisk()) // true
+fmt.Println(a.InCloud()) // true
+fmt.Println(a.FileID) // <telegram file id: ABC-DEF1234ghIkl-zyx57W2v1u123ew11>
+```
+
+You might want to save certain `File`s in order to avoid re-uploading. Feel free
+to marshal them into whatever format, `File` only contain public fields, so no
+data will ever be lost.
+
+## Sendable
+Send is undoubteldy the most important method in Telebot. `Send()` accepts a
+`Recipient` (could be user, group or a channel) and a `Sendable`. FYI, not only
+all telebot-provided media types (`Photo`, `Audio`, `Video`, etc.) are `Sendable`,
+but you can create composite types of your own. As long as they satisfy `Sendable`,
+Telebot will be able to send them out.
 
 ```go
 // Sendable is any object that can send itself.
@@ -94,6 +219,43 @@ type Sendable interface {
 }
 ```
 
+The only type at the time that doesn't fit `Send()` is `Album` and there is a reason
+for that. Albums were added not so long ago, so they are slightly quirky for backwards
+compatibilities sake. In fact, an `Album` can be sent, but never received. Instead,
+Telegram returns a `[]Message`, one for each media object in the album:
+```go
+p := &tb.Photo{File: tb.FromDisk("chicken.jpg")}
+v := &tb.Video{File: tb.FromURL("http://video.mp4")}
+
+msgs, err := b.SendAlbum(user, tb.Album{p, v})
+```
+
+### Send options
+Send options are objects and flags you can pass to `Send()`, `Edit()` and friends
+as optional arguments (following the recipient and the text/media). The most
+important one is called `SendOptions`, it lets you control _all_ the properties of
+the message supported by Telegram. The only drawback is that it's rather
+inconvenient to use at times, so `Send()` supports multiple shorthands:
+```go
+// regular send options
+b.Send(user, "text", &tb.SendOptions{
+	// ...
+})
+
+// ReplyMarkup is a part of SendOptions,
+// but often it's the only option you need
+b.Send(user, "text", &tb.ReplyMarkup{
+	// ...
+})
+
+// flags: no notification && no web link preview
+b.Send(user, "text", tb.Silent, tb.NoPreview)
+```
+
+Full list of supported option-flags you can find
+[here](https://github.com/tucnak/telebot/blob/v2/options.go#L9).
+
+## Editable
 If you want to edit some existing message, you don't really need to store the
 original `*Message` object. In fact, upon edit, Telegram only requires two IDs:
 ChatID and MessageID. And it doesn't really require the whole Message. Also you
@@ -142,16 +304,16 @@ var msgs []StoredMessage
 db.Find(&msgs) // gorm syntax
 
 for _, msg := range msgs {
-    bot.Edit(&msg, "Updated text.")
-    // or
-    bot.Delete(&msg)
+	bot.Edit(&msg, "Updated text.")
+	// or
+	bot.Delete(&msg)
 }
 ```
 
 I find it incredibly neat. Worth noting, at this point of time there exists
 another method in the Edit family, `EditCaption()` which is of a pretty
-rare use, so I didn't bother including it to `Edit()`, which would inevitably
-lead to unnecessary complications.
+rare use, so I didn't bother including it to `Edit()`, just like I did with
+`SendAlbum()` as it would inevitably lead to unnecessary complications.
 ```go
 var m *Message
 
@@ -159,35 +321,55 @@ var m *Message
 bot.EditCaption(m, "new caption")
 ```
 
-## Inline mode
-Docs TBA.
+## Keyboards
+Telebot supports both kinds of keyboards Telegram provides: reply and inline
+keyboards. All buttons can act as endpoints for `Handle()`:
+`Handle()`:
 
-## Files
->Telegram allows files up to 20 MB in size.
-
-Telebot allows to both upload (from disk / by URL) and download (from Telegram)
-and files in bot's scope. Also, sending any kind of media with a File created
-from disk will upload the file to Telegram automatically:
 ```go
-a := &tb.Audio{File: tb.FromDisk("file.ogg")}
+func main() {
+	b, _ := tb.NewBot(tb.Settings{...})
 
-fmt.Println(a.OnDisk()) // true
-fmt.Println(a.InCloud()) // false
+	replyBtn := tb.ReplyButton{Text: "🌕 Button #1"}
+	replyKeys := [][]tb.ReplyButton{
+		[]tb.ReplyButton{replyBtn},
+		// ...
+	}
+	
+	inlineBtn := tb.InlineButton{
+		Unique: "sad_moon",
+		Text: "🌚 Button #2",
+	}
+	inlineKeys := [][]tb.InlineButton{
+		[]tb.InlineButton{inlineBtn},
+		// ...
+	}
 
-// Will upload the file from disk and send it to recipient
-bot.Send(recipient, a)
+	b.Handle(&replyBtn, func(m *tb.Message) {
+		// on reply button pressed
+	})
 
-// Next time you'll be sending this very *Audio, Telebot won't
-// re-upload the same file but rather utilize its Telegram FileID
-bot.Send(otherRecipient, a)
+	b.Handle(&inlineBtn, func(c *tb.Callback) {
+		// on inline button pressed (callback!)
+	})
 
-fmt.Println(a.OnDisk()) // true
-fmt.Println(a.InCloud()) // true
-fmt.Println(a.FileID) // <telegram file id: ABC-DEF1234ghIkl-zyx57W2v1u123ew11>
+	// Command: /start <PAYLOAD>
+	b.Handle("/start", func(m *tb.Message) {
+		if !m.Private() {
+			return
+		}
+
+		b.Send(m.Sender, "Hello!", &tb.ReplyMarkup{
+			ReplyKeyboard:  replyKeys,
+			InlineKeyboard: inlineKeys,
+		})
+	})
+
+	b.Start()
+}
 ```
 
-You might want to save certain `File`s in order to avoid re-uploading. Feel free
-to marshal them into whatever format, `File` only contain public fields, so no
-data will ever be lost.
+## Inline mode
+Docs TBA.
 
 TBA.
