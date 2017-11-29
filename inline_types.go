@@ -9,7 +9,7 @@ type ResultBase struct {
 	// Ignore. This field gets set automatically.
 	Type string `json:"type",hash:"ignore"`
 
-	// Content of the message to be sent.
+	// Optional. Content of the message to be sent.
 	Content *InputMessageContent `json:"input_message_content,omitempty"`
 
 	// Optional. Inline keyboard attached to the message.

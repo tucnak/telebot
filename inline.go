@@ -101,7 +101,7 @@ func (results Results) MarshalJSON() ([]byte, error) {
 		}
 	}
 
-	return json.Marshal(results)
+	return json.Marshal([]Result(results))
 }
 
 func inferIQR(result Result) error {

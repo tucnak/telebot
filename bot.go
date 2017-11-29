@@ -682,6 +682,8 @@ func (b *Bot) Notify(recipient Recipient, action ChatAction) error {
 // be responded to once, subsequent attempts to respond to the same query
 // will result in an error.
 func (b *Bot) Answer(query *Query, response *QueryResponse) error {
+	response.QueryID = query.ID
+
 	respJSON, err := b.Raw("answerInlineQuery", response)
 	if err != nil {
 		return err
