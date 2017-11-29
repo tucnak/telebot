@@ -17,8 +17,6 @@ go get -u gopkg.in/tucnak/telebot.v2
 	- [Editable](#editable)
 	- [Keyboards](#keyboards)
 	- [Inline mode](#inline-mode)
-	- [Groups](#groups)
-	- [Payments API](#payments-api)
 * [Contributing](#contributing)
 * [Donate](#donate)
 * [License](#license)
@@ -29,7 +27,7 @@ This package provides the best of its kind API for command routing, inline query
 as callbacks. Actually, I went a couple steps further, so instead of making a 1:1 API wrapper I chose to focus on
 the beauty of API and performance. Some of the strong sides of telebot are:
 
-* Concise API with effective! reflection
+* Real concise API
 * Command routing
 * Middleware
 * Transparent File API
@@ -79,20 +77,20 @@ endpoints. You can find the full list
 ```go
 b, _ := tb.NewBot(settings)
 
-b.Handle(tb.OnText, func(m *Message) {
+b.Handle(tb.OnText, func(m *tb.Message) {
 	// all the text messages that weren't
 	// captured by existing handlers
 }
 
-b.Handle(tb.OnPhoto, func(m *Message) {
+b.Handle(tb.OnPhoto, func(m *tb.Message) {
 	// photos only
 }
 
-b.Handle(tb.OnChannelPost, func (m *Message) {
+b.Handle(tb.OnChannelPost, func (m *tb.Message) {
 	// channel posts only
 })
 
-b.Handle(tb.Query, func (c *Callback) {
+b.Handle(tb.Query, func (q *tb.Query) {
 	// incoming inline queries
 })
 ```
@@ -143,7 +141,7 @@ spamProtected := tb.NewMiddlewarePoller(poller, func(upd *tb.Update) bool {
 
 bot, _ := tb.NewBot(tb.Settings{
 	// ...
-	Poller: spamProtected, 
+	Poller: spamProtected,
 })
 
 // graceful shutdown
@@ -168,7 +166,7 @@ b.Handle("/start", func(m *tb.Message) {
 	if !m.Private() {
 		return
 	}
-	
+
 	fmt.Println(m.Payload) // <PAYLOAD>
 })
 ```
@@ -300,7 +298,7 @@ func (x StoredMessage) MessageSig() (int, int64) {
 Why bother at all? Well, it allows you to do things like this:
 ```go
 // just two integer columns in the database
-var msgs []StoredMessage
+var msgs []tb.StoredMessage
 db.Find(&msgs) // gorm syntax
 
 for _, msg := range msgs {
@@ -330,12 +328,20 @@ keyboards. All buttons can act as endpoints for `Handle()`:
 func main() {
 	b, _ := tb.NewBot(tb.Settings{...})
 
+	// This button will be displayed in user's
+	// reply keyboard.
 	replyBtn := tb.ReplyButton{Text: "🌕 Button #1"}
 	replyKeys := [][]tb.ReplyButton{
 		[]tb.ReplyButton{replyBtn},
 		// ...
 	}
-	
+
+	// And this one — just under the message itself.
+	// Pressing it will cause the client to send
+	// the bot a callback.
+	//
+	// Make sure Unique stays unique as it has to be
+	// for callback routing to work.
 	inlineBtn := tb.InlineButton{
 		Unique: "sad_moon",
 		Text: "🌚 Button #2",
@@ -351,6 +357,9 @@ func main() {
 
 	b.Handle(&inlineBtn, func(c *tb.Callback) {
 		// on inline button pressed (callback!)
+
+		// always respond!
+		c.Respond(&tb.CallbackResponse{...})
 	})
 
 	// Command: /start <PAYLOAD>
@@ -370,6 +379,63 @@ func main() {
 ```
 
 ## Inline mode
-Docs TBA.
+So if you want to handle incoming inline queries you better plug the `tb.OnQuery`
+endpoint and then use the `Answer()` method to send a list of inline queries
+back. I think at the time of writing, telebot supports all of the provided result
+types (but not the cached ones). This is how it looks like:
 
-TBA.
+```go
+b.Handle(tb.OnQuery, func(q *tb.Query) {
+	urls := []string{
+		"http://photo.jpg",
+		"http://photo2.jpg",
+	}
+
+	results := make(tb.Results, len(urls)) // []tb.Result
+	for i, url := range urls {
+		result := &tb.PhotoResult{
+			URL: url,
+
+			// required for photos
+			ThumbURL: url,
+		}
+
+		results[i] = result
+	}
+
+	err := b.Answer(q, &tb.QueryResponse{
+		Results: results,
+		CacheTime: 60, // a minute
+	})
+
+	if err != nil {
+		fmt.Println(err)
+	}
+})
+```
+
+There's not much to talk about really. It also support some form of authentication
+through deep-linking. For that, use fields `SwitchPMText` and `SwitchPMParameter`
+of `QueryResponse`.
+
+# Contributing
+
+1. Fork it
+2. Clone it: `git clone https://github.com/tucnak/telebot`
+3. Create your feature branch: `git checkout -b my-new-feature`
+4. Make changes and add them: `git add .`
+5. Commit: `git commit -m 'Add some feature'`
+6. Push: `git push origin my-new-feature`
+7. Pull request
+
+# Donate
+
+I do coding for fun but I also try to search for interesting solutions and
+optimize them as much as possible.
+If you feel like it's a good piece of software, I wouldn't mind a tip!
+
+Bitcoin: `1DkfrFvSRqgBnBuxv9BzAz83dqur5zrdTH`
+
+# License
+
+Telebot is distributed under MIT.
