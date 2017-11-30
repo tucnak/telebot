@@ -1,5 +1,5 @@
 # Telebot
->"I never knew creating Telegram bots could so _sexy_!"
+>"I never knew creating Telegram bots could be so _sexy_!"
 
 [![GoDoc](https://godoc.org/gopkg.in/tucnak/telebot.v2?status.svg)](https://godoc.org/gopkg.in/tucnak/telebot.v2)
 [![Travis](https://travis-ci.org/tucnak/telebot.svg?branch=v2)](https://travis-ci.org/tucnak/telebot)
