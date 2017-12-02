@@ -22,7 +22,7 @@ go get -u gopkg.in/tucnak/telebot.v2
 * [License](#license)
 
 # Overview
-Telebot is a bot framework for [Telegram](https://telegram.org) [Bot API](https://core.telegram.org/bots/api).
+Telebot is a bot framework for [Telegram Bot API](https://core.telegram.org/bots/api).
 This package provides the best of its kind API for command routing, inline query requests and keyboards, as well
 as callbacks. Actually, I went a couple steps further, so instead of making a 1:1 API wrapper I chose to focus on
 the beauty of API and performance. Some of the strong sides of telebot are:
@@ -255,11 +255,11 @@ Full list of supported option-flags you can find
 
 ## Editable
 If you want to edit some existing message, you don't really need to store the
-original `*Message` object. In fact, upon edit, Telegram only requires two IDs:
-ChatID and MessageID. And it doesn't really require the whole Message. Also you
-might want to store references to certain messages in the database, so for me it
-made sense for *any* Go struct to be editable as Telegram message, to implement
-Editable interface:
+original `*Message` object. In fact, upon edit, Telegram only requires `chat_id`
+and `message_id`. So you don't really need the Message as the whole. Also you
+might want to store references to certain messages in the database, so I thought
+it made sense for *any* Go struct to be editable as a Telegram message, to implement
+`Editable`:
 ```go
 // Editable is an interface for all objects that
 // provide "message signature", a pair of 32-bit
@@ -278,7 +278,7 @@ type Editable interface {
 }
 ```
 
-For example, `Message` type is Editable. Here is an implementation of `StoredMessage`
+For example, `Message` type is Editable. Here is the implementation of `StoredMessage`
 type, provided by telebot:
 ```go
 // StoredMessage is an example struct suitable for being
@@ -321,8 +321,7 @@ bot.EditCaption(m, "new caption")
 
 ## Keyboards
 Telebot supports both kinds of keyboards Telegram provides: reply and inline
-keyboards. All buttons can act as endpoints for `Handle()`:
-`Handle()`:
+keyboards. Any button can also act as an endpoints for `Handle()`:
 
 ```go
 func main() {
