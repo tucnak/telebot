@@ -190,9 +190,9 @@ func (b *Bot) incomingUpdate(upd *Update) {
 			return
 		}
 
-		// OnAddedToGrop
-		wasAdded := m.UserJoined.ID == b.Me.ID ||
-			m.UsersJoined != nil && isUserInList(b.Me, m.UsersJoined)
+		// OnAddedToGroup
+		wasAdded := (m.UserJoined != nil && m.UserJoined.ID == b.Me.ID) ||
+			(m.UsersJoined != nil && isUserInList(b.Me, m.UsersJoined))
 		if m.GroupCreated || m.SuperGroupCreated || wasAdded {
 			b.handle(OnAddedToGroup, m)
 			return
