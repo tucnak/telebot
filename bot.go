@@ -106,7 +106,7 @@ func (b *Bot) Handle(endpoint interface{}, handler interface{}) {
 
 var (
 	cmdRx   = regexp.MustCompile(`^(\/\w+)(@(\w+))?(\s|$)(.+)?`)
-	cbackRx = regexp.MustCompile(`^\f(\w+)\|(.+)$`)
+	cbackRx = regexp.MustCompile(`^\f(\w+)(\|(.+))?$`)
 )
 
 func (b *Bot) handleCommand(m *Message, cmdName, cmdBot string) bool {
@@ -276,7 +276,7 @@ func (b *Bot) incomingUpdate(upd *Update) {
 				match := cbackRx.FindAllStringSubmatch(data, -1)
 
 				if match != nil {
-					unique, payload := match[0][1], match[0][2]
+					unique, payload := match[0][1], match[0][3]
 
 					if handler, ok := b.handlers["\f"+unique]; ok {
 						if handler, ok := handler.(func(*Callback)); ok {
@@ -695,9 +695,21 @@ func (b *Bot) Answer(query *Query, response *QueryResponse) error {
 // Respond sends a response for a given callback query. A callback can
 // only be responded to once, subsequent attempts to respond to the same callback
 // will result in an error.
-func (b *Bot) Respond(callback *Callback, response *CallbackResponse) error {
-	response.CallbackID = callback.ID
+//
+// Example:
+//
+//		bot.Respond(c)
+//		bot.Respond(c, response)
+//
+func (b *Bot) Respond(callback *Callback, responseOptional ...*CallbackResponse) error {
+	var response *CallbackResponse
+	if responseOptional == nil {
+		response = &CallbackResponse{}
+	} else {
+		response = responseOptional[0]
+	}
 
+	response.CallbackID = callback.ID
 	respJSON, err := b.Raw("answerCallbackQuery", response)
 	if err != nil {
 		return err

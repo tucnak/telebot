@@ -171,7 +171,12 @@ func embedSendOptions(params map[string]string, opt *SendOptions) {
 					key := &keys[i][j]
 					if key.Unique != "" {
 						// Format: "\f<callback_name>|<data>"
-						key.Data = "\f" + key.Unique + "|" + key.Data
+						data := key.Data
+						if data == "" {
+							key.Data = "\f" + key.Unique
+						} else {
+							key.Data = "\f" + key.Unique + "|" + data
+						}
 					}
 				}
 			}
