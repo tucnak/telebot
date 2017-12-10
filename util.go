@@ -96,13 +96,13 @@ func extractOptions(how []interface{}) *SendOptions {
 	for _, prop := range how {
 		switch opt := prop.(type) {
 		case *SendOptions:
-			opts = opt
+			opts = opt.copy()
 
 		case *ReplyMarkup:
 			if opts == nil {
 				opts = &SendOptions{}
 			}
-			opts.ReplyMarkup = opt
+			opts.ReplyMarkup = opt.copy()
 
 		case Option:
 			if opts == nil {

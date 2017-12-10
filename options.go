@@ -46,6 +46,15 @@ type SendOptions struct {
 	ParseMode ParseMode
 }
 
+func (og *SendOptions) copy() *SendOptions {
+	cp := *og
+	if cp.ReplyMarkup != nil {
+		cp.ReplyMarkup = cp.ReplyMarkup.copy()
+	}
+
+	return &cp
+}
+
 // ReplyMarkup controls two convenient options for bot-user communications
 // such as reply keyboard and inline "keyboard" (a grid of buttons as a part
 // of the message).
@@ -85,6 +94,28 @@ type ReplyMarkup struct {
 	// 2) If the bot's message is a reply (has SendOptions.ReplyTo),
 	//       sender of the original message.
 	Selective bool `json:"selective,omitempty"`
+}
+
+func (og *ReplyMarkup) copy() *ReplyMarkup {
+	cp := *og
+
+	cp.ReplyKeyboard = make([][]ReplyButton, len(og.ReplyKeyboard))
+	for i, row := range og.ReplyKeyboard {
+		cp.ReplyKeyboard[i] = make([]ReplyButton, len(row))
+		for j, btn := range row {
+			cp.ReplyKeyboard[i][j] = btn
+		}
+	}
+
+	cp.InlineKeyboard = make([][]InlineButton, len(og.InlineKeyboard))
+	for i, row := range og.InlineKeyboard {
+		cp.InlineKeyboard[i] = make([]InlineButton, len(row))
+		for j, btn := range row {
+			cp.InlineKeyboard[i][j] = btn
+		}
+	}
+
+	return &cp
 }
 
 // ReplyButton represents a button displayed in reply-keyboard.
