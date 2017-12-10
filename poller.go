@@ -28,17 +28,16 @@ type Poller interface {
 // For heavy middleware, use increased capacity.
 //
 type MiddlewarePoller struct {
-	Poller Poller
-	filter func(*Update) bool
-
 	Capacity int // Default: 1
+	Poller   Poller
+	Filter   func(*Update) bool
 }
 
 // NewMiddlewarePoller wait for it... constructs a new middleware poller.
 func NewMiddlewarePoller(original Poller, filter func(*Update) bool) *MiddlewarePoller {
 	return &MiddlewarePoller{
 		Poller: original,
-		filter: filter,
+		Filter: filter,
 	}
 }
 
@@ -66,7 +65,7 @@ func (p *MiddlewarePoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 			return
 
 		case upd := <-middle:
-			if p.filter(&upd) {
+			if p.Filter(&upd) {
 				dest <- upd
 			}
 		}
