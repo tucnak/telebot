@@ -98,7 +98,7 @@ func (b *Bot) Handle(endpoint interface{}, handler interface{}) {
 	case string:
 		b.handlers[end] = handler
 	case CallbackEndpoint:
-		b.handlers["\f"+end.CallbackUnique()] = handler
+		b.handlers[end.CallbackUnique()] = handler
 	default:
 		panic("telebot: unsupported endpoint")
 	}

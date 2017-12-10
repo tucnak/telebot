@@ -70,7 +70,7 @@ type InlineButton struct {
 
 // CallbackUnique returns InlineButto.Unique.
 func (t *InlineButton) CallbackUnique() string {
-	return t.Unique
+	return "\f" + t.Unique
 }
 
 // CallbackUnique returns KeyboardButton.Text.
