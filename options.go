@@ -129,7 +129,7 @@ type ReplyButton struct {
 	Contact  bool `json:"request_contact,omitempty"`
 	Location bool `json:"request_location,omitempty"`
 
-	Action func(*Callback)
+	Action func(*Callback) `json:"-"`
 }
 
 // InlineKeyboardMarkup represents an inline keyboard that appears
