@@ -66,6 +66,8 @@ type InlineButton struct {
 	URL         string `json:"url,omitempty"`
 	Data        string `json:"callback_data,omitempty"`
 	InlineQuery string `json:"switch_inline_query,omitempty"`
+
+	Action func(*Callback)
 }
 
 // CallbackUnique returns InlineButto.Unique.

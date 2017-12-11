@@ -6,6 +6,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+var (
+	ErrCouldNotUpdate = errors.New("getUpdates() failed")
+)
+
 // Poller is a provider of Updates.
 //
 // All pollers must implement Poll(), which accepts bot
@@ -90,7 +94,7 @@ func (p *LongPoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 		updates, err := b.getUpdates(p.LastUpdateID+1, p.Timeout)
 
 		if err != nil {
-			b.debug(errors.Wrap(err, "getUpdates() failed"))
+			b.debug(ErrCouldNotUpdate)
 			continue
 		}
 
