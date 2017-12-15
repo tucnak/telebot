@@ -359,7 +359,7 @@ func main() {
 		// on inline button pressed (callback!)
 
 		// always respond!
-		c.Respond(&tb.CallbackResponse{...})
+		b.Respond(c, &tb.CallbackResponse{...})
 	})
 
 	// Command: /start <PAYLOAD>
