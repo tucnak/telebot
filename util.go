@@ -2,7 +2,6 @@ package telebot
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -19,7 +18,7 @@ func (b *Bot) deferDebug() {
 		if err, ok := r.(error); ok {
 			b.debug(err)
 		} else if str, ok := r.(string); ok {
-			b.debug(fmt.Errorf("%s", str))
+			b.debug(errors.Errorf("%s", str))
 		}
 	}
 }
