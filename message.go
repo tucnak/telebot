@@ -220,7 +220,7 @@ func (m *Message) LastEdited() time.Time {
 // IsForwarded says whether message is forwarded copy of another
 // message or not.
 func (m *Message) IsForwarded() bool {
-	return m.OriginalChat != nil
+	return m.OriginalSender != nil || m.OriginalChat != nil
 }
 
 // IsReply says whether message is a reply to another message.
