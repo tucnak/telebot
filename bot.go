@@ -79,7 +79,7 @@ type Update struct {
 	Callback          *Callback `json:"callback_query,omitempty"`
 	Query             *Query    `json:"inline_query,omitempty"`
 
-	ChosenInlineResult *ChosenInlineResult `json:"chosen_inline_result,omitempty`
+	ChosenInlineResult *ChosenInlineResult `json:"chosen_inline_result,omitempty"`
 }
 
 // ChosenInlineResult represents a result of an inline query that was chosen
