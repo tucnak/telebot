@@ -61,7 +61,20 @@ func extractMsgResponse(respJSON []byte) (*Message, error) {
 
 	err := json.Unmarshal(respJSON, &resp)
 	if err != nil {
-		return nil, errors.Wrap(err, "bad response json")
+		var resp struct {
+			Ok          bool
+			Result      bool
+			Description string
+		}
+
+		err := json.Unmarshal(respJSON, &resp)
+		if err != nil {
+			return nil, errors.Wrap(err, "bad response json")
+		}
+
+		if !resp.Ok {
+			return nil, errors.Errorf("api error: %s", resp.Description)
+		}
 	}
 
 	if !resp.Ok {
