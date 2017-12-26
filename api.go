@@ -49,20 +49,27 @@ func (b *Bot) sendFiles(
 	writer := multipart.NewWriter(body)
 
 	for name, path := range files {
-		file, err := os.Open(path)
-		if err != nil {
-			return nil, wrapSystem(err)
-		}
-		defer file.Close()
+		if err := func() error {
+			file, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
 
-		part, err := writer.CreateFormFile(name, filepath.Base(path))
-		if err != nil {
+			part, err := writer.CreateFormFile(name, filepath.Base(path))
+			if err != nil {
+				return err
+			}
+
+			if _, err = io.Copy(part, file); err != nil {
+				return err
+			}
+
+			return nil
+		} (); err != nil {
 			return nil, wrapSystem(err)
 		}
 
-		if _, err = io.Copy(part, file); err != nil {
-			return nil, wrapSystem(err)
-		}
 	}
 
 	for field, value := range params {
