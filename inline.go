@@ -3,24 +3,13 @@ package telebot
 import (
 	"encoding/json"
 	"fmt"
-	"hash/fnv"
-	"strconv"
-
-	"github.com/mitchellh/hashstructure"
-	"github.com/pkg/errors"
 )
-
-// inlineQueryHashOptions sets the HashOptions to be used when hashing
-// an inline query result (used to generate IDs).
-var inlineQueryHashOptions = &hashstructure.HashOptions{
-	Hasher: fnv.New64(),
-}
 
 // Query is an incoming inline query. When the user sends
 // an empty query, your bot could return some default or
 // trending results.
 type Query struct {
-	// Unique identifier for this query.
+	// Unique identifier for this query. 1-64 bytes.
 	ID string `json:"id"`
 
 	// Sender.
@@ -76,24 +65,17 @@ type QueryResponse struct {
 type Result interface {
 	ResultID() string
 	SetResultID(string)
+	Process()
 }
 
 // Results is a slice wrapper for convenient marshalling.
 type Results []Result
 
 // MarshalJSON makes sure IQRs have proper IDs and Type variables set.
-//
-// If ID of some result appears empty, it gets set to a new hash.
-// JSON-specific Type gets infered from the actual (specific) IQR type.
 func (results Results) MarshalJSON() ([]byte, error) {
 	for _, result := range results {
 		if result.ResultID() == "" {
-			hash, err := hashstructure.Hash(result, inlineQueryHashOptions)
-			if err != nil {
-				return nil, errors.Wrap(err, "telebot: can't hash the result")
-			}
-
-			result.SetResultID(strconv.FormatUint(hash, 16))
+			result.SetResultID(fmt.Sprintf("%d", &result))
 		}
 
 		if err := inferIQR(result); err != nil {

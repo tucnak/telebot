@@ -619,10 +619,10 @@ func (b *Bot) Edit(message Editable, what interface{}, options ...interface{}) (
 
 	// if inline message
 	if chatID == 0 {
-		params["inline_message_id"] = strconv.Itoa(messageID)
+		params["inline_message_id"] = messageID
 	} else {
 		params["chat_id"] = strconv.FormatInt(chatID, 10)
-		params["message_id"] = strconv.Itoa(messageID)
+		params["message_id"] = messageID
 	}
 
 	sendOpts := extractOptions(options)
@@ -646,10 +646,10 @@ func (b *Bot) EditCaption(originalMsg Editable, caption string) (*Message, error
 
 	// if inline message
 	if chatID == 0 {
-		params["inline_message_id"] = strconv.Itoa(messageID)
+		params["inline_message_id"] = messageID
 	} else {
 		params["chat_id"] = strconv.FormatInt(chatID, 10)
-		params["message_id"] = strconv.Itoa(messageID)
+		params["message_id"] = messageID
 	}
 
 	respJSON, err := b.Raw("editMessageCaption", params)
@@ -676,7 +676,7 @@ func (b *Bot) Delete(message Editable) error {
 
 	params := map[string]string{
 		"chat_id":    strconv.FormatInt(chatID, 10),
-		"message_id": strconv.Itoa(messageID),
+		"message_id": messageID,
 	}
 
 	respJSON, err := b.Raw("deleteMessage", params)
@@ -715,6 +715,10 @@ func (b *Bot) Notify(recipient Recipient, action ChatAction) error {
 // will result in an error.
 func (b *Bot) Answer(query *Query, response *QueryResponse) error {
 	response.QueryID = query.ID
+
+	for _, result := range response.Results {
+		result.Process()
+	}
 
 	respJSON, err := b.Raw("answerInlineQuery", response)
 	if err != nil {
@@ -981,7 +985,7 @@ func (b *Bot) Pin(message Editable, options ...interface{}) error {
 
 	params := map[string]string{
 		"chat_id":    strconv.FormatInt(chatID, 10),
-		"message_id": strconv.Itoa(messageID),
+		"message_id": messageID,
 	}
 
 	sendOpts := extractOptions(options)

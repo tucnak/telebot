@@ -4,10 +4,10 @@ package telebot
 type ResultBase struct {
 	// Unique identifier for this result, 1-64 Bytes.
 	// If left unspecified, a 64-bit FNV-1 hash will be calculated
-	ID string `json:"id",hash:"ignore"`
+	ID string `json:"id"`
 
 	// Ignore. This field gets set automatically.
-	Type string `json:"type",hash:"ignore"`
+	Type string `json:"type"`
 
 	// Optional. Content of the message to be sent.
 	Content *InputMessageContent `json:"input_message_content,omitempty"`
@@ -24,6 +24,12 @@ func (r *ResultBase) ResultID() string {
 // SetResultID sets ResultBase.ID.
 func (r *ResultBase) SetResultID(id string) {
 	r.ID = id
+}
+
+func (r *ResultBase) Process() {
+	if r.ReplyMarkup != nil {
+		processButtons(r.ReplyMarkup.InlineKeyboard)
+	}
 }
 
 // ArticleResult represents a link to an article or web page.

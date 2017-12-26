@@ -163,26 +163,30 @@ func embedSendOptions(params map[string]string, opt *SendOptions) {
 	}
 
 	if opt.ReplyMarkup != nil {
-		keys := opt.ReplyMarkup.InlineKeyboard
-		if len(keys) > 0 && len(keys[0]) > 0 {
-			for i, _ := range keys {
-				for j, _ := range keys[i] {
-					key := &keys[i][j]
-					if key.Unique != "" {
-						// Format: "\f<callback_name>|<data>"
-						data := key.Data
-						if data == "" {
-							key.Data = "\f" + key.Unique
-						} else {
-							key.Data = "\f" + key.Unique + "|" + data
-						}
-					}
+		processButtons(opt.ReplyMarkup.InlineKeyboard)
+		replyMarkup, _ := json.Marshal(opt.ReplyMarkup)
+		params["reply_markup"] = string(replyMarkup)
+	}
+}
+
+func processButtons(keys [][]InlineButton) {
+	if keys == nil || len(keys) < 1 || len(keys[0]) < 1 {
+		return
+	}
+
+	for i, _ := range keys {
+		for j, _ := range keys[i] {
+			key := &keys[i][j]
+			if key.Unique != "" {
+				// Format: "\f<callback_name>|<data>"
+				data := key.Data
+				if data == "" {
+					key.Data = "\f" + key.Unique
+				} else {
+					key.Data = "\f" + key.Unique + "|" + data
 				}
 			}
 		}
-
-		replyMarkup, _ := json.Marshal(opt.ReplyMarkup)
-		params["reply_markup"] = string(replyMarkup)
 	}
 }
 

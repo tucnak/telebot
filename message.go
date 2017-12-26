@@ -1,6 +1,7 @@
 package telebot
 
 import (
+	"strconv"
 	"time"
 )
 
@@ -203,8 +204,8 @@ type MessageEntity struct {
 }
 
 // MessageSig satisfies Editable interface (see Editable.)
-func (m *Message) MessageSig() (int, int64) {
-	return m.ID, m.Chat.ID
+func (m *Message) MessageSig() (string, int64) {
+	return strconv.Itoa(m.ID), m.Chat.ID
 }
 
 // Time returns the moment of message creation in local time.
