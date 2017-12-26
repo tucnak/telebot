@@ -76,6 +76,11 @@ const (
 	//
 	// Handler: func(*Query)
 	OnQuery = "\aquery"
+
+	// Will fire on chosen inline results.
+	//
+	// Handler: func(*ChosenInlineResult)
+	OnChosenInlineResult = "\achosen_inline_result"
 )
 
 // ChatAction is a client-side status indicating bot activity.
