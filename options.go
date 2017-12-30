@@ -86,6 +86,11 @@ type ReplyMarkup struct {
 	// Defaults to false.
 	OneTimeKeyboard bool `json:"one_time_keyboard,omitempty"`
 
+	// Requests clients to remove the reply keyboard.
+	//
+	// Dafaults to false.
+	ReplyKeyboardRemove bool `json:"remove_keyboard,omitempty"`
+
 	// Use this param if you want to force reply from
 	// specific users only.
 	//
