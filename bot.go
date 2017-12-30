@@ -1046,6 +1046,11 @@ func (b *Bot) ChatByID(id string) (*Chat, error) {
 		return nil, errors.Errorf("api error: %s", resp.Description)
 	}
 
+	if resp.Result.Type == ChatChannel && resp.Result.Username != "" {
+		//Channel is Private
+		resp.Result.Type = ChatChannelPrivate
+	}
+
 	return resp.Result, nil
 }
 
