@@ -128,10 +128,11 @@ const (
 type ChatType string
 
 const (
-	ChatPrivate    ChatType = "private"
-	ChatGroup      ChatType = "group"
-	ChatSuperGroup ChatType = "supergroup"
-	ChatChannel    ChatType = "channel"
+	ChatPrivate        ChatType = "private"
+	ChatGroup          ChatType = "group"
+	ChatSuperGroup     ChatType = "supergroup"
+	ChatChannel        ChatType = "channel"
+	ChatChannelPrivate ChatType = "privatechannel"
 )
 
 // MemberStatus is one's chat status
