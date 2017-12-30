@@ -24,6 +24,7 @@ func NewBot(pref Settings) (*Bot, error) {
 		Token:   pref.Token,
 		Updates: make(chan Update, pref.Updates),
 		Poller:  pref.Poller,
+		Proxy:   pref.Proxy,
 
 		handlers: make(map[string]interface{}),
 		stop:     make(chan struct{}),
@@ -45,6 +46,7 @@ type Bot struct {
 	Token   string
 	Updates chan Update
 	Poller  Poller
+	Proxy   string
 
 	handlers map[string]interface{}
 	reporter func(error)
@@ -66,6 +68,9 @@ type Settings struct {
 	// Reporter is a callback function that will get called
 	// on any panics recovered from endpoint handlers.
 	Reporter func(error)
+
+	// Proxy is a full address to redirect every request into.
+	Proxy string
 }
 
 // Update object represents an incoming update.
@@ -540,7 +545,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 		return nil, errors.Errorf("api error: %s", resp.Description)
 	}
 
-	for attachName, _ := range files {
+	for attachName := range files {
 		i, _ := strconv.Atoi(attachName)
 
 		var newID string
