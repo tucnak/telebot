@@ -81,11 +81,11 @@ b, _ := tb.NewBot(settings)
 b.Handle(tb.OnText, func(m *tb.Message) {
 	// all the text messages that weren't
 	// captured by existing handlers
-}
+})
 
 b.Handle(tb.OnPhoto, func(m *tb.Message) {
 	// photos only
-}
+})
 
 b.Handle(tb.OnChannelPost, func (m *tb.Message) {
 	// channel posts only
