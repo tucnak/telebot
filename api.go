@@ -61,11 +61,8 @@ func (b *Bot) sendFiles(
 				return err
 			}
 
-			if _, err = io.Copy(part, file); err != nil {
-				return err
-			}
-
-			return nil
+			_, err = io.Copy(part, file)
+			return err
 		} (); err != nil {
 			return nil, wrapSystem(err)
 		}
