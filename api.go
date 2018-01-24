@@ -30,7 +30,7 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 
 	var err error
 	resp := &http.Response{}
-	if strings.Compare(b.Proxy, "") != 0 {
+	if b.Proxy == "" {
 		proxyURL, e := url.Parse(b.Proxy)
 		if e != nil {
 			return []byte{}, errors.Wrap(e, "Proxy parsing failed")
@@ -59,7 +59,7 @@ func (b *Bot) sendFiles(
 	method string,
 	files map[string]string,
 	params map[string]string) ([]byte, error) {
-	// ---
+
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
@@ -95,15 +95,26 @@ func (b *Bot) sendFiles(
 		return nil, wrapSystem(err)
 	}
 
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.Token, method)
-	req, err := http.NewRequest("POST", url, body)
+	uri := fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.Token, method)
+	req, err := http.NewRequest("POST", uri, body)
 	if err != nil {
 		return nil, wrapSystem(err)
 	}
 
 	req.Header.Add("Content-Type", writer.FormDataContentType())
 
-	resp, err := http.DefaultClient.Do(req)
+	resp := &http.Response{}
+	if b.Proxy == "" {
+		proxyURL, e := url.Parse(b.Proxy)
+		if e != nil {
+			return []byte{}, errors.Wrap(e, "Proxy parsing failed")
+		}
+		client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyURL)}}
+
+		resp, err = client.Do(req)
+	} else {
+		resp, err = http.DefaultClient.Do(req)
+	}
 	if err != nil {
 		return nil, errors.Wrap(err, "http.Post failed")
 	}

@@ -69,7 +69,7 @@ type Settings struct {
 	// on any panics recovered from endpoint handlers.
 	Reporter func(error)
 
-	// Proxy is a full address to redirect every request into.
+	// Proxy is a full address to use as gateway for requests.
 	Proxy string
 }
 
