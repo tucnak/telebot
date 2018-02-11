@@ -98,7 +98,7 @@ b.Handle(tb.Query, func (q *tb.Query) {
 
 Now there's a dozen of supported endpoints (see package consts). Let me know
 if you'd like to see some endpoint or endpoint idea implemented. This system
-is completely extensible, so I can introduce them without braking
+is completely extensible, so I can introduce them without breaking
 backwards-compatibity.
 
 ## Poller
