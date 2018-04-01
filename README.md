@@ -401,6 +401,7 @@ b.Handle(tb.OnQuery, func(q *tb.Query) {
 		}
 
 		results[i] = result
+		results[i].SetResultID(strconv.Itoa(i)) // It's needed to set a unique string ID for each result
 	}
 
 	err := b.Answer(q, &tb.QueryResponse{
