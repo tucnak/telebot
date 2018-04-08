@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -19,17 +20,31 @@ import (
 
 // Raw lets you call any method of Bot API manually.
 func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.Token, method)
+	uri := fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.Token, method)
+	appType := "application/json"
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(payload); err != nil {
 		return []byte{}, wrapSystem(err)
 	}
 
-	resp, err := http.Post(url, "application/json", &buf)
+	var err error
+	resp := &http.Response{}
+	if b.Proxy == "" {
+		proxyURL, e := url.Parse(b.Proxy)
+		if e != nil {
+			return []byte{}, errors.Wrap(e, "Proxy parsing failed")
+		}
+		client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyURL)}}
+
+		resp, err = client.Post(uri, appType, &buf)
+	} else {
+		resp, err = http.Post(uri, appType, &buf)
+	}
 	if err != nil {
 		return []byte{}, errors.Wrap(err, "http.Post failed")
 	}
+
 	resp.Close = true
 	defer resp.Body.Close()
 	json, err := ioutil.ReadAll(resp.Body)
@@ -44,7 +59,7 @@ func (b *Bot) sendFiles(
 	method string,
 	files map[string]string,
 	params map[string]string) ([]byte, error) {
-	// ---
+
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
@@ -77,15 +92,26 @@ func (b *Bot) sendFiles(
 		return nil, wrapSystem(err)
 	}
 
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.Token, method)
-	req, err := http.NewRequest("POST", url, body)
+	uri := fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.Token, method)
+	req, err := http.NewRequest("POST", uri, body)
 	if err != nil {
 		return nil, wrapSystem(err)
 	}
 
 	req.Header.Add("Content-Type", writer.FormDataContentType())
 
-	resp, err := http.DefaultClient.Do(req)
+	resp := &http.Response{}
+	if b.Proxy == "" {
+		proxyURL, e := url.Parse(b.Proxy)
+		if e != nil {
+			return []byte{}, errors.Wrap(e, "Proxy parsing failed")
+		}
+		client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyURL)}}
+
+		resp, err = client.Do(req)
+	} else {
+		resp, err = http.DefaultClient.Do(req)
+	}
 	if err != nil {
 		return nil, errors.Wrap(err, "http.Post failed")
 	}
