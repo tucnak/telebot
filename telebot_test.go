@@ -26,8 +26,21 @@ func TestBot(t *testing.T) {
 	}
 }
 
-func TestRecipient(_ *testing.T) {
-	bot := Bot{}
+func TestRecipient(t *testing.T) {
+	token := os.Getenv("TELEBOT_SECRET")
+	if token == "" {
+		fmt.Println("ERROR: " +
+			"In order to test telebot functionality, you need to set up " +
+			"TELEBOT_SECRET environmental variable, which represents an API " +
+			"key to a Telegram bot.\n")
+		t.Fatal("Could't find TELEBOT_SECRET, aborting.")
+	}
+
+	bot, err := NewBot(Settings{Token: token})
+	if err != nil {
+		t.Fatal("couldn't create bot:", err)
+	}
+
 	bot.Send(&User{}, "")
 	bot.Send(&Chat{}, "")
 }

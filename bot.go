@@ -20,14 +20,20 @@ func NewBot(pref Settings) (*Bot, error) {
 		pref.Updates = 100
 	}
 
+	client := pref.Client
+	if client == nil {
+		client = http.DefaultClient
+	}
+
 	bot := &Bot{
-		Token:   pref.Token,
-		Updates: make(chan Update, pref.Updates),
-		Poller:  pref.Poller,
+		Token:    pref.Token,
+		Updates:  make(chan Update, pref.Updates),
+		Poller:   pref.Poller,
 
 		handlers: make(map[string]interface{}),
 		stop:     make(chan struct{}),
 		reporter: pref.Reporter,
+		client:   client,
 	}
 
 	user, err := bot.getMe()
@@ -49,6 +55,7 @@ type Bot struct {
 	handlers map[string]interface{}
 	reporter func(error)
 	stop     chan struct{}
+	client   *http.Client
 }
 
 // Settings represents a utility struct for passing certain
@@ -66,6 +73,9 @@ type Settings struct {
 	// Reporter is a callback function that will get called
 	// on any panics recovered from endpoint handlers.
 	Reporter func(error)
+
+	// HTTP Client used to make requests to telegram api
+	Client *http.Client
 }
 
 // Update object represents an incoming update.
