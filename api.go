@@ -26,7 +26,7 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 		return []byte{}, wrapSystem(err)
 	}
 
-	resp, err := http.Post(url, "application/json", &buf)
+	resp, err := b.client.Post(url, "application/json", &buf)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, "http.Post failed")
 	}
@@ -85,7 +85,7 @@ func (b *Bot) sendFiles(
 
 	req.Header.Add("Content-Type", writer.FormDataContentType())
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := b.client.Do(req)
 	if err != nil {
 		return nil, errors.Wrap(err, "http.Post failed")
 	}
