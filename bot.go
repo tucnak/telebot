@@ -26,14 +26,14 @@ func NewBot(pref Settings) (*Bot, error) {
 	}
 
 	bot := &Bot{
-		Token:   pref.Token,
-		Updates: make(chan Update, pref.Updates),
-		Poller:  pref.Poller,
+		Token:    pref.Token,
+		Updates:  make(chan Update, pref.Updates),
+		Poller:   pref.Poller,
 
 		handlers: make(map[string]interface{}),
 		stop:     make(chan struct{}),
 		reporter: pref.Reporter,
-		client:client,
+		client:   client,
 	}
 
 	user, err := bot.getMe()
