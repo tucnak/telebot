@@ -398,6 +398,11 @@ func (b *Bot) handleMedia(m *Message) bool {
 		return true
 	}
 
+	if m.Voice != nil {
+		b.handle(OnVoice, m)
+		return true
+	}
+
 	if m.Audio != nil {
 		b.handle(OnAudio, m)
 		return true
