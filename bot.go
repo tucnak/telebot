@@ -26,9 +26,9 @@ func NewBot(pref Settings) (*Bot, error) {
 	}
 
 	bot := &Bot{
-		Token:    pref.Token,
-		Updates:  make(chan Update, pref.Updates),
-		Poller:   pref.Poller,
+		Token:   pref.Token,
+		Updates: make(chan Update, pref.Updates),
+		Poller:  pref.Poller,
 
 		handlers: make(map[string]interface{}),
 		stop:     make(chan struct{}),
@@ -415,6 +415,11 @@ func (b *Bot) handleMedia(m *Message) bool {
 
 	if m.Video != nil {
 		b.handle(OnVideo, m)
+		return true
+	}
+
+	if m.Voice != nil {
+		b.handle(OnVoice, m)
 		return true
 	}
 
