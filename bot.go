@@ -1022,7 +1022,7 @@ func (b *Bot) Unpin(chat *Chat) error {
 		"chat_id": chat.Recipient(),
 	}
 
-	respJSON, err := b.Raw("upinChatMessage", params)
+	respJSON, err := b.Raw("unpinChatMessage", params)
 	if err != nil {
 		return err
 	}
