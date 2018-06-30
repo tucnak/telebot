@@ -26,9 +26,9 @@ func NewBot(pref Settings) (*Bot, error) {
 	}
 
 	bot := &Bot{
-		Token:    pref.Token,
-		Updates:  make(chan Update, pref.Updates),
-		Poller:   pref.Poller,
+		Token:   pref.Token,
+		Updates: make(chan Update, pref.Updates),
+		Poller:  pref.Poller,
 
 		handlers: make(map[string]interface{}),
 		stop:     make(chan struct{}),
@@ -847,7 +847,7 @@ func (b *Bot) StopLiveLocation(message Editable, options ...interface{}) (*Messa
 
 	params := map[string]string{
 		"chat_id":    fmt.Sprintf("%d", chatID),
-		"message_id": fmt.Sprintf("%d", messageID),
+		"message_id": messageID,
 	}
 
 	sendOpts := extractOptions(options)
