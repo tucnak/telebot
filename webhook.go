@@ -32,7 +32,8 @@ type WebhookEndpoint struct {
 // you leave these values empty, your local adress will be sent to telegram which is mostly
 // not what you want (at least while developing). If you have a single instance of your
 // bot you should consider to use the LongPoller instead of a WebHook.
-// If you are sure to publish your
+// You can also leave the Listen field empty. In this case it is up to the caller to
+// add the Webhook to a http-mux.
 type Webhook struct {
 	Listen   string
 	TLS      *WebhookTLS
@@ -104,27 +105,35 @@ func (h *Webhook) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 		close(stop)
 		return
 	}
+	// store the variables so the HTTP-handler can use 'em
+	h.dest = dest
+	h.bot = b
+
+	if h.Listen == "" {
+		h.waitForStop(stop)
+		return
+	}
+
 	s := &http.Server{
 		Addr:    h.Listen,
 		Handler: h,
 	}
 
 	go func(stop chan struct{}) {
-		<-stop
-		close(stop)
+		h.waitForStop(stop)
 		s.Shutdown(context.Background())
 	}(stop)
-
-	// store the variables so the HTTP-handler can use 'em
-	h.dest = dest
-	h.bot = b
 
 	if h.TLS != nil {
 		s.ListenAndServeTLS(h.TLS.Cert, h.TLS.Key)
 	} else {
 		s.ListenAndServe()
 	}
+}
 
+func (h *Webhook) waitForStop(stop chan struct{}) {
+	<-stop
+	close(stop)
 }
 
 // The handler simply reads the update from the body of the requests
