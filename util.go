@@ -205,5 +205,5 @@ func processButtons(keys [][]InlineButton) {
 
 func embedRights(p map[string]string, prv Rights) {
 	jsonRepr, _ := json.Marshal(prv)
-	json.Unmarshal(jsonRepr, p)
+	json.Unmarshal(jsonRepr, &p)
 }
