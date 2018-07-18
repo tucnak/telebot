@@ -107,8 +107,17 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		return nil, err
 	}
 
-	msg.Video.File.stealRef(&v.File)
-	*v = *msg.Video
+	if vid := msg.Video; vid != nil {
+		vid.File.stealRef(&v.File)
+		*v = *vid
+	} else if doc := msg.Document; doc != nil {
+		// If video has no sound, Telegram can turn it into Document (GIF)
+		doc.File.stealRef(&v.File)
+
+		v.Caption = doc.Caption
+		v.MIME = doc.MIME
+		v.Thumbnail = doc.Thumbnail
+	}
 
 	return msg, nil
 }
