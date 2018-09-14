@@ -1,6 +1,9 @@
 package telebot
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 // Recipient is any possible endpoint you can send
 // messages to: either user, group or a channel.
@@ -41,9 +44,16 @@ func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 // Send delivers media through bot b to recipient.
 func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id": to.Recipient(),
-		"caption": a.Caption,
+		"chat_id":   to.Recipient(),
+		"caption":   a.Caption,
+		"performer": a.Performer,
+		"title":     a.Title,
 	}
+
+	if a.Duration != 0 {
+		params["duration"] = strconv.Itoa(a.Duration)
+	}
+
 	embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&a.File, "audio", params)
@@ -60,9 +70,15 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 // Send delivers media through bot b to recipient.
 func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id": to.Recipient(),
-		"caption": d.Caption,
+		"chat_id":   to.Recipient(),
+		"caption":   d.Caption,
+		"file_name": d.FileName,
 	}
+
+	if d.FileSize != 0 {
+		params["file_size"] = strconv.Itoa(d.FileSize)
+	}
+
 	embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&d.File, "document", params)
@@ -100,6 +116,20 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"chat_id": to.Recipient(),
 		"caption": v.Caption,
 	}
+
+	if v.Duration != 0 {
+		params["duration"] = strconv.Itoa(v.Duration)
+	}
+	if v.Width != 0 {
+		params["width"] = strconv.Itoa(v.Width)
+	}
+	if v.Height != 0 {
+		params["height"] = strconv.Itoa(v.Height)
+	}
+	if v.SupportsStreaming {
+		params["supports_streaming"] = "true"
+	}
+
 	embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&v.File, "video", params)
@@ -127,6 +157,11 @@ func (v *Voice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
 		"chat_id": to.Recipient(),
 	}
+
+	if v.Duration != 0 {
+		params["duration"] = strconv.Itoa(v.Duration)
+	}
+
 	embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&v.File, "voice", params)
@@ -145,6 +180,14 @@ func (v *VideoNote) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 	params := map[string]string{
 		"chat_id": to.Recipient(),
 	}
+
+	if v.Duration != 0 {
+		params["duration"] = strconv.Itoa(v.Duration)
+	}
+	if v.Length != 0 {
+		params["length"] = strconv.Itoa(v.Length)
+	}
+
 	embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&v.File, "videoNote", params)
@@ -179,12 +222,13 @@ func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 // Send delivers media through bot b to recipient.
 func (v *Venue) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id":       to.Recipient(),
-		"latitude":      fmt.Sprintf("%f", v.Location.Lat),
-		"longitude":     fmt.Sprintf("%f", v.Location.Lng),
-		"title":         v.Title,
-		"address":       v.Address,
-		"foursquare_id": v.FoursquareID,
+		"chat_id":         to.Recipient(),
+		"latitude":        fmt.Sprintf("%f", v.Location.Lat),
+		"longitude":       fmt.Sprintf("%f", v.Location.Lng),
+		"title":           v.Title,
+		"address":         v.Address,
+		"foursquare_id":   v.FoursquareID,
+		"foursquare_type": v.FoursquareType,
 	}
 	embedSendOptions(params, opt)
 
