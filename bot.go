@@ -487,24 +487,10 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 	files := make(map[string]string)
 
 	for i, x := range a {
-		var (
-			f                    *File
-			caption              string
-			mediaRepr, mediaType string
-		)
+		var mediaRepr string
+		var jsonRepr []byte
 
-		switch y := x.(type) {
-		case *Photo:
-			f = &y.File
-			mediaType = "photo"
-			caption = y.Caption
-		case *Video:
-			f = &y.File
-			mediaType = "video"
-			caption = y.Caption
-		default:
-			return nil, errors.Errorf("telebot: album entry #%d is not valid", i)
-		}
+		f := x.MediaFile()
 
 		if f.InCloud() {
 			mediaRepr = f.FileID
@@ -518,11 +504,38 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 				"telebot: album entry #%d doesn't exist anywhere", i)
 		}
 
-		jsonRepr, _ := json.Marshal(map[string]string{
-			"type":    mediaType,
-			"media":   mediaRepr,
-			"caption": caption,
-		})
+		switch y := x.(type) {
+		case *Photo:
+			jsonRepr, _ = json.Marshal(struct {
+				Type    string `json:"type"`
+				Caption string `json:"caption"`
+				Media   string `json:"media"`
+			}{
+				"photo",
+				y.Caption,
+				mediaRepr,
+			})
+		case *Video:
+			jsonRepr, _ = json.Marshal(struct {
+				Type              string `json:"type"`
+				Caption           string `json:"caption"`
+				Media             string `json:"media"`
+				Width             int    `json:"width,omitempty"`
+				Height            int    `json:"height,omitempty"`
+				Duration          int    `json:"duration,omitempty"`
+				SupportsStreaming bool   `json:"supports_streaming,omitempty"`
+			}{
+				"video",
+				y.Caption,
+				mediaRepr,
+				y.Width,
+				y.Height,
+				y.Duration,
+				y.SupportsStreaming,
+			})
+		default:
+			return nil, errors.Errorf("telebot: album entry #%d is not valid", i)
+		}
 
 		media[i] = string(jsonRepr)
 	}
