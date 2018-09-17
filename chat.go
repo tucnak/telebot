@@ -9,6 +9,7 @@ type User struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Username  string `json:"username"`
+	LanguageCode  string `json:"language_code"`
 }
 
 // Recipient returns user ID (see Recipient interface).
