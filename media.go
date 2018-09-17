@@ -109,9 +109,10 @@ type Video struct {
 	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
-	Caption   string `json:"caption,omitempty"`
-	Thumbnail *Photo `json:"thumb,omitempty"`
-	MIME      string `json:"mime_type,omitempty"`
+	Caption           string `json:"caption,omitempty"`
+	Thumbnail         *Photo `json:"thumb,omitempty"`
+	SupportsStreaming bool   `json:"supports_streaming,omitempty"`
+	MIME              string `json:"mime_type,omitempty"`
 }
 
 // MediaFile returns &Video.File
@@ -140,6 +141,7 @@ type VideoNote struct {
 
 	// (Optional)
 	Thumbnail *Photo `json:"thumb,omitempty"`
+	Length    int    `json:"length,omitempty"`
 }
 
 // Contact object represents a contact to Telegram user
@@ -172,5 +174,6 @@ type Venue struct {
 	Address  string   `json:"address"`
 
 	// (Optional)
-	FoursquareID string `json:"foursquare_id,omitempty"`
+	FoursquareID   string `json:"foursquare_id,omitempty"`
+	FoursquareType string `json:"foursquare_type,omitempty"`
 }
