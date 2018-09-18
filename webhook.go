@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 )
 
 // A WebhookTLS specifies the path to a key and a cert so the poller can open
@@ -48,10 +50,14 @@ type registerResult struct {
 	Description string `json:"description"`
 }
 
-func (h *Webhook) getFiles() map[string]string {
-	m := make(map[string]string)
+func (h *Webhook) getFiles() filesReaders {
+	m := make(filesReaders)
 	if h.TLS != nil {
-		m["certificate"] = h.TLS.Cert
+		f, err := os.Open(h.TLS.Cert)
+		if err != nil {
+			return m
+		}
+		m["certificate"] = f
 	}
 	// check if it is overwritten by an endpoint
 	if h.Endpoint != nil {
@@ -63,7 +69,11 @@ func (h *Webhook) getFiles() map[string]string {
 			delete(m, "certificate")
 		} else {
 			// someone configured a certificate
-			m["certificate"] = h.Endpoint.Cert
+			f, err := os.Open(h.Endpoint.Cert)
+			if err != nil {
+				return m
+			}
+			m["certificate"] = f
 		}
 	}
 	return m
@@ -87,7 +97,15 @@ func (h *Webhook) getParams() map[string]string {
 }
 
 func (h *Webhook) Poll(b *Bot, dest chan Update, stop chan struct{}) {
-	res, err := b.sendFiles("setWebhook", h.getFiles(), h.getParams())
+	files := h.getFiles()
+	defer func() {
+		for _, r := range files {
+			if rc, ok := r.(io.ReadCloser); ok {
+				rc.Close()
+			}
+		}
+	}()
+	res, err := b.sendFiles("setWebhook", files, h.getParams())
 	if err != nil {
 		b.debug(fmt.Errorf("setWebhook failed %q: %v", string(res), err))
 		close(stop)

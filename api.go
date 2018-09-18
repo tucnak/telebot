@@ -9,13 +9,14 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/pkg/errors"
 )
+
+type filesReaders map[string]io.Reader
 
 // Raw lets you call any method of Bot API manually.
 func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
@@ -42,28 +43,22 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 
 func (b *Bot) sendFiles(
 	method string,
-	files map[string]string,
+	files filesReaders,
 	params map[string]string) ([]byte, error) {
 	// ---
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	for name, path := range files {
+	for name, r := range files {
 		if err := func() error {
-			file, err := os.Open(path)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
-
-			part, err := writer.CreateFormFile(name, filepath.Base(path))
+			part, err := writer.CreateFormFile(name, name)
 			if err != nil {
 				return err
 			}
 
-			_, err = io.Copy(part, file)
+			_, err = io.Copy(part, r)
 			return err
-		} (); err != nil {
+		}(); err != nil {
 			return nil, wrapSystem(err)
 		}
 
@@ -109,8 +104,11 @@ func (b *Bot) sendObject(f *File, what string, params map[string]string) (*Messa
 		what = "video_note"
 	}
 
-	var respJSON []byte
-	var err error
+	var (
+		respJSON []byte
+		err      error
+		file     io.ReadCloser
+	)
 
 	if f.InCloud() {
 		params[what] = f.FileID
@@ -118,9 +116,18 @@ func (b *Bot) sendObject(f *File, what string, params map[string]string) (*Messa
 	} else if f.FileURL != "" {
 		params[what] = f.FileURL
 		respJSON, err = b.Raw(sendWhat, params)
-	} else {
+	} else if f.Reader != nil {
 		respJSON, err = b.sendFiles(sendWhat,
-			map[string]string{what: f.FileLocal}, params)
+			filesReaders{what: f.Reader}, params)
+	} else {
+		file, err = os.Open(f.FileLocal)
+		if err != nil {
+			return nil, err
+		}
+		defer file.Close()
+
+		respJSON, err = b.sendFiles(sendWhat,
+			filesReaders{what: file}, params)
 	}
 
 	if err != nil {

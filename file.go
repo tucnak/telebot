@@ -1,6 +1,7 @@
 package telebot
 
 import (
+	"io"
 	"os"
 )
 
@@ -17,6 +18,9 @@ type File struct {
 
 	// file on the internet
 	FileURL string `json:"file_url"`
+
+	// raw io.Reader
+	Reader io.Reader
 }
 
 // FromDisk constructs a new local (on-disk) file object.
@@ -43,6 +47,15 @@ func FromDisk(filename string) File {
 //
 func FromURL(url string) File {
 	return File{FileURL: url}
+}
+
+// FromReader constructs a new file from io.Reader.
+//
+//	b := bytes.NewBuffer([]byte("string"))
+//	buff := &tb.Document{File: tb.FromReader(b)}
+//
+func FromReader(f io.Reader) File {
+	return File{Reader: f}
 }
 
 func (f *File) stealRef(g *File) {
