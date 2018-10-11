@@ -48,10 +48,11 @@ type registerResult struct {
 	Description string `json:"description"`
 }
 
-func (h *Webhook) getFiles() map[string]string {
-	m := make(map[string]string)
+func (h *Webhook) getFiles() map[string]File {
+	m := make(map[string]File)
+
 	if h.TLS != nil {
-		m["certificate"] = h.TLS.Cert
+		m["certificate"] = FromDisk(h.TLS.Cert)
 	}
 	// check if it is overwritten by an endpoint
 	if h.Endpoint != nil {
@@ -63,7 +64,7 @@ func (h *Webhook) getFiles() map[string]string {
 			delete(m, "certificate")
 		} else {
 			// someone configured a certificate
-			m["certificate"] = h.Endpoint.Cert
+			m["certificate"] = FromDisk(h.Endpoint.Cert)
 		}
 	}
 	return m
