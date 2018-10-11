@@ -454,8 +454,8 @@ func (b *Bot) Stop() {
 // Send accepts 2+ arguments, starting with destination chat, followed by
 // some Sendable (or string!) and optional send options.
 //
-// Note: since most arguments are of type interface{}, make sure to pass
-//       them by-pointer, NOT by-value, which will result in a panic.
+// Note: since most arguments are of type interface{}, but have pointer
+// 		method recievers, make sure to pass them by-pointer, NOT by-value.
 //
 // What is a send option exactly? It can be one of the following types:
 //
@@ -474,7 +474,7 @@ func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Mes
 	case Sendable:
 		return object.Send(b, to, sendOpts)
 	default:
-		panic("telebot: unsupported sendable")
+		return nil, errors.New("telebot: unsupported sendable")
 	}
 }
 
