@@ -484,7 +484,7 @@ func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Mes
 // From all existing options, it only supports telebot.Silent.
 func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Message, error) {
 	media := make([]string, len(a))
-	files := make(map[string]string)
+	files := make(map[string]File)
 
 	for i, x := range a {
 		var mediaRepr string
@@ -496,9 +496,9 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 			mediaRepr = f.FileID
 		} else if f.FileURL != "" {
 			mediaRepr = f.FileURL
-		} else if f.OnDisk() {
+		} else if f.OnDisk() || f.FileReader != nil {
 			mediaRepr = fmt.Sprintf("attach://%d", i)
-			files[strconv.Itoa(i)] = f.FileLocal
+			files[strconv.Itoa(i)] = *f
 		} else {
 			return nil, errors.Errorf(
 				"telebot: album entry #%d doesn't exist anywhere", i)
@@ -939,8 +939,7 @@ func (b *Bot) SetGroupPhoto(chat *Chat, p *Photo) error {
 		"chat_id": chat.Recipient(),
 	}
 
-	respJSON, err := b.sendFiles("setChatPhoto",
-		map[string]string{"photo": p.FileLocal}, params)
+	respJSON, err := b.sendFiles("setChatPhoto", map[string]File{"photo": p.File}, params)
 	if err != nil {
 		return err
 	}

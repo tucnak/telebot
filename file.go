@@ -1,6 +1,7 @@
 package telebot
 
 import (
+	"io"
 	"os"
 )
 
@@ -17,6 +18,9 @@ type File struct {
 
 	// file on the internet
 	FileURL string `json:"file_url"`
+
+	// file backed with io.Reader
+	FileReader io.Reader `json:"-"`
 }
 
 // FromDisk constructs a new local (on-disk) file object.
@@ -43,6 +47,19 @@ func FromDisk(filename string) File {
 //
 func FromURL(url string) File {
 	return File{FileURL: url}
+}
+
+// FromReader constructs a new file from io.Reader.
+//
+// Note, it returns File, not *File for a very good reason:
+// in telebot, File is pretty much an embeddable struct,
+// so upon uploading media you'll need to set embedded File
+// with something. NewFile() returning File makes it a one-liner.
+//
+//     photo := &tb.Photo{File: tb.FromReader(bytes.NewReader(...))}
+//
+func FromReader(reader io.Reader) File {
+	return File{FileReader: reader}
 }
 
 func (f *File) stealRef(g *File) {
