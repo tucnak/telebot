@@ -12,6 +12,16 @@ type Recipient interface {
 	Recipient() string
 }
 
+// RecipientType - RecipientType
+type RecipientType struct {
+	Channel string `json:"channel"`
+}
+
+// Recipient - Recipient
+func (x RecipientType) Recipient() string {
+	return x.Channel
+}
+
 // Sendable is any object that can send itself.
 //
 // This is pretty cool, since it lets bots implement
