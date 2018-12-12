@@ -25,8 +25,13 @@ func NewBot(pref Settings) (*Bot, error) {
 		client = http.DefaultClient
 	}
 
+	if pref.URL == "" {
+		pref.URL = DefaultApiURL
+	}
+
 	bot := &Bot{
 		Token:   pref.Token,
+		URL:     pref.URL,
 		Updates: make(chan Update, pref.Updates),
 		Poller:  pref.Poller,
 
@@ -49,6 +54,7 @@ func NewBot(pref Settings) (*Bot, error) {
 type Bot struct {
 	Me      *User
 	Token   string
+	URL     string
 	Updates chan Update
 	Poller  Poller
 
@@ -61,6 +67,9 @@ type Bot struct {
 // Settings represents a utility struct for passing certain
 // properties of a bot around and is required to make bots.
 type Settings struct {
+	// Telegram API Url
+	URL string
+
 	// Telegram token
 	Token string
 
@@ -825,8 +834,8 @@ func (b *Bot) Download(f *File, localFilename string) error {
 		return err
 	}
 
-	url := fmt.Sprintf("https://api.telegram.org/file/bot%s/%s",
-		b.Token, g.FilePath)
+	url := fmt.Sprintf("%s/file/bot%s/%s",
+		b.URL, b.Token, g.FilePath)
 
 	out, err := os.Create(localFilename)
 	if err != nil {
@@ -1152,5 +1161,5 @@ func (b *Bot) FileURLByID(fileID string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return "https://api.telegram.org/file/bot" + b.Token + "/" + f.FilePath, nil
+	return fmt.Sprintf("%s/file/bot%s/%s", b.URL, b.Token, f.FilePath), nil
 }

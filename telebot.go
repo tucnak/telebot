@@ -158,3 +158,5 @@ const (
 	FeatureMouth    MaskFeature = "mouth"
 	FeatureChin     MaskFeature = "chin"
 )
+
+const DefaultApiURL = "https://api.telegram.org"

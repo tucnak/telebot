@@ -19,7 +19,7 @@ import (
 
 // Raw lets you call any method of Bot API manually.
 func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.Token, method)
+	url := fmt.Sprintf("%s/bot%s/%s", b.URL, b.Token, method)
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(payload); err != nil {
@@ -118,7 +118,7 @@ func (b *Bot) sendFiles(
 		return nil, wrapSystem(err)
 	}
 
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.Token, method)
+	url := fmt.Sprintf("%s/bot%s/%s", b.URL, b.Token, method)
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return nil, wrapSystem(err)
