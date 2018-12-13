@@ -58,3 +58,25 @@ func TestFile(t *testing.T) {
 		t.Fatal("File doesn't preserve its original filename.")
 	}
 }
+
+func TestCustomURL(t *testing.T) {
+	token := os.Getenv("TELEBOT_SECRET")
+	if token == "" {
+		fmt.Println("ERROR: " +
+			"In order to test telebot functionality, you need to set up " +
+			"TELEBOT_SECRET environmental variable, which represents an API " +
+			"key to a Telegram bot.\n")
+		t.Fatal("Could't find TELEBOT_SECRET, aborting.")
+	}
+
+	customURL := "http://api.telegram.org"
+
+	bot, err := NewBot(Settings{Token: token, URL: customURL})
+	if err != nil {
+		t.Fatal("couldn't create bot:", err)
+	}
+
+	if bot.URL != customURL {
+		t.Fatal("custom api url is not set")
+	}
+}

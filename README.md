@@ -52,6 +52,8 @@ import (
 func main() {
 	b, err := tb.NewBot(tb.Settings{
 		Token:  "TOKEN_HERE",
+		// You can also set custom API URL. If field is empty it equals to "https://api.telegram.org"
+		URL: "http://195.129.111.17:8012",
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 	})
 
