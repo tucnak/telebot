@@ -207,3 +207,10 @@ func embedRights(p map[string]string, prv Rights) {
 	jsonRepr, _ := json.Marshal(prv)
 	json.Unmarshal(jsonRepr, &p)
 }
+
+func thumbnailToFilemap(thumb *Photo) map[string]File {
+	if thumb != nil {
+		return map[string]File{"thumb": thumb.File}
+	}
+	return nil
+}
