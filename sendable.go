@@ -61,8 +61,15 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		return nil, err
 	}
 
-	msg.Audio.File.stealRef(&a.File)
-	*a = *msg.Audio
+	if msg.Audio != nil {
+		msg.Audio.File.stealRef(&a.File)
+		*a = *msg.Audio
+	}
+
+	if msg.Document != nil {
+		msg.Document.File.stealRef(&a.File)
+		a.File = msg.Document.File
+	}
 
 	return msg, nil
 }
