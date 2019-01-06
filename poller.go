@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	ErrCouldNotUpdate = errors.New("getUpdates() failed")
+	ErrCouldNotUpdate = errors.New("telebot: could not fetch new updates")
 )
 
 // Poller is a provider of Updates.
