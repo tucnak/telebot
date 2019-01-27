@@ -12,12 +12,15 @@ type Currency struct {
 	SymbolLeft   bool   `json:"symbol_left"`
 	SpaceBetween bool   `json:"space_between"`
 	Exp          int    `json:"exp"`
-	MinAmount    string `json:"min_amount"`
-	MaxAmount    string `json:"max_amount"`
+	MinAmount    interface{} `json:"min_amount"`
+	MaxAmount    interface{} `json:"max_amount"`
 }
 
 var SupportedCurrencies = map[string]Currency{}
 
 func init() {
-	json.Unmarshal([]byte(dataSupportedCurrenciesJSON), &SupportedCurrencies)
+	err := json.Unmarshal([]byte(dataSupportedCurrenciesJSON), &SupportedCurrencies)
+	if err != nil {
+		panic(err)
+	}
 }
