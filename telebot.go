@@ -83,6 +83,11 @@ const (
 	//
 	// Handler: func(*ChosenInlineResult)
 	OnChosenInlineResult = "\achosen_inline_result"
+
+	// Will fire on PreCheckoutQuery.
+	//
+	// Handler: func(*PreCheckoutQuery)
+	OnCheckout = "\apre_checkout_query"
 )
 
 // ChatAction is a client-side status indicating bot activity.

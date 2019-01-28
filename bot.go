@@ -99,6 +99,8 @@ type Update struct {
 	Query             *Query    `json:"inline_query,omitempty"`
 
 	ChosenInlineResult *ChosenInlineResult `json:"chosen_inline_result,omitempty"`
+
+	PreCheckoutQuery *PreCheckoutQuery `json:"pre_checkout_query,omitempty"`
 }
 
 // ChosenInlineResult represents a result of an inline query that was chosen
@@ -111,6 +113,14 @@ type ChosenInlineResult struct {
 
 	From     User      `json:"from"`
 	Location *Location `json:"location,omitempty"`
+}
+
+type PreCheckoutQuery struct {
+	ID       string `json:"id"`
+	Sender   *User  `json:"from"`
+	Currency string `json:"currency"`
+	Total    int    `json:"total_amount"`
+	Payload  string `json:"invoice_payload"`
 }
 
 // Handle lets you set the handler for some command name or
@@ -375,6 +385,24 @@ func (b *Bot) incomingUpdate(upd *Update) {
 
 			} else {
 				panic("telebot: chosen inline result handler is bad")
+			}
+		}
+		return
+	}
+
+	if upd.PreCheckoutQuery != nil {
+		if handler, ok := b.handlers[OnCheckout]; ok {
+			if handler, ok := handler.(func(*PreCheckoutQuery)); ok {
+				// i'm not 100% sure that any of the values
+				// won't be cached, so I pass them all in:
+				go func(b *Bot, handler func(*PreCheckoutQuery),
+					r *PreCheckoutQuery) {
+					defer b.deferDebug()
+					handler(r)
+				}(b, handler, upd.PreCheckoutQuery)
+
+			} else {
+				panic("telebot: checkout handler is bad")
 			}
 		}
 		return
@@ -740,6 +768,27 @@ func (b *Bot) Notify(recipient Recipient, action ChatAction) error {
 	}
 
 	respJSON, err := b.Raw("sendChatAction", params)
+	if err != nil {
+		return err
+	}
+
+	return extractOkResponse(respJSON)
+}
+
+// Accept finalizes the deal.
+func (b *Bot) Accept(query *PreCheckoutQuery, errorMessage ...string) error {
+	params := map[string]string{
+		"pre_checkout_query_id": query.ID,
+	}
+
+	if len(errorMessage) == 0 {
+		params["ok"] = "True"
+	} else {
+		params["ok"] = "False"
+		params["error_message"] = errorMessage[0]
+	}
+
+	respJSON, err := b.Raw("answerPreCheckoutQuery", params)
 	if err != nil {
 		return err
 	}

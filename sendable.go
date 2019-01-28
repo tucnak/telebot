@@ -1,6 +1,7 @@
 package telebot
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 )
@@ -233,6 +234,30 @@ func (v *Venue) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	embedSendOptions(params, opt)
 
 	respJSON, err := b.Raw("sendVenue", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMsgResponse(respJSON)
+}
+
+// Send delivers media through bot b to recipient.
+func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
+	prices, _ := json.Marshal(i.Prices)
+
+	params := map[string]string{
+		"chat_id":         to.Recipient(),
+		"title":           i.Title,
+		"description":     i.Description,
+		"start_parameter": i.Start,
+		"payload":         i.Payload,
+		"provider_token":  i.Token,
+		"currency":        i.Currency,
+		"prices":          string(prices),
+	}
+	embedSendOptions(params, opt)
+
+	respJSON, err := b.Raw("sendInvoice", params)
 	if err != nil {
 		return nil, err
 	}
