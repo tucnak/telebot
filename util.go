@@ -3,6 +3,7 @@ package telebot
 import (
 	"encoding/json"
 	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -24,6 +25,10 @@ func (b *Bot) deferDebug() {
 }
 
 func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, error) {
+	if opt.ParseMode == ModeMarkdown {
+		text = escapeMarkdownChar(text)
+	}
+
 	params := map[string]string{
 		"chat_id": to.Recipient(),
 		"text":    text,
@@ -36,6 +41,11 @@ func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, e
 	}
 
 	return extractMsgResponse(respJSON)
+}
+
+func escapeMarkdownChar(s string) string {
+	replacer := strings.NewReplacer("*", "\\*", "_", "\\_", "[", "\\[", "`", "\\`")
+	return replacer.Replace(s)
 }
 
 func wrapSystem(err error) error {
