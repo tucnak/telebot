@@ -25,7 +25,7 @@ func (b *Bot) deferDebug() {
 }
 
 func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, error) {
-	if opt.ParseMode == ModeMarkdown {
+	if opt != nil && opt.ParseMode == ModeMarkdown {
 		text = escapeMarkdownChar(text)
 	}
 
