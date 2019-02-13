@@ -31,7 +31,7 @@ func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 
 	embedSendOptions(params, opt)
 
-	msg, err := b.sendObject(&p.File, "photo", params)
+	msg, err := b.sendObject(&p.File, "photo", params, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 
 	embedSendOptions(params, opt)
 
-	msg, err := b.sendObject(&a.File, "audio", params)
+	msg, err := b.sendObject(&a.File, "audio", params, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -78,9 +78,8 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 // Send delivers media through bot b to recipient.
 func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id":   to.Recipient(),
-		"caption":   d.Caption,
-		"file_name": d.FileName,
+		"chat_id": to.Recipient(),
+		"caption": d.Caption,
 	}
 
 	if d.FileSize != 0 {
@@ -89,7 +88,7 @@ func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 
 	embedSendOptions(params, opt)
 
-	msg, err := b.sendObject(&d.File, "document", params)
+	msg, err := b.sendObject(&d.File, "document", params, thumbnailToFilemap(d.Thumbnail))
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +106,7 @@ func (s *Sticker) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 	}
 	embedSendOptions(params, opt)
 
-	msg, err := b.sendObject(&s.File, "sticker", params)
+	msg, err := b.sendObject(&s.File, "sticker", params, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +139,7 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 
 	embedSendOptions(params, opt)
 
-	msg, err := b.sendObject(&v.File, "video", params)
+	msg, err := b.sendObject(&v.File, "video", params, thumbnailToFilemap(v.Thumbnail))
 	if err != nil {
 		return nil, err
 	}
@@ -172,7 +171,7 @@ func (v *Voice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 
 	embedSendOptions(params, opt)
 
-	msg, err := b.sendObject(&v.File, "voice", params)
+	msg, err := b.sendObject(&v.File, "voice", params, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -198,7 +197,7 @@ func (v *VideoNote) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 
 	embedSendOptions(params, opt)
 
-	msg, err := b.sendObject(&v.File, "videoNote", params)
+	msg, err := b.sendObject(&v.File, "videoNote", params, thumbnailToFilemap(v.Thumbnail))
 	if err != nil {
 		return nil, err
 	}
