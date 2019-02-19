@@ -961,7 +961,7 @@ func (b *Bot) GetInviteLink(chat *Chat) (string, error) {
 	return resp.Result, nil
 }
 
-// SetChatTitle should be used to update group title.
+// SetGroupTitle should be used to update group title.
 func (b *Bot) SetGroupTitle(chat *Chat, newTitle string) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
