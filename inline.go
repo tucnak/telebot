@@ -65,6 +65,8 @@ type QueryResponse struct {
 type Result interface {
 	ResultID() string
 	SetResultID(string)
+	SetContent(InputMessageContent)
+	SetReplyMarkup([][]InlineButton)
 	Process()
 }
 

@@ -26,6 +26,16 @@ func (r *ResultBase) SetResultID(id string) {
 	r.ID = id
 }
 
+// SetContent sets ResultBase.Content.
+func (r *ResultBase) SetContent(content InputMessageContent) {
+	r.Content = &content
+}
+
+// SetReplyMarkup sets ResultBase.ReplyMarkup.
+func (r *ResultBase) SetReplyMarkup(keyboard [][]InlineButton) {
+	r.ReplyMarkup = &InlineKeyboardMarkup{InlineKeyboard: keyboard}
+}
+
 func (r *ResultBase) Process() {
 	if r.ReplyMarkup != nil {
 		processButtons(r.ReplyMarkup.InlineKeyboard)
