@@ -701,6 +701,34 @@ func (b *Bot) Edit(message Editable, what interface{}, options ...interface{}) (
 	return extractMsgResponse(respJSON)
 }
 
+// EditReplyMarkup used to edit reply markup of already sent message.
+//
+// On success, returns edited message object
+func (b *Bot) EditReplyMarkup(message Editable, markup *InlineKeyboardMarkup) (*Message, error) {
+	messageID, chatID := message.MessageSig()
+
+	params := map[string]string{}
+
+	// if inline message
+	if chatID == 0 {
+		params["inline_message_id"] = messageID
+	} else {
+		params["chat_id"] = strconv.FormatInt(chatID, 10)
+		params["message_id"] = messageID
+	}
+
+	processButtons(markup.InlineKeyboard)
+	jsonMarkup, _ := json.Marshal(markup)
+	params["reply_markup"] = string(jsonMarkup)
+
+	respJSON, err := b.Raw("editMessageReplyMarkup", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMsgResponse(respJSON)
+}
+
 // EditCaption used to edit already sent photo caption with known recepient and message id.
 //
 // On success, returns edited message object
