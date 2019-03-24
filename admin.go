@@ -205,7 +205,7 @@ func (b *Bot) Len(chat *Chat) (int, error) {
 }
 
 // Purge: Deletes a range of messages.
-func (b *Bot) Purge(chat *Chat, start Message, end Message) error {
+func (b *Bot) Purge(chat *Chat, start *Message, end *Message) error {
 	// The ID grows by 1 every message so we'll use a for loop and add 1 every run
 	startID := start.ID
 	endID := end.ID
