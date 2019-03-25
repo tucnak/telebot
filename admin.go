@@ -207,19 +207,12 @@ func (b *Bot) Len(chat *Chat) (int, error) {
 // Purge: Deletes a range of messages.
 func (b *Bot) Purge(chat *Chat, start *Message, end *Message) error {
 	// The ID grows by 1 every message so we'll use a for loop and add 1 every run
-	startID := start.ID
-	endID := end.ID
-	for endID>=startID {
-		startIDString := strconv.Itoa(startID) // convert to string because params is a string map
-		params := map[string]string{
-			"chat_id":    strconv.FormatInt(chat.ID, 10),
-			"message_id": startIDString,
-		}
-		_ ,err := b.Raw("deleteMessage", params)
-		if err != nil {
+	msg := start
+	for msg.ID <= end.ID {
+		if err := b.Delete(msg); err != nil {
 			return err
 		}
-		startID++
+		msg.ID++
 	}
 	return nil
 }
