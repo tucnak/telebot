@@ -85,6 +85,11 @@ type Audio struct {
 	MIME      string `json:"mime_type,omitempty"`
 }
 
+// MediaFile returns &Audio.File
+func (a *Audio) MediaFile() *File {
+	return &a.File
+}
+
 // Document object represents a general file (as opposed to Photo or Audio).
 // Telegram users can send files of any type of up to 1.5 GB in size.
 type Document struct {
@@ -97,6 +102,11 @@ type Document struct {
 	Thumbnail *Photo `json:"thumb,omitempty"`
 	Caption   string `json:"caption,omitempty"`
 	MIME      string `json:"mime_type"`
+}
+
+// MediaFile returns &Document.File
+func (d *Document) MediaFile() *File {
+	return &d.File
 }
 
 // Video object represents a video file.
