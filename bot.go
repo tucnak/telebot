@@ -877,14 +877,12 @@ func (b *Bot) FileByID(fileID string) (File, error) {
 // Download saves the file from Telegram servers locally.
 //
 // Maximum file size to download is 20 MB.
-func (b *Bot) Download(f *File, localFilename string) error {
-	g, err := b.FileByID(f.FileID)
+func (b *Bot) Download(file *File, localFilename string) error {
+	reader, err := b.GetFile(file)
 	if err != nil {
-		return err
+		return wrapSystem(err)
 	}
-
-	url := fmt.Sprintf("%s/file/bot%s/%s",
-		b.URL, b.Token, g.FilePath)
+	defer reader.Close()
 
 	out, err := os.Create(localFilename)
 	if err != nil {
@@ -892,23 +890,34 @@ func (b *Bot) Download(f *File, localFilename string) error {
 	}
 	defer out.Close()
 
-	resp, err := http.Get(url)
+	_, err = io.Copy(out, reader)
 	if err != nil {
 		return wrapSystem(err)
 	}
-	defer resp.Body.Close()
-
-	_, err = io.Copy(out, resp.Body)
-	if err != nil {
-		return wrapSystem(err)
-	}
-
-	g.FileLocal = localFilename
-	*f = g
+	file.FileLocal = localFilename
 
 	return nil
 }
 
+// GetFile from Telegram servers
+func (b *Bot) GetFile(file *File) (io.ReadCloser, error) {
+	f, err := b.FileByID(file.FileID)
+	if err != nil {
+		return nil, err
+	}
+
+	url := fmt.Sprintf("%s/file/bot%s/%s",
+		b.URL, b.Token, f.FilePath)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	// set FilePath
+	*file = f
+
+	return resp.Body, nil
+}
 // StopLiveLocation should be called to stop broadcasting live message location
 // before Location.LivePeriod expires.
 //
