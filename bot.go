@@ -725,6 +725,131 @@ func (b *Bot) EditCaption(originalMsg Editable, caption string) (*Message, error
 	return extractMsgResponse(respJSON)
 }
 
+// EditMedia used to edit already sent media with known recepient and message id.
+//
+// Use cases:
+//
+//     bot.EditMedia(msg, &tb.Photo{File: tb.FromDisk("chicken.jpg")});
+//     bot.EditMedia(msg, &tb.Video{File: tb.FromURL("http://video.mp4")});
+//
+func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...interface{}) (*Message, error) {
+	var mediaRepr string;
+	var jsonRepr []byte;
+	var thumb *Photo;
+
+	file := make(map[string]File);
+
+	f := inputMedia.MediaFile();
+
+	if f.InCloud() {
+		mediaRepr = f.FileID;
+	} else if f.FileURL != "" {
+		mediaRepr = f.FileURL;
+	} else if f.OnDisk() || f.FileReader != nil {
+		s := f.FileLocal;
+		if (f.FileReader != nil) {
+			s = "0";
+		}
+		mediaRepr = "attach://" + s;
+		file[s] = *f;
+	} else {
+		return nil, errors.Errorf(
+			"telebot: can't edit media, it doesn't exist anywhere");
+	}
+
+	type FileJson struct {
+		// All types.
+		Type              string `json:"type"`
+		Caption           string `json:"caption"`
+		Media             string `json:"media"`
+
+		// Video.
+		Width             int    `json:"width,omitempty"`
+		Height            int    `json:"height,omitempty"`
+		SupportsStreaming bool   `json:"supports_streaming,omitempty"`
+
+		// Video and audio.
+		Duration          int    `json:"duration,omitempty"`
+
+		// Document.
+		FileName          string `json:"file_name"`
+
+		// Document, video and audio.
+		Thumbnail         string `json:"thumb,omitempty"`
+		MIME              string `json:"mime_type,omitempty"`
+
+		// Audio.
+		Title             string `json:"title,omitempty"`
+		Performer         string `json:"performer,omitempty"`
+	}
+
+	resultMedia := &FileJson {Media: mediaRepr};
+
+	switch y := inputMedia.(type) {
+		case *Photo:
+			resultMedia.Type = "photo";
+			resultMedia.Caption = y.Caption;
+		case *Video:
+			resultMedia.Type = "video";
+			resultMedia.Caption = y.Caption;
+			resultMedia.Width = y.Width;
+			resultMedia.Height = y.Height;
+			resultMedia.Duration = y.Duration;
+			resultMedia.SupportsStreaming = y.SupportsStreaming;
+			resultMedia.MIME = y.MIME;
+			thumb = y.Thumbnail;
+			if thumb != nil {
+				resultMedia.Thumbnail = "attach://thumb";
+			}
+		case *Document:
+			resultMedia.Type = "document";
+			resultMedia.Caption = y.Caption;
+			resultMedia.FileName = y.FileName;
+			resultMedia.MIME = y.MIME;
+			thumb = y.Thumbnail;
+			if thumb != nil {
+				resultMedia.Thumbnail = "attach://thumb";
+			}
+		case *Audio:
+			resultMedia.Type = "audio";
+			resultMedia.Caption = y.Caption;
+			resultMedia.Duration = y.Duration;
+			resultMedia.MIME = y.MIME;
+			resultMedia.Title = y.Title;
+			resultMedia.Performer = y.Performer;
+		default:
+			return nil, errors.Errorf("telebot: inputMedia entry is not valid");
+	}
+
+	messageID, chatID := message.MessageSig();
+
+	jsonRepr, _ = json.Marshal(resultMedia);
+	params := map[string]string{};
+	params["media"] = string(jsonRepr);
+
+	// If inline message.
+	if chatID == 0 {
+		params["inline_message_id"] = messageID;
+	} else {
+		params["chat_id"] = strconv.FormatInt(chatID, 10);
+		params["message_id"] = messageID;
+	}
+
+	if thumb != nil {
+		file["thumb"] = *thumb.MediaFile();
+	}
+
+	sendOpts := extractOptions(options);
+	embedSendOptions(params, sendOpts);
+
+	respJSON, err := b.sendFiles("editMessageMedia", file, params);
+	if err != nil {
+		return nil, err;
+	}
+
+	return extractMsgResponse(respJSON);
+}
+
 // Delete removes the message, including service messages,
 // with the following limitations:
 //
@@ -877,14 +1002,12 @@ func (b *Bot) FileByID(fileID string) (File, error) {
 // Download saves the file from Telegram servers locally.
 //
 // Maximum file size to download is 20 MB.
-func (b *Bot) Download(f *File, localFilename string) error {
-	g, err := b.FileByID(f.FileID)
+func (b *Bot) Download(file *File, localFilename string) error {
+	reader, err := b.GetFile(file)
 	if err != nil {
-		return err
+		return wrapSystem(err)
 	}
-
-	url := fmt.Sprintf("%s/file/bot%s/%s",
-		b.URL, b.Token, g.FilePath)
+	defer reader.Close()
 
 	out, err := os.Create(localFilename)
 	if err != nil {
@@ -892,23 +1015,34 @@ func (b *Bot) Download(f *File, localFilename string) error {
 	}
 	defer out.Close()
 
-	resp, err := http.Get(url)
+	_, err = io.Copy(out, reader)
 	if err != nil {
 		return wrapSystem(err)
 	}
-	defer resp.Body.Close()
-
-	_, err = io.Copy(out, resp.Body)
-	if err != nil {
-		return wrapSystem(err)
-	}
-
-	g.FileLocal = localFilename
-	*f = g
+	file.FileLocal = localFilename
 
 	return nil
 }
 
+// GetFile from Telegram servers
+func (b *Bot) GetFile(file *File) (io.ReadCloser, error) {
+	f, err := b.FileByID(file.FileID)
+	if err != nil {
+		return nil, err
+	}
+
+	url := fmt.Sprintf("%s/file/bot%s/%s",
+		b.URL, b.Token, f.FilePath)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	// set FilePath
+	*file = f
+
+	return resp.Body, nil
+}
 // StopLiveLocation should be called to stop broadcasting live message location
 // before Location.LivePeriod expires.
 //
