@@ -97,30 +97,28 @@ type Update struct {
 	EditedChannelPost *Message  `json:"edited_channel_post,omitempty"`
 	Callback          *Callback `json:"callback_query,omitempty"`
 	Query             *Query    `json:"inline_query,omitempty"`
-
 	ChosenInlineResult *ChosenInlineResult `json:"chosen_inline_result,omitempty"`
-
 	PreCheckoutQuery *PreCheckoutQuery `json:"pre_checkout_query,omitempty"`
 }
 
 // ChosenInlineResult represents a result of an inline query that was chosen
 // by the user and sent to their chat partner.
 type ChosenInlineResult struct {
+	From     User      `json:"from"`
+	Location *Location `json:"location,omitempty"`
 	ResultID string `json:"result_id"`
 	Query    string `json:"query"`
 	// Inline messages only!
 	MessageID string `json:"inline_message_id"`
 
-	From     User      `json:"from"`
-	Location *Location `json:"location,omitempty"`
 }
 
 type PreCheckoutQuery struct {
-	ID       string `json:"id"`
 	Sender   *User  `json:"from"`
+	ID       string `json:"id"`
 	Currency string `json:"currency"`
-	Total    int    `json:"total_amount"`
 	Payload  string `json:"invoice_payload"`
+	Total    int    `json:"total_amount"`
 }
 
 // Handle lets you set the handler for some command name or
@@ -281,7 +279,9 @@ func (b *Bot) incomingUpdate(upd *Update) {
 					// i'm not 100% sure that any of the values
 					// won't be cached, so I pass them all in:
 					go func(b *Bot, handler func(int64, int64), from, to int64) {
-						defer b.deferDebug()
+						if b.reporter == nil {
+							defer b.deferDebug()
+						}
 						handler(from, to)
 					}(b, handler, m.MigrateFrom, m.MigrateTo)
 
@@ -327,7 +327,9 @@ func (b *Bot) incomingUpdate(upd *Update) {
 							// i'm not 100% sure that any of the values
 							// won't be cached, so I pass them all in:
 							go func(b *Bot, handler func(*Callback), c *Callback) {
-								defer b.deferDebug()
+								if b.reporter == nil {
+									defer b.deferDebug()
+								}
 								handler(c)
 							}(b, handler, upd.Callback)
 
@@ -344,7 +346,9 @@ func (b *Bot) incomingUpdate(upd *Update) {
 				// i'm not 100% sure that any of the values
 				// won't be cached, so I pass them all in:
 				go func(b *Bot, handler func(*Callback), c *Callback) {
-					defer b.deferDebug()
+					if b.reporter == nil {
+						defer b.deferDebug()
+					}
 					handler(c)
 				}(b, handler, upd.Callback)
 
@@ -361,7 +365,9 @@ func (b *Bot) incomingUpdate(upd *Update) {
 				// i'm not 100% sure that any of the values
 				// won't be cached, so I pass them all in:
 				go func(b *Bot, handler func(*Query), q *Query) {
-					defer b.deferDebug()
+					if b.reporter == nil {
+						defer b.deferDebug()
+					}
 					handler(q)
 				}(b, handler, upd.Query)
 
@@ -379,7 +385,9 @@ func (b *Bot) incomingUpdate(upd *Update) {
 				// won't be cached, so I pass them all in:
 				go func(b *Bot, handler func(*ChosenInlineResult),
 					r *ChosenInlineResult) {
-					defer b.deferDebug()
+					if b.reporter == nil {
+						defer b.deferDebug()
+					}
 					handler(r)
 				}(b, handler, upd.ChosenInlineResult)
 
@@ -397,7 +405,9 @@ func (b *Bot) incomingUpdate(upd *Update) {
 				// won't be cached, so I pass them all in:
 				go func(b *Bot, handler func(*PreCheckoutQuery),
 					r *PreCheckoutQuery) {
-					defer b.deferDebug()
+					if b.reporter == nil {
+						defer b.deferDebug()
+					}
 					handler(r)
 				}(b, handler, upd.PreCheckoutQuery)
 
@@ -419,7 +429,9 @@ func (b *Bot) handle(end string, m *Message) bool {
 		// i'm not 100% sure that any of the values
 		// won't be cached, so I pass them all in:
 		go func(b *Bot, handler func(*Message), m *Message) {
-			defer b.deferDebug()
+			if b.reporter == nil {
+				defer b.deferDebug()
+			}
 			handler(m)
 		}(b, handler, m)
 

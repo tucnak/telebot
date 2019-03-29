@@ -19,10 +19,6 @@ func (b *Bot) debug(err error) {
 }
 
 func (b *Bot) deferDebug() {
-	if b.reporter == nil {
-		return
-	}
-
 	if r := recover(); r != nil {
 		if err, ok := r.(error); ok {
 			b.debug(err)
