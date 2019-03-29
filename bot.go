@@ -668,7 +668,6 @@ func (b *Bot) Forward(to Recipient, what *Message, options ...interface{}) (*Mes
 //
 func (b *Bot) Edit(message Editable, what interface{}, options ...interface{}) (*Message, error) {
 	messageID, chatID := message.MessageSig()
-	// TODO: add support for inline messages (chatID = 0)
 
 	params := map[string]string{}
 

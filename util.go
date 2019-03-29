@@ -3,17 +3,26 @@ package telebot
 import (
 	"encoding/json"
 	"strconv"
+	"log"
 
 	"github.com/pkg/errors"
 )
 
 func (b *Bot) debug(err error) {
+	err = errors.WithStack(err)
+
 	if b.reporter != nil {
-		b.reporter(errors.WithStack(err))
+		b.reporter(err)
+	} else {
+		log.Printf("%+v\n", err)
 	}
 }
 
 func (b *Bot) deferDebug() {
+	if b.reporter == nil {
+		return
+	}
+
 	if r := recover(); r != nil {
 		if err, ok := r.(error); ok {
 			b.debug(err)
