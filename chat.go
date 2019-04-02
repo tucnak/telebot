@@ -34,9 +34,6 @@ type Chat struct {
 
 // Recipient returns chat ID (see Recipient interface).
 func (c *Chat) Recipient() string {
-	if c.Type == ChatChannel {
-		return "@" + c.Username
-	}
 	return strconv.FormatInt(c.ID, 10)
 }
 
