@@ -91,14 +91,14 @@ type Settings struct {
 type Update struct {
 	ID int `json:"update_id"`
 
-	Message           *Message  `json:"message,omitempty"`
-	EditedMessage     *Message  `json:"edited_message,omitempty"`
-	ChannelPost       *Message  `json:"channel_post,omitempty"`
-	EditedChannelPost *Message  `json:"edited_channel_post,omitempty"`
-	Callback          *Callback `json:"callback_query,omitempty"`
-	Query             *Query    `json:"inline_query,omitempty"`
+	Message            *Message            `json:"message,omitempty"`
+	EditedMessage      *Message            `json:"edited_message,omitempty"`
+	ChannelPost        *Message            `json:"channel_post,omitempty"`
+	EditedChannelPost  *Message            `json:"edited_channel_post,omitempty"`
+	Callback           *Callback           `json:"callback_query,omitempty"`
+	Query              *Query              `json:"inline_query,omitempty"`
 	ChosenInlineResult *ChosenInlineResult `json:"chosen_inline_result,omitempty"`
-	PreCheckoutQuery *PreCheckoutQuery `json:"pre_checkout_query,omitempty"`
+	PreCheckoutQuery   *PreCheckoutQuery   `json:"pre_checkout_query,omitempty"`
 }
 
 // ChosenInlineResult represents a result of an inline query that was chosen
@@ -106,11 +106,10 @@ type Update struct {
 type ChosenInlineResult struct {
 	From     User      `json:"from"`
 	Location *Location `json:"location,omitempty"`
-	ResultID string `json:"result_id"`
-	Query    string `json:"query"`
+	ResultID string    `json:"result_id"`
+	Query    string    `json:"query"`
 	// Inline messages only!
 	MessageID string `json:"inline_message_id"`
-
 }
 
 type PreCheckoutQuery struct {
@@ -743,8 +742,8 @@ func (b *Bot) EditReplyMarkup(message Editable, markup *InlineKeyboardMarkup) (*
 // EditCaption used to edit already sent photo caption with known recepient and message id.
 //
 // On success, returns edited message object
-func (b *Bot) EditCaption(originalMsg Editable, caption string) (*Message, error) {
-	messageID, chatID := originalMsg.MessageSig()
+func (b *Bot) EditCaption(message Editable, caption string) (*Message, error) {
+	messageID, chatID := message.MessageSig()
 
 	params := map[string]string{"caption": caption}
 
@@ -772,121 +771,121 @@ func (b *Bot) EditCaption(originalMsg Editable, caption string) (*Message, error
 //     bot.EditMedia(msg, &tb.Video{File: tb.FromURL("http://video.mp4")});
 //
 func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...interface{}) (*Message, error) {
-	var mediaRepr string;
-	var jsonRepr []byte;
-	var thumb *Photo;
+	var mediaRepr string
+	var jsonRepr []byte
+	var thumb *Photo
 
-	file := make(map[string]File);
+	file := make(map[string]File)
 
-	f := inputMedia.MediaFile();
+	f := inputMedia.MediaFile()
 
 	if f.InCloud() {
-		mediaRepr = f.FileID;
+		mediaRepr = f.FileID
 	} else if f.FileURL != "" {
-		mediaRepr = f.FileURL;
+		mediaRepr = f.FileURL
 	} else if f.OnDisk() || f.FileReader != nil {
-		s := f.FileLocal;
-		if (f.FileReader != nil) {
-			s = "0";
+		s := f.FileLocal
+		if f.FileReader != nil {
+			s = "0"
 		}
-		mediaRepr = "attach://" + s;
-		file[s] = *f;
+		mediaRepr = "attach://" + s
+		file[s] = *f
 	} else {
 		return nil, errors.Errorf(
-			"telebot: can't edit media, it doesn't exist anywhere");
+			"telebot: can't edit media, it doesn't exist anywhere")
 	}
 
 	type FileJson struct {
 		// All types.
-		Type              string `json:"type"`
-		Caption           string `json:"caption"`
-		Media             string `json:"media"`
+		Type    string `json:"type"`
+		Caption string `json:"caption"`
+		Media   string `json:"media"`
 
 		// Video.
-		Width             int    `json:"width,omitempty"`
-		Height            int    `json:"height,omitempty"`
-		SupportsStreaming bool   `json:"supports_streaming,omitempty"`
+		Width             int  `json:"width,omitempty"`
+		Height            int  `json:"height,omitempty"`
+		SupportsStreaming bool `json:"supports_streaming,omitempty"`
 
 		// Video and audio.
-		Duration          int    `json:"duration,omitempty"`
+		Duration int `json:"duration,omitempty"`
 
 		// Document.
-		FileName          string `json:"file_name"`
+		FileName string `json:"file_name"`
 
 		// Document, video and audio.
-		Thumbnail         string `json:"thumb,omitempty"`
-		MIME              string `json:"mime_type,omitempty"`
+		Thumbnail string `json:"thumb,omitempty"`
+		MIME      string `json:"mime_type,omitempty"`
 
 		// Audio.
-		Title             string `json:"title,omitempty"`
-		Performer         string `json:"performer,omitempty"`
+		Title     string `json:"title,omitempty"`
+		Performer string `json:"performer,omitempty"`
 	}
 
-	resultMedia := &FileJson {Media: mediaRepr};
+	resultMedia := &FileJson{Media: mediaRepr}
 
 	switch y := inputMedia.(type) {
-		case *Photo:
-			resultMedia.Type = "photo";
-			resultMedia.Caption = y.Caption;
-		case *Video:
-			resultMedia.Type = "video";
-			resultMedia.Caption = y.Caption;
-			resultMedia.Width = y.Width;
-			resultMedia.Height = y.Height;
-			resultMedia.Duration = y.Duration;
-			resultMedia.SupportsStreaming = y.SupportsStreaming;
-			resultMedia.MIME = y.MIME;
-			thumb = y.Thumbnail;
-			if thumb != nil {
-				resultMedia.Thumbnail = "attach://thumb";
-			}
-		case *Document:
-			resultMedia.Type = "document";
-			resultMedia.Caption = y.Caption;
-			resultMedia.FileName = y.FileName;
-			resultMedia.MIME = y.MIME;
-			thumb = y.Thumbnail;
-			if thumb != nil {
-				resultMedia.Thumbnail = "attach://thumb";
-			}
-		case *Audio:
-			resultMedia.Type = "audio";
-			resultMedia.Caption = y.Caption;
-			resultMedia.Duration = y.Duration;
-			resultMedia.MIME = y.MIME;
-			resultMedia.Title = y.Title;
-			resultMedia.Performer = y.Performer;
-		default:
-			return nil, errors.Errorf("telebot: inputMedia entry is not valid");
+	case *Photo:
+		resultMedia.Type = "photo"
+		resultMedia.Caption = y.Caption
+	case *Video:
+		resultMedia.Type = "video"
+		resultMedia.Caption = y.Caption
+		resultMedia.Width = y.Width
+		resultMedia.Height = y.Height
+		resultMedia.Duration = y.Duration
+		resultMedia.SupportsStreaming = y.SupportsStreaming
+		resultMedia.MIME = y.MIME
+		thumb = y.Thumbnail
+		if thumb != nil {
+			resultMedia.Thumbnail = "attach://thumb"
+		}
+	case *Document:
+		resultMedia.Type = "document"
+		resultMedia.Caption = y.Caption
+		resultMedia.FileName = y.FileName
+		resultMedia.MIME = y.MIME
+		thumb = y.Thumbnail
+		if thumb != nil {
+			resultMedia.Thumbnail = "attach://thumb"
+		}
+	case *Audio:
+		resultMedia.Type = "audio"
+		resultMedia.Caption = y.Caption
+		resultMedia.Duration = y.Duration
+		resultMedia.MIME = y.MIME
+		resultMedia.Title = y.Title
+		resultMedia.Performer = y.Performer
+	default:
+		return nil, errors.Errorf("telebot: inputMedia entry is not valid")
 	}
 
-	messageID, chatID := message.MessageSig();
+	messageID, chatID := message.MessageSig()
 
-	jsonRepr, _ = json.Marshal(resultMedia);
-	params := map[string]string{};
-	params["media"] = string(jsonRepr);
+	jsonRepr, _ = json.Marshal(resultMedia)
+	params := map[string]string{}
+	params["media"] = string(jsonRepr)
 
 	// If inline message.
 	if chatID == 0 {
-		params["inline_message_id"] = messageID;
+		params["inline_message_id"] = messageID
 	} else {
-		params["chat_id"] = strconv.FormatInt(chatID, 10);
-		params["message_id"] = messageID;
+		params["chat_id"] = strconv.FormatInt(chatID, 10)
+		params["message_id"] = messageID
 	}
 
 	if thumb != nil {
-		file["thumb"] = *thumb.MediaFile();
+		file["thumb"] = *thumb.MediaFile()
 	}
 
-	sendOpts := extractOptions(options);
-	embedSendOptions(params, sendOpts);
+	sendOpts := extractOptions(options)
+	embedSendOptions(params, sendOpts)
 
-	respJSON, err := b.sendFiles("editMessageMedia", file, params);
+	respJSON, err := b.sendFiles("editMessageMedia", file, params)
 	if err != nil {
-		return nil, err;
+		return nil, err
 	}
 
-	return extractMsgResponse(respJSON);
+	return extractMsgResponse(respJSON)
 }
 
 // Delete removes the message, including service messages,
@@ -1082,6 +1081,7 @@ func (b *Bot) GetFile(file *File) (io.ReadCloser, error) {
 
 	return resp.Body, nil
 }
+
 // StopLiveLocation should be called to stop broadcasting live message location
 // before Location.LivePeriod expires.
 //
