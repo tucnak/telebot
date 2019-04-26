@@ -714,7 +714,7 @@ func (b *Bot) Edit(message Editable, what interface{}, options ...interface{}) (
 // EditReplyMarkup used to edit reply markup of already sent message.
 //
 // On success, returns edited message object
-func (b *Bot) EditReplyMarkup(message Editable, markup *InlineKeyboardMarkup) (*Message, error) {
+func (b *Bot) EditReplyMarkup(message Editable, markup *ReplyMarkup) (*Message, error) {
 	messageID, chatID := message.MessageSig()
 
 	params := map[string]string{}
