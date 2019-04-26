@@ -1,4 +1,4 @@
-module github.com/tucnak/telebot
+module gopkg.in/tucnak/telebot.v2
 
 go 1.11
 
