@@ -147,7 +147,7 @@ func (b *Bot) Handle(endpoint interface{}, handler interface{}) {
 
 var (
 	cmdRx   = regexp.MustCompile(`^(\/\w+)(@(\w+))?(\s|$)(.+)?`)
-	cbackRx = regexp.MustCompile(`^\f(\w+)(\|(.+))?$`)
+	cbackRx = regexp.MustCompile(`^\\f(\w+.+)?$`)
 )
 
 func (b *Bot) handleCommand(m *Message, cmdName, cmdBot string) bool {
