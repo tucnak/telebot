@@ -424,7 +424,7 @@ of `QueryResponse`.
 # Contributing
 
 1. Fork it
-2. Clone it: `git clone https://github.com/tucnak/telebot`
+2. Clone your own fork: `git clone https://github.com/tucnak/telebot`
 3. Create your feature branch: `git checkout -b my-new-feature`
 4. Make changes and add them: `git add .`
 5. Commit: `git commit -m 'Add some feature'`
