@@ -197,6 +197,9 @@ func (b *Bot) getUpdates(offset int, timeout time.Duration, limit int) (upd []Up
 	if offset != 0 {
 		params["offset"] = strconv.Itoa(offset)
 	}
+	if offset != 0 {
+		params["offset"] = strconv.Itoa(offset)
+	}
 	updatesJSON, errCommand := b.Raw("getUpdates", params)
 	if errCommand != nil {
 		err = errCommand
