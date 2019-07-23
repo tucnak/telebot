@@ -188,10 +188,14 @@ func (b *Bot) getMe() (*User, error) {
 
 }
 
-func (b *Bot) getUpdates(offset int, timeout time.Duration) (upd []Update, err error) {
+func (b *Bot) getUpdates(offset int, timeout time.Duration, limit int) (upd []Update, err error) {
+
 	params := map[string]string{
-		"offset":  strconv.Itoa(offset),
 		"timeout": strconv.Itoa(int(timeout / time.Second)),
+		"limit":   strconv.Itoa(limit),
+	}
+	if offset != 0 {
+		params["offset"] = strconv.Itoa(offset)
 	}
 	updatesJSON, errCommand := b.Raw("getUpdates", params)
 	if errCommand != nil {
