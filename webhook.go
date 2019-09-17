@@ -73,13 +73,13 @@ func (h *Webhook) getFiles() map[string]File {
 func (h *Webhook) getParams() map[string]string {
 	param := make(map[string]string)
 	if h.TLS != nil {
-		param["url"] = fmt.Sprintf("https://%s", h.Listen)
+		param["url"] = "https://" + h.Listen
 	} else {
 		// this will not work with telegram, they want TLS
 		// but i allow this because telegram will send an error
 		// when you register this hook. in their docs they write
 		// that port 80/http is allowed ...
-		param["url"] = fmt.Sprintf("http://%s", h.Listen)
+		param["url"] = "http://" + h.Listen
 	}
 	if h.Endpoint != nil {
 		param["url"] = h.Endpoint.PublicURL

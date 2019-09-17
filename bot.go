@@ -545,7 +545,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 		} else if f.FileURL != "" {
 			mediaRepr = f.FileURL
 		} else if f.OnDisk() || f.FileReader != nil {
-			mediaRepr = fmt.Sprintf("attach://%d", i)
+			mediaRepr = "attach://" + strconv.Itoa(i)
 			files[strconv.Itoa(i)] = *f
 		} else {
 			return nil, errors.Errorf(
@@ -1041,8 +1041,7 @@ func (b *Bot) GetFile(file *File) (io.ReadCloser, error) {
 		return nil, err
 	}
 
-	url := fmt.Sprintf("%s/file/bot%s/%s",
-		b.URL, b.Token, f.FilePath)
+	url := b.URL + "/file/bot" + b.Token + "/"+ f.FilePath
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -1062,7 +1061,7 @@ func (b *Bot) StopLiveLocation(message Editable, options ...interface{}) (*Messa
 	messageID, chatID := message.MessageSig()
 
 	params := map[string]string{
-		"chat_id":    fmt.Sprintf("%d", chatID),
+		"chat_id":    strconv.FormatInt(chatID, 10),
 		"message_id": messageID,
 	}
 
@@ -1355,7 +1354,7 @@ func (b *Bot) FileURLByID(fileID string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s/file/bot%s/%s", b.URL, b.Token, f.FilePath), nil
+	return b.URL + "/file/bot" + b.Token + "/"+ f.FilePath, nil
 }
 
 // UploadStickerFile returns uploaded File on success.
