@@ -49,6 +49,7 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"caption":   a.Caption,
 		"performer": a.Performer,
 		"title":     a.Title,
+		"file_name": a.FileName,
 	}
 
 	if a.Duration != 0 {
@@ -78,8 +79,9 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 // Send delivers media through bot b to recipient.
 func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id": to.Recipient(),
-		"caption": d.Caption,
+		"chat_id":   to.Recipient(),
+		"caption":   d.Caption,
+		"file_name": d.FileName,
 	}
 
 	if d.FileSize != 0 {
@@ -120,8 +122,9 @@ func (s *Sticker) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 // Send delivers media through bot b to recipient.
 func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id": to.Recipient(),
-		"caption": v.Caption,
+		"chat_id":   to.Recipient(),
+		"caption":   v.Caption,
+		"file_name": v.FileName,
 	}
 
 	if v.Duration != 0 {
