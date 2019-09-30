@@ -214,7 +214,7 @@ func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 		"chat_id":     to.Recipient(),
 		"latitude":    fmt.Sprintf("%f", x.Lat),
 		"longitude":   fmt.Sprintf("%f", x.Lng),
-		"live_period": fmt.Sprintf("%d", x.LivePeriod),
+		"live_period": strconv.Itoa(x.LivePeriod),
 	}
 	embedSendOptions(params, opt)
 
