@@ -38,6 +38,7 @@ func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 
 	msg.Photo.File.stealRef(&p.File)
 	*p = *msg.Photo
+	p.Caption = msg.Caption
 
 	return msg, nil
 }
@@ -66,6 +67,7 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	if msg.Audio != nil {
 		msg.Audio.File.stealRef(&a.File)
 		*a = *msg.Audio
+		a.Caption = msg.Caption
 	}
 
 	if msg.Document != nil {
@@ -97,6 +99,7 @@ func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 
 	msg.Document.File.stealRef(&d.File)
 	*d = *msg.Document
+	d.Caption = msg.Caption
 
 	return msg, nil
 }
@@ -150,6 +153,7 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	if vid := msg.Video; vid != nil {
 		vid.File.stealRef(&v.File)
 		*v = *vid
+		v.Caption = msg.Caption
 	} else if doc := msg.Document; doc != nil {
 		// If video has no sound, Telegram can turn it into Document (GIF)
 		doc.File.stealRef(&v.File)
