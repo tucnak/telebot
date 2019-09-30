@@ -10,6 +10,7 @@ type User struct {
 	LastName     string `json:"last_name"`
 	Username     string `json:"username"`
 	LanguageCode string `json:"language_code"`
+	IsBot        bool   `json:"is_bot"`
 }
 
 // Recipient returns user ID (see Recipient interface).
