@@ -711,11 +711,39 @@ func (b *Bot) Edit(message Editable, what interface{}, options ...interface{}) (
 	return extractMsgResponse(respJSON)
 }
 
+// EditReplyMarkup used to edit reply markup of already sent message.
+//
+// On success, returns edited message object
+func (b *Bot) EditReplyMarkup(message Editable, markup *ReplyMarkup) (*Message, error) {
+	messageID, chatID := message.MessageSig()
+
+	params := map[string]string{}
+
+	// if inline message
+	if chatID == 0 {
+		params["inline_message_id"] = messageID
+	} else {
+		params["chat_id"] = strconv.FormatInt(chatID, 10)
+		params["message_id"] = messageID
+	}
+
+	processButtons(markup.InlineKeyboard)
+	jsonMarkup, _ := json.Marshal(markup)
+	params["reply_markup"] = string(jsonMarkup)
+
+	respJSON, err := b.Raw("editMessageReplyMarkup", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMsgResponse(respJSON)
+}
+
 // EditCaption used to edit already sent photo caption with known recepient and message id.
 //
 // On success, returns edited message object
-func (b *Bot) EditCaption(originalMsg Editable, caption string) (*Message, error) {
-	messageID, chatID := originalMsg.MessageSig()
+func (b *Bot) EditCaption(message Editable, caption string) (*Message, error) {
+	messageID, chatID := message.MessageSig()
 
 	params := map[string]string{"caption": caption}
 
@@ -1041,7 +1069,7 @@ func (b *Bot) GetFile(file *File) (io.ReadCloser, error) {
 		return nil, err
 	}
 
-	url := b.URL + "/file/bot" + b.Token + "/"+ f.FilePath
+	url := b.URL + "/file/bot" + b.Token + "/" + f.FilePath
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -1354,7 +1382,7 @@ func (b *Bot) FileURLByID(fileID string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return b.URL + "/file/bot" + b.Token + "/"+ f.FilePath, nil
+	return b.URL + "/file/bot" + b.Token + "/" + f.FilePath, nil
 }
 
 // UploadStickerFile returns uploaded File on success.
