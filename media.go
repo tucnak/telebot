@@ -83,6 +83,7 @@ type Audio struct {
 	Title     string `json:"title,omitempty"`
 	Performer string `json:"performer,omitempty"`
 	MIME      string `json:"mime_type,omitempty"`
+	FileName  string `json:"file_name,omitempty"`
 }
 
 // MediaFile returns &Audio.File
@@ -95,13 +96,11 @@ func (a *Audio) MediaFile() *File {
 type Document struct {
 	File
 
-	// Original filename as defined by sender.
-	FileName string `json:"file_name"`
-
 	// (Optional)
 	Thumbnail *Photo `json:"thumb,omitempty"`
 	Caption   string `json:"caption,omitempty"`
 	MIME      string `json:"mime_type"`
+	FileName  string `json:"file_name,omitempty"`
 }
 
 // MediaFile returns &Document.File
@@ -123,6 +122,7 @@ type Video struct {
 	Thumbnail         *Photo `json:"thumb,omitempty"`
 	SupportsStreaming bool   `json:"supports_streaming,omitempty"`
 	MIME              string `json:"mime_type,omitempty"`
+	FileName          string `json:"file_name,omitempty"`
 }
 
 // MediaFile returns &Video.File

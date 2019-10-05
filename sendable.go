@@ -38,6 +38,7 @@ func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 
 	msg.Photo.File.stealRef(&p.File)
 	*p = *msg.Photo
+	p.Caption = msg.Caption
 
 	return msg, nil
 }
@@ -49,6 +50,7 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"caption":   a.Caption,
 		"performer": a.Performer,
 		"title":     a.Title,
+		"file_name": a.FileName,
 	}
 
 	if a.Duration != 0 {
@@ -65,6 +67,7 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	if msg.Audio != nil {
 		msg.Audio.File.stealRef(&a.File)
 		*a = *msg.Audio
+		a.Caption = msg.Caption
 	}
 
 	if msg.Document != nil {
@@ -78,8 +81,9 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 // Send delivers media through bot b to recipient.
 func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id": to.Recipient(),
-		"caption": d.Caption,
+		"chat_id":   to.Recipient(),
+		"caption":   d.Caption,
+		"file_name": d.FileName,
 	}
 
 	if d.FileSize != 0 {
@@ -95,6 +99,7 @@ func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 
 	msg.Document.File.stealRef(&d.File)
 	*d = *msg.Document
+	d.Caption = msg.Caption
 
 	return msg, nil
 }
@@ -120,8 +125,9 @@ func (s *Sticker) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 // Send delivers media through bot b to recipient.
 func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id": to.Recipient(),
-		"caption": v.Caption,
+		"chat_id":   to.Recipient(),
+		"caption":   v.Caption,
+		"file_name": v.FileName,
 	}
 
 	if v.Duration != 0 {
@@ -147,6 +153,7 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	if vid := msg.Video; vid != nil {
 		vid.File.stealRef(&v.File)
 		*v = *vid
+		v.Caption = msg.Caption
 	} else if doc := msg.Document; doc != nil {
 		// If video has no sound, Telegram can turn it into Document (GIF)
 		doc.File.stealRef(&v.File)
