@@ -106,7 +106,7 @@ const (
 )
 
 // ParseMode determines the way client applications treat the text of the message
-type ParseMode string
+type ParseMode = string
 
 const (
 	ModeDefault  ParseMode = ""
