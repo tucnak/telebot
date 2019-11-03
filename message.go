@@ -180,6 +180,9 @@ type Message struct {
 	// in this field will not contain further ReplyTo fields even
 	// if it is itself a reply.
 	PinnedMessage *Message `json:"pinned_message"`
+
+	// Inline keyboard attached to the message.
+	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup"`
 }
 
 // MessageEntity object represents "special" parts of text messages,
