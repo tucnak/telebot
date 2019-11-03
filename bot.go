@@ -742,7 +742,7 @@ func (b *Bot) EditReplyMarkup(message Editable, markup *ReplyMarkup) (*Message, 
 // EditCaption used to edit already sent photo caption with known recepient and message id.
 //
 // On success, returns edited message object
-func (b *Bot) EditCaption(message Editable, caption string) (*Message, error) {
+func (b *Bot) EditCaption(message Editable, caption string, options ...interface{}) (*Message, error) {
 	messageID, chatID := message.MessageSig()
 
 	params := map[string]string{"caption": caption}
@@ -754,6 +754,9 @@ func (b *Bot) EditCaption(message Editable, caption string) (*Message, error) {
 		params["chat_id"] = strconv.FormatInt(chatID, 10)
 		params["message_id"] = messageID
 	}
+
+	sendOpts := extractOptions(options)
+	embedSendOptions(params, sendOpts)
 
 	respJSON, err := b.Raw("editMessageCaption", params)
 	if err != nil {
