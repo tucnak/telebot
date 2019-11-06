@@ -800,9 +800,10 @@ func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...inte
 
 	type FileJson struct {
 		// All types.
-		Type    string `json:"type"`
-		Caption string `json:"caption"`
-		Media   string `json:"media"`
+		Type      string    `json:"type"`
+		Caption   string    `json:"caption"`
+		Media     string    `json:"media"`
+		ParseMode ParseMode `json:"parse_mode,omitempty"`
 
 		// Video.
 		Width             int  `json:"width,omitempty"`
@@ -824,7 +825,12 @@ func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...inte
 		Performer string `json:"performer,omitempty"`
 	}
 
-	resultMedia := &FileJson{Media: mediaRepr}
+	sendOpts := extractOptions(options)
+
+	resultMedia := &FileJson{
+		Media:     mediaRepr,
+		ParseMode: sendOpts.ParseMode,
+	}
 
 	switch y := inputMedia.(type) {
 	case *Photo:
@@ -880,7 +886,6 @@ func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...inte
 		file["thumb"] = *thumb.MediaFile()
 	}
 
-	sendOpts := extractOptions(options)
 	embedSendOptions(params, sendOpts)
 
 	respJSON, err := b.sendFiles("editMessageMedia", file, params)
