@@ -9,6 +9,8 @@ import (
 type Message struct {
 	ID int `json:"message_id"`
 
+	InlineID string `json:"-"`
+
 	// For message sent to channels, Sender will be nil
 	Sender *User `json:"from"`
 
@@ -205,6 +207,9 @@ type MessageEntity struct {
 
 // MessageSig satisfies Editable interface (see Editable.)
 func (m *Message) MessageSig() (string, int64) {
+	if m.InlineID != "" {
+		return m.InlineID, 0
+	}
 	return strconv.Itoa(m.ID), m.Chat.ID
 }
 
