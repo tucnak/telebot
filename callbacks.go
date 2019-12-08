@@ -27,6 +27,11 @@ type Callback struct {
 	Data string `json:"data"`
 }
 
+// IsInline says whether message is an inline message.
+func (c *Callback) IsInline() bool {
+	return c.MessageID != ""
+}
+
 // CallbackResponse builds a response to a Callback query.
 //
 // See also: https://core.telegram.org/bots/api#answerCallbackQuery
