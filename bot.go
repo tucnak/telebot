@@ -312,8 +312,13 @@ func (b *Bot) incomingUpdate(upd *Update) {
 
 	if upd.Callback != nil {
 		if upd.Callback.Data != "" {
-			data := upd.Callback.Data
+			if upd.Callback.MessageID != "" {
+				upd.Callback.Message = &Message{
+					InlineID: upd.Callback.MessageID,
+				}
+			}
 
+			data := upd.Callback.Data
 			if data[0] == '\f' {
 				match := cbackRx.FindAllStringSubmatch(data, -1)
 
