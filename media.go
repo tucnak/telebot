@@ -80,6 +80,7 @@ type Audio struct {
 
 	// (Optional)
 	Caption   string `json:"caption,omitempty"`
+	Thumbnail *Photo `json:"thumb,omitempty"`
 	Title     string `json:"title,omitempty"`
 	Performer string `json:"performer,omitempty"`
 	MIME      string `json:"mime_type,omitempty"`
