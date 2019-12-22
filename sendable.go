@@ -59,7 +59,7 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 
 	embedSendOptions(params, opt)
 
-	msg, err := b.sendObject(&a.File, "audio", params, nil)
+	msg, err := b.sendObject(&a.File, "audio", params, thumbnailToFilemap(a.Thumbnail))
 	if err != nil {
 		return nil, err
 	}
