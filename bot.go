@@ -508,7 +508,7 @@ func (b *Bot) Stop() {
 // some Sendable (or string!) and optional send options.
 //
 // Note: since most arguments are of type interface{}, but have pointer
-// 		method recievers, make sure to pass them by-pointer, NOT by-value.
+// 		method receivers, make sure to pass them by-pointer, NOT by-value.
 //
 // What is a send option exactly? It can be one of the following types:
 //
@@ -744,7 +744,7 @@ func (b *Bot) EditReplyMarkup(message Editable, markup *ReplyMarkup) (*Message, 
 	return extractMsgResponse(respJSON)
 }
 
-// EditCaption used to edit already sent photo caption with known recepient and message id.
+// EditCaption used to edit already sent photo caption with known recipient and message id.
 //
 // On success, returns edited message object
 func (b *Bot) EditCaption(message Editable, caption string, options ...interface{}) (*Message, error) {
@@ -771,7 +771,7 @@ func (b *Bot) EditCaption(message Editable, caption string, options ...interface
 	return extractMsgResponse(respJSON)
 }
 
-// EditMedia used to edit already sent media with known recepient and message id.
+// EditMedia used to edit already sent media with known recipient and message id.
 //
 // Use cases:
 //
@@ -937,7 +937,7 @@ func (b *Bot) Delete(message Editable) error {
 // Chat action is a status message that recipient would see where
 // you typically see "Harry is typing" status message. The only
 // difference is that bots' chat actions live only for 5 seconds
-// and die just once the client recieves a message from the bot.
+// and die just once the client receives a message from the bot.
 //
 // Currently, Telegram supports only a narrow range of possible
 // actions, these are aligned as constants of this package.
@@ -1150,7 +1150,7 @@ func (b *Bot) GetInviteLink(chat *Chat) (string, error) {
 	return resp.Result, nil
 }
 
-// SetChatTitle should be used to update group title.
+// SetGroupTitle should be used to update group title.
 func (b *Bot) SetGroupTitle(chat *Chat, newTitle string) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
