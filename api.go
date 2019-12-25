@@ -120,6 +120,7 @@ func (b *Bot) sendFiles(method string, files map[string]File,
 	if err != nil {
 		return nil, errors.Wrap(err, "http.Post failed")
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusInternalServerError {
 		return nil, errors.New("api error: internal server error")
