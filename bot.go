@@ -800,7 +800,7 @@ func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...inte
 			"telebot: can't edit media, it doesn't exist anywhere")
 	}
 
-	type FileJson struct {
+	type FileJSON struct {
 		// All types.
 		Type      string    `json:"type"`
 		Caption   string    `json:"caption"`
@@ -827,7 +827,7 @@ func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...inte
 		Performer string `json:"performer,omitempty"`
 	}
 
-	resultMedia := &FileJson{Media: mediaRepr}
+	resultMedia := &FileJSON{Media: mediaRepr}
 
 	sendOpts := extractOptions(options)
 	if sendOpts != nil {
