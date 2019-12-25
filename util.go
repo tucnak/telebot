@@ -192,8 +192,8 @@ func processButtons(keys [][]InlineButton) {
 		return
 	}
 
-	for i, _ := range keys {
-		for j, _ := range keys[i] {
+	for i := range keys {
+		for j := range keys[i] {
 			key := &keys[i][j]
 			if key.Unique != "" {
 				// Format: "\f<callback_name>|<data>"

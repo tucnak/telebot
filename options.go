@@ -107,17 +107,13 @@ func (og *ReplyMarkup) copy() *ReplyMarkup {
 	cp.ReplyKeyboard = make([][]ReplyButton, len(og.ReplyKeyboard))
 	for i, row := range og.ReplyKeyboard {
 		cp.ReplyKeyboard[i] = make([]ReplyButton, len(row))
-		for j, btn := range row {
-			cp.ReplyKeyboard[i][j] = btn
-		}
+		copy(cp.ReplyKeyboard[i], row)
 	}
 
 	cp.InlineKeyboard = make([][]InlineButton, len(og.InlineKeyboard))
 	for i, row := range og.InlineKeyboard {
 		cp.InlineKeyboard[i] = make([]InlineButton, len(row))
-		for j, btn := range row {
-			cp.InlineKeyboard[i][j] = btn
-		}
+		copy(cp.InlineKeyboard[i], row)
 	}
 
 	return &cp

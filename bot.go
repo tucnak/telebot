@@ -621,7 +621,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 		return nil, errors.Errorf("api error: %s", resp.Description)
 	}
 
-	for attachName, _ := range files {
+	for attachName := range files {
 		i, _ := strconv.Atoi(attachName)
 
 		var newID string
