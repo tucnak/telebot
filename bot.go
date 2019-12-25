@@ -1085,15 +1085,23 @@ func (b *Bot) GetFile(file *File) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
+	// save FilePath
+	file.FilePath = f.FilePath
 
-	url := b.URL + "/file/bot" + b.Token + "/" + f.FilePath
-
-	resp, err := http.Get(url)
+	req, err := http.NewRequest("GET", b.URL+"/file/bot"+b.Token+"/"+f.FilePath, nil)
 	if err != nil {
-		return nil, err
+		return nil, wrapSystem(err)
 	}
-	// set FilePath
-	*file = f
+
+	resp, err := b.client.Do(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "file http.GET failed")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
+		return nil, errors.Errorf("api error: expected 200 OK but got %s", resp.Status)
+	}
 
 	return resp.Body, nil
 }
