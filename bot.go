@@ -860,6 +860,10 @@ func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...inte
 		resultMedia.MIME = y.MIME
 		resultMedia.Title = y.Title
 		resultMedia.Performer = y.Performer
+		thumb = y.Thumbnail
+		if thumb != nil {
+			resultMedia.Thumbnail = "attach://thumb"
+		}
 	default:
 		return nil, errors.Errorf("telebot: inputMedia entry is not valid")
 	}
