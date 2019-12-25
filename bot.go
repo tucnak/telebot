@@ -825,11 +825,11 @@ func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...inte
 		Performer string `json:"performer,omitempty"`
 	}
 
-	sendOpts := extractOptions(options)
+	resultMedia := &FileJson{Media: mediaRepr}
 
-	resultMedia := &FileJson{
-		Media:     mediaRepr,
-		ParseMode: sendOpts.ParseMode,
+	sendOpts := extractOptions(options)
+	if sendOpts != nil {
+		resultMedia.ParseMode = sendOpts.ParseMode
 	}
 
 	switch y := inputMedia.(type) {
