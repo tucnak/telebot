@@ -540,14 +540,15 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 
 		f := x.MediaFile()
 
-		if f.InCloud() {
+		switch {
+		case f.InCloud():
 			mediaRepr = f.FileID
-		} else if f.FileURL != "" {
+		case f.FileURL != "":
 			mediaRepr = f.FileURL
-		} else if f.OnDisk() || f.FileReader != nil {
+		case f.OnDisk() || f.FileReader != nil:
 			mediaRepr = "attach://" + strconv.Itoa(i)
 			files[strconv.Itoa(i)] = *f
-		} else {
+		default:
 			return nil, errors.Errorf(
 				"telebot: album entry #%d doesn't exist anywhere", i)
 		}
@@ -782,18 +783,19 @@ func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...inte
 
 	f := inputMedia.MediaFile()
 
-	if f.InCloud() {
+	switch {
+	case f.InCloud():
 		mediaRepr = f.FileID
-	} else if f.FileURL != "" {
+	case f.FileURL != "":
 		mediaRepr = f.FileURL
-	} else if f.OnDisk() || f.FileReader != nil {
+	case f.OnDisk() || f.FileReader != nil:
 		s := f.FileLocal
 		if f.FileReader != nil {
 			s = "0"
 		}
 		mediaRepr = "attach://" + s
 		file[s] = *f
-	} else {
+	default:
 		return nil, errors.Errorf(
 			"telebot: can't edit media, it doesn't exist anywhere")
 	}
