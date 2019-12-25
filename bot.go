@@ -782,6 +782,7 @@ func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...inte
 	file := make(map[string]File)
 
 	f := inputMedia.MediaFile()
+	thumbAttachName := "thumb"
 
 	switch {
 	case f.InCloud():
@@ -792,6 +793,9 @@ func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...inte
 		s := f.FileLocal
 		if f.FileReader != nil {
 			s = "0"
+		}
+		if s == thumbAttachName {
+			thumbAttachName = "thumb2"
 		}
 		mediaRepr = "attach://" + s
 		file[s] = *f
@@ -848,7 +852,7 @@ func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...inte
 		resultMedia.MIME = y.MIME
 		thumb = y.Thumbnail
 		if thumb != nil {
-			resultMedia.Thumbnail = "attach://thumb"
+			resultMedia.Thumbnail = "attach://" + thumbAttachName
 		}
 	case *Document:
 		resultMedia.Type = "document"
@@ -857,7 +861,7 @@ func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...inte
 		resultMedia.MIME = y.MIME
 		thumb = y.Thumbnail
 		if thumb != nil {
-			resultMedia.Thumbnail = "attach://thumb"
+			resultMedia.Thumbnail = "attach://" + thumbAttachName
 		}
 	case *Audio:
 		resultMedia.Type = "audio"
@@ -868,7 +872,7 @@ func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...inte
 		resultMedia.Performer = y.Performer
 		thumb = y.Thumbnail
 		if thumb != nil {
-			resultMedia.Thumbnail = "attach://thumb"
+			resultMedia.Thumbnail = "attach://" + thumbAttachName
 		}
 	default:
 		return nil, errors.Errorf("telebot: inputMedia entry is not valid")
@@ -889,7 +893,7 @@ func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...inte
 	}
 
 	if thumb != nil {
-		file["thumb"] = *thumb.MediaFile()
+		file[thumbAttachName] = *thumb.MediaFile()
 	}
 
 	embedSendOptions(params, sendOpts)
