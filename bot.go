@@ -149,11 +149,6 @@ var (
 	cbackRx = regexp.MustCompile(`^\f(\w+)(\|(.+))?$`)
 )
 
-func (b *Bot) handleCommand(m *Message, cmdName, cmdBot string) bool {
-
-	return false
-}
-
 // Start brings bot into motion by consuming incoming
 // updates (see Bot.Updates channel).
 func (b *Bot) Start() {
