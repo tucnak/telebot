@@ -277,7 +277,7 @@ func (b *Bot) incomingUpdate(upd *Update) {
 							defer b.deferDebug()
 						}
 						handler(from, to)
-					}(b, handler, m.MigrateFrom, m.MigrateTo)
+					}(b, handler, m.Chat.ID, m.MigrateTo)
 
 				} else {
 					panic("telebot: migration handler is bad")
