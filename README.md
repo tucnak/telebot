@@ -123,11 +123,10 @@ type Poller interface {
 }
 ```
 
-Telegram Bot API supports long polling and webhook integration. I don't really
-care about webhooks, so the only concrete Poller you'll find in the library
-is the `LongPoller`. Poller means you can plug telebot into whatever existing
-bot infrastructure (load balancers?) you need, if you need to. Another great thing
-about pollers is that you can chain them, making some sort of middleware:
+Telegram Bot API supports long polling and webhook integration. Poller means you
+can plug telebot into whatever existing bot infrastructure (load balancers?) you
+need, if you need to. Another great thing about pollers is that you can chain
+them, making some sort of middleware:
 ```go
 poller := &tb.LongPoller{Timeout: 15 * time.Second}
 spamProtected := tb.NewMiddlewarePoller(poller, func(upd *tb.Update) bool {
@@ -330,7 +329,7 @@ keyboards. Any button can also act as an endpoints for `Handle()`:
 func main() {
 	b, _ := tb.NewBot(tb.Settings{...})
 
-	// This button will be displayed in user's
+	// This button will be displayed in the user's
 	// reply keyboard.
 	replyBtn := tb.ReplyButton{Text: "🌕 Button #1"}
 	replyKeys := [][]tb.ReplyButton{
@@ -342,8 +341,10 @@ func main() {
 	// Pressing it will cause the client to send
 	// the bot a callback.
 	//
-	// Make sure Unique stays unique as it has to be
-	// for callback routing to work.
+	// Make sure Unique stays unique as per button _kind_,
+	// as it has to be for callback routing to work.
+	//
+	// Then differentiate with the callback data.
 	inlineBtn := tb.InlineButton{
 		Unique: "sad_moon",
 		Text: "🌚 Button #2",
@@ -370,8 +371,13 @@ func main() {
 			return
 		}
 
+		// Telegram does not support messages with both reply
+		// and inline keyboard in them.
+		// 
+		// Choose one or the other.
 		b.Send(m.Sender, "Hello!", &tb.ReplyMarkup{
 			ReplyKeyboard:  replyKeys,
+			// or
 			InlineKeyboard: inlineKeys,
 		})
 	})
