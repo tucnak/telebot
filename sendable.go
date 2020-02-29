@@ -3,6 +3,7 @@ package telebot
 import (
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"strconv"
 )
 
@@ -162,6 +163,44 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		v.MIME = doc.MIME
 		v.Thumbnail = doc.Thumbnail
 	}
+
+	return msg, nil
+}
+
+// Send delivers animation through bot b to recipient.
+// @see https://core.telegram.org/bots/api#sendanimation
+func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
+	params := map[string]string{
+		"chat_id":   to.Recipient(),
+		"caption":   a.Caption,
+		"file_name": a.FileName,
+	}
+
+	if a.Duration != 0 {
+		params["duration"] = strconv.Itoa(a.Duration)
+	}
+	if a.Width != 0 {
+		params["width"] = strconv.Itoa(a.Width)
+	}
+	if a.Height != 0 {
+		params["height"] = strconv.Itoa(a.Height)
+	}
+
+	// file_name is required, without file_name GIFs sent as document
+	if params["file_name"] == "" && a.File.OnDisk() {
+		params["file_name"] = filepath.Base(a.File.FileLocal)
+	}
+
+	embedSendOptions(params, opt)
+
+	msg, err := b.sendObject(&a.File, "animation", params, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	msg.Animation.File.stealRef(&a.File)
+	*a = *msg.Animation
+	a.Caption = msg.Caption
 
 	return msg, nil
 }
