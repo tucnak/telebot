@@ -87,6 +87,9 @@ type Message struct {
 	// For a video, information about it.
 	Video *Video `json:"video"`
 
+	// For a animation, information about it.
+	Animation *Animation `json:"animation"`
+
 	// For a contact, contact information itself.
 	Contact *Contact `json:"contact"`
 
