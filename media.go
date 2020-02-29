@@ -26,7 +26,8 @@ type Photo struct {
 	Height int `json:"height"`
 
 	// (Optional)
-	Caption string `json:"caption,omitempty"`
+	Caption   string    `json:"caption,omitempty"`
+	ParseMode ParseMode `json:"parse_mode,omitempty"`
 }
 
 type photoSize struct {

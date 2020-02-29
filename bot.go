@@ -556,13 +556,15 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 		switch y := x.(type) {
 		case *Photo:
 			jsonRepr, _ = json.Marshal(struct {
-				Type    string `json:"type"`
-				Caption string `json:"caption"`
-				Media   string `json:"media"`
+				Type      string    `json:"type"`
+				Media     string    `json:"media"`
+				Caption   string    `json:"caption,omitempty"`
+				ParseMode ParseMode `json:"parse_mode,omitempty"`
 			}{
 				"photo",
-				y.Caption,
 				mediaRepr,
+				y.Caption,
+				y.ParseMode,
 			})
 		case *Video:
 			jsonRepr, _ = json.Marshal(struct {
