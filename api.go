@@ -3,6 +3,7 @@ package telebot
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -32,11 +33,88 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 	defer resp.Body.Close()
 
 	json, err := ioutil.ReadAll(resp.Body)
+	fmt.Println(string(json))
+	data := apiErrorRx.FindStringSubmatch(string(json))
 	if err != nil {
 		return []byte{}, wrapSystem(err)
 	}
 
+	if data == nil {
+		fmt.Printf("ok!\n")
+		return json, nil
+	}
+
+	description := data[2]
+	code,_ := strconv.Atoi(data[0])
+	switch description{
+	case ErrUnauthorized.ʔ():
+		err = ErrUnauthorized
+	case ErrToForwardNotFound.ʔ():
+		err = ErrToForwardNotFound
+	case ErrToReplyNotFound.ʔ():
+		err = ErrToReplyNotFound
+	case ErrMessageTooLong.ʔ():
+		err = ErrMessageTooLong
+	case ErrBlockedByUsr.ʔ():
+		err = ErrBlockedByUsr
+	case ErrToDeleteNotFound.ʔ():
+		err = ErrToDeleteNotFound
+	case ErrEmptyMessage.ʔ():
+		err = ErrEmptyMessage
+	case ErrEmptyText.ʔ():
+		err = ErrEmptyText
+	case ErrEmptyChatID.ʔ():
+		err = ErrEmptyChatID
+	case ErrNotFoundChat.ʔ():
+		err = ErrNotFoundChat
+	case ErrMessageNotModified.ʔ():
+		err = ErrMessageNotModified
+	case ErrNoRightsToRestrict.ʔ():
+		err = ErrNoRightsToRestrict
+	case ErrNoRightsToSendMsg.ʔ():
+		err = ErrNoRightsToSendMsg
+	case ErrNoRightsToSendPhoto.ʔ():
+		err = ErrNoRightsToSendPhoto
+	case ErrNoRightsToSendStickers.ʔ():
+		err = ErrNoRightsToSendStickers
+	case ErrNoRightsToSendGifs.ʔ():
+		err = ErrNoRightsToSendGifs
+	case ErrNoRightsToDelete.ʔ():
+		err = ErrNoRightsToDelete
+	case ErrKickingChatOwner.ʔ():
+		err = ErrKickingChatOwner
+	case ErrInteractKickedG.ʔ():
+		err = ErrKickingChatOwner
+	case ErrInteractKickedSprG.ʔ():
+		err = ErrInteractKickedSprG
+	case ErrWrongTypeOfContent.ʔ():
+		err = ErrWrongTypeOfContent
+	case ErrCantGetHTTPurlContent.ʔ():
+		err = ErrCantGetHTTPurlContent
+	case ErrWrongRemoteFileID.ʔ():
+		err = ErrWrongRemoteFileID
+	case ErrFileIdTooShort.ʔ():
+		err = ErrFileIdTooShort
+	case ErrWrongRemoteFileIDsymbol.ʔ():
+		err = ErrWrongRemoteFileIDsymbol
+	case ErrWrongFileIdentifier.ʔ():
+		err = ErrWrongFileIdentifier
+	case ErrTooLarge.ʔ():
+		err = ErrTooLarge
+	case ErrWrongPadding.ʔ():
+		err = ErrWrongPadding
+	case ErrImageProcess.ʔ():
+		err = ErrImageProcess
+	case ErrWrongStickerpack.ʔ():
+		err = ErrWrongStickerpack
+	default:
+		err = fmt.Errorf("unknown api error: %s (%d)", description, code)
+	}
+	if err != nil {
+		return []byte{}, err
+	}
 	return json, nil
+
 }
 
 func addFileToWriter(writer *multipart.Writer,
