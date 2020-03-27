@@ -43,8 +43,8 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 	}
 
 	description := data[2]
-	code,_ := strconv.Atoi(data[0])
-	switch description{
+	code, _ := strconv.Atoi(data[0])
+	switch description {
 	case ErrUnauthorized.ʔ():
 		err = ErrUnauthorized
 	case ErrToForwardNotFound.ʔ():
