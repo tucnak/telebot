@@ -33,14 +33,12 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 	defer resp.Body.Close()
 
 	json, err := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(json))
 	data := apiErrorRx.FindStringSubmatch(string(json))
 	if err != nil {
 		return []byte{}, wrapSystem(err)
 	}
 
 	if data == nil {
-		fmt.Printf("ok!\n")
 		return json, nil
 	}
 
