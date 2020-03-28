@@ -71,7 +71,7 @@ func main() {
 
 ```
 
-Simple, innit? Telebot's routing system takes care of deliviering updates
+Simple, innit? Telebot's routing system takes care of delivering updates
 to their endpoints, so in order to get to handle any meaningful event,
 all you got to do is just plug your function to one of the Telebot-provided
 endpoints. You can find the full list
@@ -98,7 +98,7 @@ b.Handle(tb.Query, func (q *tb.Query) {
 })
 ```
 
-Now there's a dozen of supported endpoints (see package consts). Let me know
+There's dozens of supported endpoints (see package consts). Let me know
 if you'd like to see some endpoint or endpoint idea implemented. This system
 is completely extensible, so I can introduce them without breaking
 backwards-compatibity.
@@ -202,17 +202,17 @@ to marshal them into whatever format, `File` only contain public fields, so no
 data will ever be lost.
 
 ## Sendable
-Send is undoubteldy the most important method in Telebot. `Send()` accepts a
-`Recipient` (could be user, group or a channel) and a `Sendable`. FYI, not only
-all telebot-provided media types (`Photo`, `Audio`, `Video`, etc.) are `Sendable`,
-but you can create composite types of your own. As long as they satisfy `Sendable`,
+Send is undoubtedly the most important method in Telebot. `Send()` accepts a
+`Recipient` (could be user, group or a channel) and a `Sendable`. Other types other than
+the telebot-provided media types (`Photo`, `Audio`, `Video`, etc.) are `Sendable`.
+If you create composite types of your own, and they satisfy the `Sendable` interface,
 Telebot will be able to send them out.
 
 ```go
 // Sendable is any object that can send itself.
 //
 // This is pretty cool, since it lets bots implement
-// custom Sendables for complex kind of media or
+// custom Sendables for complex kinds of media or
 // chat objects spanning across multiple messages.
 type Sendable interface {
     Send(*Bot, Recipient, *SendOptions) (*Message, error)
@@ -409,7 +409,7 @@ b.Handle(tb.OnQuery, func(q *tb.Query) {
 		}
 
 		results[i] = result
-		results[i].SetResultID(strconv.Itoa(i)) // It's needed to set a unique string ID for each result
+		results[i].SetResultID(strconv.Itoa(i)) // needed to set a unique string ID for each result
 	}
 
 	err := b.Answer(q, &tb.QueryResponse{
@@ -423,7 +423,7 @@ b.Handle(tb.OnQuery, func(q *tb.Query) {
 })
 ```
 
-There's not much to talk about really. It also support some form of authentication
+There's not much to talk about really. It also supports some form of authentication
 through deep-linking. For that, use fields `SwitchPMText` and `SwitchPMParameter`
 of `QueryResponse`.
 
