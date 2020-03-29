@@ -109,9 +109,10 @@ const (
 type ParseMode string
 
 const (
-	ModeDefault  ParseMode = ""
-	ModeMarkdown ParseMode = "Markdown"
-	ModeHTML     ParseMode = "HTML"
+	ModeDefault        ParseMode = ""
+	ModeMarkdown       ParseMode = "MarkdownV2"
+	ModeLegacyMarkdown ParseMode = "Markdown"
+	ModeHTML           ParseMode = "HTML"
 )
 
 // EntityType is a MessageEntity type.
@@ -129,6 +130,8 @@ const (
 	EntityCode      EntityType = "code"
 	EntityCodeBlock EntityType = "pre"
 	EntityTextLink  EntityType = "text_link"
+	EntityUnderline EntityType = "underline"
+	Strikethrough   EntityType = "strikethrough"
 )
 
 // ChatType represents one of the possible chat types.
