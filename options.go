@@ -140,3 +140,10 @@ type InlineKeyboardMarkup struct {
 	// an Array of KeyboardButton objects.
 	InlineKeyboard [][]InlineButton `json:"inline_keyboard,omitempty"`
 }
+
+// PollOptions represents arguments for sendPoll method.
+type PollOptions struct {
+	DisableNotification bool         `json:"disable_notification"`
+	ReplyToMessageID    *int         `json:"reply_to_message_id"`
+	ReplyMarkup         *ReplyMarkup `json:"reply_markup"`
+}

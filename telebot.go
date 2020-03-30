@@ -88,6 +88,16 @@ const (
 	//
 	// Handler: func(*PreCheckoutQuery)
 	OnCheckout = "\apre_checkout_query"
+
+	// Will fire on Poll.
+	//
+	// Handler: func(*Poll)
+	OnPoll = "\apoll"
+
+	// Will fire on PollAnswer.
+	//
+	// Handler: func(*PollAnswer)
+	OnPollAnswer = "\apoll_answer"
 )
 
 // ChatAction is a client-side status indicating bot activity.

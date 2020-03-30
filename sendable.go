@@ -316,3 +316,30 @@ func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 
 	return extractMsgResponse(respJSON)
 }
+
+func (p *Poll) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
+	params := map[string]string{
+		"chat_id":                 to.Recipient(),
+		"question":                p.Question,
+		"type":                    p.Type,
+		"allows_multiple_answers": strconv.FormatBool(p.AllowsMultipleAnswers),
+		"correct_option_id":       strconv.Itoa(p.CorrectOptionID),
+		"is_anonymous":            strconv.FormatBool(p.IsAnonymous),
+		"is_closed":               strconv.FormatBool(p.IsClosed),
+	}
+	embedSendOptions(params, opt)
+
+	var options []string
+	for _, o := range p.Options {
+		options = append(options, o.Text)
+	}
+	opts, _ := json.Marshal(options)
+	params["options"] = string(opts)
+
+	respJSON, err := b.Raw("sendPoll", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMsgResponse(respJSON)
+}

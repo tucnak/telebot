@@ -99,6 +99,8 @@ type Update struct {
 	Query              *Query              `json:"inline_query,omitempty"`
 	ChosenInlineResult *ChosenInlineResult `json:"chosen_inline_result,omitempty"`
 	PreCheckoutQuery   *PreCheckoutQuery   `json:"pre_checkout_query,omitempty"`
+	Poll               *Poll               `json:"poll,omitempty"`
+	PollAnswer         *PollAnswer         `json:"poll_answer,omitempty"`
 }
 
 // ChosenInlineResult represents a result of an inline query that was chosen
@@ -412,6 +414,46 @@ func (b *Bot) incomingUpdate(upd *Update) {
 
 			} else {
 				panic("telebot: checkout handler is bad")
+			}
+		}
+		return
+	}
+
+	if upd.Poll != nil {
+		if handler, ok := b.handlers[OnPoll]; ok {
+			if handler, ok := handler.(func(*Poll)); ok {
+				// i'm not 100% sure that any of the values
+				// won't be cached, so I pass them all in:
+				go func(b *Bot, handler func(*Poll),
+					r *Poll) {
+					if b.reporter == nil {
+						defer b.deferDebug()
+					}
+					handler(r)
+				}(b, handler, upd.Poll)
+
+			} else {
+				panic("telebot: poll handler is bad")
+			}
+		}
+		return
+	}
+
+	if upd.PollAnswer != nil {
+		if handler, ok := b.handlers[OnPollAnswer]; ok {
+			if handler, ok := handler.(func(*PollAnswer)); ok {
+				// i'm not 100% sure that any of the values
+				// won't be cached, so I pass them all in:
+				go func(b *Bot, handler func(*PollAnswer),
+					r *PollAnswer) {
+					if b.reporter == nil {
+						defer b.deferDebug()
+					}
+					handler(r)
+				}(b, handler, upd.PollAnswer)
+
+			} else {
+				panic("telebot: poll answer handler is bad")
 			}
 		}
 		return
