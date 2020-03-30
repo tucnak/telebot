@@ -1591,7 +1591,7 @@ func (b *Bot) DeleteStickerFromSet(sticker string) error {
 	return extractOkResponse(respJSON)
 }
 
-// DeleteStickerFromSet deletes sticker from set created by the bot.
+// SendPoll sends poll to chat
 func (b *Bot) SendPoll(to Recipient, poll *Poll, options *PollOptions) (*Message, error) {
 	params := map[string]string{
 		"chat_id":                 to.Recipient(),
