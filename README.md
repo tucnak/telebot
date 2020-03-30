@@ -17,6 +17,7 @@ go get -u gopkg.in/tucnak/telebot.v2
 	- [Editable](#editable)
 	- [Keyboards](#keyboards)
 	- [Inline mode](#inline-mode)
+	- [Poll](#poll)
 * [Contributing](#contributing)
 * [Donate](#donate)
 * [License](#license)
@@ -426,6 +427,23 @@ b.Handle(tb.OnQuery, func(q *tb.Query) {
 There's not much to talk about really. It also supports some form of authentication
 through deep-linking. For that, use fields `SwitchPMText` and `SwitchPMParameter`
 of `QueryResponse`.
+
+
+## Poll
+Creating polls is just as easy. You just need to create an object and use the `Send` method. 
+You can also use the `AddAnswers` method instead of explicitly specifying 
+a slice of answers to a question and without `append`.
+```
+poll := &tb.Poll{
+    Question:    "my question",
+    Type:        "regular",
+    IsClosed:    false,
+    IsAnonymous: true,
+}
+poll.AddAnswers("answer 1", "answer 2")
+
+b.Send(m.Sender, poll)
+```
 
 # Contributing
 
