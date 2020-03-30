@@ -19,8 +19,8 @@ type Poll struct {
 
 // PollOption object represents a option of a poll
 type PollOption struct {
-	Text       string
-	VoterCount int
+	Text       string `json:"text"`
+	VoterCount int    `json:"voter_count"`
 }
 
 // PollAnswer object represents an answer of a user in a non-anonymous poll.
@@ -38,4 +38,10 @@ func (p *Poll) IsRegular() bool {
 
 func (p *Poll) IsQuiz() bool {
 	return p.Type == "quiz"
+}
+
+func (p *Poll) AddAnswers(text ...string) {
+	for _, t := range text {
+		p.Options = append(p.Options, PollOption{Text: t})
+	}
 }

@@ -99,6 +99,8 @@ type Update struct {
 	Query              *Query              `json:"inline_query,omitempty"`
 	ChosenInlineResult *ChosenInlineResult `json:"chosen_inline_result,omitempty"`
 	PreCheckoutQuery   *PreCheckoutQuery   `json:"pre_checkout_query,omitempty"`
+	Poll               *Poll               `json:"poll,omitempty"`
+	PollAnswer         *PollAnswer         `json:"poll_answer,omitempty"`
 }
 
 // ChosenInlineResult represents a result of an inline query that was chosen
@@ -412,6 +414,46 @@ func (b *Bot) incomingUpdate(upd *Update) {
 
 			} else {
 				panic("telebot: checkout handler is bad")
+			}
+		}
+		return
+	}
+
+	if upd.Poll != nil {
+		if handler, ok := b.handlers[OnPoll]; ok {
+			if handler, ok := handler.(func(*Poll)); ok {
+				// i'm not 100% sure that any of the values
+				// won't be cached, so I pass them all in:
+				go func(b *Bot, handler func(*Poll),
+					r *Poll) {
+					if b.reporter == nil {
+						defer b.deferDebug()
+					}
+					handler(r)
+				}(b, handler, upd.Poll)
+
+			} else {
+				panic("telebot: poll handler is bad")
+			}
+		}
+		return
+	}
+
+	if upd.PollAnswer != nil {
+		if handler, ok := b.handlers[OnPollAnswer]; ok {
+			if handler, ok := handler.(func(*PollAnswer)); ok {
+				// i'm not 100% sure that any of the values
+				// won't be cached, so I pass them all in:
+				go func(b *Bot, handler func(*PollAnswer),
+					r *PollAnswer) {
+					if b.reporter == nil {
+						defer b.deferDebug()
+					}
+					handler(r)
+				}(b, handler, upd.PollAnswer)
+
+			} else {
+				panic("telebot: poll answer handler is bad")
 			}
 		}
 		return
@@ -1547,4 +1589,50 @@ func (b *Bot) DeleteStickerFromSet(sticker string) error {
 	}
 
 	return extractOkResponse(respJSON)
+}
+
+// DeleteStickerFromSet deletes sticker from set created by the bot.
+func (b *Bot) SendPoll(to Recipient, poll *Poll, options *PollOptions) (*Message, error) {
+	params := map[string]string{
+		"chat_id":                 to.Recipient(),
+		"question":                poll.Question,
+		"type":                    poll.Type,
+		"allows_multiple_answers": strconv.FormatBool(poll.AllowsMultipleAnswers),
+		"correct_option_id":       strconv.Itoa(poll.CorrectOptionID),
+		"is_anonymous":            strconv.FormatBool(poll.IsAnonymous),
+		"is_closed":               strconv.FormatBool(poll.IsClosed),
+	}
+
+	if poll.Type == "" {
+		params["type"] = "regular"
+	}
+
+	if poll.Options != nil {
+		var options []string
+		for _, opt := range poll.Options {
+			options = append(options, opt.Text)
+		}
+		opts, _ := json.Marshal(options)
+		params["options"] = string(opts)
+	}
+
+	if options != nil {
+		if options.DisableNotification {
+			params["disable_notification"] = "true"
+		}
+		if options.ReplyToMessageID != nil {
+			params["reply_to_message_id"] = strconv.Itoa(*options.ReplyToMessageID)
+		}
+		if options.ReplyMarkup != nil {
+			markup, _ := json.Marshal(options.ReplyMarkup)
+			params["reply_markup"] = string(markup)
+		}
+	}
+
+	respJSON, err := b.Raw("sendPoll", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMsgResponse(respJSON)
 }
