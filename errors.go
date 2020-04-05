@@ -50,34 +50,34 @@ var errorRx = regexp.MustCompile(`{.+"error_code":(\d+),"description":"(.+)"}`)
 var (
 	// General errors
 	ErrUnauthorized      = NewAPIError(401, "Unauthorized")
-	ErrBlockedByUsr      = NewAPIError(401, "Forbidden: bot was blocked by the user")
+	ErrBlockedByUser     = NewAPIError(401, "Forbidden: bot was blocked by the user")
 	ErrUserIsDeactivated = NewAPIError(401, "Forbidden: user is deactivated")
 	ErrNotFound          = NewAPIError(404, "Not Found")
 
 	// Bad request errors
-	ErrTooLarge                = NewAPIError(400, "Request Entity Too Large")
-	ErrToForwardNotFound       = NewAPIError(400, "Bad Request: message to forward not found")
-	ErrToReplyNotFound         = NewAPIError(400, "Bad Request: reply message not found")
-	ErrMessageTooLong          = NewAPIError(400, "Bad Request: message is too long")
-	ErrToDeleteNotFound        = NewAPIError(400, "Bad Request: message to delete not found")
-	ErrEmptyMessage            = NewAPIError(400, "Bad Request: message must be non-empty")
-	ErrNotFoundChat            = NewAPIError(400, "Bad Request: chat not found")
-	ErrEmptyText               = NewAPIError(400, "Bad Request: text is empty")
-	ErrEmptyChatID             = NewAPIError(400, "Bad Request: chat_id is empty")
-	ErrMessageNotModified      = NewAPIError(400, "Bad Request: message is not modified")
-	ErrWrongTypeOfContent      = NewAPIError(400, "Bad Request: wrong type of the web page content")
-	ErrCantGetHTTPurlContent   = NewAPIError(400, "Bad Request: failed to get HTTP URL content")
-	ErrWrongRemoteFileID       = NewAPIError(400, "Bad Request: wrong remote file id specified: can't unserialize it. Wrong last symbol")
-	ErrFileIdTooShort          = NewAPIError(400, "Bad Request: wrong remote file id specified: Wrong string length")
-	ErrWrongRemoteFileIDsymbol = NewAPIError(400, "Bad Request: wrong remote file id specified: Wrong character in the string")
-	ErrWrongFileIdentifier     = NewAPIError(400, "Bad Request: wrong file identifier/HTTP URL specified")
-	ErrWrongPadding            = NewAPIError(400, "Bad Request: wrong remote file id specified: Wrong padding in the string")
-	ErrImageProcess            = NewAPIError(400, "Bad Request: IMAGE_PROCESS_FAILED", "Image process failed")
-	ErrWrongStickerpack        = NewAPIError(400, "Bad Request: STICKERSET_INVALID", "Stickerset is invalid")
+	ErrTooLarge             = NewAPIError(400, "Request Entity Too Large")
+	ErrMessageTooLong       = NewAPIError(400, "Bad Request: message is too long")
+	ErrToForwardNotFound    = NewAPIError(400, "Bad Request: message to forward not found")
+	ErrToReplyNotFound      = NewAPIError(400, "Bad Request: reply message not found")
+	ErrToDeleteNotFound     = NewAPIError(400, "Bad Request: message to delete not found")
+	ErrEmptyMessage         = NewAPIError(400, "Bad Request: message must be non-empty")
+	ErrEmptyText            = NewAPIError(400, "Bad Request: text is empty")
+	ErrEmptyChatID          = NewAPIError(400, "Bad Request: chat_id is empty")
+	ErrChatNotFound         = NewAPIError(400, "Bad Request: chat not found")
+	ErrMessageNotModified   = NewAPIError(400, "Bad Request: message is not modified")
+	ErrWrongTypeOfContent   = NewAPIError(400, "Bad Request: wrong type of the web page content")
+	ErrBadURLContent        = NewAPIError(400, "Bad Request: failed to get HTTP URL content")
+	ErrWrongFileID          = NewAPIError(400, "Bad Request: wrong file identifier/HTTP URL specified")
+	ErrWrongFileIDSymbol    = NewAPIError(400, "Bad Request: wrong remote file id specified: can't unserialize it. Wrong last symbol")
+	ErrWrongFileIDLength    = NewAPIError(400, "Bad Request: wrong remote file id specified: Wrong string length")
+	ErrWrongFileIDCharacter = NewAPIError(400, "Bad Request: wrong remote file id specified: Wrong character in the string")
+	ErrWrongFileIDPadding   = NewAPIError(400, "Bad Request: wrong remote file id specified: Wrong padding in the string")
+	ErrFailedImageProcess   = NewAPIError(400, "Bad Request: IMAGE_PROCESS_FAILED", "Image process failed")
+	ErrInvaliadStickerset   = NewAPIError(400, "Bad Request: STICKERSET_INVALID", "Stickerset is invalid")
 
 	// No rights errors
 	ErrNoRightsToRestrict     = NewAPIError(400, "Bad Request: not enough rights to restrict/unrestrict chat member")
-	ErrNoRightsToSendMsg      = NewAPIError(400, "Bad Request: have no rights to send a message")
+	ErrNoRightsToSend         = NewAPIError(400, "Bad Request: have no rights to send a message")
 	ErrNoRightsToSendPhoto    = NewAPIError(400, "Bad Request: not enough rights to send photos to the chat")
 	ErrNoRightsToSendStickers = NewAPIError(400, "Bad Request: not enough rights to send stickers to the chat")
 	ErrNoRightsToSendGifs     = NewAPIError(400, "Bad Request: CHAT_SEND_GIFS_FORBIDDEN", "sending GIFS is not allowed in this chat")
@@ -85,8 +85,8 @@ var (
 	ErrKickingChatOwner       = NewAPIError(400, "Bad Request: can't remove chat owner")
 
 	// Super/groups errors
-	ErrInteractKickedG    = NewAPIError(403, "Forbidden: bot was kicked from the group chat")
-	ErrInteractKickedSprG = NewAPIError(403, "Forbidden: bot was kicked from the supergroup chat")
+	ErrBotKickedFromGroup      = NewAPIError(403, "Forbidden: bot was kicked from the group chat")
+	ErrBotKickedFromSuperGroup = NewAPIError(403, "Forbidden: bot was kicked from the supergroup chat")
 )
 
 // ErrByDescription returns APIError instance by given description.
@@ -104,8 +104,8 @@ func ErrByDescription(s string) error {
 		return ErrToReplyNotFound
 	case ErrMessageTooLong.ʔ():
 		return ErrMessageTooLong
-	case ErrBlockedByUsr.ʔ():
-		return ErrBlockedByUsr
+	case ErrBlockedByUser.ʔ():
+		return ErrBlockedByUser
 	case ErrToDeleteNotFound.ʔ():
 		return ErrToDeleteNotFound
 	case ErrEmptyMessage.ʔ():
@@ -114,14 +114,14 @@ func ErrByDescription(s string) error {
 		return ErrEmptyText
 	case ErrEmptyChatID.ʔ():
 		return ErrEmptyChatID
-	case ErrNotFoundChat.ʔ():
-		return ErrNotFoundChat
+	case ErrChatNotFound.ʔ():
+		return ErrChatNotFound
 	case ErrMessageNotModified.ʔ():
 		return ErrMessageNotModified
 	case ErrNoRightsToRestrict.ʔ():
 		return ErrNoRightsToRestrict
-	case ErrNoRightsToSendMsg.ʔ():
-		return ErrNoRightsToSendMsg
+	case ErrNoRightsToSend.ʔ():
+		return ErrNoRightsToSend
 	case ErrNoRightsToSendPhoto.ʔ():
 		return ErrNoRightsToSendPhoto
 	case ErrNoRightsToSendStickers.ʔ():
@@ -132,30 +132,30 @@ func ErrByDescription(s string) error {
 		return ErrNoRightsToDelete
 	case ErrKickingChatOwner.ʔ():
 		return ErrKickingChatOwner
-	case ErrInteractKickedG.ʔ():
+	case ErrBotKickedFromGroup.ʔ():
 		return ErrKickingChatOwner
-	case ErrInteractKickedSprG.ʔ():
-		return ErrInteractKickedSprG
+	case ErrBotKickedFromSuperGroup.ʔ():
+		return ErrBotKickedFromSuperGroup
 	case ErrWrongTypeOfContent.ʔ():
 		return ErrWrongTypeOfContent
-	case ErrCantGetHTTPurlContent.ʔ():
-		return ErrCantGetHTTPurlContent
-	case ErrWrongRemoteFileID.ʔ():
-		return ErrWrongRemoteFileID
-	case ErrFileIdTooShort.ʔ():
-		return ErrFileIdTooShort
-	case ErrWrongRemoteFileIDsymbol.ʔ():
-		return ErrWrongRemoteFileIDsymbol
-	case ErrWrongFileIdentifier.ʔ():
-		return ErrWrongFileIdentifier
+	case ErrBadURLContent.ʔ():
+		return ErrBadURLContent
+	case ErrWrongFileIDSymbol.ʔ():
+		return ErrWrongFileIDSymbol
+	case ErrWrongFileIDLength.ʔ():
+		return ErrWrongFileIDLength
+	case ErrWrongFileIDCharacter.ʔ():
+		return ErrWrongFileIDCharacter
+	case ErrWrongFileID.ʔ():
+		return ErrWrongFileID
 	case ErrTooLarge.ʔ():
 		return ErrTooLarge
-	case ErrWrongPadding.ʔ():
-		return ErrWrongPadding
-	case ErrImageProcess.ʔ():
-		return ErrImageProcess
-	case ErrWrongStickerpack.ʔ():
-		return ErrWrongStickerpack
+	case ErrWrongFileIDPadding.ʔ():
+		return ErrWrongFileIDPadding
+	case ErrFailedImageProcess.ʔ():
+		return ErrFailedImageProcess
+	case ErrInvaliadStickerset.ʔ():
+		return ErrInvaliadStickerset
 	default:
 		return nil
 	}
