@@ -22,7 +22,7 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(payload); err != nil {
-		return []byte{}, wrapError(err)
+		return []byte{}, err
 	}
 
 	resp, err := b.client.Post(url, "application/json", &buf)
@@ -45,7 +45,7 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 	desc := match[2]
 	if err = ErrByDescription(desc); err == nil {
 		code, _ := strconv.Atoi(match[1])
-		err = fmt.Errorf("unknown api error: %s (%d)", desc, code)
+		err = fmt.Errorf("telegram: %s (%d)", desc, code)
 	}
 	return data, err
 }
