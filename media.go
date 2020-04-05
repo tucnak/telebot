@@ -149,8 +149,8 @@ type Animation struct {
 }
 
 // MediaFile returns &Animation.File
-func (v *Animation) MediaFile() *File {
-	return &v.File
+func (a *Animation) MediaFile() *File {
+	return &a.File
 }
 
 // Voice object represents a voice note.

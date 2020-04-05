@@ -22,7 +22,7 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(payload); err != nil {
-		return []byte{}, wrapSystem(err)
+		return []byte{}, wrapError(err)
 	}
 
 	resp, err := b.client.Post(url, "application/json", &buf)
@@ -32,87 +32,23 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 	resp.Close = true
 	defer resp.Body.Close()
 
-	json, err := ioutil.ReadAll(resp.Body)
-	data := apiErrorRx.FindStringSubmatch(string(json))
+	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return []byte{}, wrapSystem(err)
+		return []byte{}, wrapError(err)
 	}
 
-	if data == nil {
-		return json, nil
+	match := errorRx.FindStringSubmatch(string(data))
+	if match == nil || len(match) < 3 {
+		return data, nil
 	}
 
-	description := data[2]
-	code, _ := strconv.Atoi(data[0])
-	switch description {
-	case ErrUnauthorized.ʔ():
-		err = ErrUnauthorized
-	case ErrToForwardNotFound.ʔ():
-		err = ErrToForwardNotFound
-	case ErrToReplyNotFound.ʔ():
-		err = ErrToReplyNotFound
-	case ErrMessageTooLong.ʔ():
-		err = ErrMessageTooLong
-	case ErrBlockedByUsr.ʔ():
-		err = ErrBlockedByUsr
-	case ErrToDeleteNotFound.ʔ():
-		err = ErrToDeleteNotFound
-	case ErrEmptyMessage.ʔ():
-		err = ErrEmptyMessage
-	case ErrEmptyText.ʔ():
-		err = ErrEmptyText
-	case ErrEmptyChatID.ʔ():
-		err = ErrEmptyChatID
-	case ErrNotFoundChat.ʔ():
-		err = ErrNotFoundChat
-	case ErrMessageNotModified.ʔ():
-		err = ErrMessageNotModified
-	case ErrNoRightsToRestrict.ʔ():
-		err = ErrNoRightsToRestrict
-	case ErrNoRightsToSendMsg.ʔ():
-		err = ErrNoRightsToSendMsg
-	case ErrNoRightsToSendPhoto.ʔ():
-		err = ErrNoRightsToSendPhoto
-	case ErrNoRightsToSendStickers.ʔ():
-		err = ErrNoRightsToSendStickers
-	case ErrNoRightsToSendGifs.ʔ():
-		err = ErrNoRightsToSendGifs
-	case ErrNoRightsToDelete.ʔ():
-		err = ErrNoRightsToDelete
-	case ErrKickingChatOwner.ʔ():
-		err = ErrKickingChatOwner
-	case ErrInteractKickedG.ʔ():
-		err = ErrKickingChatOwner
-	case ErrInteractKickedSprG.ʔ():
-		err = ErrInteractKickedSprG
-	case ErrWrongTypeOfContent.ʔ():
-		err = ErrWrongTypeOfContent
-	case ErrCantGetHTTPurlContent.ʔ():
-		err = ErrCantGetHTTPurlContent
-	case ErrWrongRemoteFileID.ʔ():
-		err = ErrWrongRemoteFileID
-	case ErrFileIdTooShort.ʔ():
-		err = ErrFileIdTooShort
-	case ErrWrongRemoteFileIDsymbol.ʔ():
-		err = ErrWrongRemoteFileIDsymbol
-	case ErrWrongFileIdentifier.ʔ():
-		err = ErrWrongFileIdentifier
-	case ErrTooLarge.ʔ():
-		err = ErrTooLarge
-	case ErrWrongPadding.ʔ():
-		err = ErrWrongPadding
-	case ErrImageProcess.ʔ():
-		err = ErrImageProcess
-	case ErrWrongStickerpack.ʔ():
-		err = ErrWrongStickerpack
-	default:
-		err = fmt.Errorf("unknown api error: %s (%d)", description, code)
+	desc := match[2]
+	err = errByDescription(desc)
+	if err == nil {
+		code, _ := strconv.Atoi(match[1])
+		err = fmt.Errorf("unknown api error: %s (%d)", desc, code)
 	}
-	if err != nil {
-		return []byte{}, err
-	}
-	return json, nil
-
+	return data, err
 }
 
 func addFileToWriter(writer *multipart.Writer,
@@ -170,24 +106,24 @@ func (b *Bot) sendFiles(method string, files map[string]File,
 
 	for field, file := range rawFiles {
 		if err := addFileToWriter(writer, params["file_name"], field, file); err != nil {
-			return nil, wrapSystem(err)
+			return nil, wrapError(err)
 		}
 	}
 
 	for field, value := range params {
 		if err := writer.WriteField(field, value); err != nil {
-			return nil, wrapSystem(err)
+			return nil, wrapError(err)
 		}
 	}
 
 	if err := writer.Close(); err != nil {
-		return nil, wrapSystem(err)
+		return nil, wrapError(err)
 	}
 
 	url := b.URL + "/bot" + b.Token + "/" + method
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
-		return nil, wrapSystem(err)
+		return nil, wrapError(err)
 	}
 
 	req.Header.Add("Content-Type", writer.FormDataContentType())
@@ -202,12 +138,12 @@ func (b *Bot) sendFiles(method string, files map[string]File,
 		return nil, errors.New("api error: internal server error")
 	}
 
-	json, err := ioutil.ReadAll(resp.Body)
+	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, wrapSystem(err)
+		return nil, wrapError(err)
 	}
 
-	return json, nil
+	return data, nil
 }
 
 func (b *Bot) sendObject(f *File, what string, params map[string]string, files map[string]File) (*Message, error) {

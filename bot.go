@@ -147,7 +147,7 @@ func (b *Bot) Handle(endpoint interface{}, handler interface{}) {
 }
 
 var (
-	cmdRx   = regexp.MustCompile(`^(\/\w+)(@(\w+))?(\s|$)(.+)?`)
+	cmdRx   = regexp.MustCompile(`^(/\w+)(@(\w+))?(\s|$)(.+)?`)
 	cbackRx = regexp.MustCompile(`^\f(\w+)(\|(.+))?$`)
 )
 
@@ -1105,19 +1105,19 @@ func (b *Bot) FileByID(fileID string) (File, error) {
 func (b *Bot) Download(file *File, localFilename string) error {
 	reader, err := b.GetFile(file)
 	if err != nil {
-		return wrapSystem(err)
+		return wrapError(err)
 	}
 	defer reader.Close()
 
 	out, err := os.Create(localFilename)
 	if err != nil {
-		return wrapSystem(err)
+		return wrapError(err)
 	}
 	defer out.Close()
 
 	_, err = io.Copy(out, reader)
 	if err != nil {
-		return wrapSystem(err)
+		return wrapError(err)
 	}
 	file.FileLocal = localFilename
 
@@ -1135,7 +1135,7 @@ func (b *Bot) GetFile(file *File) (io.ReadCloser, error) {
 
 	req, err := http.NewRequest("GET", b.URL+"/file/bot"+b.Token+"/"+f.FilePath, nil)
 	if err != nil {
-		return nil, wrapSystem(err)
+		return nil, wrapError(err)
 	}
 
 	resp, err := b.client.Do(req)
@@ -1374,7 +1374,7 @@ func (b *Bot) ChatByID(id string) (*Chat, error) {
 	}
 
 	if resp.Result.Type == ChatChannel && resp.Result.Username == "" {
-		//Channel is Private
+		// Channel is Private
 		resp.Result.Type = ChatChannelPrivate
 	}
 

@@ -43,8 +43,9 @@ func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, e
 	return extractMsgResponse(respJSON)
 }
 
-func wrapSystem(err error) error {
-	return errors.Wrap(err, "system error")
+// wrapError returns new wrapped telebot-related error.
+func wrapError(err error) error {
+	return errors.Wrap(err, "telebot")
 }
 
 func isUserInList(user *User, list []User) bool {
