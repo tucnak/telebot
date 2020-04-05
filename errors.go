@@ -29,7 +29,7 @@ func (err *APIError) Error() string {
 			msg = err.Description
 		}
 	}
-	return fmt.Sprintf("api error: %s (%d)", msg, err.Code)
+	return fmt.Sprintf("telegram: %s (%d)", msg, err.Code)
 }
 
 // NewAPIError returns new APIError instance with given description.
@@ -48,11 +48,14 @@ func NewAPIError(code int, msgs ...string) *APIError {
 var errorRx = regexp.MustCompile(`{.+"error_code":(\d+),"description":"(.+)"}`)
 
 var (
-	// Authorization errors
-	ErrUnauthorized = NewAPIError(401, "Unauthorized")
-	ErrBlockedByUsr = NewAPIError(401, "Forbidden: bot was blocked by the user")
+	// General errors
+	ErrUnauthorized      = NewAPIError(401, "Unauthorized")
+	ErrBlockedByUsr      = NewAPIError(401, "Forbidden: bot was blocked by the user")
+	ErrUserIsDeactivated = NewAPIError(401, "Forbidden: user is deactivated")
+	ErrNotFound          = NewAPIError(404, "Not Found")
 
 	// Bad request errors
+	ErrTooLarge                = NewAPIError(400, "Request Entity Too Large")
 	ErrToForwardNotFound       = NewAPIError(400, "Bad Request: message to forward not found")
 	ErrToReplyNotFound         = NewAPIError(400, "Bad Request: reply message not found")
 	ErrMessageTooLong          = NewAPIError(400, "Bad Request: message is too long")
@@ -70,7 +73,6 @@ var (
 	ErrWrongFileIdentifier     = NewAPIError(400, "Bad Request: wrong file identifier/HTTP URL specified")
 	ErrWrongPadding            = NewAPIError(400, "Bad Request: wrong remote file id specified: Wrong padding in the string")
 	ErrImageProcess            = NewAPIError(400, "Bad Request: IMAGE_PROCESS_FAILED", "Image process failed")
-	ErrTooLarge                = NewAPIError(400, "Request Entity Too Large")
 	ErrWrongStickerpack        = NewAPIError(400, "Bad Request: STICKERSET_INVALID", "Stickerset is invalid")
 
 	// No rights errors
@@ -87,11 +89,15 @@ var (
 	ErrInteractKickedSprG = NewAPIError(403, "Forbidden: bot was kicked from the supergroup chat")
 )
 
-// errByDescription returns APIError instance by given description.
-func errByDescription(s string) *APIError {
+// ErrByDescription returns APIError instance by given description.
+func ErrByDescription(s string) error {
 	switch s {
 	case ErrUnauthorized.ʔ():
 		return ErrUnauthorized
+	case ErrNotFound.ʔ():
+		return ErrNotFound
+	case ErrUserIsDeactivated.ʔ():
+		return ErrUserIsDeactivated
 	case ErrToForwardNotFound.ʔ():
 		return ErrToForwardNotFound
 	case ErrToReplyNotFound.ʔ():
