@@ -8,7 +8,7 @@ type Poll struct {
 	TotalVoterCount       int          `json:"total_voter_count"`
 	IsClosed              bool         `json:"is_closed"`
 	IsAnonymous           bool         `json:"is_anonymous"`
-	Type                  string       `json:"type"`
+	Type                  PollType     `json:"type"`
 	AllowsMultipleAnswers bool         `json:"allows_multiple_answers"`
 
 	// Optional. 0-based identifier of the correct answer option.

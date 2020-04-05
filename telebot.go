@@ -112,6 +112,7 @@ const (
 	UploadingVNote    ChatAction = "upload_video_note"
 	RecordingVideo    ChatAction = "record_video"
 	RecordingAudio    ChatAction = "record_audio"
+	RecordingVNote    ChatAction = "record_video_note"
 	FindingLocation   ChatAction = "find_location"
 )
 
@@ -119,26 +120,31 @@ const (
 type ParseMode string
 
 const (
-	ModeDefault  ParseMode = ""
-	ModeMarkdown ParseMode = "Markdown"
-	ModeHTML     ParseMode = "HTML"
+	ModeDefault    ParseMode = ""
+	ModeMarkdown   ParseMode = "Markdown"
+	ModeMarkdownV2 ParseMode = "MarkdownV2"
+	ModeHTML       ParseMode = "HTML"
 )
 
 // EntityType is a MessageEntity type.
 type EntityType string
 
 const (
-	EntityMention   EntityType = "mention"
-	EntityTMention  EntityType = "text_mention"
-	EntityHashtag   EntityType = "hashtag"
-	EntityCommand   EntityType = "bot_command"
-	EntityURL       EntityType = "url"
-	EntityEmail     EntityType = "email"
-	EntityBold      EntityType = "bold"
-	EntityItalic    EntityType = "italic"
-	EntityCode      EntityType = "code"
-	EntityCodeBlock EntityType = "pre"
-	EntityTextLink  EntityType = "text_link"
+	EntityMention       EntityType = "mention"
+	EntityTMention      EntityType = "text_mention"
+	EntityHashtag       EntityType = "hashtag"
+	EntityCashtag       EntityType = "cashtag"
+	EntityCommand       EntityType = "bot_command"
+	EntityURL           EntityType = "url"
+	EntityEmail         EntityType = "email"
+	EntityPhone         EntityType = "phone_number"
+	EntityBold          EntityType = "bold"
+	EntityItalic        EntityType = "italic"
+	EntityUnderline     EntityType = "underline"
+	EntityStrikethrough EntityType = "strikethrough"
+	EntityCode          EntityType = "code"
+	EntityCodeBlock     EntityType = "pre"
+	EntityTextLink      EntityType = "text_link"
 )
 
 // ChatType represents one of the possible chat types.
@@ -152,7 +158,7 @@ const (
 	ChatChannelPrivate ChatType = "privatechannel"
 )
 
-// MemberStatus is one's chat status
+// MemberStatus is one's chat status.
 type MemberStatus string
 
 const (
@@ -172,6 +178,15 @@ const (
 	FeatureEyes     MaskFeature = "eyes"
 	FeatureMouth    MaskFeature = "mouth"
 	FeatureChin     MaskFeature = "chin"
+)
+
+// PollType defines poll types.
+type PollType = string
+
+const (
+	PollAny     PollType = ""
+	PollQuiz    PollType = "quiz"
+	PollRegular PollType = "regular"
 )
 
 const DefaultApiURL = "https://api.telegram.org"
