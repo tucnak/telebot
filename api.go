@@ -43,8 +43,7 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 	}
 
 	desc := match[2]
-	err = errByDescription(desc)
-	if err == nil {
+	if err = ErrByDescription(desc); err == nil {
 		code, _ := strconv.Atoi(match[1])
 		err = fmt.Errorf("unknown api error: %s (%d)", desc, code)
 	}
@@ -167,27 +166,21 @@ func (b *Bot) sendObject(f *File, what string, params map[string]string, files m
 }
 
 func (b *Bot) getMe() (*User, error) {
-	meJSON, err := b.Raw("getMe", nil)
+	me, err := b.Raw("getMe", nil)
 	if err != nil {
 		return nil, err
 	}
 
-	var botInfo struct {
-		Ok          bool
-		Result      *User
-		Description string
+	var resp struct {
+		// Raw already handles error.
+		// So we need only single result field.
+		Result *User `json:"result"`
 	}
 
-	err = json.Unmarshal(meJSON, &botInfo)
-	if err != nil {
-		return nil, errors.Wrap(err, "bad response json")
+	if err := json.Unmarshal(me, &resp); err != nil {
+		return nil, wrapError(err)
 	}
-
-	if !botInfo.Ok {
-		return nil, errors.Errorf("api error: %s", botInfo.Description)
-	}
-
-	return botInfo.Result, nil
+	return resp.Result, nil
 
 }
 
