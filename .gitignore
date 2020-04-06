@@ -25,3 +25,4 @@ _testmain.go
 
 .idea
 .DS_Store
+coverage.txt
