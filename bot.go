@@ -127,13 +127,12 @@ type PreCheckoutQuery struct {
 //
 // Example:
 //
-//     b.handle("/help", func (m *tb.Message) {})
-//     b.handle(tb.OnEdited, func (m *tb.Message) {})
-//     b.handle(tb.OnQuery, func (q *tb.Query) {})
+//     b.Handle("/help", func (m *tb.Message) {})
+//     b.Handle(tb.OnText, func (m *tb.Message) {})
+//     b.Handle(tb.OnQuery, func (q *tb.Query) {})
 //
-//     // make a hook for one of your preserved (by-pointer)
-//     // inline buttons.
-//     b.handle(&inlineButton, func (c *tb.Callback) {})
+//     // make a hook for one of your preserved (by-pointer) inline buttons.
+//     b.Handle(&inlineButton, func (c *tb.Callback) {})
 //
 func (b *Bot) Handle(endpoint interface{}, handler interface{}) {
 	switch end := endpoint.(type) {
