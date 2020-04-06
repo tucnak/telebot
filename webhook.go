@@ -42,12 +42,6 @@ type Webhook struct {
 	bot      *Bot
 }
 
-type registerResult struct {
-	Ok          bool   `json:"ok"`
-	ErrorCode   int    `json:"error_code"`
-	Description string `json:"description"`
-}
-
 func (h *Webhook) getFiles() map[string]File {
 	m := make(map[string]File)
 
@@ -88,24 +82,13 @@ func (h *Webhook) getParams() map[string]string {
 }
 
 func (h *Webhook) Poll(b *Bot, dest chan Update, stop chan struct{}) {
-	res, err := b.sendFiles("setWebhook", h.getFiles(), h.getParams())
+	_, err := b.sendFiles("setWebhook", h.getFiles(), h.getParams())
 	if err != nil {
-		b.debug(fmt.Errorf("setWebhook failed %q: %v", string(res), err))
+		b.debug(err)
 		close(stop)
 		return
 	}
-	var result registerResult
-	err = json.Unmarshal(res, &result)
-	if err != nil {
-		b.debug(fmt.Errorf("bad json data %q: %v", string(res), err))
-		close(stop)
-		return
-	}
-	if !result.Ok {
-		b.debug(fmt.Errorf("cannot register webhook: %s", result.Description))
-		close(stop)
-		return
-	}
+
 	// store the variables so the HTTP-handler can use 'em
 	h.dest = dest
 	h.bot = b
@@ -147,4 +130,9 @@ func (h *Webhook) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.dest <- update
+}
+
+func (b *Bot) RemoveWebhook() error {
+	_, err := b.Raw("deleteWebhook", nil)
+	return err
 }

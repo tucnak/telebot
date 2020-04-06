@@ -76,7 +76,8 @@ func TestStart(t *testing.T) {
 	b, err := NewBot(pref)
 	assert.NoError(t, err)
 
-	// TODO: deleteWebhook
+	// remove webhook to be sure that bot can poll
+	assert.NoError(t, b.RemoveWebhook())
 
 	time.AfterFunc(50*time.Millisecond, b.Stop)
 	b.Start() // stops after some delay
