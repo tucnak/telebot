@@ -296,6 +296,13 @@ func (b *Bot) incomingUpdate(upd *Update) {
 	}
 
 	if upd.ChannelPost != nil {
+		m := upd.ChannelPost
+
+		if m.PinnedMessage != nil {
+			b.handle(OnPinned, m)
+			return
+		}
+
 		b.handle(OnChannelPost, upd.ChannelPost)
 		return
 	}
