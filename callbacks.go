@@ -76,6 +76,8 @@ type InlineButton struct {
 	InlineQueryChat string `json:"switch_inline_query_current_chat"`
 	Login           *Login `json:"login_url,omitempty"`
 
+	// Not used anywhere.
+	// Will be removed in future releases.
 	Action func(*Callback) `json:"-"`
 }
 
