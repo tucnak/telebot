@@ -9,6 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Cached bot instance to avoid getMe method flooding.
+var b, _ = newTestBot()
+
 func defaultSettings() Settings {
 	return Settings{Token: os.Getenv("TELEBOT_SECRET")}
 }
@@ -50,4 +53,46 @@ func TestNewBot(t *testing.T) {
 	assert.Equal(t, pref.URL, b.URL)
 	assert.Equal(t, pref.Poller, b.Poller)
 	assert.Equal(t, 50, cap(b.Updates))
+}
+
+func TestHandle(t *testing.T) {
+	b.Handle("/start", func(m *Message) {})
+	assert.Contains(t, b.handlers, "/start")
+
+	btn := &InlineButton{Unique: "test"}
+	b.Handle(btn, func(c *Callback) {})
+	assert.Contains(t, b.handlers, btn.CallbackUnique())
+
+	assert.Panics(t, func() { b.Handle(1, func() {}) })
+}
+
+func TestStart(t *testing.T) {
+	// cached bot has no poller
+	assert.Panics(t, func() { b.Start() })
+
+	pref := defaultSettings()
+
+	pref.Poller = &LongPoller{}
+	b, err := NewBot(pref)
+	assert.NoError(t, err)
+
+	// TODO: deleteWebhook
+
+	time.AfterFunc(50*time.Millisecond, b.Stop)
+	b.Start() // stops after some delay
+	assert.Empty(t, b.stop)
+
+	pref.Poller = &testPoller{Message: "/start"}
+	b, err = NewBot(pref)
+	assert.NoError(t, err)
+
+	var ok bool
+	b.Handle("/start", func(m *Message) {
+		assert.Equal(t, m.Text, "/start")
+		ok = true
+	})
+
+	time.AfterFunc(50*time.Millisecond, b.Stop)
+	b.Start() // stops after some delay
+	assert.True(t, ok)
 }

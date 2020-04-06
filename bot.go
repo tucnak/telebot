@@ -157,9 +157,8 @@ func (b *Bot) Start() {
 		panic("telebot: can't start without a poller")
 	}
 
-	stopPoller := make(chan struct{})
-
-	go b.Poller.Poll(b, b.Updates, stopPoller)
+	stop := make(chan struct{})
+	go b.Poller.Poll(b, b.Updates, stop)
 
 	for {
 		select {
@@ -169,10 +168,10 @@ func (b *Bot) Start() {
 
 		// call to stop polling
 		case <-b.stop:
-			stopPoller <- struct{}{}
+			stop <- struct{}{}
 
 		// polling has stopped
-		case <-stopPoller:
+		case <-stop:
 			return
 		}
 	}

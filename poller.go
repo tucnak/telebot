@@ -94,6 +94,7 @@ func (p *LongPoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 		updates, err := b.getUpdates(p.LastUpdateID+1, p.Timeout)
 
 		if err != nil {
+			b.debug(err)
 			b.debug(ErrCouldNotUpdate)
 			continue
 		}
