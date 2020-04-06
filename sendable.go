@@ -264,12 +264,12 @@ func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 	}
 	embedSendOptions(params, opt)
 
-	respJSON, err := b.Raw("sendLocation", params)
+	data, err := b.Raw("sendLocation", params)
 	if err != nil {
 		return nil, err
 	}
 
-	return extractMsgResponse(respJSON)
+	return extractMessage(data)
 }
 
 // Send delivers media through bot b to recipient.
@@ -285,12 +285,12 @@ func (v *Venue) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	}
 	embedSendOptions(params, opt)
 
-	respJSON, err := b.Raw("sendVenue", params)
+	data, err := b.Raw("sendVenue", params)
 	if err != nil {
 		return nil, err
 	}
 
-	return extractMsgResponse(respJSON)
+	return extractMessage(data)
 }
 
 // Send delivers media through bot b to recipient.
@@ -309,12 +309,12 @@ func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 	}
 	embedSendOptions(params, opt)
 
-	respJSON, err := b.Raw("sendInvoice", params)
+	data, err := b.Raw("sendInvoice", params)
 	if err != nil {
 		return nil, err
 	}
 
-	return extractMsgResponse(respJSON)
+	return extractMessage(data)
 }
 
 func (p *Poll) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
@@ -336,10 +336,10 @@ func (p *Poll) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	opts, _ := json.Marshal(options)
 	params["options"] = string(opts)
 
-	respJSON, err := b.Raw("sendPoll", params)
+	data, err := b.Raw("sendPoll", params)
 	if err != nil {
 		return nil, err
 	}
 
-	return extractMsgResponse(respJSON)
+	return extractMessage(data)
 }

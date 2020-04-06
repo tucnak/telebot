@@ -2,6 +2,7 @@ package telebot
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"strconv"
 
@@ -10,7 +11,6 @@ import (
 
 func (b *Bot) debug(err error) {
 	err = errors.WithStack(err)
-
 	if b.reporter != nil {
 		b.reporter(err)
 	} else {
@@ -28,84 +28,39 @@ func (b *Bot) deferDebug() {
 	}
 }
 
-func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, error) {
-	params := map[string]string{
-		"chat_id": to.Recipient(),
-		"text":    text,
-	}
-	embedSendOptions(params, opt)
-
-	respJSON, err := b.Raw("sendMessage", params)
-	if err != nil {
-		return nil, err
-	}
-
-	return extractMsgResponse(respJSON)
-}
-
 // wrapError returns new wrapped telebot-related error.
 func wrapError(err error) error {
 	return errors.Wrap(err, "telebot")
 }
 
-func isUserInList(user *User, list []User) bool {
-	for _, user2 := range list {
-		if user.ID == user2.ID {
-			return true
-		}
+// extractOk checks given result for error. If result is ok returns nil.
+// In other cases it extracts API error. If error is not presented
+// in errors.go, it will be prefixed with `unknown` keyword.
+func extractOk(data []byte) error {
+	match := errorRx.FindStringSubmatch(string(data))
+	if match == nil || len(match) < 3 {
+		return nil
 	}
 
-	return false
+	desc := match[2]
+	err := ErrByDescription(desc)
+	if err == nil {
+		code, _ := strconv.Atoi(match[1])
+		err = fmt.Errorf("telegram unknown: %s (%d)", desc, code)
+	}
+	return err
 }
 
-func extractMsgResponse(respJSON []byte) (*Message, error) {
+// extractMessage extracts common Message result from given data.
+// Should be called after extractOk or b.Raw to handle possible errors.
+func extractMessage(data []byte) (*Message, error) {
 	var resp struct {
-		Ok          bool
-		Result      *Message
-		Description string
+		Result *Message
 	}
-
-	err := json.Unmarshal(respJSON, &resp)
-	if err != nil {
-		var resp struct {
-			Ok          bool
-			Result      bool
-			Description string
-		}
-
-		err := json.Unmarshal(respJSON, &resp)
-		if err != nil {
-			return nil, errors.Wrap(err, "bad response json")
-		}
-
-		if !resp.Ok {
-			return nil, errors.Errorf("api error: %s", resp.Description)
-		}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
 	}
-
-	if !resp.Ok {
-		return nil, errors.Errorf("api error: %s", resp.Description)
-	}
-
 	return resp.Result, nil
-}
-
-func extractOkResponse(respJSON []byte) error {
-	var resp struct {
-		Ok          bool
-		Description string
-	}
-
-	err := json.Unmarshal(respJSON, &resp)
-	if err != nil {
-		return errors.Wrap(err, "bad response json")
-	}
-
-	if !resp.Ok {
-		return errors.Errorf("api error: %s", resp.Description)
-	}
-
-	return nil
 }
 
 func extractOptions(how []interface{}) *SendOptions {
@@ -115,13 +70,11 @@ func extractOptions(how []interface{}) *SendOptions {
 		switch opt := prop.(type) {
 		case *SendOptions:
 			opts = opt.copy()
-
 		case *ReplyMarkup:
 			if opts == nil {
 				opts = &SendOptions{}
 			}
 			opts.ReplyMarkup = opt.copy()
-
 		case Option:
 			if opts == nil {
 				opts = &SendOptions{}
@@ -145,13 +98,11 @@ func extractOptions(how []interface{}) *SendOptions {
 			default:
 				panic("telebot: unsupported flag-option")
 			}
-
 		case ParseMode:
 			if opts == nil {
 				opts = &SendOptions{}
 			}
 			opts.ParseMode = opt
-
 		default:
 			panic("telebot: unsupported send-option")
 		}
@@ -209,9 +160,9 @@ func processButtons(keys [][]InlineButton) {
 	}
 }
 
-func embedRights(p map[string]string, prv Rights) {
-	jsonRepr, _ := json.Marshal(prv)
-	_ = json.Unmarshal(jsonRepr, &p)
+func embedRights(p map[string]string, rights Rights) {
+	data, _ := json.Marshal(rights)
+	_ = json.Unmarshal(data, &p)
 }
 
 func thumbnailToFilemap(thumb *Photo) map[string]File {
@@ -219,4 +170,13 @@ func thumbnailToFilemap(thumb *Photo) map[string]File {
 		return map[string]File{"thumb": thumb.File}
 	}
 	return nil
+}
+
+func isUserInList(user *User, list []User) bool {
+	for _, user2 := range list {
+		if user.ID == user2.ID {
+			return true
+		}
+	}
+	return false
 }

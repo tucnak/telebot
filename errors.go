@@ -53,6 +53,7 @@ var (
 	ErrBlockedByUser     = NewAPIError(401, "Forbidden: bot was blocked by the user")
 	ErrUserIsDeactivated = NewAPIError(401, "Forbidden: user is deactivated")
 	ErrNotFound          = NewAPIError(404, "Not Found")
+	ErrInternal          = NewAPIError(500, "Internal Server Error ")
 
 	// Bad request errors
 	ErrTooLarge             = NewAPIError(400, "Request Entity Too Large")

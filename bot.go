@@ -106,12 +106,11 @@ type Update struct {
 // ChosenInlineResult represents a result of an inline query that was chosen
 // by the user and sent to their chat partner.
 type ChosenInlineResult struct {
-	From     User      `json:"from"`
-	Location *Location `json:"location,omitempty"`
-	ResultID string    `json:"result_id"`
-	Query    string    `json:"query"`
-	// Inline messages only!
-	MessageID string `json:"inline_message_id"`
+	From      User      `json:"from"`
+	Location  *Location `json:"location,omitempty"`
+	ResultID  string    `json:"result_id"`
+	Query     string    `json:"query"`
+	MessageID string    `json:"inline_message_id"` // inline messages only!
 }
 
 type PreCheckoutQuery struct {
@@ -646,7 +645,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 	sendOpts := extractOptions(options)
 	embedSendOptions(params, sendOpts)
 
-	respJSON, err := b.sendFiles("sendMediaGroup", files, params)
+	data, err := b.sendFiles("sendMediaGroup", files, params)
 	if err != nil {
 		return nil, err
 	}
@@ -657,7 +656,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 		Description string
 	}
 
-	err = json.Unmarshal(respJSON, &resp)
+	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return nil, errors.Wrap(err, "bad response json")
 	}
@@ -709,12 +708,12 @@ func (b *Bot) Forward(to Recipient, what *Message, options ...interface{}) (*Mes
 	sendOpts := extractOptions(options)
 	embedSendOptions(params, sendOpts)
 
-	respJSON, err := b.Raw("forwardMessage", params)
+	data, err := b.Raw("forwardMessage", params)
 	if err != nil {
 		return nil, err
 	}
 
-	return extractMsgResponse(respJSON)
+	return extractMessage(data)
 }
 
 // Edit is magic, it lets you change already sent message.
@@ -753,12 +752,12 @@ func (b *Bot) Edit(message Editable, what interface{}, options ...interface{}) (
 	sendOpts := extractOptions(options)
 	embedSendOptions(params, sendOpts)
 
-	respJSON, err := b.Raw("editMessageText", params)
+	data, err := b.Raw("editMessageText", params)
 	if err != nil {
 		return nil, err
 	}
 
-	return extractMsgResponse(respJSON)
+	return extractMessage(data)
 }
 
 // EditReplyMarkup used to edit reply markup of already sent message.
@@ -781,12 +780,12 @@ func (b *Bot) EditReplyMarkup(message Editable, markup *ReplyMarkup) (*Message, 
 	jsonMarkup, _ := json.Marshal(markup)
 	params["reply_markup"] = string(jsonMarkup)
 
-	respJSON, err := b.Raw("editMessageReplyMarkup", params)
+	data, err := b.Raw("editMessageReplyMarkup", params)
 	if err != nil {
 		return nil, err
 	}
 
-	return extractMsgResponse(respJSON)
+	return extractMessage(data)
 }
 
 // EditCaption used to edit already sent photo caption with known recipient and message id.
@@ -808,12 +807,12 @@ func (b *Bot) EditCaption(message Editable, caption string, options ...interface
 	sendOpts := extractOptions(options)
 	embedSendOptions(params, sendOpts)
 
-	respJSON, err := b.Raw("editMessageCaption", params)
+	data, err := b.Raw("editMessageCaption", params)
 	if err != nil {
 		return nil, err
 	}
 
-	return extractMsgResponse(respJSON)
+	return extractMessage(data)
 }
 
 // EditMedia used to edit already sent media with known recipient and message id.
@@ -947,12 +946,12 @@ func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...inte
 
 	embedSendOptions(params, sendOpts)
 
-	respJSON, err := b.sendFiles("editMessageMedia", file, params)
+	data, err := b.sendFiles("editMessageMedia", file, params)
 	if err != nil {
 		return nil, err
 	}
 
-	return extractMsgResponse(respJSON)
+	return extractMessage(data)
 }
 
 // Delete removes the message, including service messages,
@@ -974,12 +973,12 @@ func (b *Bot) Delete(message Editable) error {
 		"message_id": messageID,
 	}
 
-	respJSON, err := b.Raw("deleteMessage", params)
+	data, err := b.Raw("deleteMessage", params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // Notify updates the chat action for recipient.
@@ -997,12 +996,12 @@ func (b *Bot) Notify(recipient Recipient, action ChatAction) error {
 		"action":  string(action),
 	}
 
-	respJSON, err := b.Raw("sendChatAction", params)
+	data, err := b.Raw("sendChatAction", params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // Accept finalizes the deal.
@@ -1018,12 +1017,12 @@ func (b *Bot) Accept(query *PreCheckoutQuery, errorMessage ...string) error {
 		params["error_message"] = errorMessage[0]
 	}
 
-	respJSON, err := b.Raw("answerPreCheckoutQuery", params)
+	data, err := b.Raw("answerPreCheckoutQuery", params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // Answer sends a response for a given inline query. A query can only
@@ -1036,12 +1035,12 @@ func (b *Bot) Answer(query *Query, response *QueryResponse) error {
 		result.Process()
 	}
 
-	respJSON, err := b.Raw("answerInlineQuery", response)
+	data, err := b.Raw("answerInlineQuery", response)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // Respond sends a response for a given callback query. A callback can
@@ -1062,12 +1061,12 @@ func (b *Bot) Respond(callback *Callback, responseOptional ...*CallbackResponse)
 	}
 
 	response.CallbackID = callback.ID
-	respJSON, err := b.Raw("answerCallbackQuery", response)
+	data, err := b.Raw("answerCallbackQuery", response)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // FileByID returns full file object including File.FilePath, allowing you to
@@ -1080,7 +1079,7 @@ func (b *Bot) FileByID(fileID string) (File, error) {
 		"file_id": fileID,
 	}
 
-	respJSON, err := b.Raw("getFile", params)
+	data, err := b.Raw("getFile", params)
 	if err != nil {
 		return File{}, err
 	}
@@ -1091,7 +1090,7 @@ func (b *Bot) FileByID(fileID string) (File, error) {
 		Result      File
 	}
 
-	err = json.Unmarshal(respJSON, &resp)
+	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return File{}, errors.Wrap(err, "bad response json")
 	}
@@ -1171,12 +1170,12 @@ func (b *Bot) StopLiveLocation(message Editable, options ...interface{}) (*Messa
 	sendOpts := extractOptions(options)
 	embedSendOptions(params, sendOpts)
 
-	respJSON, err := b.Raw("stopMessageLiveLocation", params)
+	data, err := b.Raw("stopMessageLiveLocation", params)
 	if err != nil {
 		return nil, err
 	}
 
-	return extractMsgResponse(respJSON)
+	return extractMessage(data)
 }
 
 // GetInviteLink should be used to export chat's invite link.
@@ -1185,7 +1184,7 @@ func (b *Bot) GetInviteLink(chat *Chat) (string, error) {
 		"chat_id": chat.Recipient(),
 	}
 
-	respJSON, err := b.Raw("exportChatInviteLink", params)
+	data, err := b.Raw("exportChatInviteLink", params)
 	if err != nil {
 		return "", err
 	}
@@ -1196,7 +1195,7 @@ func (b *Bot) GetInviteLink(chat *Chat) (string, error) {
 		Result      string
 	}
 
-	err = json.Unmarshal(respJSON, &resp)
+	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return "", errors.Wrap(err, "bad response json")
 	}
@@ -1215,12 +1214,12 @@ func (b *Bot) SetGroupTitle(chat *Chat, newTitle string) error {
 		"title":   newTitle,
 	}
 
-	respJSON, err := b.Raw("setChatTitle", params)
+	data, err := b.Raw("setChatTitle", params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // SetGroupDescription should be used to update group title.
@@ -1230,12 +1229,12 @@ func (b *Bot) SetGroupDescription(chat *Chat, description string) error {
 		"description": description,
 	}
 
-	respJSON, err := b.Raw("setChatDescription", params)
+	data, err := b.Raw("setChatDescription", params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // SetGroupPhoto should be used to update group photo.
@@ -1244,12 +1243,12 @@ func (b *Bot) SetGroupPhoto(chat *Chat, p *Photo) error {
 		"chat_id": chat.Recipient(),
 	}
 
-	respJSON, err := b.sendFiles("setChatPhoto", map[string]File{"photo": p.File}, params)
+	data, err := b.sendFiles("setChatPhoto", map[string]File{"photo": p.File}, params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // SetGroupStickerSet should be used to update group's group sticker set.
@@ -1259,12 +1258,12 @@ func (b *Bot) SetGroupStickerSet(chat *Chat, setName string) error {
 		"sticker_set_name": setName,
 	}
 
-	respJSON, err := b.Raw("setChatStickerSet", params)
+	data, err := b.Raw("setChatStickerSet", params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // DeleteGroupPhoto should be used to just remove group photo.
@@ -1273,12 +1272,12 @@ func (b *Bot) DeleteGroupPhoto(chat *Chat) error {
 		"chat_id": chat.Recipient(),
 	}
 
-	respJSON, err := b.Raw("deleteGroupPhoto", params)
+	data, err := b.Raw("deleteGroupPhoto", params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // DeleteGroupStickerSet should be used to just remove group sticker set.
@@ -1287,12 +1286,12 @@ func (b *Bot) DeleteGroupStickerSet(chat *Chat) error {
 		"chat_id": chat.Recipient(),
 	}
 
-	respJSON, err := b.Raw("deleteChatStickerSet", params)
+	data, err := b.Raw("deleteChatStickerSet", params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // Leave makes bot leave a group, supergroup or channel.
@@ -1301,12 +1300,12 @@ func (b *Bot) Leave(chat *Chat) error {
 		"chat_id": chat.Recipient(),
 	}
 
-	respJSON, err := b.Raw("leaveChat", params)
+	data, err := b.Raw("leaveChat", params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // Use this method to pin a message in a supergroup or a channel.
@@ -1323,12 +1322,12 @@ func (b *Bot) Pin(message Editable, options ...interface{}) error {
 	sendOpts := extractOptions(options)
 	embedSendOptions(params, sendOpts)
 
-	respJSON, err := b.Raw("pinChatMessage", params)
+	data, err := b.Raw("pinChatMessage", params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // Use this method to unpin a message in a supergroup or a channel.
@@ -1339,12 +1338,12 @@ func (b *Bot) Unpin(chat *Chat) error {
 		"chat_id": chat.Recipient(),
 	}
 
-	respJSON, err := b.Raw("unpinChatMessage", params)
+	data, err := b.Raw("unpinChatMessage", params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // ChatByID fetches chat info of its ID.
@@ -1358,7 +1357,7 @@ func (b *Bot) ChatByID(id string) (*Chat, error) {
 		"chat_id": id,
 	}
 
-	respJSON, err := b.Raw("getChat", params)
+	data, err := b.Raw("getChat", params)
 	if err != nil {
 		return nil, err
 	}
@@ -1369,7 +1368,7 @@ func (b *Bot) ChatByID(id string) (*Chat, error) {
 		Result      *Chat
 	}
 
-	err = json.Unmarshal(respJSON, &resp)
+	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return nil, errors.Wrap(err, "bad response json")
 	}
@@ -1392,7 +1391,7 @@ func (b *Bot) ProfilePhotosOf(user *User) ([]Photo, error) {
 		"user_id": user.Recipient(),
 	}
 
-	respJSON, err := b.Raw("getUserProfilePhotos", params)
+	data, err := b.Raw("getUserProfilePhotos", params)
 	if err != nil {
 		return nil, err
 	}
@@ -1407,7 +1406,7 @@ func (b *Bot) ProfilePhotosOf(user *User) ([]Photo, error) {
 		Description string `json:"description"`
 	}
 
-	err = json.Unmarshal(respJSON, &resp)
+	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return nil, errors.Wrap(err, "bad response json")
 	}
@@ -1428,7 +1427,7 @@ func (b *Bot) ChatMemberOf(chat *Chat, user *User) (*ChatMember, error) {
 		"user_id": user.Recipient(),
 	}
 
-	respJSON, err := b.Raw("getChatMember", params)
+	data, err := b.Raw("getChatMember", params)
 	if err != nil {
 		return nil, err
 	}
@@ -1439,7 +1438,7 @@ func (b *Bot) ChatMemberOf(chat *Chat, user *User) (*ChatMember, error) {
 		Description string `json:"description"`
 	}
 
-	err = json.Unmarshal(respJSON, &resp)
+	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return nil, errors.Wrap(err, "bad response json")
 	}
@@ -1469,7 +1468,7 @@ func (b *Bot) UploadStickerFile(userID int, pngSticker *File) (*File, error) {
 		"user_id": strconv.Itoa(userID),
 	}
 
-	respJSON, err := b.sendFiles("uploadStickerFile", files, params)
+	data, err := b.sendFiles("uploadStickerFile", files, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1480,7 +1479,7 @@ func (b *Bot) UploadStickerFile(userID int, pngSticker *File) (*File, error) {
 		Description string
 	}
 
-	err = json.Unmarshal(respJSON, &resp)
+	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return nil, err
 	}
@@ -1494,7 +1493,7 @@ func (b *Bot) UploadStickerFile(userID int, pngSticker *File) (*File, error) {
 
 // GetStickerSet returns StickerSet on success.
 func (b *Bot) GetStickerSet(name string) (*StickerSet, error) {
-	respJSON, err := b.Raw("getStickerSet", map[string]string{"name": name})
+	data, err := b.Raw("getStickerSet", map[string]string{"name": name})
 	if err != nil {
 		return nil, err
 	}
@@ -1504,7 +1503,7 @@ func (b *Bot) GetStickerSet(name string) (*StickerSet, error) {
 		Description string
 		Result      *StickerSet
 	}
-	err = json.Unmarshal(respJSON, &resp)
+	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return nil, err
 	}
@@ -1536,12 +1535,12 @@ func (b *Bot) CreateNewStickerSet(sp StickerSetParams, containsMasks bool, maskP
 		params["mask_position"] = string(mp)
 	}
 
-	respJSON, err := b.sendFiles("createNewStickerSet", files, params)
+	data, err := b.sendFiles("createNewStickerSet", files, params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // AddStickerToSet adds new sticker to existing sticker set.
@@ -1564,12 +1563,12 @@ func (b *Bot) AddStickerToSet(sp StickerSetParams, maskPosition MaskPosition) er
 		params["mask_position"] = string(mp)
 	}
 
-	respJSON, err := b.sendFiles("addStickerToSet", files, params)
+	data, err := b.sendFiles("addStickerToSet", files, params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // SetStickerPositionInSet moves a sticker in set to a specific position.
@@ -1578,20 +1577,20 @@ func (b *Bot) SetStickerPositionInSet(sticker string, position int) error {
 		"sticker":  sticker,
 		"position": strconv.Itoa(position),
 	}
-	respJSON, err := b.Raw("setStickerPositionInSet", params)
+	data, err := b.Raw("setStickerPositionInSet", params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // DeleteStickerFromSet deletes sticker from set created by the bot.
 func (b *Bot) DeleteStickerFromSet(sticker string) error {
-	respJSON, err := b.Raw("deleteStickerFromSet", map[string]string{"sticker": sticker})
+	data, err := b.Raw("deleteStickerFromSet", map[string]string{"sticker": sticker})
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }

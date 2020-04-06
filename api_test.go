@@ -60,5 +60,5 @@ func TestRaw(t *testing.T) {
 	assert.EqualError(t, err, "telebot: "+io.ErrUnexpectedEOF.Error())
 
 	_, err = b.Raw("testUnknownError", nil)
-	assert.EqualError(t, err, "telegram: unknown error (400)")
+	assert.EqualError(t, err, "telegram unknown: unknown error (400)")
 }

@@ -62,12 +62,12 @@ func (b *Bot) Ban(chat *Chat, member *ChatMember) error {
 		"until_date": strconv.FormatInt(member.RestrictedUntil, 10),
 	}
 
-	respJSON, err := b.Raw("kickChatMember", params)
+	data, err := b.Raw("kickChatMember", params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // Unban will unban user from chat, who would have thought eh?
@@ -77,12 +77,12 @@ func (b *Bot) Unban(chat *Chat, user *User) error {
 		"user_id": user.Recipient(),
 	}
 
-	respJSON, err := b.Raw("unbanChatMember", params)
+	data, err := b.Raw("unbanChatMember", params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // Restrict let's you restrict a subset of member's rights until
@@ -104,12 +104,12 @@ func (b *Bot) Restrict(chat *Chat, member *ChatMember) error {
 
 	embedRights(params, prv)
 
-	respJSON, err := b.Raw("restrictChatMember", params)
+	data, err := b.Raw("restrictChatMember", params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // Promote lets you update member's admin rights, such as:
@@ -133,12 +133,12 @@ func (b *Bot) Promote(chat *Chat, member *ChatMember) error {
 
 	embedRights(params, prv)
 
-	respJSON, err := b.Raw("promoteChatMember", params)
+	data, err := b.Raw("promoteChatMember", params)
 	if err != nil {
 		return err
 	}
 
-	return extractOkResponse(respJSON)
+	return extractOk(data)
 }
 
 // AdminsOf return a member list of chat admins.
@@ -152,7 +152,7 @@ func (b *Bot) AdminsOf(chat *Chat) ([]ChatMember, error) {
 		"chat_id": chat.Recipient(),
 	}
 
-	respJSON, err := b.Raw("getChatAdministrators", params)
+	data, err := b.Raw("getChatAdministrators", params)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +163,7 @@ func (b *Bot) AdminsOf(chat *Chat) ([]ChatMember, error) {
 		Description string `json:"description"`
 	}
 
-	err = json.Unmarshal(respJSON, &resp)
+	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return nil, errors.Wrap(err, "bad response json")
 	}
@@ -181,7 +181,7 @@ func (b *Bot) Len(chat *Chat) (int, error) {
 		"chat_id": chat.Recipient(),
 	}
 
-	respJSON, err := b.Raw("getChatMembersCount", params)
+	data, err := b.Raw("getChatMembersCount", params)
 	if err != nil {
 		return 0, err
 	}
@@ -192,7 +192,7 @@ func (b *Bot) Len(chat *Chat) (int, error) {
 		Description string `json:"description"`
 	}
 
-	err = json.Unmarshal(respJSON, &resp)
+	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return 0, errors.Wrap(err, "bad response json")
 	}
