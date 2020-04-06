@@ -40,7 +40,7 @@ func (p *Poll) IsQuiz() bool {
 	return p.Type == "quiz"
 }
 
-func (p *Poll) AddAnswers(text ...string) {
+func (p *Poll) AddOptions(text ...string) {
 	for _, t := range text {
 		p.Options = append(p.Options, PollOption{Text: t})
 	}
