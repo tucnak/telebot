@@ -193,17 +193,15 @@ func (b *Bot) incomingUpdate(upd *Update) {
 			}
 
 			match := cmdRx.FindAllStringSubmatch(m.Text, -1)
-
-			// Command found - handle and return
 			if match != nil {
 				// Syntax: "</command>@<bot> <payload>"
-				command, botName := match[0][1], match[0][3]
-				m.Payload = match[0][5]
 
+				command, botName := match[0][1], match[0][3]
 				if botName != "" && !strings.EqualFold(b.Me.Username, botName) {
 					return
 				}
 
+				m.Payload = match[0][5]
 				if b.handle(command, m) {
 					return
 				}
@@ -214,17 +212,14 @@ func (b *Bot) incomingUpdate(upd *Update) {
 				return
 			}
 
-			// OnText
 			b.handle(OnText, m)
 			return
 		}
 
-		// on media
 		if b.handleMedia(m) {
 			return
 		}
 
-		// OnAddedToGroup
 		wasAdded := (m.UserJoined != nil && m.UserJoined.ID == b.Me.ID) ||
 			(m.UsersJoined != nil && isUserInList(b.Me, m.UsersJoined))
 		if m.GroupCreated || m.SuperGroupCreated || wasAdded {
@@ -242,7 +237,6 @@ func (b *Bot) incomingUpdate(upd *Update) {
 				m.UserJoined = &user
 				b.handle(OnUserJoined, m)
 			}
-
 			return
 		}
 
@@ -268,25 +262,21 @@ func (b *Bot) incomingUpdate(upd *Update) {
 
 		if m.MigrateTo != 0 {
 			if handler, ok := b.handlers[OnMigration]; ok {
-				if handler, ok := handler.(func(int64, int64)); ok {
-					// i'm not 100% sure that any of the values
-					// won't be cached, so I pass them all in:
-					go func(b *Bot, handler func(int64, int64), from, to int64) {
-						if b.reporter == nil {
-							defer b.deferDebug()
-						}
-						handler(from, to)
-					}(b, handler, m.Chat.ID, m.MigrateTo)
-
-				} else {
+				handler, ok := handler.(func(int64, int64))
+				if !ok {
 					panic("telebot: migration handler is bad")
 				}
+
+				go func(b *Bot, handler func(int64, int64), from, to int64) {
+					if b.reporter == nil {
+						defer b.deferDebug()
+					}
+					handler(from, to)
+				}(b, handler, m.Chat.ID, m.MigrateTo)
 			}
 
 			return
 		}
-
-		return
 	}
 
 	if upd.EditedMessage != nil {
@@ -315,6 +305,8 @@ func (b *Bot) incomingUpdate(upd *Update) {
 		if upd.Callback.Data != "" {
 			if upd.Callback.MessageID != "" {
 				upd.Callback.Message = &Message{
+					// InlineID indicates that message
+					// is inline so we have only its id
 					InlineID: upd.Callback.MessageID,
 				}
 			}
@@ -322,157 +314,144 @@ func (b *Bot) incomingUpdate(upd *Update) {
 			data := upd.Callback.Data
 			if data[0] == '\f' {
 				match := cbackRx.FindAllStringSubmatch(data, -1)
-
 				if match != nil {
 					unique, payload := match[0][1], match[0][3]
 
 					if handler, ok := b.handlers["\f"+unique]; ok {
-						if handler, ok := handler.(func(*Callback)); ok {
-							upd.Callback.Data = payload
-							// i'm not 100% sure that any of the values
-							// won't be cached, so I pass them all in:
-							go func(b *Bot, handler func(*Callback), c *Callback) {
-								if b.reporter == nil {
-									defer b.deferDebug()
-								}
-								handler(c)
-							}(b, handler, upd.Callback)
-
-							return
+						handler, ok := handler.(func(*Callback))
+						if !ok {
+							panic(fmt.Errorf("telebot: %s callback handler is bad", unique))
 						}
-					}
 
+						upd.Callback.Data = payload
+						go func(b *Bot, handler func(*Callback), c *Callback) {
+							if b.reporter == nil {
+								defer b.deferDebug()
+							}
+							handler(c)
+						}(b, handler, upd.Callback)
+
+						return
+					}
 				}
 			}
 		}
 
 		if handler, ok := b.handlers[OnCallback]; ok {
-			if handler, ok := handler.(func(*Callback)); ok {
-				// i'm not 100% sure that any of the values
-				// won't be cached, so I pass them all in:
-				go func(b *Bot, handler func(*Callback), c *Callback) {
-					if b.reporter == nil {
-						defer b.deferDebug()
-					}
-					handler(c)
-				}(b, handler, upd.Callback)
-
-			} else {
+			handler, ok := handler.(func(*Callback))
+			if !ok {
 				panic("telebot: callback handler is bad")
 			}
+
+			go func(b *Bot, handler func(*Callback), c *Callback) {
+				if b.reporter == nil {
+					defer b.deferDebug()
+				}
+				handler(c)
+			}(b, handler, upd.Callback)
 		}
+
 		return
 	}
 
 	if upd.Query != nil {
 		if handler, ok := b.handlers[OnQuery]; ok {
-			if handler, ok := handler.(func(*Query)); ok {
-				// i'm not 100% sure that any of the values
-				// won't be cached, so I pass them all in:
-				go func(b *Bot, handler func(*Query), q *Query) {
-					if b.reporter == nil {
-						defer b.deferDebug()
-					}
-					handler(q)
-				}(b, handler, upd.Query)
-
-			} else {
+			handler, ok := handler.(func(*Query))
+			if !ok {
 				panic("telebot: query handler is bad")
 			}
+
+			go func(b *Bot, handler func(*Query), q *Query) {
+				if b.reporter == nil {
+					defer b.deferDebug()
+				}
+				handler(q)
+			}(b, handler, upd.Query)
 		}
+
 		return
 	}
 
 	if upd.ChosenInlineResult != nil {
 		if handler, ok := b.handlers[OnChosenInlineResult]; ok {
-			if handler, ok := handler.(func(*ChosenInlineResult)); ok {
-				// i'm not 100% sure that any of the values
-				// won't be cached, so I pass them all in:
-				go func(b *Bot, handler func(*ChosenInlineResult),
-					r *ChosenInlineResult) {
-					if b.reporter == nil {
-						defer b.deferDebug()
-					}
-					handler(r)
-				}(b, handler, upd.ChosenInlineResult)
-
-			} else {
+			handler, ok := handler.(func(*ChosenInlineResult))
+			if !ok {
 				panic("telebot: chosen inline result handler is bad")
 			}
+
+			go func(b *Bot, handler func(*ChosenInlineResult), r *ChosenInlineResult) {
+				if b.reporter == nil {
+					defer b.deferDebug()
+				}
+				handler(r)
+			}(b, handler, upd.ChosenInlineResult)
 		}
+
 		return
 	}
 
 	if upd.PreCheckoutQuery != nil {
 		if handler, ok := b.handlers[OnCheckout]; ok {
-			if handler, ok := handler.(func(*PreCheckoutQuery)); ok {
-				// i'm not 100% sure that any of the values
-				// won't be cached, so I pass them all in:
-				go func(b *Bot, handler func(*PreCheckoutQuery),
-					r *PreCheckoutQuery) {
-					if b.reporter == nil {
-						defer b.deferDebug()
-					}
-					handler(r)
-				}(b, handler, upd.PreCheckoutQuery)
-
-			} else {
-				panic("telebot: checkout handler is bad")
+			handler, ok := handler.(func(*PreCheckoutQuery))
+			if !ok {
+				panic("telebot: pre checkout query handler is bad")
 			}
+
+			go func(b *Bot, handler func(*PreCheckoutQuery), pre *PreCheckoutQuery) {
+				if b.reporter == nil {
+					defer b.deferDebug()
+				}
+				handler(pre)
+			}(b, handler, upd.PreCheckoutQuery)
 		}
+
 		return
 	}
 
 	if upd.Poll != nil {
 		if handler, ok := b.handlers[OnPoll]; ok {
-			if handler, ok := handler.(func(*Poll)); ok {
-				// i'm not 100% sure that any of the values
-				// won't be cached, so I pass them all in:
-				go func(b *Bot, handler func(*Poll),
-					r *Poll) {
-					if b.reporter == nil {
-						defer b.deferDebug()
-					}
-					handler(r)
-				}(b, handler, upd.Poll)
-
-			} else {
+			handler, ok := handler.(func(*Poll))
+			if !ok {
 				panic("telebot: poll handler is bad")
 			}
+
+			go func(b *Bot, handler func(*Poll), p *Poll) {
+				if b.reporter == nil {
+					defer b.deferDebug()
+				}
+				handler(p)
+			}(b, handler, upd.Poll)
 		}
+
 		return
 	}
 
 	if upd.PollAnswer != nil {
 		if handler, ok := b.handlers[OnPollAnswer]; ok {
-			if handler, ok := handler.(func(*PollAnswer)); ok {
-				// i'm not 100% sure that any of the values
-				// won't be cached, so I pass them all in:
-				go func(b *Bot, handler func(*PollAnswer),
-					r *PollAnswer) {
-					if b.reporter == nil {
-						defer b.deferDebug()
-					}
-					handler(r)
-				}(b, handler, upd.PollAnswer)
-
-			} else {
+			handler, ok := handler.(func(*PollAnswer))
+			if !ok {
 				panic("telebot: poll answer handler is bad")
 			}
+
+			go func(b *Bot, handler func(*PollAnswer), pa *PollAnswer) {
+				if b.reporter == nil {
+					defer b.deferDebug()
+				}
+				handler(pa)
+			}(b, handler, upd.PollAnswer)
 		}
+
 		return
 	}
 }
 
 func (b *Bot) handle(end string, m *Message) bool {
-	handler, ok := b.handlers[end]
-	if !ok {
-		return false
-	}
+	if handler, ok := b.handlers[end]; ok {
+		handler, ok := handler.(func(*Message))
+		if !ok {
+			panic(fmt.Errorf("telebot: %s handler is bad", end))
+		}
 
-	if handler, ok := handler.(func(*Message)); ok {
-		// i'm not 100% sure that any of the values
-		// won't be cached, so I pass them all in:
 		go func(b *Bot, handler func(*Message), m *Message) {
 			if b.reporter == nil {
 				defer b.deferDebug()
@@ -487,57 +466,31 @@ func (b *Bot) handle(end string, m *Message) bool {
 }
 
 func (b *Bot) handleMedia(m *Message) bool {
-	if m.Photo != nil {
+	switch {
+	case m.Photo != nil:
 		b.handle(OnPhoto, m)
-		return true
-	}
-
-	if m.Voice != nil {
+	case m.Voice != nil:
 		b.handle(OnVoice, m)
-		return true
-	}
-
-	if m.Audio != nil {
+	case m.Audio != nil:
 		b.handle(OnAudio, m)
-		return true
-	}
-
-	if m.Document != nil {
+	case m.Document != nil:
 		b.handle(OnDocument, m)
-		return true
-	}
-
-	if m.Sticker != nil {
+	case m.Sticker != nil:
 		b.handle(OnSticker, m)
-		return true
-	}
-
-	if m.Video != nil {
+	case m.Video != nil:
 		b.handle(OnVideo, m)
-		return true
-	}
-
-	if m.VideoNote != nil {
+	case m.VideoNote != nil:
 		b.handle(OnVideoNote, m)
-		return true
-	}
-
-	if m.Contact != nil {
+	case m.Contact != nil:
 		b.handle(OnContact, m)
-		return true
-	}
-
-	if m.Location != nil {
+	case m.Location != nil:
 		b.handle(OnLocation, m)
-		return true
-	}
-
-	if m.Venue != nil {
+	case m.Venue != nil:
 		b.handle(OnVenue, m)
-		return true
+	default:
+		return false
 	}
-
-	return false
+	return true
 }
 
 // Stop gracefully shuts the poller down.
