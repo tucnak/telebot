@@ -1,4 +1,13 @@
 language: go
 
-env:
-    - TELEBOT_SECRET=107177593:AAHBJfF3nv3pZXVjXpoowVhv_KSGw56s8zo
+go:
+    - 1.11.x
+
+before_install:
+    - go get -t -v ./...
+
+script:
+    - go test -coverprofile=coverage.txt -covermode=atomic
+
+after_success:
+    - bash <(curl -s https://codecov.io/bash)
