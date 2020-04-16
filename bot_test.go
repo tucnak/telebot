@@ -261,24 +261,22 @@ func TestBotIncomingUpdate(t *testing.T) {
 	b.Start() // stops after some delay
 }
 
-func TestBotSend(t *testing.T) {
+func TestBot(t *testing.T) {
 	if chatID == 0 {
 		t.Skip("CHAT_ID is required for Send method test")
 	}
 
 	_, err := b.Send(to, nil)
-	assert.Equal(t, ErrUnsupportedSendable, err)
+	assert.Equal(t, ErrUnsupportedWhat, err)
+	_, err = b.Edit(&Message{Chat: &Chat{}}, nil)
+	assert.Equal(t, ErrUnsupportedWhat, err)
 
-	_, err = b.Send(nil, t.Name())
-	assert.Error(t, err)
+	_, err = b.Send(nil, "")
+	assert.Equal(t, ErrBadRecipient, err)
+	_, err = b.Forward(nil, nil)
+	assert.Equal(t, ErrBadRecipient, err)
 
-	t.Run("what=string", func(t *testing.T) {
-		msg, err := b.Send(to, t.Name())
-		assert.NoError(t, err)
-		assert.Equal(t, t.Name(), msg.Text)
-	})
-
-	t.Run("what=Sendable", func(t *testing.T) {
+	t.Run("Send(what=Sendable)", func(t *testing.T) {
 		photo := &Photo{
 			File:    File{FileID: photoID},
 			Caption: t.Name(),
@@ -288,5 +286,50 @@ func TestBotSend(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, msg.Photo)
 		assert.Equal(t, photo.Caption, msg.Caption)
+	})
+
+	var msg *Message
+
+	t.Run("Send(what=string)", func(t *testing.T) {
+		msg, err = b.Send(to, t.Name())
+		assert.NoError(t, err)
+		assert.Equal(t, t.Name(), msg.Text)
+
+		rpl, err := b.Reply(msg, t.Name())
+		assert.NoError(t, err)
+		assert.Equal(t, rpl.Text, msg.Text)
+		assert.NotNil(t, rpl.ReplyTo)
+		assert.Equal(t, rpl.ReplyTo, msg)
+		assert.True(t, rpl.IsReply())
+
+		fwd, err := b.Forward(to, msg)
+		assert.NoError(t, err)
+		assert.NotNil(t, msg, fwd)
+		assert.True(t, fwd.IsForwarded())
+
+		fwd.ID += 1 // nonexistent message
+		fwd, err = b.Forward(to, fwd)
+		assert.Equal(t, ErrToForwardNotFound, err)
+	})
+
+	t.Run("Edit(what=string)", func(t *testing.T) {
+		msg, err = b.Edit(msg, t.Name())
+		assert.NoError(t, err)
+		assert.Equal(t, t.Name(), msg.Text)
+
+		_, err = b.Edit(msg, msg.Text)
+		assert.Error(t, err) // message is not modified
+	})
+
+	t.Run("Edit(what=Location)", func(t *testing.T) {
+		loc := &Location{Lat: 42, Lng: 69, LivePeriod: 60}
+		msg, err := b.Send(to, loc)
+		assert.NoError(t, err)
+		assert.NotNil(t, msg.Location)
+
+		loc = &Location{Lat: loc.Lng, Lng: loc.Lat}
+		msg, err = b.Edit(msg, *loc)
+		assert.NoError(t, err)
+		assert.NotNil(t, msg.Location)
 	})
 }
