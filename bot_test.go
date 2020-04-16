@@ -3,14 +3,24 @@ package telebot
 import (
 	"net/http"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
-// Cached bot instance to avoid getMe method flooding.
-var b, _ = newTestBot()
+const (
+	photoID = "AgACAgIAAxkDAAIBV16Ybpg7l2jPgMUiiLJ3WaQOUqTrAAJorjEbh2TBSPSOinaCHfydQO_pki4AAwEAAwIAA3kAA_NQAAIYBA"
+)
+
+var (
+	// required to test send and edit methods
+	chatID, _ = strconv.ParseInt(os.Getenv("CHAT_ID"), 10, 64)
+
+	b, _ = newTestBot()      // cached bot instance to avoid getMe method flooding
+	to   = &Chat{ID: chatID} // to recipient for send and edit methods
+)
 
 func defaultSettings() Settings {
 	return Settings{Token: os.Getenv("TELEBOT_SECRET")}
@@ -71,8 +81,8 @@ func TestBotStart(t *testing.T) {
 	assert.Panics(t, func() { b.Start() })
 
 	pref := defaultSettings()
-
 	pref.Poller = &LongPoller{}
+
 	b, err := NewBot(pref)
 	assert.NoError(t, err)
 
@@ -105,7 +115,9 @@ func TestBotStart(t *testing.T) {
 
 func TestBotIncomingUpdate(t *testing.T) {
 	b, err := newTestBot()
-	assert.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	tp := &testPoller{updates: make(chan Update, 1)}
 	b.Poller = tp
@@ -247,4 +259,34 @@ func TestBotIncomingUpdate(t *testing.T) {
 
 	time.AfterFunc(100*time.Millisecond, b.Stop)
 	b.Start() // stops after some delay
+}
+
+func TestBotSend(t *testing.T) {
+	if chatID == 0 {
+		t.Skip("CHAT_ID is required for Send method test")
+	}
+
+	_, err := b.Send(to, nil)
+	assert.Equal(t, ErrUnsupportedSendable, err)
+
+	_, err = b.Send(nil, t.Name())
+	assert.Error(t, err)
+
+	t.Run("what=string", func(t *testing.T) {
+		msg, err := b.Send(to, t.Name())
+		assert.NoError(t, err)
+		assert.Equal(t, t.Name(), msg.Text)
+	})
+
+	t.Run("what=Sendable", func(t *testing.T) {
+		photo := &Photo{
+			File:    File{FileID: photoID},
+			Caption: t.Name(),
+		}
+
+		msg, err := b.Send(to, photo)
+		assert.NoError(t, err)
+		assert.NotNil(t, msg.Photo)
+		assert.Equal(t, photo.Caption, msg.Caption)
+	})
 }

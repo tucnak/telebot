@@ -44,7 +44,12 @@ func testRawServer(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestRaw(t *testing.T) {
-	_, err := b.Raw("BAD METHOD", nil)
+	b, err := newTestBot()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = b.Raw("BAD METHOD", nil)
 	assert.EqualError(t, err, ErrNotFound.Error())
 
 	_, err = b.Raw("", &testPayload{})

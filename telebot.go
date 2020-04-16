@@ -28,6 +28,12 @@
 //
 package telebot
 
+import "github.com/pkg/errors"
+
+var (
+	ErrUnsupportedSendable = errors.New("telebot: unsupported sendable")
+)
+
 // These are one of the possible events Handle() can deal with.
 //
 // For convenience, all Telebot-provided endpoints start with

@@ -521,7 +521,7 @@ func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Mes
 	case Sendable:
 		return object.Send(b, to, sendOpts)
 	default:
-		return nil, errors.New("telebot: unsupported sendable")
+		return nil, ErrUnsupportedSendable
 	}
 }
 

@@ -5,7 +5,6 @@ type testPoller struct {
 }
 
 func (p *testPoller) Poll(b *Bot, updates chan Update, stop chan struct{}) {
-
 	for {
 		select {
 		case upd := <-p.updates:
