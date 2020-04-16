@@ -52,7 +52,7 @@ func extractOk(data []byte) error {
 }
 
 // extractMessage extracts common Message result from given data.
-// Should be called after extractOk or b.Raw to handle possible errors.
+// Should be called after extractOk or b.Raw() to handle possible errors.
 func extractMessage(data []byte) (*Message, error) {
 	var resp struct {
 		Result *Message

@@ -511,7 +511,6 @@ func (b *Bot) Stop() {
 //     - Option (a shorcut flag for popular options)
 //     - ParseMode (HTML, Markdown, etc)
 //
-// This function will panic upon unsupported payloads and options!
 func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
@@ -525,7 +524,7 @@ func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Mes
 	case Sendable:
 		return object.Send(b, to, sendOpts)
 	default:
-		return nil, ErrUnsupportedSendable
+		return nil, ErrUnsupportedWhat
 	}
 }
 
@@ -643,22 +642,21 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 }
 
 // Reply behaves just like Send() with an exception of "reply-to" indicator.
+//
+// This function will panic upon nil Message.
 func (b *Bot) Reply(to *Message, what interface{}, options ...interface{}) (*Message, error) {
-	// This function will panic upon unsupported payloads and options!
 	sendOpts := extractOptions(options)
 	if sendOpts == nil {
 		sendOpts = &SendOptions{}
 	}
 
 	sendOpts.ReplyTo = to
-
 	return b.Send(to.Chat, what, sendOpts)
 }
 
-// Forward behaves just like Send() but of all options it
-// only supports Silent (see Bots API).
+// Forward behaves just like Send() but of all options it only supports Silent (see Bots API).
 //
-// This function will panic upon unsupported payloads and options!
+// This function will panic upon nil Message.
 func (b *Bot) Forward(to Recipient, what *Message, options ...interface{}) (*Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
@@ -687,37 +685,39 @@ func (b *Bot) Forward(to Recipient, what *Message, options ...interface{}) (*Mes
 //
 //     b.Edit(msg, msg.Text, newMarkup)
 //     b.Edit(msg, "new <b>text</b>", tb.ModeHTML)
+//     b.Edit(msg, tb.Location{42.1337, 69.4242})
 //
-//     // Edit live location:
-//     b.Edit(liveMsg, tb.Location{42.1337, 69.4242})
-//
-func (b *Bot) Edit(message Editable, what interface{}, options ...interface{}) (*Message, error) {
-	messageID, chatID := message.MessageSig()
-
-	params := map[string]string{}
+// This function will panic upon nil Editable.
+func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Message, error) {
+	var (
+		method string
+		params = map[string]string{}
+	)
 
 	switch v := what.(type) {
 	case string:
+		method = "editMessageText"
 		params["text"] = v
 	case Location:
+		method = "editMessageLiveLocation"
 		params["latitude"] = fmt.Sprintf("%f", v.Lat)
 		params["longitude"] = fmt.Sprintf("%f", v.Lng)
 	default:
-		panic("telebot: unsupported what argument")
+		return nil, ErrUnsupportedWhat
 	}
 
-	// if inline message
-	if chatID == 0 {
-		params["inline_message_id"] = messageID
+	msgID, chatID := msg.MessageSig()
+	if chatID == 0 { // if inline message
+		params["inline_message_id"] = msgID
 	} else {
 		params["chat_id"] = strconv.FormatInt(chatID, 10)
-		params["message_id"] = messageID
+		params["message_id"] = msgID
 	}
 
 	sendOpts := extractOptions(options)
 	embedSendOptions(params, sendOpts)
 
-	data, err := b.Raw("editMessageText", params)
+	data, err := b.Raw(method, params)
 	if err != nil {
 		return nil, err
 	}

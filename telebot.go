@@ -31,8 +31,8 @@ package telebot
 import "github.com/pkg/errors"
 
 var (
-	ErrBadRecipient        = errors.New("telebot: recipient is nil")
-	ErrUnsupportedSendable = errors.New("telebot: unsupported sendable")
+	ErrBadRecipient    = errors.New("telebot: recipient is nil")
+	ErrUnsupportedWhat = errors.New("telebot: unsupported what argument")
 )
 
 // These are one of the possible events Handle() can deal with.
