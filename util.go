@@ -177,7 +177,7 @@ func embedSendOptions(params map[string]string, opt *SendOptions) {
 	}
 
 	if opt.ParseMode != ModeDefault {
-		params["parse_mode"] = string(opt.ParseMode)
+		params["parse_mode"] = opt.ParseMode
 	}
 
 	if opt.ReplyMarkup != nil {
