@@ -188,7 +188,7 @@ func TestBotIncomingUpdate(t *testing.T) {
 			assert.Equal(t, "callback", c.Data)
 		}
 	})
-	b.Handle("\fcallback", func(c *Callback) {
+	b.Handle("\funique", func(c *Callback) {
 		assert.Equal(t, "callback", c.Data)
 	})
 	b.Handle(OnQuery, func(q *Query) {
