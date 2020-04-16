@@ -31,6 +31,7 @@ package telebot
 import "github.com/pkg/errors"
 
 var (
+	ErrBadRecipient        = errors.New("telebot: recipient is nil")
 	ErrUnsupportedSendable = errors.New("telebot: unsupported sendable")
 )
 

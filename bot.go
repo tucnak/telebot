@@ -513,6 +513,10 @@ func (b *Bot) Stop() {
 //
 // This function will panic upon unsupported payloads and options!
 func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Message, error) {
+	if to == nil {
+		return nil, ErrBadRecipient
+	}
+
 	sendOpts := extractOptions(options)
 
 	switch object := what.(type) {
@@ -530,6 +534,10 @@ func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Mes
 //
 // From all existing options, it only supports telebot.Silent.
 func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Message, error) {
+	if to == nil {
+		return nil, ErrBadRecipient
+	}
+
 	media := make([]string, len(a))
 	files := make(map[string]File)
 
@@ -652,6 +660,10 @@ func (b *Bot) Reply(to *Message, what interface{}, options ...interface{}) (*Mes
 //
 // This function will panic upon unsupported payloads and options!
 func (b *Bot) Forward(to Recipient, what *Message, options ...interface{}) (*Message, error) {
+	if to == nil {
+		return nil, ErrBadRecipient
+	}
+
 	params := map[string]string{
 		"chat_id":      to.Recipient(),
 		"from_chat_id": what.Chat.Recipient(),
@@ -943,9 +955,13 @@ func (b *Bot) Delete(message Editable) error {
 //
 // Currently, Telegram supports only a narrow range of possible
 // actions, these are aligned as constants of this package.
-func (b *Bot) Notify(recipient Recipient, action ChatAction) error {
+func (b *Bot) Notify(to Recipient, action ChatAction) error {
+	if to == nil {
+		return ErrBadRecipient
+	}
+
 	params := map[string]string{
-		"chat_id": recipient.Recipient(),
+		"chat_id": to.Recipient(),
 		"action":  string(action),
 	}
 
