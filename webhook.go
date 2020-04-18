@@ -82,8 +82,7 @@ func (h *Webhook) getParams() map[string]string {
 }
 
 func (h *Webhook) Poll(b *Bot, dest chan Update, stop chan struct{}) {
-	_, err := b.sendFiles("setWebhook", h.getFiles(), h.getParams())
-	if err != nil {
+	if err := b.SetWebhook(h); err != nil {
 		b.debug(err)
 		close(stop)
 		return
@@ -130,6 +129,11 @@ func (h *Webhook) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.dest <- update
+}
+
+func (b *Bot) SetWebhook(w *Webhook) error {
+	_, err := b.sendFiles("setWebhook", w.getFiles(), w.getParams())
+	return err
 }
 
 func (b *Bot) RemoveWebhook() error {
