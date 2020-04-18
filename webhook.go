@@ -131,11 +131,14 @@ func (h *Webhook) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.dest <- update
 }
 
+// SetWebhook configures a bot to receive incoming
+// updates via an outgoing webhook.
 func (b *Bot) SetWebhook(w *Webhook) error {
 	_, err := b.sendFiles("setWebhook", w.getFiles(), w.getParams())
 	return err
 }
 
+// RemoveWebhook removes webhook integration.
 func (b *Bot) RemoveWebhook() error {
 	_, err := b.Raw("deleteWebhook", nil)
 	return err
