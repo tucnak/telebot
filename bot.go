@@ -726,24 +726,29 @@ func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Mes
 }
 
 // EditReplyMarkup used to edit reply markup of already sent message.
+// Pass nil or empty ReplyMarkup to delete it from the message.
 //
-// On success, returns edited message object
+// On success, returns edited message object.
+// This function will panic upon nil Editable.
 func (b *Bot) EditReplyMarkup(message Editable, markup *ReplyMarkup) (*Message, error) {
 	messageID, chatID := message.MessageSig()
-
 	params := map[string]string{}
 
-	// if inline message
-	if chatID == 0 {
+	if chatID == 0 { // if inline message
 		params["inline_message_id"] = messageID
 	} else {
 		params["chat_id"] = strconv.FormatInt(chatID, 10)
 		params["message_id"] = messageID
 	}
 
+	if markup == nil {
+		// will delete reply markup
+		markup = &ReplyMarkup{}
+	}
+
 	processButtons(markup.InlineKeyboard)
-	jsonMarkup, _ := json.Marshal(markup)
-	params["reply_markup"] = string(jsonMarkup)
+	data, _ := json.Marshal(markup)
+	params["reply_markup"] = string(data)
 
 	data, err := b.Raw("editMessageReplyMarkup", params)
 	if err != nil {

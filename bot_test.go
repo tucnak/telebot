@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -331,5 +332,31 @@ func TestBot(t *testing.T) {
 		msg, err = b.Edit(msg, *loc)
 		assert.NoError(t, err)
 		assert.NotNil(t, msg.Location)
+	})
+
+	t.Run("EditReplyMarkup()", func(t *testing.T) {
+		markup := &ReplyMarkup{
+			InlineKeyboard: [][]InlineButton{{{
+				Data: "btn",
+				Text: "Hi Telebot!",
+			}}},
+		}
+		badMarkup := &ReplyMarkup{
+			InlineKeyboard: [][]InlineButton{{{
+				Data: strings.Repeat("*", 65),
+				Text: "Bad Button",
+			}}},
+		}
+
+		msg, err := b.EditReplyMarkup(msg, markup)
+		assert.NoError(t, err)
+		assert.Equal(t, msg.ReplyMarkup.InlineKeyboard, markup.InlineKeyboard)
+
+		msg, err = b.EditReplyMarkup(msg, nil)
+		assert.NoError(t, err)
+		assert.Nil(t, msg.ReplyMarkup.InlineKeyboard)
+
+		_, err = b.EditReplyMarkup(msg, badMarkup)
+		assert.Equal(t, ErrButtonDataInvalid, err)
 	})
 }
