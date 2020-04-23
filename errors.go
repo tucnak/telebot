@@ -66,6 +66,7 @@ var (
 	ErrEmptyChatID          = NewAPIError(400, "Bad Request: chat_id is empty")
 	ErrChatNotFound         = NewAPIError(400, "Bad Request: chat not found")
 	ErrMessageNotModified   = NewAPIError(400, "Bad Request: message is not modified")
+	ErrButtonDataInvalid    = NewAPIError(400, "Bad Request: BUTTON_DATA_INVALID")
 	ErrWrongTypeOfContent   = NewAPIError(400, "Bad Request: wrong type of the web page content")
 	ErrBadURLContent        = NewAPIError(400, "Bad Request: failed to get HTTP URL content")
 	ErrWrongFileID          = NewAPIError(400, "Bad Request: wrong file identifier/HTTP URL specified")
@@ -119,6 +120,8 @@ func ErrByDescription(s string) error {
 		return ErrChatNotFound
 	case ErrMessageNotModified.ʔ():
 		return ErrMessageNotModified
+	case ErrButtonDataInvalid.ʔ():
+		return ErrButtonDataInvalid
 	case ErrNoRightsToRestrict.ʔ():
 		return ErrNoRightsToRestrict
 	case ErrNoRightsToSend.ʔ():
