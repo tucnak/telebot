@@ -76,6 +76,7 @@ var (
 	ErrWrongFileIDPadding   = NewAPIError(400, "Bad Request: wrong remote file id specified: Wrong padding in the string")
 	ErrFailedImageProcess   = NewAPIError(400, "Bad Request: IMAGE_PROCESS_FAILED", "Image process failed")
 	ErrInvaliadStickerset   = NewAPIError(400, "Bad Request: STICKERSET_INVALID", "Stickerset is invalid")
+	ErrBadPollOptions       = NewAPIError(400, "Bad Request: expected Array of String as options")
 
 	// No rights errors
 	ErrNoRightsToRestrict     = NewAPIError(400, "Bad Request: not enough rights to restrict/unrestrict chat member")
@@ -122,6 +123,8 @@ func ErrByDescription(s string) error {
 		return ErrMessageNotModified
 	case ErrButtonDataInvalid.ʔ():
 		return ErrButtonDataInvalid
+	case ErrBadPollOptions.ʔ():
+		return ErrBadPollOptions
 	case ErrNoRightsToRestrict.ʔ():
 		return ErrNoRightsToRestrict
 	case ErrNoRightsToSend.ʔ():

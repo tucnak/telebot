@@ -317,15 +317,25 @@ func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 	return extractMessage(data)
 }
 
+// Send delivers poll through bot b to recipient.
 func (p *Poll) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
 		"chat_id":                 to.Recipient(),
 		"question":                p.Question,
-		"type":                    p.Type,
-		"allows_multiple_answers": strconv.FormatBool(p.AllowsMultipleAnswers),
-		"correct_option_id":       strconv.Itoa(p.CorrectOptionID),
-		"is_anonymous":            strconv.FormatBool(p.IsAnonymous),
-		"is_closed":               strconv.FormatBool(p.IsClosed),
+		"type":                    string(p.Type),
+		"is_closed":               strconv.FormatBool(p.Closed),
+		"is_anonymous":            strconv.FormatBool(p.Anonymous),
+		"allows_multiple_answers": strconv.FormatBool(p.MultipleAnswers),
+		"correct_option_id":       strconv.Itoa(p.CorrectOption),
+	}
+	if p.Explanation != "" {
+		params["explanation"] = p.Explanation
+		params["explanation_parse_mode"] = p.ParseMode
+	}
+	if p.OpenPeriod != 0 {
+		params["open_period"] = strconv.Itoa(p.OpenPeriod)
+	} else if p.CloseUnixdate != 0 {
+		params["close_date"] = strconv.FormatInt(p.CloseUnixdate, 10)
 	}
 	embedSendOptions(params, opt)
 

@@ -1,5 +1,7 @@
 package telebot
 
+import "encoding/json"
+
 // Option is a shorcut flag type for certain message features
 // (so-called options). It means that instead of passing
 // fully-fledged SendOptions* to Send(), you can use these
@@ -127,8 +129,9 @@ func (og *ReplyMarkup) copy() *ReplyMarkup {
 type ReplyButton struct {
 	Text string `json:"text"`
 
-	Contact  bool `json:"request_contact,omitempty"`
-	Location bool `json:"request_location,omitempty"`
+	Contact  bool     `json:"request_contact,omitempty"`
+	Location bool     `json:"request_location,omitempty"`
+	Poll     PollType `json:"request_poll,omitempty"`
 
 	// Not used anywhere.
 	// Will be removed in future releases.
@@ -143,9 +146,11 @@ type InlineKeyboardMarkup struct {
 	InlineKeyboard [][]InlineButton `json:"inline_keyboard,omitempty"`
 }
 
-// PollOptions represents arguments for sendPoll method.
-type PollOptions struct {
-	DisableNotification bool         `json:"disable_notification"`
-	ReplyToMessageID    *int         `json:"reply_to_message_id"`
-	ReplyMarkup         *ReplyMarkup `json:"reply_markup"`
+func (pt PollType) MarshalJSON() ([]byte, error) {
+	var aux = struct {
+		Type string `json:"type"`
+	}{
+		Type: string(pt),
+	}
+	return json.Marshal(&aux)
 }

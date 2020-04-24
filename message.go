@@ -99,6 +99,9 @@ type Message struct {
 	// For a venue, information about it.
 	Venue *Venue `json:"venue"`
 
+	// For a poll, information the native poll.
+	Poll *Poll `json:"poll"`
+
 	// For a service message, represents a user,
 	// that just got added to chat, this message came from.
 	//

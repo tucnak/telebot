@@ -188,10 +188,13 @@ const (
 )
 
 // PollType defines poll types.
-type PollType = string
+type PollType string
 
 const (
-	PollAny     PollType = ""
+	// Despite "any" type isn't described in documentation,
+	// it needed for proper KeyboardButtonPollType marshaling.
+	PollAny PollType = "any"
+
 	PollQuiz    PollType = "quiz"
 	PollRegular PollType = "regular"
 )
