@@ -18,9 +18,11 @@ const (
 var (
 	// required to test send and edit methods
 	chatID, _ = strconv.ParseInt(os.Getenv("CHAT_ID"), 10, 64)
+	userID, _ = strconv.Atoi(os.Getenv("USER_ID"))
 
 	b, _ = newTestBot()      // cached bot instance to avoid getMe method flooding
-	to   = &Chat{ID: chatID} // to recipient for send and edit methods
+	to   = &Chat{ID: chatID} // to chat recipient for send and edit methods
+	user = &User{ID: userID} // to user recipient for some special cases
 )
 
 func defaultSettings() Settings {
@@ -264,7 +266,7 @@ func TestBotIncomingUpdate(t *testing.T) {
 
 func TestBot(t *testing.T) {
 	if chatID == 0 {
-		t.Skip("CHAT_ID is required for Send method test")
+		t.Skip("CHAT_ID is required for Bot methods test")
 	}
 
 	_, err := b.Send(to, nil)

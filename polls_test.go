@@ -18,6 +18,10 @@ func TestPoll(t *testing.T) {
 }
 
 func TestPollSend(t *testing.T) {
+	if userID == 0 {
+		t.Skip("USER_ID is required for Poll methods test")
+	}
+
 	p := &Poll{
 		Type:          PollQuiz,
 		Question:      "Test Poll",
@@ -33,13 +37,13 @@ func TestPollSend(t *testing.T) {
 		}}},
 	}
 
-	msg, err := b.Send(to, p, markup)
+	msg, err := b.Send(user, p, markup)
 	assert.NoError(t, err)
 	assert.Equal(t, p.Question, msg.Poll.Question)
 	assert.Equal(t, p.Options, msg.Poll.Options)
 	assert.Equal(t, p.CloseUnixdate, msg.Poll.CloseUnixdate)
 	assert.Equal(t, p.CloseDate(), msg.Poll.CloseDate())
 
-	_, err = b.Send(to, &Poll{}) // empty poll
+	_, err = b.Send(user, &Poll{}) // empty poll
 	assert.Equal(t, ErrBadPollOptions, err)
 }
