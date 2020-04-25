@@ -35,6 +35,8 @@ var (
 	ErrUnsupportedWhat = errors.New("telebot: unsupported what argument")
 )
 
+const DefaultApiURL = "https://api.telegram.org"
+
 // These are one of the possible events Handle() can deal with.
 //
 // For convenience, all Telebot-provided endpoints start with
@@ -198,8 +200,6 @@ const (
 	PollQuiz    PollType = "quiz"
 	PollRegular PollType = "regular"
 )
-
-const DefaultApiURL = "https://api.telegram.org"
 
 type DiceType string
 
