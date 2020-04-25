@@ -210,3 +210,8 @@ type Venue struct {
 	FoursquareID   string `json:"foursquare_id,omitempty"`
 	FoursquareType string `json:"foursquare_type,omitempty"`
 }
+
+type Dice struct {
+	Type  DiceType `json:"emoji"`
+	Value int      `json:"value"`
+}
