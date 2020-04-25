@@ -356,7 +356,7 @@ func (p *Poll) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 func (d *Dice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
 		"chat_id": to.Recipient(),
-		"emoji":   d.EmojiType,
+		"emoji":   string(d.Type),
 	}
 	embedSendOptions(params, opt)
 	data, err := b.Raw("sendDice", params)

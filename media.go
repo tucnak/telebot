@@ -212,6 +212,6 @@ type Venue struct {
 }
 
 type Dice struct {
-	EmojiType string `json:"emoji"`
-	Value     int    `json:"value"`
+	Type  DiceType `json:"emoji"`
+	Value int      `json:"value"`
 }

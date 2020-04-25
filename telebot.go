@@ -200,3 +200,10 @@ const (
 )
 
 const DefaultApiURL = "https://api.telegram.org"
+
+type DiceType string
+
+var (
+	Cube = &Dice{Type: "🎲"}
+	Dart = &Dice{Type: "🎯"}
+)

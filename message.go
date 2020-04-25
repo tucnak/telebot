@@ -192,7 +192,7 @@ type Message struct {
 	// Inline keyboard attached to the message.
 	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup"`
 
-	DiceResult *Dice `json:"dice"`
+	Dice *Dice `json:"dice"`
 }
 
 // MessageEntity object represents "special" parts of text messages,
