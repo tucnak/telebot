@@ -487,6 +487,8 @@ func (b *Bot) handleMedia(m *Message) bool {
 		b.handle(OnLocation, m)
 	case m.Venue != nil:
 		b.handle(OnVenue, m)
+	case m.DiceResult != nil:
+		b.handle(OnDice, m)
 	default:
 		return false
 	}
