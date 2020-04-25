@@ -18,6 +18,9 @@ func TestPoll(t *testing.T) {
 }
 
 func TestPollSend(t *testing.T) {
+	if token == "" {
+		t.Skip("TELEBOT_SECRET is required")
+	}
 	if userID == 0 {
 		t.Skip("USER_ID is required for Poll methods test")
 	}

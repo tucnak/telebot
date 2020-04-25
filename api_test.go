@@ -26,6 +26,7 @@ func testRawServer(w http.ResponseWriter, r *http.Request) {
 	case strings.HasSuffix(r.URL.Path, "/testReadError"):
 		// tells the body is 1 byte length but actually it's 0
 		w.Header().Set("Content-Length", "1")
+
 	// returns unknown telegram error
 	case strings.HasSuffix(r.URL.Path, "/testUnknownError"):
 		data, _ := json.Marshal(struct {
@@ -44,6 +45,10 @@ func testRawServer(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestRaw(t *testing.T) {
+	if token == "" {
+		t.Skip("TELEBOT_SECRET is required")
+	}
+
 	b, err := newTestBot()
 	if err != nil {
 		t.Fatal(err)

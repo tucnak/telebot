@@ -17,6 +17,7 @@ const (
 
 var (
 	// required to test send and edit methods
+	token     = os.Getenv("TELEBOT_SECRET")
 	chatID, _ = strconv.ParseInt(os.Getenv("CHAT_ID"), 10, 64)
 	userID, _ = strconv.Atoi(os.Getenv("USER_ID"))
 
@@ -26,7 +27,7 @@ var (
 )
 
 func defaultSettings() Settings {
-	return Settings{Token: os.Getenv("TELEBOT_SECRET")}
+	return Settings{Token: token}
 }
 
 func newTestBot() (*Bot, error) {
@@ -46,8 +47,15 @@ func TestNewBot(t *testing.T) {
 	_, err = NewBot(pref)
 	assert.Error(t, err)
 
+	if token == "" {
+		t.Skip("TELEBOT_SECRET is required")
+	}
+
 	b, err := newTestBot()
-	assert.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	assert.NotNil(t, b.Me)
 	assert.Equal(t, DefaultApiURL, b.URL)
 	assert.Equal(t, http.DefaultClient, b.client)
@@ -69,6 +77,10 @@ func TestNewBot(t *testing.T) {
 }
 
 func TestBotHandle(t *testing.T) {
+	if b == nil {
+		t.Skip("Cached bot instance is bad (probably wrong or empty TELEBOT_SECRET)")
+	}
+
 	b.Handle("/start", func(m *Message) {})
 	assert.Contains(t, b.handlers, "/start")
 
@@ -80,6 +92,10 @@ func TestBotHandle(t *testing.T) {
 }
 
 func TestBotStart(t *testing.T) {
+	if token == "" {
+		t.Skip("TELEBOT_SECRET is required")
+	}
+
 	// cached bot has no poller
 	assert.Panics(t, func() { b.Start() })
 
@@ -87,7 +103,9 @@ func TestBotStart(t *testing.T) {
 	pref.Poller = &LongPoller{}
 
 	b, err := NewBot(pref)
-	assert.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// remove webhook to be sure that bot can poll
 	assert.NoError(t, b.RemoveWebhook())
@@ -117,6 +135,10 @@ func TestBotStart(t *testing.T) {
 }
 
 func TestBotIncomingUpdate(t *testing.T) {
+	if token == "" {
+		t.Skip("TELEBOT_SECRET is required")
+	}
+
 	b, err := newTestBot()
 	if err != nil {
 		t.Fatal(err)
@@ -265,6 +287,9 @@ func TestBotIncomingUpdate(t *testing.T) {
 }
 
 func TestBot(t *testing.T) {
+	if b == nil {
+		t.Skip("Cached bot instance is bad (probably wrong or empty TELEBOT_SECRET)")
+	}
 	if chatID == 0 {
 		t.Skip("CHAT_ID is required for Bot methods test")
 	}
