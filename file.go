@@ -8,6 +8,7 @@ import (
 // File object represents any sort of file.
 type File struct {
 	FileID   string `json:"file_id"`
+	UniqueID string `json:"file_unique_id"`
 	FileSize int    `json:"file_size"`
 
 	// file on telegram server https://core.telegram.org/bots/api#file
