@@ -1144,7 +1144,8 @@ func (b *Bot) GetFile(file *File) (io.ReadCloser, error) {
 // StopLiveLocation should be called to stop broadcasting live message location
 // before Location.LivePeriod expires.
 //
-// It supports telebot.ReplyMarkup.
+// It supports ReplyMarkup.
+// This function will panic upon nil Editable.
 func (b *Bot) StopLiveLocation(message Editable, options ...interface{}) (*Message, error) {
 	messageID, chatID := message.MessageSig()
 
@@ -1162,6 +1163,36 @@ func (b *Bot) StopLiveLocation(message Editable, options ...interface{}) (*Messa
 	}
 
 	return extractMessage(data)
+}
+
+// StopPoll stops a poll which was sent by the bot and returns
+// the stopped Poll object with the final results.
+//
+// It supports ReplyMarkup.
+// This function will panic upon nil Editable.
+func (b *Bot) StopPoll(msg Editable, options ...interface{}) (*Poll, error) {
+	msgID, chatID := msg.MessageSig()
+
+	params := map[string]string{
+		"chat_id":    strconv.FormatInt(chatID, 10),
+		"message_id": msgID,
+	}
+
+	sendOpts := extractOptions(options)
+	embedSendOptions(params, sendOpts)
+
+	data, err := b.Raw("stopPoll", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result *Poll
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return resp.Result, nil
 }
 
 // GetInviteLink should be used to export chat's invite link.
