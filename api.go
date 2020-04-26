@@ -18,6 +18,13 @@ import (
 
 // Raw lets you call any method of Bot API manually.
 func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
+
+	if b.IsCallsQueueFull() {
+		// Wait 1 second to reset calls counter
+		time.Sleep(1 * time.Second)
+	}
+
+	b.ProcessCall()
 	url := b.URL + "/bot" + b.Token + "/" + method
 
 	var buf bytes.Buffer

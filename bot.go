@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -35,10 +36,11 @@ func NewBot(pref Settings) (*Bot, error) {
 		Updates: make(chan Update, pref.Updates),
 		Poller:  pref.Poller,
 
-		handlers: make(map[string]interface{}),
-		stop:     make(chan struct{}),
-		reporter: pref.Reporter,
-		client:   client,
+		callsCounter: 0,
+		handlers:     make(map[string]interface{}),
+		stop:         make(chan struct{}),
+		reporter:     pref.Reporter,
+		client:       client,
 	}
 
 	user, err := bot.getMe()
@@ -58,10 +60,11 @@ type Bot struct {
 	Updates chan Update
 	Poller  Poller
 
-	handlers map[string]interface{}
-	reporter func(error)
-	stop     chan struct{}
-	client   *http.Client
+	callsCounter int
+	handlers     map[string]interface{}
+	reporter     func(error)
+	stop         chan struct{}
+	client       *http.Client
 }
 
 // Settings represents a utility struct for passing certain
@@ -160,6 +163,16 @@ func (b *Bot) Start() {
 
 	go b.Poller.Poll(b, b.Updates, stopPoller)
 
+	// Reset calls counter every second (telegram limit is 30 req/sec)
+	go func() {
+
+		for {
+			b.callsCounter = 0
+			time.Sleep(1 * time.Second)
+		}
+
+	}()
+
 	for {
 		select {
 		// handle incoming updates
@@ -175,6 +188,20 @@ func (b *Bot) Start() {
 			return
 		}
 	}
+}
+
+// Check if calls queue is full (telegram limit is 30 req/sec)
+func (b *Bot) IsCallsQueueFull() bool {
+	if b.callsCounter >= 30 {
+		return true
+	}
+
+	return false
+}
+
+// Increase calls counter (telegram limit is 30 req/sec)
+func (b *Bot) ProcessCall() {
+	b.callsCounter++
 }
 
 func (b *Bot) incomingUpdate(upd *Update) {
