@@ -73,9 +73,27 @@ func (p *MiddlewarePoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 
 // LongPoller is a classic LongPoller with timeout.
 type LongPoller struct {
-	Timeout time.Duration
-
+	Limit        int
+	Timeout      time.Duration
 	LastUpdateID int
+
+	// AllowedUpdates contains the update types
+	// you want your bot to receive.
+	//
+	// Possible values:
+	//		message
+	// 		edited_message
+	// 		channel_post
+	// 		edited_channel_post
+	// 		inline_query
+	// 		chosen_inline_result
+	// 		callback_query
+	// 		shipping_query
+	// 		pre_checkout_query
+	// 		poll
+	// 		poll_answer
+	//
+	AllowedUpdates []string
 }
 
 // Poll does long polling.
@@ -86,8 +104,7 @@ func (p *LongPoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 	}(stop)
 
 	for {
-		updates, err := b.getUpdates(p.LastUpdateID+1, p.Timeout)
-
+		updates, err := b.getUpdates(p.LastUpdateID+1, p.Limit, p.Timeout, p.AllowedUpdates)
 		if err != nil {
 			b.debug(err)
 			b.debug(ErrCouldNotUpdate)

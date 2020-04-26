@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 // A WebhookTLS specifies the path to a key and a cert so the poller can open
@@ -35,11 +36,15 @@ type WebhookEndpoint struct {
 // You can also leave the Listen field empty. In this case it is up to the caller to
 // add the Webhook to a http-mux.
 type Webhook struct {
-	Listen   string
+	Listen         string
+	MaxConnections int
+	AllowedUpdates []string
+
 	TLS      *WebhookTLS
 	Endpoint *WebhookEndpoint
-	dest     chan<- Update
-	bot      *Bot
+
+	dest chan<- Update
+	bot  *Bot
 }
 
 func (h *Webhook) getFiles() map[string]File {
@@ -65,20 +70,29 @@ func (h *Webhook) getFiles() map[string]File {
 }
 
 func (h *Webhook) getParams() map[string]string {
-	param := make(map[string]string)
+	params := make(map[string]string)
+
+	if h.MaxConnections != 0 {
+		params["max_connections"] = strconv.Itoa(h.MaxConnections)
+	}
+	if len(h.AllowedUpdates) > 0 {
+		data, _ := json.Marshal(h.AllowedUpdates)
+		params["allowed_updates"] = string(data)
+	}
+
 	if h.TLS != nil {
-		param["url"] = "https://" + h.Listen
+		params["url"] = "https://" + h.Listen
 	} else {
 		// this will not work with telegram, they want TLS
 		// but i allow this because telegram will send an error
 		// when you register this hook. in their docs they write
 		// that port 80/http is allowed ...
-		param["url"] = "http://" + h.Listen
+		params["url"] = "http://" + h.Listen
 	}
 	if h.Endpoint != nil {
-		param["url"] = h.Endpoint.PublicURL
+		params["url"] = h.Endpoint.PublicURL
 	}
-	return param
+	return params
 }
 
 func (h *Webhook) Poll(b *Bot, dest chan Update, stop chan struct{}) {

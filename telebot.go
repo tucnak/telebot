@@ -62,8 +62,10 @@ const (
 	OnChannelPost       = "\achan_post"
 	OnEditedChannelPost = "\achan_edited_post"
 	OnDice              = "\adice"
+
 	// Will fire when bot is added to a group.
 	OnAddedToGroup = "\aadded_to_group"
+
 	// Group events:
 	OnUserJoined        = "\auser_joined"
 	OnUserLeft          = "\auser_left"

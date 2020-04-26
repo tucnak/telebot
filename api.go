@@ -176,10 +176,18 @@ func (b *Bot) getMe() (*User, error) {
 
 }
 
-func (b *Bot) getUpdates(offset int, timeout time.Duration) ([]Update, error) {
+func (b *Bot) getUpdates(offset, limit int, timeout time.Duration, allowed []string) ([]Update, error) {
 	params := map[string]string{
 		"offset":  strconv.Itoa(offset),
 		"timeout": strconv.Itoa(int(timeout / time.Second)),
+	}
+
+	if limit != 0 {
+		params["limit"] = strconv.Itoa(limit)
+	}
+	if len(allowed) > 0 {
+		data, _ := json.Marshal(allowed)
+		params["allowed_updates"] = string(data)
 	}
 
 	data, err := b.Raw("getUpdates", params)
