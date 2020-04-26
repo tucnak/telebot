@@ -1274,7 +1274,7 @@ func (b *Bot) DeleteGroupPhoto(chat *Chat) error {
 		"chat_id": chat.Recipient(),
 	}
 
-	data, err := b.Raw("deleteGroupPhoto", params)
+	data, err := b.Raw("deleteChatPhoto", params)
 	if err != nil {
 		return err
 	}
