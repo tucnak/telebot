@@ -103,6 +103,16 @@ type Update struct {
 	PollAnswer         *PollAnswer         `json:"poll_answer,omitempty"`
 }
 
+// Command represents a bot command.
+type Command struct {
+	// Text is a aext of the command, 1-32 characters.
+	// Can contain only lowercase English letters, digits and underscores.
+	Text string `json:"command"`
+
+	// Description of the command, 3-256 characters.
+	Description string `json:"description"`
+}
+
 // ChosenInlineResult represents a result of an inline query that was chosen
 // by the user and sent to their chat partner.
 type ChosenInlineResult struct {
@@ -1580,6 +1590,38 @@ func (b *Bot) SetStickerPositionInSet(sticker string, position int) error {
 // DeleteStickerFromSet deletes sticker from set created by the bot.
 func (b *Bot) DeleteStickerFromSet(sticker string) error {
 	data, err := b.Raw("deleteStickerFromSet", map[string]string{"sticker": sticker})
+	if err != nil {
+		return err
+	}
+
+	return extractOk(data)
+}
+
+// GetCommands returns the current list of the bot's commands.
+func (b *Bot) GetCommands() ([]Command, error) {
+	data, err := b.Raw("getMyCommands", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result []Command
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return resp.Result, nil
+}
+
+// SetCommands changes the list of the bot's commands.
+func (b *Bot) SetCommands(cmds []Command) error {
+	data, _ := json.Marshal(cmds)
+
+	params := map[string]string{
+		"commands": string(data),
+	}
+
+	data, err := b.Raw("setMyCommands", params)
 	if err != nil {
 		return err
 	}

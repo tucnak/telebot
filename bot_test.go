@@ -386,4 +386,16 @@ func TestBot(t *testing.T) {
 		_, err = b.EditReplyMarkup(msg, badMarkup)
 		assert.Equal(t, ErrButtonDataInvalid, err)
 	})
+
+	t.Run("Commands", func(t *testing.T) {
+		orig := []Command{{
+			Text:        "test",
+			Description: "test command",
+		}}
+		assert.NoError(t, b.SetCommands(orig))
+
+		cmds, err := b.GetCommands()
+		assert.NoError(t, err)
+		assert.Equal(t, orig, cmds)
+	})
 }
