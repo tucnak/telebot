@@ -211,6 +211,8 @@ type Venue struct {
 	FoursquareType string `json:"foursquare_type,omitempty"`
 }
 
+// Dice object represents a dice with a random value
+// from 1 to 6 for currently supported base emoji.
 type Dice struct {
 	Type  DiceType `json:"emoji"`
 	Value int      `json:"value"`
