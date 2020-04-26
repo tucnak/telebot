@@ -39,18 +39,22 @@ type PollAnswer struct {
 	Options []int  `json:"option_ids"`
 }
 
+// IsRegular says whether poll is a regular.
 func (p *Poll) IsRegular() bool {
 	return p.Type == PollRegular
 }
 
+// IsQuiz says wheter poll is a quiz.
 func (p *Poll) IsQuiz() bool {
 	return p.Type == PollQuiz
 }
 
+// CloseDate returns the close date of poll in local time.
 func (p *Poll) CloseDate() time.Time {
 	return time.Unix(p.CloseUnixdate, 0)
 }
 
+// AddOptions adds text options to the poll.
 func (p *Poll) AddOptions(opts ...string) {
 	for _, t := range opts {
 		p.Options = append(p.Options, PollOption{Text: t})
