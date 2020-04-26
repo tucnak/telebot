@@ -98,12 +98,14 @@ type LongPoller struct {
 
 // Poll does long polling.
 func (p *LongPoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
-	go func(stop chan struct{}) {
-		<-stop
-		close(stop)
-	}(stop)
-
 	for {
+		select {
+		case <-stop:
+			close(stop)
+			return
+		default:
+		}
+
 		updates, err := b.getUpdates(p.LastUpdateID+1, p.Limit, p.Timeout, p.AllowedUpdates)
 		if err != nil {
 			b.debug(err)

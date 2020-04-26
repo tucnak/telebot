@@ -174,16 +174,17 @@ func (b *Bot) Start() {
 		// handle incoming updates
 		case upd := <-b.Updates:
 			b.incomingUpdate(&upd)
-
 		// call to stop polling
 		case <-b.stop:
 			stop <- struct{}{}
-
-		// polling has stopped
-		case <-stop:
 			return
 		}
 	}
+}
+
+// Stop gracefully shuts the poller down.
+func (b *Bot) Stop() {
+	b.stop <- struct{}{}
 }
 
 func (b *Bot) incomingUpdate(upd *Update) {
@@ -503,11 +504,6 @@ func (b *Bot) handleMedia(m *Message) bool {
 		return false
 	}
 	return true
-}
-
-// Stop gracefully shuts the poller down.
-func (b *Bot) Stop() {
-	b.stop <- struct{}{}
 }
 
 // Send accepts 2+ arguments, starting with destination chat, followed by
