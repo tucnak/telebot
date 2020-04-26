@@ -1242,6 +1242,22 @@ func (b *Bot) SetGroupStickerSet(chat *Chat, setName string) error {
 	return extractOk(data)
 }
 
+// SetGroupPermissions sets default chat permissions for all members.
+func (b *Bot) SetGroupPermissions(chat *Chat, perms Rights) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+
+	embedRights(params, perms)
+
+	data, err := b.Raw("setChatPermissions", params)
+	if err != nil {
+		return err
+	}
+
+	return extractOk(data)
+}
+
 // DeleteGroupPhoto should be used to just remove group photo.
 func (b *Bot) DeleteGroupPhoto(chat *Chat) error {
 	params := map[string]string{
