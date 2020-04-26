@@ -102,6 +102,9 @@ type Message struct {
 	// For a poll, information the native poll.
 	Poll *Poll `json:"poll"`
 
+	// For a dice, information about it.
+	Dice *Dice `json:"dice"`
+
 	// For a service message, represents a user,
 	// that just got added to chat, this message came from.
 	//
@@ -191,8 +194,6 @@ type Message struct {
 
 	// Inline keyboard attached to the message.
 	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup"`
-
-	Dice *Dice `json:"dice"`
 }
 
 // MessageEntity object represents "special" parts of text messages,
