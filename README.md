@@ -3,7 +3,7 @@
 
 [![GoDoc](https://godoc.org/gopkg.in/tucnak/telebot.v2?status.svg)](https://godoc.org/gopkg.in/tucnak/telebot.v2)
 [![Travis](https://travis-ci.org/tucnak/telebot.svg?branch=v2)](https://travis-ci.org/tucnak/telebot)
-[![codecov.io](https://codecov.io/gh/tucnak/telebot/coverage.svg?branch=develop)](https://codecov.io/gh/tucnak/telebot?branch=develop)
+[![codecov.io](https://codecov.io/gh/tucnak/telebot/coverage.svg?branch=v2)](https://codecov.io/gh/tucnak/telebot?branch=v2)
 
 ```bash
 go get -u gopkg.in/tucnak/telebot.v2
@@ -53,9 +53,11 @@ import (
 
 func main() {
 	b, err := tb.NewBot(tb.Settings{
-		Token:  "TOKEN_HERE",
-		// You can also set custom API URL. If field is empty it equals to "https://api.telegram.org"
+		// You can also set custom API URL.
+		// If field is empty it equals to "https://api.telegram.org".
 		URL: "http://195.129.111.17:8012",
+
+		Token:  "TOKEN_HERE",
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 	})
 
@@ -65,7 +67,7 @@ func main() {
 	}
 
 	b.Handle("/hello", func(m *tb.Message) {
-		b.Send(m.Sender, "hello world")
+		b.Send(m.Sender, "Hello World!")
 	})
 
 	b.Start()
@@ -149,12 +151,10 @@ bot, _ := tb.NewBot(tb.Settings{
 })
 
 // graceful shutdown
-go func() {
-	<-time.After(N * time.Second)
-	bot.Stop()
-})()
+time.AfterFunc(N * time.Second, b.Stop)
 
-bot.Start() // blocks until shutdown
+// blocks until shutdown
+bot.Start()
 
 fmt.Println(poller.LastUpdateID) // 134237
 ```
@@ -306,7 +306,7 @@ var msgs []tb.StoredMessage
 db.Find(&msgs) // gorm syntax
 
 for _, msg := range msgs {
-	bot.Edit(&msg, "Updated text.")
+	bot.Edit(&msg, "Updated text")
 	// or
 	bot.Delete(&msg)
 }
@@ -411,16 +411,17 @@ b.Handle(tb.OnQuery, func(q *tb.Query) {
 		}
 
 		results[i] = result
-		results[i].SetResultID(strconv.Itoa(i)) // needed to set a unique string ID for each result
+		// needed to set a unique string ID for each result
+		results[i].SetResultID(strconv.Itoa(i))
 	}
 
 	err := b.Answer(q, &tb.QueryResponse{
-		Results: results,
+		Results:   results,
 		CacheTime: 60, // a minute
 	})
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 })
 ```
@@ -429,31 +430,14 @@ There's not much to talk about really. It also supports some form of authenticat
 through deep-linking. For that, use fields `SwitchPMText` and `SwitchPMParameter`
 of `QueryResponse`.
 
-
-## Poll
-Creating polls is just as easy. You just need to create an object and use the `Send` method. 
-You can also use the `AddAnswers` method instead of explicitly specifying 
-a slice of answers to a question and without `append`.
-```
-poll := &tb.Poll{
-    Question:    "my question",
-    Type:        "regular",
-    IsClosed:    false,
-    IsAnonymous: true,
-}
-poll.AddAnswers("answer 1", "answer 2")
-
-b.Send(m.Sender, poll)
-```
-
 # Contributing
 
 1. Fork it
-2. Clone it: `git clone https://github.com/tucnak/telebot`
-3. Create your feature branch: `git checkout -b my-new-feature`
+2. Clone develop: `git clone -b develop https://github.com/tucnak/telebot`
+3. Create your feature branch: `git checkout -b new-feature`
 4. Make changes and add them: `git add .`
-5. Commit: `git commit -m 'Add some feature'`
-6. Push: `git push origin my-new-feature`
+5. Commit: `git commit -m "Add some feature"`
+6. Push: `git push origin new-feature`
 7. Pull request
 
 # Donate
