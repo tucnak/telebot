@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"strconv"
 	"time"
-
-	"github.com/pkg/errors"
 )
 
 // Rights is a list of privileges available to chat members.
@@ -126,7 +124,6 @@ func (b *Bot) Restrict(chat *Chat, member *ChatMember) error {
 		"user_id":    member.User.Recipient(),
 		"until_date": strconv.FormatInt(until, 10),
 	}
-
 	embedRights(params, prv)
 
 	data, err := b.Raw("restrictChatMember", params)
@@ -155,7 +152,6 @@ func (b *Bot) Promote(chat *Chat, member *ChatMember) error {
 		"chat_id": chat.Recipient(),
 		"user_id": member.User.Recipient(),
 	}
-
 	embedRights(params, prv)
 
 	data, err := b.Raw("promoteChatMember", params)
@@ -183,20 +179,11 @@ func (b *Bot) AdminsOf(chat *Chat) ([]ChatMember, error) {
 	}
 
 	var resp struct {
-		Ok          bool
-		Result      []ChatMember
-		Description string `json:"description"`
+		Result []ChatMember
 	}
-
-	err = json.Unmarshal(data, &resp)
-	if err != nil {
-		return nil, errors.Wrap(err, "bad response json")
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
 	}
-
-	if !resp.Ok {
-		return nil, errors.Errorf("api error: %s", resp.Description)
-	}
-
 	return resp.Result, nil
 }
 
@@ -212,20 +199,11 @@ func (b *Bot) Len(chat *Chat) (int, error) {
 	}
 
 	var resp struct {
-		Ok          bool
-		Result      int
-		Description string `json:"description"`
+		Result int
 	}
-
-	err = json.Unmarshal(data, &resp)
-	if err != nil {
-		return 0, errors.Wrap(err, "bad response json")
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return 0, wrapError(err)
 	}
-
-	if !resp.Ok {
-		return 0, errors.Errorf("api error: %s", resp.Description)
-	}
-
 	return resp.Result, nil
 }
 

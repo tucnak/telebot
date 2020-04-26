@@ -146,6 +146,8 @@ type InlineKeyboardMarkup struct {
 	InlineKeyboard [][]InlineButton `json:"inline_keyboard,omitempty"`
 }
 
+// MarshalJSON implements json.Marshaler. It allows to pass
+// PollType as keyboard's poll type instead of KeyboardButtonPollType object.
 func (pt PollType) MarshalJSON() ([]byte, error) {
 	var aux = struct {
 		Type string `json:"type"`

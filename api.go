@@ -84,7 +84,7 @@ func (b *Bot) sendFiles(method string, files map[string]File, params map[string]
 
 	resp, err := b.client.Post(url, writer.FormDataContentType(), &buf)
 	if err != nil {
-		return nil, errors.Wrap(err, "http.Post failed")
+		return nil, wrapError(err)
 	}
 	resp.Close = true
 	defer resp.Body.Close()
@@ -181,6 +181,7 @@ func (b *Bot) getUpdates(offset int, timeout time.Duration) ([]Update, error) {
 		"offset":  strconv.Itoa(offset),
 		"timeout": strconv.Itoa(int(timeout / time.Second)),
 	}
+
 	data, err := b.Raw("getUpdates", params)
 	if err != nil {
 		return nil, err

@@ -33,6 +33,7 @@ import "github.com/pkg/errors"
 var (
 	ErrBadRecipient    = errors.New("telebot: recipient is nil")
 	ErrUnsupportedWhat = errors.New("telebot: unsupported what argument")
+	ErrCouldNotUpdate  = errors.New("telebot: could not fetch new updates")
 )
 
 const DefaultApiURL = "https://api.telegram.org"

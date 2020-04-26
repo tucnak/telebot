@@ -79,7 +79,6 @@ func (results Results) MarshalJSON() ([]byte, error) {
 		if result.ResultID() == "" {
 			result.SetResultID(fmt.Sprintf("%d", &result))
 		}
-
 		if err := inferIQR(result); err != nil {
 			return nil, err
 		}

@@ -540,10 +540,9 @@ func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Mes
 	}
 }
 
-// SendAlbum is used when sending multiple instances of media as a single
-// message (so-called album).
+// SendAlbum sends multiple instances of media as a single message.
 //
-// From all existing options, it only supports telebot.Silent.
+// From all existing options, it only supports tb.Silent option.
 func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
@@ -553,39 +552,39 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 	files := make(map[string]File)
 
 	for i, x := range a {
-		var mediaRepr string
-		var jsonRepr []byte
-
-		f := x.MediaFile()
+		var (
+			repr string
+			data []byte
+			f    = x.MediaFile()
+		)
 
 		switch {
 		case f.InCloud():
-			mediaRepr = f.FileID
+			repr = f.FileID
 		case f.FileURL != "":
-			mediaRepr = f.FileURL
+			repr = f.FileURL
 		case f.OnDisk() || f.FileReader != nil:
-			mediaRepr = "attach://" + strconv.Itoa(i)
+			repr = "attach://" + strconv.Itoa(i)
 			files[strconv.Itoa(i)] = *f
 		default:
-			return nil, errors.Errorf(
-				"telebot: album entry #%d doesn't exist anywhere", i)
+			return nil, errors.Errorf("telebot: album entry #%d does not exist", i)
 		}
 
 		switch y := x.(type) {
 		case *Photo:
-			jsonRepr, _ = json.Marshal(struct {
+			data, _ = json.Marshal(struct {
 				Type      string    `json:"type"`
 				Media     string    `json:"media"`
 				Caption   string    `json:"caption,omitempty"`
 				ParseMode ParseMode `json:"parse_mode,omitempty"`
 			}{
-				"photo",
-				mediaRepr,
-				y.Caption,
-				y.ParseMode,
+				Type:      "photo",
+				Media:     repr,
+				Caption:   y.Caption,
+				ParseMode: y.ParseMode,
 			})
 		case *Video:
-			jsonRepr, _ = json.Marshal(struct {
+			data, _ = json.Marshal(struct {
 				Type              string `json:"type"`
 				Caption           string `json:"caption"`
 				Media             string `json:"media"`
@@ -594,19 +593,19 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 				Duration          int    `json:"duration,omitempty"`
 				SupportsStreaming bool   `json:"supports_streaming,omitempty"`
 			}{
-				"video",
-				y.Caption,
-				mediaRepr,
-				y.Width,
-				y.Height,
-				y.Duration,
-				y.SupportsStreaming,
+				Type:              "video",
+				Caption:           y.Caption,
+				Media:             repr,
+				Width:             y.Width,
+				Height:            y.Height,
+				Duration:          y.Duration,
+				SupportsStreaming: y.SupportsStreaming,
 			})
 		default:
 			return nil, errors.Errorf("telebot: album entry #%d is not valid", i)
 		}
 
-		media[i] = string(jsonRepr)
+		media[i] = string(data)
 	}
 
 	params := map[string]string{
@@ -623,18 +622,10 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 	}
 
 	var resp struct {
-		Ok          bool
-		Result      []Message
-		Description string
+		Result []Message
 	}
-
-	err = json.Unmarshal(data, &resp)
-	if err != nil {
-		return nil, errors.Wrap(err, "bad response json")
-	}
-
-	if !resp.Ok {
-		return nil, errors.Errorf("api error: %s", resp.Description)
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
 	}
 
 	for attachName := range files {
@@ -737,20 +728,20 @@ func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Mes
 	return extractMessage(data)
 }
 
-// EditReplyMarkup used to edit reply markup of already sent message.
+// EditReplyMarkup edits reply markup of already sent message.
 // Pass nil or empty ReplyMarkup to delete it from the message.
 //
 // On success, returns edited message object.
 // This function will panic upon nil Editable.
-func (b *Bot) EditReplyMarkup(message Editable, markup *ReplyMarkup) (*Message, error) {
-	messageID, chatID := message.MessageSig()
+func (b *Bot) EditReplyMarkup(msg Editable, markup *ReplyMarkup) (*Message, error) {
+	msgID, chatID := msg.MessageSig()
 	params := map[string]string{}
 
 	if chatID == 0 { // if inline message
-		params["inline_message_id"] = messageID
+		params["inline_message_id"] = msgID
 	} else {
 		params["chat_id"] = strconv.FormatInt(chatID, 10)
-		params["message_id"] = messageID
+		params["message_id"] = msgID
 	}
 
 	if markup == nil {
@@ -770,20 +761,22 @@ func (b *Bot) EditReplyMarkup(message Editable, markup *ReplyMarkup) (*Message, 
 	return extractMessage(data)
 }
 
-// EditCaption used to edit already sent photo caption with known recipient and message id.
+// EditCaption edits already sent photo caption with known recipient and message id.
 //
-// On success, returns edited message object
-func (b *Bot) EditCaption(message Editable, caption string, options ...interface{}) (*Message, error) {
-	messageID, chatID := message.MessageSig()
+// On success, returns edited message object.
+// This function will panic upon nil Editable.
+func (b *Bot) EditCaption(msg Editable, caption string, options ...interface{}) (*Message, error) {
+	msgID, chatID := msg.MessageSig()
 
-	params := map[string]string{"caption": caption}
+	params := map[string]string{
+		"caption": caption,
+	}
 
-	// if inline message
-	if chatID == 0 {
-		params["inline_message_id"] = messageID
+	if chatID == 0 { // if inline message
+		params["inline_message_id"] = msgID
 	} else {
 		params["chat_id"] = strconv.FormatInt(chatID, 10)
-		params["message_id"] = messageID
+		params["message_id"] = msgID
 	}
 
 	sendOpts := extractOptions(options)
@@ -797,41 +790,41 @@ func (b *Bot) EditCaption(message Editable, caption string, options ...interface
 	return extractMessage(data)
 }
 
-// EditMedia used to edit already sent media with known recipient and message id.
+// EditMedia edits already sent media with known recipient and message id.
 //
 // Use cases:
 //
-//     bot.EditMedia(msg, &tb.Photo{File: tb.FromDisk("chicken.jpg")});
-//     bot.EditMedia(msg, &tb.Video{File: tb.FromURL("http://video.mp4")});
+//     bot.EditMedia(msg, &tb.Photo{File: tb.FromDisk("chicken.jpg")})
+//     bot.EditMedia(msg, &tb.Video{File: tb.FromURL("http://video.mp4")})
 //
-func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...interface{}) (*Message, error) {
-	var mediaRepr string
-	var jsonRepr []byte
-	var thumb *Photo
+// This function will panic upon nil Editable.
+func (b *Bot) EditMedia(msg Editable, media InputMedia, options ...interface{}) (*Message, error) {
+	var (
+		repr  string
+		thumb *Photo
 
-	file := make(map[string]File)
-
-	f := inputMedia.MediaFile()
-	thumbAttachName := "thumb"
+		thumbName = "thumb"
+		file      = media.MediaFile()
+		files     = make(map[string]File)
+	)
 
 	switch {
-	case f.InCloud():
-		mediaRepr = f.FileID
-	case f.FileURL != "":
-		mediaRepr = f.FileURL
-	case f.OnDisk() || f.FileReader != nil:
-		s := f.FileLocal
-		if f.FileReader != nil {
+	case file.InCloud():
+		repr = file.FileID
+	case file.FileURL != "":
+		repr = file.FileURL
+	case file.OnDisk() || file.FileReader != nil:
+		s := file.FileLocal
+		if file.FileReader != nil {
 			s = "0"
+		} else if s == thumbName {
+			thumbName = "thumb2"
 		}
-		if s == thumbAttachName {
-			thumbAttachName = "thumb2"
-		}
-		mediaRepr = "attach://" + s
-		file[s] = *f
+
+		repr = "attach://" + s
+		files[s] = *file
 	default:
-		return nil, errors.Errorf(
-			"telebot: can't edit media, it doesn't exist anywhere")
+		return nil, errors.Errorf("telebot: can't edit media, it does not exist")
 	}
 
 	type FileJSON struct {
@@ -861,74 +854,64 @@ func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...inte
 		Performer string `json:"performer,omitempty"`
 	}
 
-	resultMedia := &FileJSON{Media: mediaRepr}
+	result := &FileJSON{Media: repr}
+
+	switch m := media.(type) {
+	case *Photo:
+		result.Type = "photo"
+		result.Caption = m.Caption
+	case *Video:
+		result.Type = "video"
+		result.Caption = m.Caption
+		result.Width = m.Width
+		result.Height = m.Height
+		result.Duration = m.Duration
+		result.SupportsStreaming = m.SupportsStreaming
+		result.MIME = m.MIME
+		thumb = m.Thumbnail
+	case *Document:
+		result.Type = "document"
+		result.Caption = m.Caption
+		result.FileName = m.FileName
+		result.MIME = m.MIME
+		thumb = m.Thumbnail
+	case *Audio:
+		result.Type = "audio"
+		result.Caption = m.Caption
+		result.Duration = m.Duration
+		result.MIME = m.MIME
+		result.Title = m.Title
+		result.Performer = m.Performer
+		thumb = m.Thumbnail
+	default:
+		return nil, errors.Errorf("telebot: media entry is not valid")
+	}
+
+	msgID, chatID := msg.MessageSig()
+	params := map[string]string{}
 
 	sendOpts := extractOptions(options)
-	if sendOpts != nil {
-		resultMedia.ParseMode = sendOpts.ParseMode
-	}
-
-	switch y := inputMedia.(type) {
-	case *Photo:
-		resultMedia.Type = "photo"
-		resultMedia.Caption = y.Caption
-	case *Video:
-		resultMedia.Type = "video"
-		resultMedia.Caption = y.Caption
-		resultMedia.Width = y.Width
-		resultMedia.Height = y.Height
-		resultMedia.Duration = y.Duration
-		resultMedia.SupportsStreaming = y.SupportsStreaming
-		resultMedia.MIME = y.MIME
-		thumb = y.Thumbnail
-		if thumb != nil {
-			resultMedia.Thumbnail = "attach://" + thumbAttachName
-		}
-	case *Document:
-		resultMedia.Type = "document"
-		resultMedia.Caption = y.Caption
-		resultMedia.FileName = y.FileName
-		resultMedia.MIME = y.MIME
-		thumb = y.Thumbnail
-		if thumb != nil {
-			resultMedia.Thumbnail = "attach://" + thumbAttachName
-		}
-	case *Audio:
-		resultMedia.Type = "audio"
-		resultMedia.Caption = y.Caption
-		resultMedia.Duration = y.Duration
-		resultMedia.MIME = y.MIME
-		resultMedia.Title = y.Title
-		resultMedia.Performer = y.Performer
-		thumb = y.Thumbnail
-		if thumb != nil {
-			resultMedia.Thumbnail = "attach://" + thumbAttachName
-		}
-	default:
-		return nil, errors.Errorf("telebot: inputMedia entry is not valid")
-	}
-
-	messageID, chatID := message.MessageSig()
-
-	jsonRepr, _ = json.Marshal(resultMedia)
-	params := map[string]string{}
-	params["media"] = string(jsonRepr)
-
-	// If inline message.
-	if chatID == 0 {
-		params["inline_message_id"] = messageID
-	} else {
-		params["chat_id"] = strconv.FormatInt(chatID, 10)
-		params["message_id"] = messageID
-	}
-
-	if thumb != nil {
-		file[thumbAttachName] = *thumb.MediaFile()
-	}
-
 	embedSendOptions(params, sendOpts)
 
-	data, err := b.sendFiles("editMessageMedia", file, params)
+	if sendOpts != nil {
+		result.ParseMode = sendOpts.ParseMode
+	}
+	if thumb != nil {
+		result.Thumbnail = "attach://" + thumbName
+		files[thumbName] = *thumb.MediaFile()
+	}
+
+	data, _ := json.Marshal(result)
+	params["media"] = string(data)
+
+	if chatID == 0 { // If inline message.
+		params["inline_message_id"] = msgID
+	} else {
+		params["chat_id"] = strconv.FormatInt(chatID, 10)
+		params["message_id"] = msgID
+	}
+
+	data, err := b.sendFiles("editMessageMedia", files, params)
 	if err != nil {
 		return nil, err
 	}
@@ -947,12 +930,13 @@ func (b *Bot) EditMedia(message Editable, inputMedia InputMedia, options ...inte
 //     * If the bot has can_delete_messages permission in a supergroup or a
 //       channel, it can delete any message there.
 //
-func (b *Bot) Delete(message Editable) error {
-	messageID, chatID := message.MessageSig()
+// This function will panic upon nil Editable.
+func (b *Bot) Delete(msg Editable) error {
+	msgID, chatID := msg.MessageSig()
 
 	params := map[string]string{
 		"chat_id":    strconv.FormatInt(chatID, 10),
-		"message_id": messageID,
+		"message_id": msgID,
 	}
 
 	data, err := b.Raw("deleteMessage", params)
@@ -1014,14 +998,14 @@ func (b *Bot) Accept(query *PreCheckoutQuery, errorMessage ...string) error {
 // Answer sends a response for a given inline query. A query can only
 // be responded to once, subsequent attempts to respond to the same query
 // will result in an error.
-func (b *Bot) Answer(query *Query, response *QueryResponse) error {
-	response.QueryID = query.ID
+func (b *Bot) Answer(query *Query, resp *QueryResponse) error {
+	resp.QueryID = query.ID
 
-	for _, result := range response.Results {
+	for _, result := range resp.Results {
 		result.Process()
 	}
 
-	data, err := b.Raw("answerInlineQuery", response)
+	data, err := b.Raw("answerInlineQuery", resp)
 	if err != nil {
 		return err
 	}
@@ -1038,16 +1022,16 @@ func (b *Bot) Answer(query *Query, response *QueryResponse) error {
 //		bot.Respond(c)
 //		bot.Respond(c, response)
 //
-func (b *Bot) Respond(callback *Callback, responseOptional ...*CallbackResponse) error {
-	var response *CallbackResponse
-	if responseOptional == nil {
-		response = &CallbackResponse{}
+func (b *Bot) Respond(c *Callback, response ...*CallbackResponse) error {
+	var resp *CallbackResponse
+	if response == nil {
+		resp = &CallbackResponse{}
 	} else {
-		response = responseOptional[0]
+		resp = response[0]
 	}
 
-	response.CallbackID = callback.ID
-	data, err := b.Raw("answerCallbackQuery", response)
+	resp.CallbackID = c.ID
+	data, err := b.Raw("answerCallbackQuery", resp)
 	if err != nil {
 		return err
 	}
@@ -1071,21 +1055,11 @@ func (b *Bot) FileByID(fileID string) (File, error) {
 	}
 
 	var resp struct {
-		Ok          bool
-		Description string
-		Result      File
+		Result File
 	}
-
-	err = json.Unmarshal(data, &resp)
-	if err != nil {
-		return File{}, errors.Wrap(err, "bad response json")
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return File{}, wrapError(err)
 	}
-
-	if !resp.Ok {
-		return File{}, errors.Errorf("api error: %s", resp.Description)
-
-	}
-
 	return resp.Result, nil
 }
 
@@ -1109,49 +1083,50 @@ func (b *Bot) Download(file *File, localFilename string) error {
 	if err != nil {
 		return wrapError(err)
 	}
-	file.FileLocal = localFilename
 
+	file.FileLocal = localFilename
 	return nil
 }
 
-// GetFile from Telegram servers
+// GetFile gets a file from Telegram servers.
 func (b *Bot) GetFile(file *File) (io.ReadCloser, error) {
 	f, err := b.FileByID(file.FileID)
 	if err != nil {
 		return nil, err
 	}
-	// save FilePath
-	file.FilePath = f.FilePath
 
-	req, err := http.NewRequest("GET", b.URL+"/file/bot"+b.Token+"/"+f.FilePath, nil)
+	url := b.URL + "/file/bot" + b.Token + "/" + f.FilePath
+	file.FilePath = f.FilePath // saving file path
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, wrapError(err)
 	}
 
 	resp, err := b.client.Do(req)
 	if err != nil {
-		return nil, errors.Wrap(err, "file http.GET failed")
+		return nil, wrapError(err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
 		resp.Body.Close()
-		return nil, errors.Errorf("api error: expected 200 OK but got %s", resp.Status)
+		return nil, errors.Errorf("telebot: expected status 200 but got %s", resp.Status)
 	}
 
 	return resp.Body, nil
 }
 
-// StopLiveLocation should be called to stop broadcasting live message location
+// StopLiveLocation stops broadcasting live message location
 // before Location.LivePeriod expires.
 //
-// It supports ReplyMarkup.
+// It supports tb.ReplyMarkup.
 // This function will panic upon nil Editable.
-func (b *Bot) StopLiveLocation(message Editable, options ...interface{}) (*Message, error) {
-	messageID, chatID := message.MessageSig()
+func (b *Bot) StopLiveLocation(msg Editable, options ...interface{}) (*Message, error) {
+	msgID, chatID := msg.MessageSig()
 
 	params := map[string]string{
 		"chat_id":    strconv.FormatInt(chatID, 10),
-		"message_id": messageID,
+		"message_id": msgID,
 	}
 
 	sendOpts := extractOptions(options)
@@ -1207,28 +1182,19 @@ func (b *Bot) GetInviteLink(chat *Chat) (string, error) {
 	}
 
 	var resp struct {
-		Ok          bool
-		Description string
-		Result      string
+		Result string
 	}
-
-	err = json.Unmarshal(data, &resp)
-	if err != nil {
-		return "", errors.Wrap(err, "bad response json")
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return "", wrapError(err)
 	}
-
-	if !resp.Ok {
-		return "", errors.Errorf("api error: %s", resp.Description)
-	}
-
 	return resp.Result, nil
 }
 
 // SetGroupTitle should be used to update group title.
-func (b *Bot) SetGroupTitle(chat *Chat, newTitle string) error {
+func (b *Bot) SetGroupTitle(chat *Chat, title string) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
-		"title":   newTitle,
+		"title":   title,
 	}
 
 	data, err := b.Raw("setChatTitle", params)
@@ -1288,7 +1254,6 @@ func (b *Bot) SetGroupPermissions(chat *Chat, perms Rights) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 	}
-
 	embedRights(params, perms)
 
 	data, err := b.Raw("setChatPermissions", params)
@@ -1341,15 +1306,16 @@ func (b *Bot) Leave(chat *Chat) error {
 	return extractOk(data)
 }
 
-// Use this method to pin a message in a supergroup or a channel.
+// Pin pins a message in a supergroup or a channel.
 //
-// It supports telebot.Silent option.
-func (b *Bot) Pin(message Editable, options ...interface{}) error {
-	messageID, chatID := message.MessageSig()
+// It supports tb.Silent option.
+// This function will panic upon nil Editable.
+func (b *Bot) Pin(msg Editable, options ...interface{}) error {
+	msgID, chatID := msg.MessageSig()
 
 	params := map[string]string{
 		"chat_id":    strconv.FormatInt(chatID, 10),
-		"message_id": messageID,
+		"message_id": msgID,
 	}
 
 	sendOpts := extractOptions(options)
@@ -1363,9 +1329,9 @@ func (b *Bot) Pin(message Editable, options ...interface{}) error {
 	return extractOk(data)
 }
 
-// Use this method to unpin a message in a supergroup or a channel.
+// Unpin unpins a message in a supergroup or a channel.
 //
-// It supports telebot.Silent option.
+// It supports tb.Silent option.
 func (b *Bot) Unpin(chat *Chat) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -1396,29 +1362,18 @@ func (b *Bot) ChatByID(id string) (*Chat, error) {
 	}
 
 	var resp struct {
-		Ok          bool
-		Description string
-		Result      *Chat
+		Result *Chat
 	}
-
-	err = json.Unmarshal(data, &resp)
-	if err != nil {
-		return nil, errors.Wrap(err, "bad response json")
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
 	}
-
-	if !resp.Ok {
-		return nil, errors.Errorf("api error: %s", resp.Description)
-	}
-
 	if resp.Result.Type == ChatChannel && resp.Result.Username == "" {
-		// Channel is Private
 		resp.Result.Type = ChatChannelPrivate
 	}
-
 	return resp.Result, nil
 }
 
-// ProfilePhotosOf return list of profile pictures for a user.
+// ProfilePhotosOf returns list of profile pictures for a user.
 func (b *Bot) ProfilePhotosOf(user *User) ([]Photo, error) {
 	params := map[string]string{
 		"user_id": user.Recipient(),
@@ -1430,28 +1385,18 @@ func (b *Bot) ProfilePhotosOf(user *User) ([]Photo, error) {
 	}
 
 	var resp struct {
-		Ok     bool
 		Result struct {
 			Count  int     `json:"total_count"`
 			Photos []Photo `json:"photos"`
 		}
-
-		Description string `json:"description"`
 	}
-
-	err = json.Unmarshal(data, &resp)
-	if err != nil {
-		return nil, errors.Wrap(err, "bad response json")
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
 	}
-
-	if !resp.Ok {
-		return nil, errors.Errorf("api error: %s", resp.Description)
-	}
-
 	return resp.Result.Photos, nil
 }
 
-// ChatMemberOf return information about a member of a chat.
+// ChatMemberOf returns information about a member of a chat.
 //
 // Returns a ChatMember object on success.
 func (b *Bot) ChatMemberOf(chat *Chat, user *User) (*ChatMember, error) {
@@ -1466,20 +1411,11 @@ func (b *Bot) ChatMemberOf(chat *Chat, user *User) (*ChatMember, error) {
 	}
 
 	var resp struct {
-		Ok          bool
-		Result      *ChatMember
-		Description string `json:"description"`
+		Result *ChatMember
 	}
-
-	err = json.Unmarshal(data, &resp)
-	if err != nil {
-		return nil, errors.Wrap(err, "bad response json")
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
 	}
-
-	if !resp.Ok {
-		return nil, errors.Errorf("api error: %s", resp.Description)
-	}
-
 	return resp.Result, nil
 }
 
@@ -1489,13 +1425,16 @@ func (b *Bot) FileURLByID(fileID string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return b.URL + "/file/bot" + b.Token + "/" + f.FilePath, nil
 }
 
-// UploadStickerFile returns uploaded File on success.
-func (b *Bot) UploadStickerFile(userID int, pngSticker *File) (*File, error) {
+// UploadStickerFile uploads a .PNG file with a sticker for later use.
+//
+// NOTE: Deprecated and will be changed in future releases.
+func (b *Bot) UploadStickerFile(userID int, png *File) (*File, error) {
 	files := map[string]File{
-		"png_sticker": *pngSticker,
+		"png_sticker": *png,
 	}
 	params := map[string]string{
 		"user_id": strconv.Itoa(userID),
@@ -1507,24 +1446,17 @@ func (b *Bot) UploadStickerFile(userID int, pngSticker *File) (*File, error) {
 	}
 
 	var resp struct {
-		Ok          bool
-		Result      File
-		Description string
+		Result File
 	}
-
-	err = json.Unmarshal(data, &resp)
-	if err != nil {
-		return nil, err
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
 	}
-
-	if !resp.Ok {
-		return nil, errors.Errorf("api error: %s", resp.Description)
-	}
-
 	return &resp.Result, nil
 }
 
-// GetStickerSet returns StickerSet on success.
+// GetStickerSet returns a StickerSet on success.
+//
+// NOTE: Deprecated and will be changed in future releases.
 func (b *Bot) GetStickerSet(name string) (*StickerSet, error) {
 	data, err := b.Raw("getStickerSet", map[string]string{"name": name})
 	if err != nil {
@@ -1532,24 +1464,18 @@ func (b *Bot) GetStickerSet(name string) (*StickerSet, error) {
 	}
 
 	var resp struct {
-		Ok          bool
-		Description string
-		Result      *StickerSet
+		Result *StickerSet
 	}
-	err = json.Unmarshal(data, &resp)
-	if err != nil {
-		return nil, err
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
 	}
-
-	if !resp.Ok {
-		return nil, errors.Errorf("api error: %s", resp.Description)
-	}
-
 	return resp.Result, nil
 }
 
-// CreateNewStickerSet creates new sticker set.
-func (b *Bot) CreateNewStickerSet(sp StickerSetParams, containsMasks bool, maskPosition MaskPosition) error {
+// CreateNewStickerSet creates a new sticker set.
+//
+// NOTE: Deprecated and will be changed in future releases.
+func (b *Bot) CreateNewStickerSet(sp StickerSetParams, masked bool, mp MaskPosition) error {
 	files := map[string]File{
 		"png_sticker": *sp.PngSticker,
 	}
@@ -1560,12 +1486,12 @@ func (b *Bot) CreateNewStickerSet(sp StickerSetParams, containsMasks bool, maskP
 		"emojis":  sp.Emojis,
 	}
 
-	if containsMasks {
-		mp, err := json.Marshal(&maskPosition)
+	if masked {
+		data, err := json.Marshal(&mp)
 		if err != nil {
 			return err
 		}
-		params["mask_position"] = string(mp)
+		params["mask_position"] = string(data)
 	}
 
 	data, err := b.sendFiles("createNewStickerSet", files, params)
@@ -1577,7 +1503,9 @@ func (b *Bot) CreateNewStickerSet(sp StickerSetParams, containsMasks bool, maskP
 }
 
 // AddStickerToSet adds new sticker to existing sticker set.
-func (b *Bot) AddStickerToSet(sp StickerSetParams, maskPosition MaskPosition) error {
+//
+// NOTE: Deprecated and will be changed in future releases.
+func (b *Bot) AddStickerToSet(sp StickerSetParams, mp MaskPosition) error {
 	files := map[string]File{
 		"png_sticker": *sp.PngSticker,
 	}
@@ -1588,12 +1516,12 @@ func (b *Bot) AddStickerToSet(sp StickerSetParams, maskPosition MaskPosition) er
 		"emojis":  sp.Emojis,
 	}
 
-	if maskPosition != (MaskPosition{}) {
-		mp, err := json.Marshal(&maskPosition)
+	if mp != (MaskPosition{}) {
+		data, err := json.Marshal(&mp)
 		if err != nil {
 			return err
 		}
-		params["mask_position"] = string(mp)
+		params["mask_position"] = string(data)
 	}
 
 	data, err := b.sendFiles("addStickerToSet", files, params)
@@ -1610,6 +1538,7 @@ func (b *Bot) SetStickerPositionInSet(sticker string, position int) error {
 		"sticker":  sticker,
 		"position": strconv.Itoa(position),
 	}
+
 	data, err := b.Raw("setStickerPositionInSet", params)
 	if err != nil {
 		return err

@@ -2,12 +2,6 @@ package telebot
 
 import (
 	"time"
-
-	"github.com/pkg/errors"
-)
-
-var (
-	ErrCouldNotUpdate = errors.New("telebot: could not fetch new updates")
 )
 
 // Poller is a provider of Updates.
@@ -59,6 +53,7 @@ func (p *MiddlewarePoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 
 	for {
 		select {
+
 		// call to stop
 		case <-stop:
 			stopPoller <- struct{}{}

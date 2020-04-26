@@ -27,7 +27,7 @@ func (u *User) Recipient() string {
 type Chat struct {
 	ID int64 `json:"id"`
 
-	// See telebot.ChatType and consts.
+	// See ChatType and consts.
 	Type ChatType `json:"type"`
 
 	// Won't be there for ChatPrivate.
