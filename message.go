@@ -192,6 +192,9 @@ type Message struct {
 	// if it is itself a reply.
 	PinnedMessage *Message `json:"pinned_message"`
 
+	// The domain name of the website on which the user has logged in.
+	ConnectedWebsite string `json:"connected_website,omitempty"`
+
 	// Inline keyboard attached to the message.
 	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup"`
 }
@@ -215,6 +218,9 @@ type MessageEntity struct {
 
 	// (Optional) For EntityTMention entity type only.
 	User *User `json:"user,omitempty"`
+
+	// (Optional) For EntityCodeBlock entity type only.
+	Language string `json:"language,omitempty"`
 }
 
 // MessageSig satisfies Editable interface (see Editable.)
