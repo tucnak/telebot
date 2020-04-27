@@ -73,7 +73,7 @@ type InlineButton struct {
 	URL             string `json:"url,omitempty"`
 	Data            string `json:"callback_data,omitempty"`
 	InlineQuery     string `json:"switch_inline_query,omitempty"`
-	InlineQueryChat string `json:"switch_inline_query_current_chat"`
+	InlineQueryChat string `json:"switch_inline_query_current_chat,omitempty"`
 	Login           *Login `json:"login_url,omitempty"`
 
 	// Not used anywhere.
