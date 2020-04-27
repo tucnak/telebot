@@ -50,6 +50,7 @@ var errorRx = regexp.MustCompile(`{.+"error_code":(\d+),"description":"(.+)"}`)
 var (
 	// General errors
 	ErrUnauthorized      = NewAPIError(401, "Unauthorized")
+	ErrNotStartedByUser  = NewAPIError(403, "Forbidden: bot can't initiate conversation with a user")
 	ErrBlockedByUser     = NewAPIError(401, "Forbidden: bot was blocked by the user")
 	ErrUserIsDeactivated = NewAPIError(401, "Forbidden: user is deactivated")
 	ErrNotFound          = NewAPIError(404, "Not Found")
@@ -97,6 +98,8 @@ func ErrByDescription(s string) error {
 	switch s {
 	case ErrUnauthorized.ʔ():
 		return ErrUnauthorized
+	case ErrNotStartedByUser.ʔ():
+		return ErrNotStartedByUser
 	case ErrNotFound.ʔ():
 		return ErrNotFound
 	case ErrUserIsDeactivated.ʔ():
