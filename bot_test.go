@@ -47,11 +47,7 @@ func TestNewBot(t *testing.T) {
 	_, err = NewBot(pref)
 	assert.Error(t, err)
 
-	if token == "" {
-		t.Skip("TELEBOT_SECRET is required")
-	}
-
-	b, err := newTestBot()
+	b, err := NewBot(Settings{offline: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,6 +63,7 @@ func TestNewBot(t *testing.T) {
 	pref.Client = client
 	pref.Poller = &LongPoller{Timeout: time.Second}
 	pref.Updates = 50
+	pref.offline = true
 
 	b, err = NewBot(pref)
 	assert.NoError(t, err)
@@ -135,17 +132,10 @@ func TestBotStart(t *testing.T) {
 }
 
 func TestBotIncomingUpdate(t *testing.T) {
-	if token == "" {
-		t.Skip("TELEBOT_SECRET is required")
-	}
-
-	b, err := newTestBot()
+	b, err := NewBot(Settings{Synchronous: true, offline: true})
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	tp := &testPoller{updates: make(chan Update, 1)}
-	b.Poller = tp
 
 	b.Handle("/start", func(m *Message) {
 		assert.Equal(t, "/start", m.Text)
