@@ -28,6 +28,18 @@ func (b *Bot) deferDebug() {
 	}
 }
 
+func (b *Bot) runHandler(handler func()) {
+	f := func() {
+		defer b.deferDebug()
+		handler()
+	}
+	if b.synchronous {
+		f()
+	} else {
+		go f()
+	}
+}
+
 // wrapError returns new wrapped telebot-related error.
 func wrapError(err error) error {
 	return errors.Wrap(err, "telebot")
