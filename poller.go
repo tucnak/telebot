@@ -98,6 +98,8 @@ type LongPoller struct {
 
 // Poll does long polling.
 func (p *LongPoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
+	b.RemoveWebhook()
+	
 	for {
 		select {
 		case <-stop:
