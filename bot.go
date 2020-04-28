@@ -186,7 +186,7 @@ func (b *Bot) Start() {
 		select {
 		// handle incoming updates
 		case upd := <-b.Updates:
-			b.ProcessUpdate(&upd)
+			b.ProcessUpdate(upd)
 		// call to stop polling
 		case <-b.stop:
 			stop <- struct{}{}
@@ -202,7 +202,7 @@ func (b *Bot) Stop() {
 
 // ProcessUpdate processes a single incoming update.
 // A started bot calls this function automatically.
-func (b *Bot) ProcessUpdate(upd *Update) {
+func (b *Bot) ProcessUpdate(upd Update) {
 	if upd.Message != nil {
 		m := upd.Message
 
@@ -293,9 +293,7 @@ func (b *Bot) ProcessUpdate(upd *Update) {
 					panic("telebot: migration handler is bad")
 				}
 
-				func(b *Bot, handler func(int64, int64), from, to int64) {
-					b.runHandler(func() { handler(from, to) })
-				}(b, handler, m.Chat.ID, m.MigrateTo)
+				b.runHandler(func() { handler(m.Chat.ID, m.MigrateTo) })
 			}
 
 			return
@@ -347,9 +345,7 @@ func (b *Bot) ProcessUpdate(upd *Update) {
 						}
 
 						upd.Callback.Data = payload
-						func(b *Bot, handler func(*Callback), c *Callback) {
-							b.runHandler(func() { handler(c) })
-						}(b, handler, upd.Callback)
+						b.runHandler(func() { handler(upd.Callback) })
 
 						return
 					}
@@ -363,9 +359,7 @@ func (b *Bot) ProcessUpdate(upd *Update) {
 				panic("telebot: callback handler is bad")
 			}
 
-			func(b *Bot, handler func(*Callback), c *Callback) {
-				b.runHandler(func() { handler(c) })
-			}(b, handler, upd.Callback)
+			b.runHandler(func() { handler(upd.Callback) })
 		}
 
 		return
@@ -378,9 +372,7 @@ func (b *Bot) ProcessUpdate(upd *Update) {
 				panic("telebot: query handler is bad")
 			}
 
-			func(b *Bot, handler func(*Query), q *Query) {
-				b.runHandler(func() { handler(q) })
-			}(b, handler, upd.Query)
+			b.runHandler(func() { handler(upd.Query) })
 		}
 
 		return
@@ -393,9 +385,7 @@ func (b *Bot) ProcessUpdate(upd *Update) {
 				panic("telebot: chosen inline result handler is bad")
 			}
 
-			func(b *Bot, handler func(*ChosenInlineResult), r *ChosenInlineResult) {
-				b.runHandler(func() { handler(r) })
-			}(b, handler, upd.ChosenInlineResult)
+			b.runHandler(func() { handler(upd.ChosenInlineResult) })
 		}
 
 		return
@@ -408,9 +398,7 @@ func (b *Bot) ProcessUpdate(upd *Update) {
 				panic("telebot: pre checkout query handler is bad")
 			}
 
-			func(b *Bot, handler func(*PreCheckoutQuery), pre *PreCheckoutQuery) {
-				b.runHandler(func() { handler(pre) })
-			}(b, handler, upd.PreCheckoutQuery)
+			b.runHandler(func() { handler(upd.PreCheckoutQuery) })
 		}
 
 		return
@@ -423,9 +411,7 @@ func (b *Bot) ProcessUpdate(upd *Update) {
 				panic("telebot: poll handler is bad")
 			}
 
-			func(b *Bot, handler func(*Poll), p *Poll) {
-				b.runHandler(func() { handler(p) })
-			}(b, handler, upd.Poll)
+			b.runHandler(func() { handler(upd.Poll) })
 		}
 
 		return
@@ -438,9 +424,7 @@ func (b *Bot) ProcessUpdate(upd *Update) {
 				panic("telebot: poll answer handler is bad")
 			}
 
-			func(b *Bot, handler func(*PollAnswer), pa *PollAnswer) {
-				b.runHandler(func() { handler(pa) })
-			}(b, handler, upd.PollAnswer)
+			b.runHandler(func() { handler(upd.PollAnswer) })
 		}
 
 		return
