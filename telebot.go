@@ -49,6 +49,7 @@ const (
 	OnText              = "\atext"
 	OnPhoto             = "\aphoto"
 	OnAudio             = "\aaudio"
+	OnAnimation         = "\aanimation"
 	OnDocument          = "\adocument"
 	OnSticker           = "\asticker"
 	OnVideo             = "\avideo"
