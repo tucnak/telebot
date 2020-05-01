@@ -176,7 +176,7 @@ func (b *Bot) Start() {
 			b.incomingUpdate(&upd)
 		// call to stop polling
 		case <-b.stop:
-			stop <- struct{}{}
+			close(stop)
 			return
 		}
 	}

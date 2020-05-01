@@ -41,28 +41,20 @@ func NewMiddlewarePoller(original Poller, filter func(*Update) bool) *Middleware
 
 // Poll sieves updates through middleware filter.
 func (p *MiddlewarePoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
-	cap := 1
-	if p.Capacity > 1 {
-		cap = p.Capacity
+	if p.Capacity < 1 {
+		p.Capacity = 1
 	}
 
-	middle := make(chan Update, cap)
+	middle := make(chan Update, p.Capacity)
 	stopPoller := make(chan struct{})
 
 	go p.Poller.Poll(b, middle, stopPoller)
 
 	for {
 		select {
-
-		// call to stop
 		case <-stop:
-			stopPoller <- struct{}{}
-
-		// poller is done
-		case <-stopPoller:
-			close(stop)
+			close(stopPoller)
 			return
-
 		case upd := <-middle:
 			if p.Filter(&upd) {
 				dest <- upd
@@ -101,7 +93,6 @@ func (p *LongPoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 	for {
 		select {
 		case <-stop:
-			close(stop)
 			return
 		default:
 		}
