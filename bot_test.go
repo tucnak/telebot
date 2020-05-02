@@ -47,11 +47,7 @@ func TestNewBot(t *testing.T) {
 	_, err = NewBot(pref)
 	assert.Error(t, err)
 
-	if token == "" {
-		t.Skip("TELEBOT_SECRET is required")
-	}
-
-	b, err := newTestBot()
+	b, err := NewBot(Settings{offline: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,6 +63,7 @@ func TestNewBot(t *testing.T) {
 	pref.Client = client
 	pref.Poller = &LongPoller{Timeout: time.Second}
 	pref.Updates = 50
+	pref.offline = true
 
 	b, err = NewBot(pref)
 	assert.NoError(t, err)
@@ -135,17 +132,10 @@ func TestBotStart(t *testing.T) {
 }
 
 func TestBotIncomingUpdate(t *testing.T) {
-	if token == "" {
-		t.Skip("TELEBOT_SECRET is required")
-	}
-
-	b, err := newTestBot()
+	b, err := NewBot(Settings{Synchronous: true, offline: true})
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	tp := &testPoller{updates: make(chan Update, 1)}
-	b.Poller = tp
 
 	b.Handle("/start", func(m *Message) {
 		assert.Equal(t, "/start", m.Text)
@@ -244,46 +234,41 @@ func TestBotIncomingUpdate(t *testing.T) {
 		assert.Equal(t, "poll", pa.PollID)
 	})
 
-	go func() {
-		tp.updates <- Update{Message: &Message{Text: "/start"}}
-		tp.updates <- Update{Message: &Message{Text: "/start@other_bot"}}
-		tp.updates <- Update{Message: &Message{Text: "hello"}}
-		tp.updates <- Update{Message: &Message{Text: "text"}}
-		tp.updates <- Update{Message: &Message{PinnedMessage: &Message{}}}
-		tp.updates <- Update{Message: &Message{Photo: &Photo{}}}
-		tp.updates <- Update{Message: &Message{Voice: &Voice{}}}
-		tp.updates <- Update{Message: &Message{Audio: &Audio{}}}
-		tp.updates <- Update{Message: &Message{Document: &Document{}}}
-		tp.updates <- Update{Message: &Message{Sticker: &Sticker{}}}
-		tp.updates <- Update{Message: &Message{Video: &Video{}}}
-		tp.updates <- Update{Message: &Message{VideoNote: &VideoNote{}}}
-		tp.updates <- Update{Message: &Message{Contact: &Contact{}}}
-		tp.updates <- Update{Message: &Message{Location: &Location{}}}
-		tp.updates <- Update{Message: &Message{Venue: &Venue{}}}
-		tp.updates <- Update{Message: &Message{GroupCreated: true}}
-		tp.updates <- Update{Message: &Message{UserJoined: &User{}}}
-		tp.updates <- Update{Message: &Message{UsersJoined: []User{{}}}}
-		tp.updates <- Update{Message: &Message{UserLeft: &User{}}}
-		tp.updates <- Update{Message: &Message{NewGroupTitle: "title"}}
-		tp.updates <- Update{Message: &Message{NewGroupPhoto: &Photo{}}}
-		tp.updates <- Update{Message: &Message{GroupPhotoDeleted: true}}
-		tp.updates <- Update{Message: &Message{Chat: &Chat{ID: 1}, MigrateTo: 2}}
-		tp.updates <- Update{EditedMessage: &Message{Text: "edited"}}
-		tp.updates <- Update{ChannelPost: &Message{Text: "post"}}
-		tp.updates <- Update{ChannelPost: &Message{PinnedMessage: &Message{}}}
-		tp.updates <- Update{EditedChannelPost: &Message{Text: "edited post"}}
-		tp.updates <- Update{Callback: &Callback{MessageID: "inline", Data: "callback"}}
-		tp.updates <- Update{Callback: &Callback{Data: "callback"}}
-		tp.updates <- Update{Callback: &Callback{Data: "\funique|callback"}}
-		tp.updates <- Update{Query: &Query{Text: "query"}}
-		tp.updates <- Update{ChosenInlineResult: &ChosenInlineResult{ResultID: "result"}}
-		tp.updates <- Update{PreCheckoutQuery: &PreCheckoutQuery{ID: "checkout"}}
-		tp.updates <- Update{Poll: &Poll{ID: "poll"}}
-		tp.updates <- Update{PollAnswer: &PollAnswer{PollID: "poll"}}
-	}()
-
-	time.AfterFunc(100*time.Millisecond, b.Stop)
-	b.Start() // stops after some delay
+	b.ProcessUpdate(Update{Message: &Message{Text: "/start"}})
+	b.ProcessUpdate(Update{Message: &Message{Text: "/start@other_bot"}})
+	b.ProcessUpdate(Update{Message: &Message{Text: "hello"}})
+	b.ProcessUpdate(Update{Message: &Message{Text: "text"}})
+	b.ProcessUpdate(Update{Message: &Message{PinnedMessage: &Message{}}})
+	b.ProcessUpdate(Update{Message: &Message{Photo: &Photo{}}})
+	b.ProcessUpdate(Update{Message: &Message{Voice: &Voice{}}})
+	b.ProcessUpdate(Update{Message: &Message{Audio: &Audio{}}})
+	b.ProcessUpdate(Update{Message: &Message{Document: &Document{}}})
+	b.ProcessUpdate(Update{Message: &Message{Sticker: &Sticker{}}})
+	b.ProcessUpdate(Update{Message: &Message{Video: &Video{}}})
+	b.ProcessUpdate(Update{Message: &Message{VideoNote: &VideoNote{}}})
+	b.ProcessUpdate(Update{Message: &Message{Contact: &Contact{}}})
+	b.ProcessUpdate(Update{Message: &Message{Location: &Location{}}})
+	b.ProcessUpdate(Update{Message: &Message{Venue: &Venue{}}})
+	b.ProcessUpdate(Update{Message: &Message{GroupCreated: true}})
+	b.ProcessUpdate(Update{Message: &Message{UserJoined: &User{}}})
+	b.ProcessUpdate(Update{Message: &Message{UsersJoined: []User{{}}}})
+	b.ProcessUpdate(Update{Message: &Message{UserLeft: &User{}}})
+	b.ProcessUpdate(Update{Message: &Message{NewGroupTitle: "title"}})
+	b.ProcessUpdate(Update{Message: &Message{NewGroupPhoto: &Photo{}}})
+	b.ProcessUpdate(Update{Message: &Message{GroupPhotoDeleted: true}})
+	b.ProcessUpdate(Update{Message: &Message{Chat: &Chat{ID: 1}, MigrateTo: 2}})
+	b.ProcessUpdate(Update{EditedMessage: &Message{Text: "edited"}})
+	b.ProcessUpdate(Update{ChannelPost: &Message{Text: "post"}})
+	b.ProcessUpdate(Update{ChannelPost: &Message{PinnedMessage: &Message{}}})
+	b.ProcessUpdate(Update{EditedChannelPost: &Message{Text: "edited post"}})
+	b.ProcessUpdate(Update{Callback: &Callback{MessageID: "inline", Data: "callback"}})
+	b.ProcessUpdate(Update{Callback: &Callback{Data: "callback"}})
+	b.ProcessUpdate(Update{Callback: &Callback{Data: "\funique|callback"}})
+	b.ProcessUpdate(Update{Query: &Query{Text: "query"}})
+	b.ProcessUpdate(Update{ChosenInlineResult: &ChosenInlineResult{ResultID: "result"}})
+	b.ProcessUpdate(Update{PreCheckoutQuery: &PreCheckoutQuery{ID: "checkout"}})
+	b.ProcessUpdate(Update{Poll: &Poll{ID: "poll"}})
+	b.ProcessUpdate(Update{PollAnswer: &PollAnswer{PollID: "poll"}})
 }
 
 func TestBot(t *testing.T) {

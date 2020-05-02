@@ -109,7 +109,9 @@ backwards-compatibity.
 
 ## Poller
 Telebot doesn't really care how you provide it with incoming updates, as long
-as you set it up with a Poller:
+as you set it up with a Poller, or call ProcessUpdate for each update (see
+[examples/awslambdaechobot](examples/awslambdaechobot)):
+
 ```go
 // Poller is a provider of Updates.
 //
