@@ -133,7 +133,7 @@ func TestBotStart(t *testing.T) {
 	assert.True(t, ok)
 }
 
-func TestBotIncomingUpdate(t *testing.T) {
+func TestBotProcessUpdate(t *testing.T) {
 	b, err := NewBot(Settings{Synchronous: true, offline: true})
 	if err != nil {
 		t.Fatal(err)
@@ -251,9 +251,10 @@ func TestBotIncomingUpdate(t *testing.T) {
 	b.ProcessUpdate(Update{Message: &Message{Contact: &Contact{}}})
 	b.ProcessUpdate(Update{Message: &Message{Location: &Location{}}})
 	b.ProcessUpdate(Update{Message: &Message{Venue: &Venue{}}})
+	b.ProcessUpdate(Update{Message: &Message{Dice: &Dice{}}})
 	b.ProcessUpdate(Update{Message: &Message{GroupCreated: true}})
-	b.ProcessUpdate(Update{Message: &Message{UserJoined: &User{}}})
-	b.ProcessUpdate(Update{Message: &Message{UsersJoined: []User{{}}}})
+	b.ProcessUpdate(Update{Message: &Message{UserJoined: &User{ID: 1}}})
+	b.ProcessUpdate(Update{Message: &Message{UsersJoined: []User{{ID: 1}}}})
 	b.ProcessUpdate(Update{Message: &Message{UserLeft: &User{}}})
 	b.ProcessUpdate(Update{Message: &Message{NewGroupTitle: "title"}})
 	b.ProcessUpdate(Update{Message: &Message{NewGroupPhoto: &Photo{}}})
