@@ -189,7 +189,7 @@ func (b *Bot) Start() {
 			b.ProcessUpdate(upd)
 		// call to stop polling
 		case <-b.stop:
-			stop <- struct{}{}
+			close(stop)
 			return
 		}
 	}

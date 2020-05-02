@@ -107,11 +107,10 @@ func TestBotStart(t *testing.T) {
 	// remove webhook to be sure that bot can poll
 	assert.NoError(t, b.RemoveWebhook())
 
-	time.AfterFunc(50*time.Millisecond, b.Stop)
-	b.Start() // stops after some delay
-	assert.Empty(t, b.stop)
+	go b.Start()
+	b.Stop()
 
-	tp := &testPoller{updates: make(chan Update, 1)}
+	tp := newTestPoller()
 	go func() {
 		tp.updates <- Update{Message: &Message{Text: "/start"}}
 	}()
@@ -123,11 +122,14 @@ func TestBotStart(t *testing.T) {
 	var ok bool
 	b.Handle("/start", func(m *Message) {
 		assert.Equal(t, m.Text, "/start")
+		tp.done <- struct{}{}
 		ok = true
 	})
 
-	time.AfterFunc(100*time.Millisecond, b.Stop)
-	b.Start() // stops after some delay
+	go b.Start()
+	<-tp.done
+	b.Stop()
+
 	assert.True(t, ok)
 }
 
