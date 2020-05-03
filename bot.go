@@ -454,6 +454,8 @@ func (b *Bot) handleMedia(m *Message) bool {
 		b.handle(OnVoice, m)
 	case m.Audio != nil:
 		b.handle(OnAudio, m)
+	case m.Animation != nil:
+		b.handle(OnAnimation, m)
 	case m.Document != nil:
 		b.handle(OnDocument, m)
 	case m.Sticker != nil:
