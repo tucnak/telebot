@@ -1398,14 +1398,12 @@ func (b *Bot) FileURLByID(fileID string) (string, error) {
 }
 
 // UploadStickerFile uploads a .PNG file with a sticker for later use.
-//
-// NOTE: Deprecated and will be changed in future releases.
-func (b *Bot) UploadStickerFile(userID int, png *File) (*File, error) {
+func (b *Bot) UploadStickerFile(to Recipient, png *File) (*File, error) {
 	files := map[string]File{
 		"png_sticker": *png,
 	}
 	params := map[string]string{
-		"user_id": strconv.Itoa(userID),
+		"user_id": to.Recipient(),
 	}
 
 	data, err := b.sendFiles("uploadStickerFile", files, params)
@@ -1423,8 +1421,6 @@ func (b *Bot) UploadStickerFile(userID int, png *File) (*File, error) {
 }
 
 // GetStickerSet returns a StickerSet on success.
-//
-// NOTE: Deprecated and will be changed in future releases.
 func (b *Bot) GetStickerSet(name string) (*StickerSet, error) {
 	data, err := b.Raw("getStickerSet", map[string]string{"name": name})
 	if err != nil {
@@ -1441,21 +1437,25 @@ func (b *Bot) GetStickerSet(name string) (*StickerSet, error) {
 }
 
 // CreateNewStickerSet creates a new sticker set.
-//
-// NOTE: Deprecated and will be changed in future releases.
-func (b *Bot) CreateNewStickerSet(sp StickerSetParams, masked bool, mp MaskPosition) error {
-	files := map[string]File{
-		"png_sticker": *sp.PngSticker,
+func (b *Bot) CreateNewStickerSet(to Recipient, s StickerSet) error {
+	files := make(map[string]File)
+	if s.PNG != nil {
+		files["png_sticker"] = *s.PNG
 	}
-	params := map[string]string{
-		"user_id": strconv.Itoa(sp.UserID),
-		"name":    sp.Name,
-		"title":   sp.Title,
-		"emojis":  sp.Emojis,
+	if s.TGS != nil {
+		files["tgs_sticker"] = *s.TGS
 	}
 
-	if masked {
-		data, err := json.Marshal(&mp)
+	params := map[string]string{
+		"user_id":        to.Recipient(),
+		"name":           s.Name,
+		"title":          s.Title,
+		"emojis":         s.Emojis,
+		"contains_masks": strconv.FormatBool(s.ContainsMasks),
+	}
+
+	if s.MaskPosition != nil {
+		data, err := json.Marshal(&s.MaskPosition)
 		if err != nil {
 			return err
 		}
@@ -1471,21 +1471,23 @@ func (b *Bot) CreateNewStickerSet(sp StickerSetParams, masked bool, mp MaskPosit
 }
 
 // AddStickerToSet adds new sticker to existing sticker set.
-//
-// NOTE: Deprecated and will be changed in future releases.
-func (b *Bot) AddStickerToSet(sp StickerSetParams, mp MaskPosition) error {
-	files := map[string]File{
-		"png_sticker": *sp.PngSticker,
+func (b *Bot) AddStickerToSet(to Recipient, s Sticker) error {
+	files := make(map[string]File)
+	if s.PNG != nil {
+		files["png_sticker"] = *s.PNG
 	}
-	params := map[string]string{
-		"user_id": strconv.Itoa(sp.UserID),
-		"name":    sp.Name,
-		"title":   sp.Title,
-		"emojis":  sp.Emojis,
+	if s.TGS != nil {
+		files["tgs_sticker"] = *s.TGS
 	}
 
-	if mp != (MaskPosition{}) {
-		data, err := json.Marshal(&mp)
+	params := map[string]string{
+		"user_id": to.Recipient(),
+		"name":    s.Name,
+		"emojis":  s.Emojis,
+	}
+
+	if s.MaskPosition != nil {
+		data, err := json.Marshal(&s.MaskPosition)
 		if err != nil {
 			return err
 		}
