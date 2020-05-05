@@ -662,7 +662,7 @@ func (b *Bot) Forward(to Recipient, what *Message, options ...interface{}) (*Mes
 func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Message, error) {
 	var (
 		method string
-		params = map[string]string{}
+		params = make(map[string]string)
 	)
 
 	switch v := what.(type) {
@@ -703,7 +703,7 @@ func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Mes
 // This function will panic upon nil Editable.
 func (b *Bot) EditReplyMarkup(msg Editable, markup *ReplyMarkup) (*Message, error) {
 	msgID, chatID := msg.MessageSig()
-	params := map[string]string{}
+	params := make(map[string]string)
 
 	if chatID == 0 { // if inline message
 		params["inline_message_id"] = msgID
