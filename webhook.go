@@ -36,9 +36,15 @@ type WebhookEndpoint struct {
 // You can also leave the Listen field empty. In this case it is up to the caller to
 // add the Webhook to a http-mux.
 type Webhook struct {
-	Listen         string
-	MaxConnections int
-	AllowedUpdates []string
+	Listen         string   `json:"url"`
+	MaxConnections int      `json:"max_conecctions"`
+	AllowedUpdates []string `json:"allowed_updates"`
+
+	// (WebhookInfo)
+	HasCustomCert  bool   `json:"has_custom_certificate"`
+	PendingUpdates int    `json:"pending_update_count"`
+	ErrorUnixtime  int64  `json:"last_error_date"`
+	ErrorMessage   string `json:"last_error_message"`
 
 	TLS      *WebhookTLS
 	Endpoint *WebhookEndpoint
@@ -143,6 +149,22 @@ func (h *Webhook) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.dest <- update
+}
+
+// GetWebhook returns current webhook status.
+func (b *Bot) GetWebhook() (*Webhook, error) {
+	data, err := b.Raw("getWebhookInfo", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Webhook Webhook
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, err
+	}
+	return &resp.Webhook, nil
 }
 
 // SetWebhook configures a bot to receive incoming
