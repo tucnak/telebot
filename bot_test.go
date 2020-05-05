@@ -324,7 +324,7 @@ func TestBot(t *testing.T) {
 		assert.True(t, fwd.IsForwarded())
 
 		fwd.ID += 1 // nonexistent message
-		fwd, err = b.Forward(to, fwd)
+		_, err = b.Forward(to, fwd)
 		assert.Equal(t, ErrToForwardNotFound, err)
 	})
 
