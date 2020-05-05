@@ -159,12 +159,12 @@ func (b *Bot) GetWebhook() (*Webhook, error) {
 	}
 
 	var resp struct {
-		Webhook Webhook
+		Result Webhook
 	}
 	if err := json.Unmarshal(data, &resp); err != nil {
 		return nil, err
 	}
-	return &resp.Webhook, nil
+	return &resp.Result, nil
 }
 
 // SetWebhook configures a bot to receive incoming
