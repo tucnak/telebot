@@ -354,7 +354,7 @@ func (p *Poll) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	return extractMessage(data)
 }
 
-// Send delivers dice through bot b to recipient
+// Send delivers dice through bot b to recipient.
 func (d *Dice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
 		"chat_id": to.Recipient(),
@@ -363,6 +363,22 @@ func (d *Dice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	embedSendOptions(params, opt)
 
 	data, err := b.Raw("sendDice", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMessage(data)
+}
+
+// Send delivers game through bot b to recipient.
+func (g *Game) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
+	params := map[string]string{
+		"chat_id":         to.Recipient(),
+		"game_short_name": g.Title,
+	}
+	embedSendOptions(params, opt)
+
+	data, err := b.Raw("sendGame", params)
 	if err != nil {
 		return nil, err
 	}

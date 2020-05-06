@@ -86,3 +86,25 @@ type ChatMember struct {
 	//
 	RestrictedUntil int64 `json:"until_date,omitempty"`
 }
+
+// ChatID represents a chat or an user integer ID, which can be used
+// as recipient in bot methods. It is very useful in cases where
+// you have special group IDs, for example in your config, and don't
+// want to wrap it into *tb.Chat every time you send messages.
+//
+// Example:
+//
+//		group := tb.ChatID(-100756389456)
+//		b.Send(group, "Hello!")
+//
+//		type Config struct {
+//			AdminGroup tb.ChatID `json:"admin_group"`
+//		}
+//		b.Send(conf.AdminGroup, "Hello!")
+//
+type ChatID int64
+
+// Recipient returns chat ID (see Recipient interface).
+func (i ChatID) Recipient() string {
+	return strconv.FormatInt(int64(i), 10)
+}

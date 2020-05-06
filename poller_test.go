@@ -34,7 +34,10 @@ func TestMiddlewarePoller(t *testing.T) {
 	tp := newTestPoller()
 	var ids []int
 
-	b, err := newTestBot()
+	pref := defaultSettings()
+	pref.offline = true
+
+	b, err := NewBot(pref)
 	if err != nil {
 		t.Fatal(err)
 	}
