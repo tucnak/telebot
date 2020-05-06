@@ -160,6 +160,9 @@ func TestBotProcessUpdate(t *testing.T) {
 	b.Handle(OnAudio, func(m *Message) {
 		assert.NotNil(t, m.Audio)
 	})
+	b.Handle(OnAnimation, func(m *Message) {
+		assert.NotNil(t, m.Animation)
+	})
 	b.Handle(OnDocument, func(m *Message) {
 		assert.NotNil(t, m.Document)
 	})
@@ -244,6 +247,7 @@ func TestBotProcessUpdate(t *testing.T) {
 	b.ProcessUpdate(Update{Message: &Message{Photo: &Photo{}}})
 	b.ProcessUpdate(Update{Message: &Message{Voice: &Voice{}}})
 	b.ProcessUpdate(Update{Message: &Message{Audio: &Audio{}}})
+	b.ProcessUpdate(Update{Message: &Message{Animation: &Animation{}}})
 	b.ProcessUpdate(Update{Message: &Message{Document: &Document{}}})
 	b.ProcessUpdate(Update{Message: &Message{Sticker: &Sticker{}}})
 	b.ProcessUpdate(Update{Message: &Message{Video: &Video{}}})
@@ -302,6 +306,10 @@ func TestBot(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, msg.Photo)
 		assert.Equal(t, photo.Caption, msg.Caption)
+
+		msg, err = b.EditCaption(msg, "new caption")
+		assert.NoError(t, err)
+		assert.Equal(t, "new caption", msg.Caption)
 	})
 
 	var msg *Message
@@ -373,6 +381,16 @@ func TestBot(t *testing.T) {
 
 		_, err = b.EditReplyMarkup(msg, badMarkup)
 		assert.Equal(t, ErrButtonDataInvalid, err)
+	})
+
+	t.Run("Notify()", func(t *testing.T) {
+		assert.Equal(t, ErrBadRecipient, b.Notify(nil, Typing))
+		assert.NoError(t, b.Notify(to, Typing))
+	})
+
+	// should be the last
+	t.Run("Delete()", func(t *testing.T) {
+		assert.NoError(t, b.Delete(msg))
 	})
 
 	t.Run("Commands", func(t *testing.T) {
