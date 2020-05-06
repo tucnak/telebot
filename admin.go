@@ -85,12 +85,8 @@ func (b *Bot) Ban(chat *Chat, member *ChatMember) error {
 		"until_date": strconv.FormatInt(member.RestrictedUntil, 10),
 	}
 
-	data, err := b.Raw("kickChatMember", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("kickChatMember", params)
+	return err
 }
 
 // Unban will unban user from chat, who would have thought eh?
@@ -100,12 +96,8 @@ func (b *Bot) Unban(chat *Chat, user *User) error {
 		"user_id": user.Recipient(),
 	}
 
-	data, err := b.Raw("unbanChatMember", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("unbanChatMember", params)
+	return err
 }
 
 // Restrict lets you restrict a subset of member's rights until
@@ -126,12 +118,8 @@ func (b *Bot) Restrict(chat *Chat, member *ChatMember) error {
 	}
 	embedRights(params, prv)
 
-	data, err := b.Raw("restrictChatMember", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("restrictChatMember", params)
+	return err
 }
 
 // Promote lets you update member's admin rights, such as:
@@ -154,12 +142,8 @@ func (b *Bot) Promote(chat *Chat, member *ChatMember) error {
 	}
 	embedRights(params, prv)
 
-	data, err := b.Raw("promoteChatMember", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("promoteChatMember", params)
+	return err
 }
 
 // AdminsOf returns a member list of chat admins.
@@ -216,10 +200,6 @@ func (b *Bot) SetAdminTitle(chat *Chat, user *User, title string) error {
 		"custom_title": title,
 	}
 
-	data, err := b.Raw("setChatAdministratorCustomTitle", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("setChatAdministratorCustomTitle", params)
+	return err
 }

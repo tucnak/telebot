@@ -678,6 +678,7 @@ func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Mes
 	}
 
 	msgID, chatID := msg.MessageSig()
+
 	if chatID == 0 { // if inline message
 		params["inline_message_id"] = msgID
 	} else {
@@ -856,7 +857,7 @@ func (b *Bot) EditMedia(msg Editable, media InputMedia, options ...interface{}) 
 	}
 
 	msgID, chatID := msg.MessageSig()
-	params := map[string]string{}
+	params := make(map[string]string)
 
 	sendOpts := extractOptions(options)
 	embedSendOptions(params, sendOpts)
@@ -907,12 +908,8 @@ func (b *Bot) Delete(msg Editable) error {
 		"message_id": msgID,
 	}
 
-	data, err := b.Raw("deleteMessage", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("deleteMessage", params)
+	return err
 }
 
 // Notify updates the chat action for recipient.
@@ -934,12 +931,8 @@ func (b *Bot) Notify(to Recipient, action ChatAction) error {
 		"action":  string(action),
 	}
 
-	data, err := b.Raw("sendChatAction", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("sendChatAction", params)
+	return err
 }
 
 // Accept finalizes the deal.
@@ -955,12 +948,8 @@ func (b *Bot) Accept(query *PreCheckoutQuery, errorMessage ...string) error {
 		params["error_message"] = errorMessage[0]
 	}
 
-	data, err := b.Raw("answerPreCheckoutQuery", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("answerPreCheckoutQuery", params)
+	return err
 }
 
 // Answer sends a response for a given inline query. A query can only
@@ -973,12 +962,8 @@ func (b *Bot) Answer(query *Query, resp *QueryResponse) error {
 		result.Process()
 	}
 
-	data, err := b.Raw("answerInlineQuery", resp)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("answerInlineQuery", resp)
+	return err
 }
 
 // Respond sends a response for a given callback query. A callback can
@@ -999,12 +984,8 @@ func (b *Bot) Respond(c *Callback, response ...*CallbackResponse) error {
 	}
 
 	resp.CallbackID = c.ID
-	data, err := b.Raw("answerCallbackQuery", resp)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("answerCallbackQuery", resp)
+	return err
 }
 
 // FileByID returns full file object including File.FilePath, allowing you to
@@ -1165,12 +1146,8 @@ func (b *Bot) SetGroupTitle(chat *Chat, title string) error {
 		"title":   title,
 	}
 
-	data, err := b.Raw("setChatTitle", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("setChatTitle", params)
+	return err
 }
 
 // SetGroupDescription should be used to update group title.
@@ -1180,12 +1157,8 @@ func (b *Bot) SetGroupDescription(chat *Chat, description string) error {
 		"description": description,
 	}
 
-	data, err := b.Raw("setChatDescription", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("setChatDescription", params)
+	return err
 }
 
 // SetGroupPhoto should be used to update group photo.
@@ -1194,12 +1167,8 @@ func (b *Bot) SetGroupPhoto(chat *Chat, p *Photo) error {
 		"chat_id": chat.Recipient(),
 	}
 
-	data, err := b.sendFiles("setChatPhoto", map[string]File{"photo": p.File}, params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.sendFiles("setChatPhoto", map[string]File{"photo": p.File}, params)
+	return err
 }
 
 // SetGroupStickerSet should be used to update group's group sticker set.
@@ -1209,12 +1178,8 @@ func (b *Bot) SetGroupStickerSet(chat *Chat, setName string) error {
 		"sticker_set_name": setName,
 	}
 
-	data, err := b.Raw("setChatStickerSet", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("setChatStickerSet", params)
+	return err
 }
 
 // SetGroupPermissions sets default chat permissions for all members.
@@ -1224,12 +1189,8 @@ func (b *Bot) SetGroupPermissions(chat *Chat, perms Rights) error {
 	}
 	embedRights(params, perms)
 
-	data, err := b.Raw("setChatPermissions", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("setChatPermissions", params)
+	return err
 }
 
 // DeleteGroupPhoto should be used to just remove group photo.
@@ -1238,12 +1199,8 @@ func (b *Bot) DeleteGroupPhoto(chat *Chat) error {
 		"chat_id": chat.Recipient(),
 	}
 
-	data, err := b.Raw("deleteChatPhoto", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("deleteChatPhoto", params)
+	return err
 }
 
 // DeleteGroupStickerSet should be used to just remove group sticker set.
@@ -1252,12 +1209,8 @@ func (b *Bot) DeleteGroupStickerSet(chat *Chat) error {
 		"chat_id": chat.Recipient(),
 	}
 
-	data, err := b.Raw("deleteChatStickerSet", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("deleteChatStickerSet", params)
+	return err
 }
 
 // Leave makes bot leave a group, supergroup or channel.
@@ -1266,12 +1219,8 @@ func (b *Bot) Leave(chat *Chat) error {
 		"chat_id": chat.Recipient(),
 	}
 
-	data, err := b.Raw("leaveChat", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("leaveChat", params)
+	return err
 }
 
 // Pin pins a message in a supergroup or a channel.
@@ -1289,12 +1238,8 @@ func (b *Bot) Pin(msg Editable, options ...interface{}) error {
 	sendOpts := extractOptions(options)
 	embedSendOptions(params, sendOpts)
 
-	data, err := b.Raw("pinChatMessage", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("pinChatMessage", params)
+	return err
 }
 
 // Unpin unpins a message in a supergroup or a channel.
@@ -1305,12 +1250,8 @@ func (b *Bot) Unpin(chat *Chat) error {
 		"chat_id": chat.Recipient(),
 	}
 
-	data, err := b.Raw("unpinChatMessage", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("unpinChatMessage", params)
+	return err
 }
 
 // ChatByID fetches chat info of its ID.
@@ -1462,12 +1403,8 @@ func (b *Bot) CreateNewStickerSet(sp StickerSetParams, masked bool, mp MaskPosit
 		params["mask_position"] = string(data)
 	}
 
-	data, err := b.sendFiles("createNewStickerSet", files, params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.sendFiles("createNewStickerSet", files, params)
+	return err
 }
 
 // AddStickerToSet adds new sticker to existing sticker set.
@@ -1492,12 +1429,8 @@ func (b *Bot) AddStickerToSet(sp StickerSetParams, mp MaskPosition) error {
 		params["mask_position"] = string(data)
 	}
 
-	data, err := b.sendFiles("addStickerToSet", files, params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.sendFiles("addStickerToSet", files, params)
+	return err
 }
 
 // SetStickerPositionInSet moves a sticker in set to a specific position.
@@ -1507,22 +1440,15 @@ func (b *Bot) SetStickerPositionInSet(sticker string, position int) error {
 		"position": strconv.Itoa(position),
 	}
 
-	data, err := b.Raw("setStickerPositionInSet", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("setStickerPositionInSet", params)
+	return err
 }
 
 // DeleteStickerFromSet deletes sticker from set created by the bot.
 func (b *Bot) DeleteStickerFromSet(sticker string) error {
-	data, err := b.Raw("deleteStickerFromSet", map[string]string{"sticker": sticker})
-	if err != nil {
-		return err
-	}
+	_, err := b.Raw("deleteStickerFromSet", map[string]string{"sticker": sticker})
+	return err
 
-	return extractOk(data)
 }
 
 // GetCommands returns the current list of the bot's commands.
@@ -1549,10 +1475,6 @@ func (b *Bot) SetCommands(cmds []Command) error {
 		"commands": string(data),
 	}
 
-	data, err := b.Raw("setMyCommands", params)
-	if err != nil {
-		return err
-	}
-
-	return extractOk(data)
+	_, err := b.Raw("setMyCommands", params)
+	return err
 }

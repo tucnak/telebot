@@ -41,11 +41,12 @@ type GameHighScore struct {
 //
 // This function will panic upon nil Editable.
 func (b *Bot) GetGameScores(user Recipient, msg Editable) ([]GameHighScore, error) {
+	msgID, chatID := msg.MessageSig()
+
 	params := map[string]string{
 		"user_id": user.Recipient(),
 	}
 
-	msgID, chatID := msg.MessageSig()
 	if chatID == 0 { // if inline message
 		params["inline_message_id"] = msgID
 	} else {
@@ -76,6 +77,8 @@ func (b *Bot) GetGameScores(user Recipient, msg Editable) ([]GameHighScore, erro
 //		for `telebot: no game message` error.
 //
 func (b *Bot) SetGameScore(user Recipient, msg Editable, score GameHighScore) (*Message, error) {
+	msgID, chatID := msg.MessageSig()
+
 	params := map[string]string{
 		"user_id":              user.Recipient(),
 		"score":                strconv.Itoa(score.Score),
@@ -83,7 +86,6 @@ func (b *Bot) SetGameScore(user Recipient, msg Editable, score GameHighScore) (*
 		"disable_edit_message": strconv.FormatBool(score.NoEdit),
 	}
 
-	msgID, chatID := msg.MessageSig()
 	if chatID == 0 { // if inline message
 		params["inline_message_id"] = msgID
 	} else {
