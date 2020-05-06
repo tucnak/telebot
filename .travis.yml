@@ -10,4 +10,4 @@ script:
     - go test -coverprofile=coverage.txt -covermode=atomic
 
 after_success:
-    - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash <(curl -s https://codecov.io/bash)
+    - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash <(curl -s https://codecov.io/bash); fi
