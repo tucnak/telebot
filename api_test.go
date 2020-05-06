@@ -72,3 +72,17 @@ func TestRaw(t *testing.T) {
 	_, err = b.Raw("testUnknownError", nil)
 	assert.EqualError(t, err, "telegram unknown: unknown error (400)")
 }
+
+func TestExtractOK(t *testing.T) {
+	data := []byte(`{"ok":true}`)
+	assert.Nil(t, extractOk(data))
+
+	data = []byte(`{"ok":true,"result":{}`)
+	assert.Nil(t, extractOk(data))
+
+	data = []byte(`{"ok":false,"error_code":400,"description":"Bad Request: message to edit not found"}`)
+	assert.EqualError(t, extractOk(data), extractOk(data).Error())
+
+	data = []byte(`{"ok":false,"error_code":429,"description":"Too Many Requests: retry after 10","parameters":{"retry_after":10}}`)
+	assert.EqualError(t, extractOk(data), extractOk(data).Error())
+}

@@ -45,7 +45,7 @@ func NewAPIError(code int, msgs ...string) *APIError {
 	return err
 }
 
-var errorRx = regexp.MustCompile(`{.+"error_code":(\d+),"description":"(.+)"}`)
+var errorRx = regexp.MustCompile(`{.+"error_code":(\d+),"description":"(.+?)".*}`)
 
 var (
 	// General errors
