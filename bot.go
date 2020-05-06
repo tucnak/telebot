@@ -1527,6 +1527,26 @@ func (b *Bot) DeleteStickerFromSet(sticker string) error {
 	return extractOk(data)
 }
 
+// SetStickerSetThumb sets the thumbnail of a sticker set. Animated thumbnails can be set for animated sticker sets only.
+//
+// Thumbnail must be a PNG image, up to 128 kilobytes in size and have width and height exactly 100px,
+// or a TGS animation up to 32 kilobytes in size. Animated sticker set thumbnail can't be uploaded via HTTP URL.
+func (b *Bot) SetStickerSetThumb(to Recipient, s Sticker) error {
+	files := map[string]File{}
+	if s.PNG != nil {
+		files["thumb"] = *s.PNG
+	} else if s.TGS != nil {
+		files["thumb"] = *s.TGS
+	}
+	params := map[string]string{
+		"name":    s.Name,
+		"user_id": to.Recipient(),
+	}
+
+	_, err := b.sendFiles("setStickerSetThumb", files, params)
+	return err
+}
+
 // GetCommands returns the current list of the bot's commands.
 func (b *Bot) GetCommands() ([]Command, error) {
 	data, err := b.Raw("getMyCommands", nil)
