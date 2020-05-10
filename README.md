@@ -97,7 +97,7 @@ b.Handle(tb.OnChannelPost, func (m *tb.Message) {
 	// channel posts only
 })
 
-b.Handle(tb.Query, func (q *tb.Query) {
+b.Handle(tb.OnQuery, func (q *tb.Query) {
 	// incoming inline queries
 })
 ```
