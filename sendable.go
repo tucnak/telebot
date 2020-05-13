@@ -293,19 +293,40 @@ func (v *Venue) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	return extractMessage(data)
 }
 
-// Send delivers media through bot b to recipient.
+// Send delivers invoice through bot b to recipient.
 func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	prices, _ := json.Marshal(i.Prices)
 
 	params := map[string]string{
-		"chat_id":         to.Recipient(),
-		"title":           i.Title,
-		"description":     i.Description,
-		"start_parameter": i.Start,
-		"payload":         i.Payload,
-		"provider_token":  i.Token,
-		"currency":        i.Currency,
-		"prices":          string(prices),
+		"chat_id":                       to.Recipient(),
+		"title":                         i.Title,
+		"description":                   i.Description,
+		"start_parameter":               i.Start,
+		"payload":                       i.Payload,
+		"provider_token":                i.Token,
+		"currency":                      i.Currency,
+		"prices":                        string(prices),
+		"need_name":                     strconv.FormatBool(i.NeedName),
+		"need_phone_number":             strconv.FormatBool(i.NeedPhoneNumber),
+		"need_email":                    strconv.FormatBool(i.NeedEmail),
+		"need_shipping_address":         strconv.FormatBool(i.NeedShippingAddress),
+		"send_phone_number_to_provider": strconv.FormatBool(i.SendPhone),
+		"send_email_to_provider":        strconv.FormatBool(i.SendEmail),
+		"is_flexible":                   strconv.FormatBool(i.IsFlexible),
+	}
+	if i.Photo != nil {
+		if i.Photo.FileURL != "" {
+			params["photo_url"] = i.Photo.FileURL
+		}
+		if i.Photo.Size > 0 {
+			params["photo_size"] = strconv.Itoa(i.Photo.Size)
+		}
+		if i.Photo.Width > 0 {
+			params["photo_width"] = strconv.Itoa(i.Photo.Width)
+		}
+		if i.Photo.Height > 0 {
+			params["photo_height"] = strconv.Itoa(i.Photo.Height)
+		}
 	}
 	embedSendOptions(params, opt)
 
