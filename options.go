@@ -206,17 +206,17 @@ func(r *ReplyMarkup) Text(unique,text  string) Btn {
 	return Btn{Unique: unique, Text: text}
 }
 
-func(r *ReplyMarkup) URL(unique,url string) Btn {
-	return Btn{Unique: unique, URL: url}
+func(r *ReplyMarkup) URL(unique,text,url string) Btn {
+	return Btn{Unique: unique, Text: text, URL: url}
 }
 
 
-func(r *ReplyMarkup) Query(unique string, query string) Btn {
-	return Btn{Unique: unique, InlineQuery: query}
+func(r *ReplyMarkup) Query(unique string, text,query string) Btn {
+	return Btn{Unique: unique,Text: text, InlineQuery: query}
 }
 
-func(r *ReplyMarkup) QueryChat(unique string, query string) Btn {
-	return Btn{Unique: unique, InlineQueryChat: query}
+func(r *ReplyMarkup) QueryChat(unique string, text,query string) Btn {
+	return Btn{Unique: unique,Text: text, InlineQueryChat: query}
 }
 
 func(r *ReplyMarkup) Login(unique,text string,login *Login) Btn {
