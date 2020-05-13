@@ -1366,6 +1366,6 @@ func (b *Bot) SetCommands(cmds []Command) error {
 	return err
 }
 
-func(b *Bot) NewMarkup() *ReplyMarkup{
+func (b *Bot) NewMarkup() *ReplyMarkup {
 	return &ReplyMarkup{}
 }
