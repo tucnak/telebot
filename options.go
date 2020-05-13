@@ -1,6 +1,9 @@
 package telebot
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // Option is a shorcut flag type for certain message features
 // (so-called options). It means that instead of passing
@@ -155,4 +158,90 @@ func (pt PollType) MarshalJSON() ([]byte, error) {
 		Type: string(pt),
 	}
 	return json.Marshal(&aux)
+}
+
+type row []Btn
+func (r *ReplyMarkup) Row(many ...Btn) row {
+	return many
+}
+
+func (r *ReplyMarkup) Inline(rows ...row) {
+	inlineKeys := make([][]InlineButton, 0, len(rows))
+	for i, row := range rows {
+		keys := make([]InlineButton, 0, len(row))
+		for j, btn := range row {
+			btn := btn.Inline()
+			if btn == nil {
+				panic(fmt.Sprintf(
+					"telebot: button row %d column %d is not an inline button",
+					i, j))
+			}
+			keys = append(keys, *btn)
+		}
+		inlineKeys = append(inlineKeys, keys)
+	}
+
+	r.InlineKeyboard = inlineKeys
+}
+
+func (r *ReplyMarkup) Reply(rows ...row) {
+	replyKeys := make([][]ReplyButton, 0, len(rows))
+	for i, row := range rows {
+		keys := make([]ReplyButton, 0, len(row))
+		for j, btn := range row {
+			btn := btn.Reply()
+			if btn == nil {
+				panic(fmt.Sprintf(
+					"telebot: button row %d column %d is not a reply button",
+					i, j))
+			}
+			keys = append(keys, *btn)
+		}
+		replyKeys = append(replyKeys, keys)
+	}
+
+	r.ReplyKeyboard = replyKeys
+}
+
+// Btn is a constructor button, which will later become either a reply, or an inline button.
+type Btn struct {
+	Unique          string
+	Text            string
+	URL             string
+	Data            string
+	InlineQuery     string
+	InlineQueryChat string
+	Contact         bool
+	Location        bool
+	Poll            PollType
+	Login           *Login
+}
+
+func (b Btn) Inline() *InlineButton {
+	if b.Unique == "" {
+		return nil
+	}
+
+	return &InlineButton{
+		Unique:          b.Unique,
+		Text:            b.Text,
+		URL:             b.URL,
+		Data:            b.Data,
+		InlineQuery:     b.InlineQuery,
+		InlineQueryChat: b.InlineQueryChat,
+		Login:           nil,
+	}
+}
+
+func (b Btn) Reply() *ReplyButton {
+	if b.Unique != "" {
+		return nil
+	}
+
+	return &ReplyButton{
+		Text:     b.Text,
+		Contact:  b.Contact,
+		Location: b.Location,
+		Poll:     b.Poll,
+	}
 }

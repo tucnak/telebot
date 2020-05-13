@@ -81,6 +81,20 @@ type InlineButton struct {
 	Action func(*Callback) `json:"-"`
 }
 
+// With returns a copy of the button with data.
+func (t *InlineButton) With(data string) *InlineButton {
+	return &InlineButton{
+		Unique:          t.Unique,
+		Text:            t.Text,
+		URL:             t.Text,
+		InlineQuery:     t.InlineQuery,
+		InlineQueryChat: t.InlineQueryChat,
+		Login:           t.Login,
+
+		Data:            data,
+	}
+}
+
 // CallbackUnique returns InlineButto.Unique.
 func (t *InlineButton) CallbackUnique() string {
 	return "\f" + t.Unique

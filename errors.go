@@ -13,7 +13,7 @@ type APIError struct {
 }
 
 // ʔ returns description of error.
-// A tiny shortcut to make code clearier.
+// A tiny shortcut to make code clearer.
 func (err *APIError) ʔ() string {
 	return err.Description
 }
