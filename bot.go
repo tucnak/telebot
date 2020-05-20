@@ -1398,3 +1398,7 @@ func (b *Bot) SetCommands(cmds []Command) error {
 	_, err := b.Raw("setMyCommands", params)
 	return err
 }
+
+func (b *Bot) NewMarkup() *ReplyMarkup {
+	return &ReplyMarkup{}
+}

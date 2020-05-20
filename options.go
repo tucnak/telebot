@@ -161,6 +161,7 @@ func (pt PollType) MarshalJSON() ([]byte, error) {
 }
 
 type row []Btn
+
 func (r *ReplyMarkup) Row(many ...Btn) row {
 	return many
 }
@@ -201,6 +202,37 @@ func (r *ReplyMarkup) Reply(rows ...row) {
 	}
 
 	r.ReplyKeyboard = replyKeys
+}
+func (r *ReplyMarkup) Text(unique, text string) Btn {
+	return Btn{Unique: unique, Text: text}
+}
+
+func (r *ReplyMarkup) URL(unique, text, url string) Btn {
+	return Btn{Unique: unique, Text: text, URL: url}
+}
+
+func (r *ReplyMarkup) Query(unique string, text, query string) Btn {
+	return Btn{Unique: unique, Text: text, InlineQuery: query}
+}
+
+func (r *ReplyMarkup) QueryChat(unique string, text, query string) Btn {
+	return Btn{Unique: unique, Text: text, InlineQueryChat: query}
+}
+
+func (r *ReplyMarkup) Login(unique, text string, login *Login) Btn {
+	return Btn{Unique: unique, Login: login, Text: text}
+}
+
+func (r *ReplyMarkup) Contact(text string) Btn {
+	return Btn{Contact: true, Text: text}
+}
+
+func (r *ReplyMarkup) Location(text string) Btn {
+	return Btn{Location: true, Text: text}
+}
+
+func (r *ReplyMarkup) Poll(poll PollType) Btn {
+	return Btn{Poll: poll}
 }
 
 // Btn is a constructor button, which will later become either a reply, or an inline button.
