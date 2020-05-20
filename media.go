@@ -24,6 +24,7 @@ type Photo struct {
 
 	Width  int `json:"width"`
 	Height int `json:"height"`
+	Size   int `json:"photo_size"`
 
 	// (Optional)
 	Caption   string    `json:"caption,omitempty"`

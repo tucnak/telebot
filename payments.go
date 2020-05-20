@@ -25,6 +25,21 @@ type Invoice struct {
 	Currency string `json:"currency"`
 
 	Prices []Price `json:"prices"`
+
+	ProviderData string `json:"provider_data"`
+
+	// Processing photo_url, photo_size, photo_width, photo_height fields.
+	Photo *Photo
+
+	NeedName            bool `json:"need_name"`
+	NeedPhoneNumber     bool `json:"need_phone_number"`
+	NeedEmail           bool `json:"need_email"`
+	NeedShippingAddress bool `json:"need_shipping_address"`
+
+	SendPhone bool `json:"send_phone_number_to_provider"`
+	SendEmail bool `json:"send_email_to_provider"`
+
+	IsFlexible bool `json:"is_flexible"`
 }
 
 type Price struct {
