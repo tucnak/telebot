@@ -111,6 +111,7 @@ type Update struct {
 	Callback           *Callback           `json:"callback_query,omitempty"`
 	Query              *Query              `json:"inline_query,omitempty"`
 	ChosenInlineResult *ChosenInlineResult `json:"chosen_inline_result,omitempty"`
+	ShippingQuery      *ShippingQuery      `json:"shipping_query,omitempty"`
 	PreCheckoutQuery   *PreCheckoutQuery   `json:"pre_checkout_query,omitempty"`
 	Poll               *Poll               `json:"poll,omitempty"`
 	PollAnswer         *PollAnswer         `json:"poll_answer,omitempty"`
@@ -124,24 +125,6 @@ type Command struct {
 
 	// Description of the command, 3-256 characters.
 	Description string `json:"description"`
-}
-
-// ChosenInlineResult represents a result of an inline query that was chosen
-// by the user and sent to their chat partner.
-type ChosenInlineResult struct {
-	From      User      `json:"from"`
-	Location  *Location `json:"location,omitempty"`
-	ResultID  string    `json:"result_id"`
-	Query     string    `json:"query"`
-	MessageID string    `json:"inline_message_id"` // inline messages only!
-}
-
-type PreCheckoutQuery struct {
-	Sender   *User  `json:"from"`
-	ID       string `json:"id"`
-	Currency string `json:"currency"`
-	Payload  string `json:"invoice_payload"`
-	Total    int    `json:"total_amount"`
 }
 
 // Handle lets you set the handler for some command name or
@@ -386,6 +369,19 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			}
 
 			b.runHandler(func() { handler(upd.ChosenInlineResult) })
+		}
+
+		return
+	}
+
+	if upd.ShippingQuery != nil {
+		if handler, ok := b.handlers[OnShipping]; ok {
+			handler, ok := handler.(func(*ShippingQuery))
+			if !ok {
+				panic("telebot: shipping query handler is bad")
+			}
+
+			b.runHandler(func() { handler(upd.ShippingQuery) })
 		}
 
 		return
@@ -932,6 +928,43 @@ func (b *Bot) Notify(to Recipient, action ChatAction) error {
 	}
 
 	_, err := b.Raw("sendChatAction", params)
+	return err
+}
+
+// Ship replies to the shipping query, if you sent an invoice
+// requesting an address and the parameter is_flexible was specified.
+//
+// Usage:
+//		b.Ship(query) 				// OK
+//		b.Ship(query, options...)	// OK with options
+//		b.Ship(query, "Oops!")		// Error message
+//
+func (b *Bot) Ship(query *ShippingQuery, what ...interface{}) error {
+	params := map[string]string{
+		"shipping_query_id": query.ID,
+	}
+
+	if len(what) == 0 {
+		params["ok"] = "True"
+	} else if s, ok := what[0].(string); ok {
+		params["ok"] = "False"
+		params["error_message"] = s
+	} else {
+		var opts []ShippingOption
+		for _, v := range what {
+			opt, ok := v.(ShippingOption)
+			if !ok {
+				return ErrUnsupportedWhat
+			}
+			opts = append(opts, opt)
+		}
+
+		params["ok"] = "True"
+		data, _ := json.Marshal(opts)
+		params["shipping_options"] = string(data)
+	}
+
+	_, err := b.Raw("answerShippingQuery", params)
 	return err
 }
 

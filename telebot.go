@@ -98,6 +98,11 @@ const (
 	// Handler: func(*ChosenInlineResult)
 	OnChosenInlineResult = "\achosen_inline_result"
 
+	// Will fire on ShippingQuery.
+	//
+	// Handler: func(*ShippingQuery)
+	OnShipping = "\ashipping_query"
+
 	// Will fire on PreCheckoutQuery.
 	//
 	// Handler: func(*PreCheckoutQuery)

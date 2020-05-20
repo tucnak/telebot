@@ -91,7 +91,7 @@ func (t *InlineButton) With(data string) *InlineButton {
 		InlineQueryChat: t.InlineQueryChat,
 		Login:           t.Login,
 
-		Data:            data,
+		Data: data,
 	}
 }
 

@@ -5,7 +5,7 @@ import (
 )
 
 // Album lets you group multiple media (so-called InputMedia)
-// into a single messsage.
+// into a single message.
 //
 // On older clients albums look like N regular messages.
 type Album []InputMedia
@@ -24,7 +24,6 @@ type Photo struct {
 
 	Width  int `json:"width"`
 	Height int `json:"height"`
-	Size   int `json:"photo_size"`
 
 	// (Optional)
 	Caption   string    `json:"caption,omitempty"`

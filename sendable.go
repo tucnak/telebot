@@ -310,7 +310,7 @@ func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 		"need_phone_number":             strconv.FormatBool(i.NeedPhoneNumber),
 		"need_email":                    strconv.FormatBool(i.NeedEmail),
 		"need_shipping_address":         strconv.FormatBool(i.NeedShippingAddress),
-		"send_phone_number_to_provider": strconv.FormatBool(i.SendPhone),
+		"send_phone_number_to_provider": strconv.FormatBool(i.SendPhoneNumber),
 		"send_email_to_provider":        strconv.FormatBool(i.SendEmail),
 		"is_flexible":                   strconv.FormatBool(i.IsFlexible),
 	}
@@ -318,8 +318,8 @@ func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 		if i.Photo.FileURL != "" {
 			params["photo_url"] = i.Photo.FileURL
 		}
-		if i.Photo.Size > 0 {
-			params["photo_size"] = strconv.Itoa(i.Photo.Size)
+		if i.PhotoSize > 0 {
+			params["photo_size"] = strconv.Itoa(i.PhotoSize)
 		}
 		if i.Photo.Width > 0 {
 			params["photo_width"] = strconv.Itoa(i.Photo.Width)
