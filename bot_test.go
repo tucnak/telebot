@@ -404,4 +404,17 @@ func TestBot(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, orig, cmds)
 	})
+
+	t.Run("Payments", func(t *testing.T) {
+		assert.NotPanics(t, func() {
+			b.Accept(&PreCheckoutQuery{})
+			b.Accept(&PreCheckoutQuery{}, "error")
+		})
+		assert.NotPanics(t, func() {
+			b.Ship(&ShippingQuery{})
+			b.Ship(&ShippingQuery{}, "error")
+			b.Ship(&ShippingQuery{}, ShippingOption{}, ShippingOption{})
+			assert.Equal(t, ErrUnsupportedWhat, b.Ship(&ShippingQuery{}, 0))
+		})
+	})
 }
