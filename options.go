@@ -3,6 +3,7 @@ package telebot
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 // Option is a shortcut flag type for certain message features
@@ -203,24 +204,9 @@ func (r *ReplyMarkup) Reply(rows ...row) {
 
 	r.ReplyKeyboard = replyKeys
 }
-func (r *ReplyMarkup) Text(unique, text string) Btn {
-	return Btn{Unique: unique, Text: text}
-}
 
-func (r *ReplyMarkup) URL(unique, text, url string) Btn {
-	return Btn{Unique: unique, Text: text, URL: url}
-}
-
-func (r *ReplyMarkup) Query(unique string, text, query string) Btn {
-	return Btn{Unique: unique, Text: text, InlineQuery: query}
-}
-
-func (r *ReplyMarkup) QueryChat(unique string, text, query string) Btn {
-	return Btn{Unique: unique, Text: text, InlineQueryChat: query}
-}
-
-func (r *ReplyMarkup) Login(unique, text string, login *Login) Btn {
-	return Btn{Unique: unique, Login: login, Text: text}
+func (r *ReplyMarkup) Text(text string) Btn {
+	return Btn{Text: text}
 }
 
 func (r *ReplyMarkup) Contact(text string) Btn {
@@ -231,8 +217,32 @@ func (r *ReplyMarkup) Location(text string) Btn {
 	return Btn{Location: true, Text: text}
 }
 
-func (r *ReplyMarkup) Poll(poll PollType) Btn {
-	return Btn{Poll: poll}
+func (r *ReplyMarkup) Poll(text string, poll PollType) Btn {
+	return Btn{Poll: poll, Text: text}
+}
+
+func (r *ReplyMarkup) Data(text, unique string, data ...string) Btn {
+	return Btn{
+		Unique: unique,
+		Text:   text,
+		Data:   strings.Join(data, "|"),
+	}
+}
+
+func (r *ReplyMarkup) URL(text, url string) Btn {
+	return Btn{Text: text, URL: url}
+}
+
+func (r *ReplyMarkup) Query(text, query string) Btn {
+	return Btn{Text: text, InlineQuery: query}
+}
+
+func (r *ReplyMarkup) QueryChat(text, query string) Btn {
+	return Btn{Text: text, InlineQueryChat: query}
+}
+
+func (r *ReplyMarkup) Login(text string, login *Login) Btn {
+	return Btn{Login: login, Text: text}
 }
 
 // Btn is a constructor button, which will later become either a reply, or an inline button.
@@ -250,10 +260,6 @@ type Btn struct {
 }
 
 func (b Btn) Inline() *InlineButton {
-	if b.Unique == "" {
-		return nil
-	}
-
 	return &InlineButton{
 		Unique:          b.Unique,
 		Text:            b.Text,
@@ -261,7 +267,7 @@ func (b Btn) Inline() *InlineButton {
 		Data:            b.Data,
 		InlineQuery:     b.InlineQuery,
 		InlineQueryChat: b.InlineQueryChat,
-		Login:           nil,
+		Login:           b.Login,
 	}
 }
 

@@ -946,6 +946,7 @@ func (b *Bot) Notify(to Recipient, action ChatAction) error {
 // requesting an address and the parameter is_flexible was specified.
 //
 // Usage:
+//
 //		b.Ship(query)          // OK
 //		b.Ship(query, opts...) // OK with options
 //		b.Ship(query, "Oops!") // Error message
