@@ -295,8 +295,6 @@ func (v *Venue) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 
 // Send delivers invoice through bot b to recipient.
 func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
-	prices, _ := json.Marshal(i.Prices)
-
 	params := map[string]string{
 		"chat_id":                       to.Recipient(),
 		"title":                         i.Title,
@@ -305,14 +303,13 @@ func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 		"payload":                       i.Payload,
 		"provider_token":                i.Token,
 		"currency":                      i.Currency,
-		"prices":                        string(prices),
 		"need_name":                     strconv.FormatBool(i.NeedName),
 		"need_phone_number":             strconv.FormatBool(i.NeedPhoneNumber),
 		"need_email":                    strconv.FormatBool(i.NeedEmail),
 		"need_shipping_address":         strconv.FormatBool(i.NeedShippingAddress),
 		"send_phone_number_to_provider": strconv.FormatBool(i.SendPhoneNumber),
 		"send_email_to_provider":        strconv.FormatBool(i.SendEmail),
-		"is_flexible":                   strconv.FormatBool(i.IsFlexible),
+		"is_flexible":                   strconv.FormatBool(i.Flexible),
 	}
 	if i.Photo != nil {
 		if i.Photo.FileURL != "" {
@@ -327,6 +324,10 @@ func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 		if i.Photo.Height > 0 {
 			params["photo_height"] = strconv.Itoa(i.Photo.Height)
 		}
+	}
+	if len(i.Prices) > 0 {
+		data, _ := json.Marshal(i.Prices)
+		params["prices"] = string(data)
 	}
 	embedSendOptions(params, opt)
 

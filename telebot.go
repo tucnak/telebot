@@ -64,6 +64,8 @@ const (
 	OnChannelPost       = "\achan_post"
 	OnEditedChannelPost = "\achan_edited_post"
 	OnDice              = "\adice"
+	OnInvoice           = "\ainvoice"
+	OnPayment           = "\apayment"
 
 	// Will fire when bot is added to a group.
 	OnAddedToGroup = "\aadded_to_group"

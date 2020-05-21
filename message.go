@@ -192,6 +192,12 @@ type Message struct {
 	// if it is itself a reply.
 	PinnedMessage *Message `json:"pinned_message"`
 
+	// Message is an invoice for a payment.
+	Invoice *Invoice `json:"invoice"`
+
+	// Message is a service message about a successful payment.
+	Payment *Payment `json:"successful_payment"`
+
 	// The domain name of the website on which the user has logged in.
 	ConnectedWebsite string `json:"connected_website,omitempty"`
 

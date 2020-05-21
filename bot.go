@@ -229,6 +229,16 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			return
 		}
 
+		if m.Invoice != nil {
+			b.handle(OnInvoice, m)
+			return
+		}
+
+		if m.Payment != nil {
+			b.handle(OnPayment, m)
+			return
+		}
+
 		wasAdded := (m.UserJoined != nil && m.UserJoined.ID == b.Me.ID) ||
 			(m.UsersJoined != nil && isUserInList(b.Me, m.UsersJoined))
 		if m.GroupCreated || m.SuperGroupCreated || wasAdded {

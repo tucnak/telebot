@@ -30,6 +30,17 @@ type ShippingOption struct {
 	Prices []Price `json:"prices"`
 }
 
+// Payment contains basic information about a successful payment.
+type Payment struct {
+	Currency         Currency `json:"currency"`
+	Total            int      `json:"total_amount"`
+	Payload          string   `json:"invoice_payload"`
+	OptionID         string   `json:"shipping_option_id"`
+	Order            Order    `json:"order_info"`
+	TelegramChargeID string   `json:"telegram_payment_charge_id"`
+	ProviderChargeID string   `json:"provider_payment_charge_id"`
+}
+
 // PreCheckoutQuery contains information about an incoming pre-checkout query.
 type PreCheckoutQuery struct {
 	Sender   *User  `json:"from"`
@@ -51,22 +62,22 @@ type Order struct {
 
 // Invoice contains basic information about an invoice.
 type Invoice struct {
-	Title        string  `json:"title"`
-	Description  string  `json:"description"`
-	Payload      string  `json:"payload"`
-	Token        string  `json:"provider_token"`
-	Currency     string  `json:"currency"`
-	Prices       []Price `json:"prices"`
-	ProviderData string  `json:"provider_data"`
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Payload     string  `json:"payload"`
+	Currency    string  `json:"currency"`
+	Prices      []Price `json:"prices"`
+	Token       string  `json:"provider_token"`
+	Data        string  `json:"provider_data"`
 
 	Photo     *Photo `json:"photo"`
 	PhotoSize int    `json:"photo_size"`
 
-	// Start is a unique deep-linking parameter that can be used to
+	// Unique deep-linking parameter that can be used to
 	// generate this invoice when used as a start parameter.
 	Start string `json:"start_parameter"`
 
-	// Total shows the total price in the smallest units of the currency.
+	// Shows the total price in the smallest units of the currency.
 	// For example, for a price of US$ 1.45 pass amount = 145.
 	Total int `json:"total_amount"`
 
@@ -76,7 +87,7 @@ type Invoice struct {
 	NeedShippingAddress bool `json:"need_shipping_address"`
 	SendPhoneNumber     bool `json:"send_phone_number_to_provider"`
 	SendEmail           bool `json:"send_email_to_provider"`
-	IsFlexible          bool `json:"is_flexible"`
+	Flexible            bool `json:"is_flexible"`
 }
 
 // Price represents a portion of the price for goods or services.
