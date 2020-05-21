@@ -633,16 +633,17 @@ func (b *Bot) Reply(to *Message, what interface{}, options ...interface{}) (*Mes
 
 // Forward behaves just like Send() but of all options it only supports Silent (see Bots API).
 //
-// This function will panic upon nil Message.
-func (b *Bot) Forward(to Recipient, what *Message, options ...interface{}) (*Message, error) {
+// This function will panic upon nil Editable.
+func (b *Bot) Forward(to Recipient, msg Editable, options ...interface{}) (*Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
 	}
+	msgID, chatID := msg.MessageSig()
 
 	params := map[string]string{
 		"chat_id":      to.Recipient(),
-		"from_chat_id": what.Chat.Recipient(),
-		"message_id":   strconv.Itoa(what.ID),
+		"from_chat_id": strconv.FormatInt(chatID, 10),
+		"message_id":   msgID,
 	}
 
 	sendOpts := extractOptions(options)
