@@ -18,7 +18,6 @@ go get -u gopkg.in/tucnak/telebot.v2
 	- [Editable](#editable)
 	- [Keyboards](#keyboards)
 	- [Inline mode](#inline-mode)
-	- [Poll](#poll)
 * [Contributing](#contributing)
 * [Donate](#donate)
 * [License](#license)
@@ -45,10 +44,13 @@ Let's take a look at the minimal telebot setup:
 package main
 
 import (
-	"time"
-	"log"
+"log"
+"time"
 
-	tb "gopkg.in/tucnak/telebot.v2"
+
+
+
+tb "gopkg.in/tucnak/telebot.v2"
 )
 
 func main() {
@@ -105,7 +107,7 @@ b.Handle(tb.OnQuery, func (q *tb.Query) {
 There's dozens of supported endpoints (see package consts). Let me know
 if you'd like to see some endpoint or endpoint idea implemented. This system
 is completely extensible, so I can introduce them without breaking
-backwards-compatibity.
+backwards-compatibility.
 
 ## Poller
 Telebot doesn't really care how you provide it with incoming updates, as long
@@ -273,7 +275,7 @@ it made sense for *any* Go struct to be editable as a Telegram message, to imple
 // for edit operations.
 //
 // Use case: DB model struct for messages to-be
-// edited with, say two collums: msg_id,chat_id
+// edited with, say two columns: msg_id,chat_id
 // could easily implement MessageSig() making
 // instances of stored messages editable.
 type Editable interface {

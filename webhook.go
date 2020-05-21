@@ -37,7 +37,7 @@ type WebhookEndpoint struct {
 // add the Webhook to a http-mux.
 type Webhook struct {
 	Listen         string   `json:"url"`
-	MaxConnections int      `json:"max_conecctions"`
+	MaxConnections int      `json:"max_connections"`
 	AllowedUpdates []string `json:"allowed_updates"`
 
 	// (WebhookInfo)

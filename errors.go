@@ -76,7 +76,7 @@ var (
 	ErrWrongFileIDCharacter = NewAPIError(400, "Bad Request: wrong remote file id specified: Wrong character in the string")
 	ErrWrongFileIDPadding   = NewAPIError(400, "Bad Request: wrong remote file id specified: Wrong padding in the string")
 	ErrFailedImageProcess   = NewAPIError(400, "Bad Request: IMAGE_PROCESS_FAILED", "Image process failed")
-	ErrInvaliadStickerset   = NewAPIError(400, "Bad Request: STICKERSET_INVALID", "Stickerset is invalid")
+	ErrInvalidStickerSet    = NewAPIError(400, "Bad Request: STICKERSET_INVALID", "Stickerset is invalid")
 	ErrBadPollOptions       = NewAPIError(400, "Bad Request: expected Array of String as options")
 
 	// No rights errors
@@ -164,8 +164,8 @@ func ErrByDescription(s string) error {
 		return ErrWrongFileIDPadding
 	case ErrFailedImageProcess.ʔ():
 		return ErrFailedImageProcess
-	case ErrInvaliadStickerset.ʔ():
-		return ErrInvaliadStickerset
+	case ErrInvalidStickerSet.ʔ():
+		return ErrInvalidStickerSet
 	default:
 		return nil
 	}

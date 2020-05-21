@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// Option is a shorcut flag type for certain message features
+// Option is a shortcut flag type for certain message features
 // (so-called options). It means that instead of passing
 // fully-fledged SendOptions* to Send(), you can use these
 // flags instead.
@@ -93,7 +93,7 @@ type ReplyMarkup struct {
 
 	// Requests clients to remove the reply keyboard.
 	//
-	// Dafaults to false.
+	// Defaults to false.
 	ReplyKeyboardRemove bool `json:"remove_keyboard,omitempty"`
 
 	// Use this param if you want to force reply from
@@ -106,17 +106,17 @@ type ReplyMarkup struct {
 	Selective bool `json:"selective,omitempty"`
 }
 
-func (og *ReplyMarkup) copy() *ReplyMarkup {
-	cp := *og
+func (r *ReplyMarkup) copy() *ReplyMarkup {
+	cp := *r
 
-	cp.ReplyKeyboard = make([][]ReplyButton, len(og.ReplyKeyboard))
-	for i, row := range og.ReplyKeyboard {
+	cp.ReplyKeyboard = make([][]ReplyButton, len(r.ReplyKeyboard))
+	for i, row := range r.ReplyKeyboard {
 		cp.ReplyKeyboard[i] = make([]ReplyButton, len(row))
 		copy(cp.ReplyKeyboard[i], row)
 	}
 
-	cp.InlineKeyboard = make([][]InlineButton, len(og.InlineKeyboard))
-	for i, row := range og.InlineKeyboard {
+	cp.InlineKeyboard = make([][]InlineButton, len(r.InlineKeyboard))
+	for i, row := range r.InlineKeyboard {
 		cp.InlineKeyboard[i] = make([]InlineButton, len(row))
 		copy(cp.InlineKeyboard[i], row)
 	}

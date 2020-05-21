@@ -6,7 +6,7 @@ package telebot
 // for edit operations.
 //
 // Use case: DB model struct for messages to-be
-// edited with, say two collums: msg_id,chat_id
+// edited with, say two columns: msg_id,chat_id
 // could easily implement MessageSig() making
 // instances of stored messages editable.
 type Editable interface {

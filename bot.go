@@ -119,7 +119,7 @@ type Update struct {
 
 // Command represents a bot command.
 type Command struct {
-	// Text is a aext of the command, 1-32 characters.
+	// Text is a text of the command, 1-32 characters.
 	// Can contain only lowercase English letters, digits and underscores.
 	Text string `json:"command"`
 
@@ -196,7 +196,7 @@ func (b *Bot) ProcessUpdate(upd Update) {
 
 		// Commands
 		if m.Text != "" {
-			// Filtering malicious messsages
+			// Filtering malicious messages
 			if m.Text[0] == '\a' {
 				return
 			}
@@ -494,7 +494,7 @@ func (b *Bot) handleMedia(m *Message) bool {
 //
 //     - *SendOptions (the actual object accepted by Telegram API)
 //     - *ReplyMarkup (a component of SendOptions)
-//     - Option (a shorcut flag for popular options)
+//     - Option (a shortcut flag for popular options)
 //     - ParseMode (HTML, Markdown, etc)
 //
 func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Message, error) {
@@ -945,9 +945,9 @@ func (b *Bot) Notify(to Recipient, action ChatAction) error {
 // requesting an address and the parameter is_flexible was specified.
 //
 // Usage:
-//		b.Ship(query) 				// OK
-//		b.Ship(query, options...)	// OK with options
-//		b.Ship(query, "Oops!")		// Error message
+//		b.Ship(query)          // OK
+//		b.Ship(query, opts...) // OK with options
+//		b.Ship(query, "Oops!") // Error message
 //
 func (b *Bot) Ship(query *ShippingQuery, what ...interface{}) error {
 	params := map[string]string{

@@ -95,7 +95,7 @@ func (t *InlineButton) With(data string) *InlineButton {
 	}
 }
 
-// CallbackUnique returns InlineButto.Unique.
+// CallbackUnique returns InlineButton.Unique.
 func (t *InlineButton) CallbackUnique() string {
 	return "\f" + t.Unique
 }
@@ -119,15 +119,15 @@ type Login struct {
 // It needed to avoid InlineQueryChat and Login fields conflict.
 // If you have Login field in your button, InlineQueryChat must be skipped.
 func (t *InlineButton) MarshalJSON() ([]byte, error) {
-	type InineButtonJSON InlineButton
+	type InlineButtonJSON InlineButton
 
 	if t.Login != nil {
 		return json.Marshal(struct {
-			InineButtonJSON
+			InlineButtonJSON
 			InlineQueryChat string `json:"switch_inline_query_current_chat,omitempty"`
 		}{
-			InineButtonJSON: InineButtonJSON(*t),
+			InlineButtonJSON: InlineButtonJSON(*t),
 		})
 	}
-	return json.Marshal(InineButtonJSON(*t))
+	return json.Marshal(InlineButtonJSON(*t))
 }

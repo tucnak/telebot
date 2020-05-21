@@ -44,7 +44,7 @@ func (p *Poll) IsRegular() bool {
 	return p.Type == PollRegular
 }
 
-// IsQuiz says wheter poll is a quiz.
+// IsQuiz says whether poll is a quiz.
 func (p *Poll) IsQuiz() bool {
 	return p.Type == PollQuiz
 }
