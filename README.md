@@ -44,13 +44,10 @@ Let's take a look at the minimal telebot setup:
 package main
 
 import (
-"log"
-"time"
+    "log"
+    "time"
 
-
-
-
-tb "gopkg.in/tucnak/telebot.v2"
+    tb "gopkg.in/tucnak/telebot.v2"
 )
 
 func main() {
