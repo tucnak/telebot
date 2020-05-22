@@ -81,9 +81,22 @@ func TestBotHandle(t *testing.T) {
 	b.Handle("/start", func(m *Message) {})
 	assert.Contains(t, b.handlers, "/start")
 
-	btn := &InlineButton{Unique: "test"}
-	b.Handle(btn, func(c *Callback) {})
-	assert.Contains(t, b.handlers, btn.CallbackUnique())
+	reply := ReplyButton{Text: "reply"}
+	b.Handle(&reply, func(m *Message) {})
+
+	inline := InlineButton{Unique: "inline"}
+	b.Handle(&inline, func(c *Callback) {})
+
+	btnReply := (&ReplyMarkup{}).Text("btnReply")
+	b.Handle(&btnReply, func(m *Message) {})
+
+	btnInline := (&ReplyMarkup{}).Data("", "btnInline")
+	b.Handle(&btnInline, func(c *Callback) {})
+
+	assert.Contains(t, b.handlers, btnReply.CallbackUnique())
+	assert.Contains(t, b.handlers, btnInline.CallbackUnique())
+	assert.Contains(t, b.handlers, reply.CallbackUnique())
+	assert.Contains(t, b.handlers, inline.CallbackUnique())
 
 	assert.Panics(t, func() { b.Handle(1, func() {}) })
 }
@@ -359,16 +372,20 @@ func TestBot(t *testing.T) {
 
 	t.Run("EditReplyMarkup()", func(t *testing.T) {
 		markup := &ReplyMarkup{
-			InlineKeyboard: [][]InlineButton{{{
-				Data: "btn",
-				Text: "Hi Telebot!",
-			}}},
+			InlineKeyboard: [][]InlineButton{
+				{{
+					Data: "btn",
+					Text: "Hi Telebot!",
+				}},
+			},
 		}
 		badMarkup := &ReplyMarkup{
-			InlineKeyboard: [][]InlineButton{{{
-				Data: strings.Repeat("*", 65),
-				Text: "Bad Button",
-			}}},
+			InlineKeyboard: [][]InlineButton{
+				{{
+					Data: strings.Repeat("*", 65),
+					Text: "Bad Button",
+				}},
+			},
 		}
 
 		msg, err := b.EditReplyMarkup(msg, markup)

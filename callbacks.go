@@ -86,8 +86,7 @@ func (t *InlineButton) With(data string) *InlineButton {
 		InlineQuery:     t.InlineQuery,
 		InlineQueryChat: t.InlineQueryChat,
 		Login:           t.Login,
-
-		Data: data,
+		Data:            data,
 	}
 }
 
@@ -101,6 +100,14 @@ func (t *ReplyButton) CallbackUnique() string {
 	return t.Text
 }
 
+// CallbackUnique implements CallbackEndpoint.
+func (t *Btn) CallbackUnique() string {
+	if t.Unique != "" {
+		return "\f" + t.Unique
+	}
+	return t.Text
+}
+
 // Login represents a parameter of the inline keyboard button
 // used to automatically authorize a user. Serves as a great replacement
 // for the Telegram Login Widget when the user is coming from Telegram.
@@ -111,7 +118,7 @@ type Login struct {
 	WriteAccess bool   `json:"request_write_access,omitempty"`
 }
 
-// MarshalJSON implements Marshaler interface.
+// MarshalJSON implements json.Marshaler interface.
 // It needed to avoid InlineQueryChat and Login fields conflict.
 // If you have Login field in your button, InlineQueryChat must be skipped.
 func (t *InlineButton) MarshalJSON() ([]byte, error) {
