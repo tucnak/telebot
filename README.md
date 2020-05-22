@@ -44,10 +44,10 @@ Let's take a look at the minimal telebot setup:
 package main
 
 import (
-    "log"
-    "time"
+	"log"
+	"time"
 
-    tb "gopkg.in/tucnak/telebot.v2"
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 func main() {
@@ -218,7 +218,7 @@ Telebot will be able to send them out.
 // custom Sendables for complex kinds of media or
 // chat objects spanning across multiple messages.
 type Sendable interface {
-    Send(*Bot, Recipient, *SendOptions) (*Message, error)
+	Send(*Bot, Recipient, *SendOptions) (*Message, error)
 }
 ```
 
@@ -326,47 +326,43 @@ bot.EditCaption(m, "new caption")
 
 ## Keyboards
 Telebot supports both kinds of keyboards Telegram provides: reply and inline
-keyboards. Any button can also act as an endpoints for `Handle()`:
+keyboards. Any button can also act as an endpoints for `Handle()`.
+
+In `v2.2` we're introducing a little more convenient way in building keyboards.
+The main goal is to avoid a lot of boilerplate and to make code clearer.
 
 ```go
 func main() {
 	b, _ := tb.NewBot(tb.Settings{...})
 
-	// This button will be displayed in the user's
-	// reply keyboard.
-	replyBtn := tb.ReplyButton{Text: "🌕 Button #1"}
-	replyKeys := [][]tb.ReplyButton{
-		[]tb.ReplyButton{replyBtn},
-		// ...
-	}
+	var (
+		// Universal markup builders.
+		menu     = &ReplyMarkup{ResizeReplyKeyboard: true}
+		selector = &ReplyMarkup{}
 
-	// And this one — just under the message itself.
-	// Pressing it will cause the client to send
-	// the bot a callback.
-	//
-	// Make sure Unique stays unique as per button _kind_,
-	// as it has to be for callback routing to work.
-	//
-	// Then differentiate with the callback data.
-	inlineBtn := tb.InlineButton{
-		Unique: "sad_moon",
-		Text: "🌚 Button #2",
-	}
-	inlineKeys := [][]tb.InlineButton{
-		[]tb.InlineButton{inlineBtn},
-		// ...
-	}
+		// Reply buttons.
+		btnHelp     = menu.Text("ℹ Help")
+		btnSettings = menu.Text("⚙ Settings")
 
-	b.Handle(&replyBtn, func(m *tb.Message) {
-		// on reply button pressed
-	})
+		// Inline buttons.
+		//
+		// Pressing it will cause the client to
+		// send the bot a callback.
+		//
+		// Make sure Unique stays unique as per button kind,
+		// as it has to be for callback routing to work.
+		//
+		btnPrev = selector.Data("⬅", "prev", ...)
+		btnNext = selector.Data("➡", "next", ...)
+	)
 
-	b.Handle(&inlineBtn, func(c *tb.Callback) {
-		// on inline button pressed (callback!)
-
-		// always respond!
-		b.Respond(c, &tb.CallbackResponse{...})
-	})
+	menu.Reply(
+		menu.Row(btnHelp),
+		menu.Row(btnSettings),
+	)
+	selector.Inline(
+		selector.Row(btnPrev, btnNext),
+	)
 
 	// Command: /start <PAYLOAD>
 	b.Handle("/start", func(m *tb.Message) {
@@ -374,19 +370,40 @@ func main() {
 			return
 		}
 
-		// Telegram does not support messages with both reply
-		// and inline keyboard in them.
-		// 
-		// Choose one or the other.
-		b.Send(m.Sender, "Hello!", &tb.ReplyMarkup{
-			ReplyKeyboard:  replyKeys,
-			// or
-			InlineKeyboard: inlineKeys,
-		})
+		b.Send(m.Sender, "Hello!", menu)
+	})
+
+	// On reply button pressed (message)
+	b.Handle(&btnHelp, func(m *tb.Message) {...})
+
+	// On inline button pressed (callback)
+	b.Handle(&btnPrev, func(c *tb.Callback) {
+		// ...
+		// Always respond!
+		b.Respond(c, &tb.CallbackResponse{...})
 	})
 
 	b.Start()
 }
+```
+
+You can use markup constructor for every type of possible buttons:
+```go
+r := &ReplyMarkup{}
+
+// Reply buttons:
+r.Text("Hello!")
+r.Contact("Send phone number")
+r.Location("Send location")
+r.Poll(tb.PollQuiz)
+
+// Inline buttons:
+r.Data("Show help", "help") // data is optional
+r.Data("Delete item", "delete", item.ID)
+r.URL("Visit", "https://google.com")
+r.Query("Search", query)
+r.QueryChat("Share", query)
+r.Login("Login", &tb.Login{...})
 ```
 
 ## Inline mode
