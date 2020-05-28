@@ -32,13 +32,13 @@ type ShippingOption struct {
 
 // Payment contains basic information about a successful payment.
 type Payment struct {
-	Currency         Currency `json:"currency"`
-	Total            int      `json:"total_amount"`
-	Payload          string   `json:"invoice_payload"`
-	OptionID         string   `json:"shipping_option_id"`
-	Order            Order    `json:"order_info"`
-	TelegramChargeID string   `json:"telegram_payment_charge_id"`
-	ProviderChargeID string   `json:"provider_payment_charge_id"`
+	Currency         string `json:"currency"`
+	Total            int    `json:"total_amount"`
+	Payload          string `json:"invoice_payload"`
+	OptionID         string `json:"shipping_option_id"`
+	Order            Order  `json:"order_info"`
+	TelegramChargeID string `json:"telegram_payment_charge_id"`
+	ProviderChargeID string `json:"provider_payment_charge_id"`
 }
 
 // PreCheckoutQuery contains information about an incoming pre-checkout query.
