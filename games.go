@@ -70,11 +70,8 @@ func (b *Bot) GetGameScores(user Recipient, msg Editable) ([]GameHighScore, erro
 
 // SetGameScore sets the score of the specified user in a game.
 //
-// NOTE:
-// 		If the message was sent by the bot, returns the edited Message,
-// 		otherwise returns nil Message and ErrNoGameMessage.
-//		If you expect successful True result, you must check
-//		for `telebot: no game message` error.
+// If the message was sent by the bot, returns the edited Message,
+// otherwise returns nil and ErrTrueResult.
 //
 func (b *Bot) SetGameScore(user Recipient, msg Editable, score GameHighScore) (*Message, error) {
 	msgID, chatID := msg.MessageSig()
@@ -97,13 +94,5 @@ func (b *Bot) SetGameScore(user Recipient, msg Editable, score GameHighScore) (*
 	if err != nil {
 		return nil, err
 	}
-
-	m, err := extractMessage(data)
-	if err != nil {
-		return nil, err
-	}
-	if m == nil {
-		return nil, ErrNoGameMessage
-	}
-	return m, nil
+	return extractMessage(data)
 }

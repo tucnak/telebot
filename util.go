@@ -70,6 +70,15 @@ func extractMessage(data []byte) (*Message, error) {
 		Result *Message
 	}
 	if err := json.Unmarshal(data, &resp); err != nil {
+		var resp struct {
+			Result bool
+		}
+		if err := json.Unmarshal(data, &resp); err != nil {
+			return nil, wrapError(err)
+		}
+		if resp.Result {
+			return nil, ErrTrueResult
+		}
 		return nil, wrapError(err)
 	}
 	return resp.Result, nil

@@ -659,6 +659,9 @@ func (b *Bot) Forward(to Recipient, msg Editable, options ...interface{}) (*Mess
 
 // Edit is magic, it lets you change already sent message.
 //
+// If edited message is sent by the bot, returns it,
+// otherwise returns nil and ErrTrueResult.
+//
 // Use cases:
 //
 //     b.Edit(msg, msg.Text, newMarkup)
@@ -707,6 +710,9 @@ func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Mes
 // EditReplyMarkup edits reply markup of already sent message.
 // Pass nil or empty ReplyMarkup to delete it from the message.
 //
+// If edited message is sent by the bot, returns it,
+// otherwise returns nil and ErrTrueResult.
+//
 // On success, returns edited message object.
 // This function will panic upon nil Editable.
 func (b *Bot) EditReplyMarkup(msg Editable, markup *ReplyMarkup) (*Message, error) {
@@ -739,6 +745,9 @@ func (b *Bot) EditReplyMarkup(msg Editable, markup *ReplyMarkup) (*Message, erro
 
 // EditCaption edits already sent photo caption with known recipient and message id.
 //
+// If edited message is sent by the bot, returns it,
+// otherwise returns nil and ErrTrueResult.
+//
 // On success, returns edited message object.
 // This function will panic upon nil Editable.
 func (b *Bot) EditCaption(msg Editable, caption string, options ...interface{}) (*Message, error) {
@@ -767,6 +776,9 @@ func (b *Bot) EditCaption(msg Editable, caption string, options ...interface{}) 
 }
 
 // EditMedia edits already sent media with known recipient and message id.
+//
+// If edited message is sent by the bot, returns it,
+// otherwise returns nil and ErrTrueResult.
 //
 // Use cases:
 //
@@ -880,7 +892,7 @@ func (b *Bot) EditMedia(msg Editable, media InputMedia, options ...interface{}) 
 	data, _ := json.Marshal(result)
 	params["media"] = string(data)
 
-	if chatID == 0 { // If inline message.
+	if chatID == 0 { // if inline message
 		params["inline_message_id"] = msgID
 	} else {
 		params["chat_id"] = strconv.FormatInt(chatID, 10)
@@ -1112,6 +1124,9 @@ func (b *Bot) GetFile(file *File) (io.ReadCloser, error) {
 
 // StopLiveLocation stops broadcasting live message location
 // before Location.LivePeriod expires.
+//
+// If the message is sent by the bot, returns it,
+// otherwise returns nil and ErrTrueResult.
 //
 // It supports tb.ReplyMarkup.
 // This function will panic upon nil Editable.
