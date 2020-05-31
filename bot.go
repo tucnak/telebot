@@ -516,7 +516,7 @@ func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Mes
 
 // SendAlbum sends multiple instances of media as a single message.
 //
-// From all existing options, it only supports tb.Silent option.
+// From all existing options, it only supports tb.Silent.
 func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
