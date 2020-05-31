@@ -37,6 +37,7 @@ func NewBot(pref Settings) (*Bot, error) {
 
 		handlers:    make(map[string]interface{}),
 		synchronous: pref.Synchronous,
+		verbose:     pref.Verbose,
 		stop:        make(chan struct{}),
 		reporter:    pref.Reporter,
 		client:      client,
@@ -65,6 +66,7 @@ type Bot struct {
 
 	handlers    map[string]interface{}
 	synchronous bool
+	verbose     bool
 	reporter    func(error)
 	stop        chan struct{}
 	client      *http.Client
@@ -88,6 +90,10 @@ type Settings struct {
 	// Synchronous prevents handlers from running in parallel.
 	// It makes ProcessUpdate return after the handler is finished.
 	Synchronous bool
+
+	// Verbose mode let you to debug the bot
+	// Shows upcoming requests
+	Verbose bool
 
 	// Reporter is a callback function that will get called
 	// on any panics recovered from endpoint handlers.
@@ -291,6 +297,7 @@ func (b *Bot) ProcessUpdate(upd Update) {
 
 			return
 		}
+
 	}
 
 	if upd.EditedMessage != nil {
@@ -435,6 +442,7 @@ func (b *Bot) ProcessUpdate(upd Update) {
 
 		return
 	}
+
 }
 
 func (b *Bot) handle(end string, m *Message) bool {
