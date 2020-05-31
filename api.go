@@ -44,7 +44,7 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 Method: %v
 URL: %v
 Params: %v
-Response: %v`, method, url, payload, string(data))
+Response: %v`, method, strings.Replace(url, b.Token, "<token>", -1), payload, string(data))
 	}
 
 	// returning data as well
