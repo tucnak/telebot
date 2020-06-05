@@ -194,6 +194,12 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			return
 		}
 
+		// Pinned message in group comes from channel message
+		if m.Sender.ID == 777000 && (m.Chat.Type == "group" || m.Chat.Type == "supergroup") {
+			b.handle(OnPinned, m)
+			return
+		}
+
 		// Commands
 		if m.Text != "" {
 			// Filtering malicious messages
