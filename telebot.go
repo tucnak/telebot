@@ -216,6 +216,7 @@ const (
 type DiceType string
 
 var (
-	Cube = &Dice{Type: "🎲"}
-	Dart = &Dice{Type: "🎯"}
+	Cube       = &Dice{Type: "🎲"}
+	Dart       = &Dice{Type: "🎯"}
+	Basketball = &Dice{Type: "🏀"}
 )
