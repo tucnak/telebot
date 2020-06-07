@@ -218,4 +218,5 @@ type DiceType string
 var (
 	Cube = &Dice{Type: "🎲"}
 	Dart = &Dice{Type: "🎯"}
+	Ball = &Dice{Type: "🏀"}
 )
