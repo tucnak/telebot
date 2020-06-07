@@ -37,6 +37,9 @@ type Message struct {
 	// itself is a reply.
 	ReplyTo *Message `json:"reply_to_message"`
 
+	// Shows through which bot the message was sent.
+	Via *User `json:"via_bot"`
+
 	// (Optional) Time of last edit in Unix
 	LastEdit int64 `json:"edit_date"`
 
