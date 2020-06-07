@@ -664,9 +664,11 @@ func (b *Bot) Forward(to Recipient, msg Editable, options ...interface{}) (*Mess
 //
 // Use cases:
 //
-//     b.Edit(msg, msg.Text, newMarkup)
-//     b.Edit(msg, "new <b>text</b>", tb.ModeHTML)
-//     b.Edit(msg, tb.Location{42.1337, 69.4242})
+//     b.Edit(m, m.Text, newMarkup)
+//     b.Edit(m, "new <b>text</b>", tb.ModeHTML)
+//     b.Edit(m, &tb.ReplyMarkup{...})
+//     b.Edit(m, &tb.Photo{File: ...})
+//     b.Edit(m, tb.Location{42.1337, 69.4242})
 //
 // This function will panic upon nil Editable.
 func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Message, error) {
@@ -676,6 +678,10 @@ func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Mes
 	)
 
 	switch v := what.(type) {
+	case *ReplyMarkup:
+		return b.EditReplyMarkup(msg, v)
+	case InputMedia:
+		return b.EditMedia(msg, v, options...)
 	case string:
 		method = "editMessageText"
 		params["text"] = v
@@ -782,8 +788,8 @@ func (b *Bot) EditCaption(msg Editable, caption string, options ...interface{}) 
 //
 // Use cases:
 //
-//     bot.EditMedia(msg, &tb.Photo{File: tb.FromDisk("chicken.jpg")})
-//     bot.EditMedia(msg, &tb.Video{File: tb.FromURL("http://video.mp4")})
+//     b.EditMedia(m, &tb.Photo{File: tb.FromDisk("chicken.jpg")})
+//     b.EditMedia(m, &tb.Video{File: tb.FromURL("http://video.mp4")})
 //
 // This function will panic upon nil Editable.
 func (b *Bot) EditMedia(msg Editable, media InputMedia, options ...interface{}) (*Message, error) {

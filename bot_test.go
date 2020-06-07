@@ -309,23 +309,30 @@ func TestBot(t *testing.T) {
 	_, err = b.Forward(nil, nil)
 	assert.Equal(t, ErrBadRecipient, err)
 
-	t.Run("Send(what=Sendable)", func(t *testing.T) {
-		photo := &Photo{
-			File:    File{FileID: photoID},
-			Caption: t.Name(),
-		}
+	photo := &Photo{
+		File:    File{FileID: photoID},
+		Caption: t.Name(),
+	}
+	var msg *Message
 
-		msg, err := b.Send(to, photo)
+	t.Run("Send(what=Sendable)", func(t *testing.T) {
+		msg, err = b.Send(to, photo)
 		assert.NoError(t, err)
 		assert.NotNil(t, msg.Photo)
 		assert.Equal(t, photo.Caption, msg.Caption)
-
-		msg, err = b.EditCaption(msg, "new caption")
-		assert.NoError(t, err)
-		assert.Equal(t, "new caption", msg.Caption)
 	})
 
-	var msg *Message
+	t.Run("EditCaption()", func(t *testing.T) {
+		edited, err := b.EditCaption(msg, "new caption")
+		assert.NoError(t, err)
+		assert.Equal(t, "new caption", edited.Caption)
+	})
+
+	t.Run("Edit(what=InputMedia)", func(t *testing.T) {
+		edited, err := b.Edit(msg, photo)
+		assert.NoError(t, err)
+		assert.Equal(t, msg.Photo, edited.Photo)
+	})
 
 	t.Run("Send(what=string)", func(t *testing.T) {
 		msg, err = b.Send(to, t.Name())
@@ -358,20 +365,8 @@ func TestBot(t *testing.T) {
 		assert.Error(t, err) // message is not modified
 	})
 
-	t.Run("Edit(what=Location)", func(t *testing.T) {
-		loc := &Location{Lat: 42, Lng: 69, LivePeriod: 60}
-		msg, err := b.Send(to, loc)
-		assert.NoError(t, err)
-		assert.NotNil(t, msg.Location)
-
-		loc = &Location{Lat: loc.Lng, Lng: loc.Lat}
-		msg, err = b.Edit(msg, *loc)
-		assert.NoError(t, err)
-		assert.NotNil(t, msg.Location)
-	})
-
-	t.Run("EditReplyMarkup()", func(t *testing.T) {
-		markup := &ReplyMarkup{
+	t.Run("Edit(what=ReplyMarkup)", func(t *testing.T) {
+		good := &ReplyMarkup{
 			InlineKeyboard: [][]InlineButton{
 				{{
 					Data: "btn",
@@ -379,7 +374,7 @@ func TestBot(t *testing.T) {
 				}},
 			},
 		}
-		badMarkup := &ReplyMarkup{
+		bad := &ReplyMarkup{
 			InlineKeyboard: [][]InlineButton{
 				{{
 					Data: strings.Repeat("*", 65),
@@ -388,16 +383,28 @@ func TestBot(t *testing.T) {
 			},
 		}
 
-		msg, err := b.EditReplyMarkup(msg, markup)
+		edited, err := b.Edit(msg, good)
 		assert.NoError(t, err)
-		assert.Equal(t, msg.ReplyMarkup.InlineKeyboard, markup.InlineKeyboard)
+		assert.Equal(t, edited.ReplyMarkup.InlineKeyboard, good.InlineKeyboard)
 
-		msg, err = b.EditReplyMarkup(msg, nil)
+		edited, err = b.EditReplyMarkup(edited, nil)
 		assert.NoError(t, err)
-		assert.Nil(t, msg.ReplyMarkup.InlineKeyboard)
+		assert.Nil(t, edited.ReplyMarkup.InlineKeyboard)
 
-		_, err = b.EditReplyMarkup(msg, badMarkup)
+		_, err = b.Edit(edited, bad)
 		assert.Equal(t, ErrButtonDataInvalid, err)
+	})
+
+	t.Run("Edit(what=Location)", func(t *testing.T) {
+		loc := &Location{Lat: 42, Lng: 69, LivePeriod: 60}
+		edited, err := b.Send(to, loc)
+		assert.NoError(t, err)
+		assert.NotNil(t, edited.Location)
+
+		loc = &Location{Lat: loc.Lng, Lng: loc.Lat}
+		edited, err = b.Edit(edited, *loc)
+		assert.NoError(t, err)
+		assert.NotNil(t, edited.Location)
 	})
 
 	t.Run("Notify()", func(t *testing.T) {
