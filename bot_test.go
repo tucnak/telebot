@@ -63,6 +63,7 @@ func TestNewBot(t *testing.T) {
 	pref.Client = client
 	pref.Poller = &LongPoller{Timeout: time.Second}
 	pref.Updates = 50
+	pref.ParseMode = ModeHTML
 	pref.offline = true
 
 	b, err = NewBot(pref)
@@ -71,6 +72,7 @@ func TestNewBot(t *testing.T) {
 	assert.Equal(t, pref.URL, b.URL)
 	assert.Equal(t, pref.Poller, b.Poller)
 	assert.Equal(t, 50, cap(b.Updates))
+	assert.Equal(t, ModeHTML, b.parseMode)
 }
 
 func TestBotHandle(t *testing.T) {
@@ -322,16 +324,22 @@ func TestBot(t *testing.T) {
 		assert.Equal(t, photo.Caption, msg.Caption)
 	})
 
-	t.Run("EditCaption()", func(t *testing.T) {
-		edited, err := b.EditCaption(msg, "new caption")
+	t.Run("EditCaption()+ParseMode", func(t *testing.T) {
+		b.parseMode = ModeHTML
+		edited, err := b.EditCaption(msg, "<b>new caption with parse mode</b>")
 		assert.NoError(t, err)
-		assert.Equal(t, "new caption", edited.Caption)
+		assert.Equal(t, "new caption with parse mode", edited.Caption)
+
+		b.parseMode = ModeDefault
+		edited, err = b.EditCaption(msg, "*new caption w/o parse mode*", ModeMarkdown)
+		assert.NoError(t, err)
+		assert.Equal(t, "new caption w/o parse mode", edited.Caption)
 	})
 
 	t.Run("Edit(what=InputMedia)", func(t *testing.T) {
 		edited, err := b.Edit(msg, photo)
 		assert.NoError(t, err)
-		assert.Equal(t, msg.Photo, edited.Photo)
+		assert.Equal(t, edited.Photo.FileID, photo.FileID)
 	})
 
 	t.Run("Send(what=string)", func(t *testing.T) {

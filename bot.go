@@ -37,6 +37,7 @@ func NewBot(pref Settings) (*Bot, error) {
 
 		handlers:    make(map[string]interface{}),
 		synchronous: pref.Synchronous,
+		parseMode:   pref.ParseMode,
 		stop:        make(chan struct{}),
 		reporter:    pref.Reporter,
 		client:      client,
@@ -65,6 +66,7 @@ type Bot struct {
 
 	handlers    map[string]interface{}
 	synchronous bool
+	parseMode   ParseMode
 	reporter    func(error)
 	stop        chan struct{}
 	client      *http.Client
@@ -88,6 +90,11 @@ type Settings struct {
 	// Synchronous prevents handlers from running in parallel.
 	// It makes ProcessUpdate return after the handler is finished.
 	Synchronous bool
+
+	// ParseMode used to set default parse mode of all sent messages.
+	// It attaches to every send, edit or whatever method. You also
+	// will be able to override the default mode by passing a new one.
+	ParseMode ParseMode
 
 	// Reporter is a callback function that will get called
 	// on any panics recovered from endpoint handlers.
@@ -588,7 +595,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.sendFiles("sendMediaGroup", files, params)
 	if err != nil {
@@ -647,7 +654,7 @@ func (b *Bot) Forward(to Recipient, msg Editable, options ...interface{}) (*Mess
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw("forwardMessage", params)
 	if err != nil {
@@ -703,7 +710,7 @@ func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Mes
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw(method, params)
 	if err != nil {
@@ -771,7 +778,7 @@ func (b *Bot) EditCaption(msg Editable, caption string, options ...interface{}) 
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw("editMessageCaption", params)
 	if err != nil {
@@ -885,7 +892,7 @@ func (b *Bot) EditMedia(msg Editable, media InputMedia, options ...interface{}) 
 	params := make(map[string]string)
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	if sendOpts != nil {
 		result.ParseMode = sendOpts.ParseMode
@@ -1145,7 +1152,7 @@ func (b *Bot) StopLiveLocation(msg Editable, options ...interface{}) (*Message, 
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw("stopMessageLiveLocation", params)
 	if err != nil {
@@ -1169,7 +1176,7 @@ func (b *Bot) StopPoll(msg Editable, options ...interface{}) (*Poll, error) {
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw("stopPoll", params)
 	if err != nil {
@@ -1302,7 +1309,7 @@ func (b *Bot) Pin(msg Editable, options ...interface{}) error {
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	_, err := b.Raw("pinChatMessage", params)
 	return err
