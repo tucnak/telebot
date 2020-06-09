@@ -23,7 +23,7 @@ func TestBtn(t *testing.T) {
 	assert.Equal(t, &InlineButton{Text: "T", Login: &Login{Text: "T"}}, r.Login("T", &Login{Text: "T"}).Inline())
 }
 
-func TestReplyInline(t *testing.T) {
+func TestOptions(t *testing.T) {
 	r := &ReplyMarkup{}
 	r.Reply(
 		r.Row(r.Text("Menu")),
@@ -36,13 +36,28 @@ func TestReplyInline(t *testing.T) {
 	}, r.ReplyKeyboard)
 
 	i := &ReplyMarkup{}
-	i.Inline(r.Row(
-		r.Data("Previous", "prev"),
-		r.Data("Next", "next"),
+	i.Inline(i.Row(
+		i.Data("Previous", "prev"),
+		i.Data("Next", "next"),
 	))
 
 	assert.Equal(t, [][]InlineButton{{
 		{Unique: "prev", Text: "Previous"},
 		{Unique: "next", Text: "Next"},
 	}}, i.InlineKeyboard)
+
+	assert.Panics(t, func() {
+		r.Reply(r.Row(r.Data("T", "u")))
+		i.Inline(i.Row(i.Text("T")))
+	})
+
+	assert.Equal(t, r.copy(), r)
+	assert.Equal(t, i.copy(), i)
+
+	o := &SendOptions{ReplyMarkup: r}
+	assert.Equal(t, o.copy(), o)
+
+	data, err := PollQuiz.MarshalJSON()
+	assert.NoError(t, err)
+	assert.Equal(t, []byte(`{"type":"quiz"}`), data)
 }

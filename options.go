@@ -57,7 +57,6 @@ func (og *SendOptions) copy() *SendOptions {
 	if cp.ReplyMarkup != nil {
 		cp.ReplyMarkup = cp.ReplyMarkup.copy()
 	}
-
 	return &cp
 }
 
@@ -110,16 +109,20 @@ type ReplyMarkup struct {
 func (r *ReplyMarkup) copy() *ReplyMarkup {
 	cp := *r
 
-	cp.ReplyKeyboard = make([][]ReplyButton, len(r.ReplyKeyboard))
-	for i, row := range r.ReplyKeyboard {
-		cp.ReplyKeyboard[i] = make([]ReplyButton, len(row))
-		copy(cp.ReplyKeyboard[i], row)
+	if len(r.ReplyKeyboard) > 0 {
+		cp.ReplyKeyboard = make([][]ReplyButton, len(r.ReplyKeyboard))
+		for i, row := range r.ReplyKeyboard {
+			cp.ReplyKeyboard[i] = make([]ReplyButton, len(row))
+			copy(cp.ReplyKeyboard[i], row)
+		}
 	}
 
-	cp.InlineKeyboard = make([][]InlineButton, len(r.InlineKeyboard))
-	for i, row := range r.InlineKeyboard {
-		cp.InlineKeyboard[i] = make([]InlineButton, len(row))
-		copy(cp.InlineKeyboard[i], row)
+	if len(r.InlineKeyboard) > 0 {
+		cp.InlineKeyboard = make([][]InlineButton, len(r.InlineKeyboard))
+		for i, row := range r.InlineKeyboard {
+			cp.InlineKeyboard[i] = make([]InlineButton, len(row))
+			copy(cp.InlineKeyboard[i], row)
+		}
 	}
 
 	return &cp
