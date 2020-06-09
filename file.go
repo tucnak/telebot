@@ -80,9 +80,6 @@ func (f *File) InCloud() bool {
 
 // OnDisk will return true if file is present on disk.
 func (f *File) OnDisk() bool {
-	if _, err := os.Stat(f.FileLocal); err != nil {
-		return false
-	}
-
-	return true
+	_, err := os.Stat(f.FileLocal)
+	return err == nil
 }

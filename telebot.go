@@ -78,7 +78,7 @@ const (
 	OnGroupPhotoDeleted = "\achat_photo_del"
 
 	// Migration happens when group switches to
-	// a super group. You might want to update
+	// a supergroup. You might want to update
 	// your internal references to this chat
 	// upon switching as its ID will change.
 	//

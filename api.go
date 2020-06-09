@@ -29,7 +29,7 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 
 	resp, err := b.client.Post(url, "application/json", &buf)
 	if err != nil {
-		return nil, errors.Wrap(err, "http.Post failed")
+		return nil, wrapError(err)
 	}
 	resp.Close = true
 	defer resp.Body.Close()

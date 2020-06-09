@@ -544,17 +544,17 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 		var (
 			repr string
 			data []byte
-			f    = x.MediaFile()
+			file = x.MediaFile()
 		)
 
 		switch {
-		case f.InCloud():
-			repr = f.FileID
-		case f.FileURL != "":
-			repr = f.FileURL
-		case f.OnDisk() || f.FileReader != nil:
+		case file.InCloud():
+			repr = file.FileID
+		case file.FileURL != "":
+			repr = file.FileURL
+		case file.OnDisk() || file.FileReader != nil:
 			repr = "attach://" + strconv.Itoa(i)
-			files[strconv.Itoa(i)] = *f
+			files[strconv.Itoa(i)] = *file
 		default:
 			return nil, errors.Errorf("telebot: album entry #%d does not exist", i)
 		}
@@ -1053,16 +1053,16 @@ func (b *Bot) Answer(query *Query, resp *QueryResponse) error {
 //		bot.Respond(c)
 //		bot.Respond(c, response)
 //
-func (b *Bot) Respond(c *Callback, response ...*CallbackResponse) error {
-	var resp *CallbackResponse
-	if response == nil {
-		resp = &CallbackResponse{}
+func (b *Bot) Respond(c *Callback, resp ...*CallbackResponse) error {
+	var r *CallbackResponse
+	if resp == nil {
+		r = &CallbackResponse{}
 	} else {
-		resp = response[0]
+		r = resp[0]
 	}
 
-	resp.CallbackID = c.ID
-	_, err := b.Raw("answerCallbackQuery", resp)
+	r.CallbackID = c.ID
+	_, err := b.Raw("answerCallbackQuery", r)
 	return err
 }
 

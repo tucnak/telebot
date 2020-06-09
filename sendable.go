@@ -29,7 +29,6 @@ func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"chat_id": to.Recipient(),
 		"caption": p.Caption,
 	}
-
 	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&p.File, "photo", params, nil)
@@ -53,12 +52,11 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"title":     a.Title,
 		"file_name": a.FileName,
 	}
+	b.embedSendOptions(params, opt)
 
 	if a.Duration != 0 {
 		params["duration"] = strconv.Itoa(a.Duration)
 	}
-
-	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&a.File, "audio", params, thumbnailToFilemap(a.Thumbnail))
 	if err != nil {
@@ -86,12 +84,11 @@ func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 		"caption":   d.Caption,
 		"file_name": d.FileName,
 	}
+	b.embedSendOptions(params, opt)
 
 	if d.FileSize != 0 {
 		params["file_size"] = strconv.Itoa(d.FileSize)
 	}
-
-	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&d.File, "document", params, thumbnailToFilemap(d.Thumbnail))
 	if err != nil {
@@ -130,6 +127,7 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"caption":   v.Caption,
 		"file_name": v.FileName,
 	}
+	b.embedSendOptions(params, opt)
 
 	if v.Duration != 0 {
 		params["duration"] = strconv.Itoa(v.Duration)
@@ -143,8 +141,6 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	if v.SupportsStreaming {
 		params["supports_streaming"] = "true"
 	}
-
-	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&v.File, "video", params, thumbnailToFilemap(v.Thumbnail))
 	if err != nil {
@@ -175,6 +171,7 @@ func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 		"caption":   a.Caption,
 		"file_name": a.FileName,
 	}
+	b.embedSendOptions(params, opt)
 
 	if a.Duration != 0 {
 		params["duration"] = strconv.Itoa(a.Duration)
@@ -190,8 +187,6 @@ func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 	if params["file_name"] == "" && a.File.OnDisk() {
 		params["file_name"] = filepath.Base(a.File.FileLocal)
 	}
-
-	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&a.File, "animation", params, nil)
 	if err != nil {
@@ -210,12 +205,11 @@ func (v *Voice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
 		"chat_id": to.Recipient(),
 	}
+	b.embedSendOptions(params, opt)
 
 	if v.Duration != 0 {
 		params["duration"] = strconv.Itoa(v.Duration)
 	}
-
-	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&v.File, "voice", params, nil)
 	if err != nil {
@@ -233,6 +227,7 @@ func (v *VideoNote) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 	params := map[string]string{
 		"chat_id": to.Recipient(),
 	}
+	b.embedSendOptions(params, opt)
 
 	if v.Duration != 0 {
 		params["duration"] = strconv.Itoa(v.Duration)
@@ -240,8 +235,6 @@ func (v *VideoNote) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 	if v.Length != 0 {
 		params["length"] = strconv.Itoa(v.Length)
 	}
-
-	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&v.File, "videoNote", params, thumbnailToFilemap(v.Thumbnail))
 	if err != nil {

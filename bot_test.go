@@ -324,6 +324,19 @@ func TestBot(t *testing.T) {
 		assert.Equal(t, photo.Caption, msg.Caption)
 	})
 
+	t.Run("SendAlbum()", func(t *testing.T) {
+		_, err = b.SendAlbum(nil, nil)
+		assert.Equal(t, ErrBadRecipient, err)
+
+		_, err = b.SendAlbum(to, nil)
+		assert.Error(t, err)
+
+		msgs, err := b.SendAlbum(to, Album{photo, photo})
+		assert.NoError(t, err)
+		assert.Len(t, msgs, 2)
+		assert.NotEmpty(t, msgs[0].AlbumID)
+	})
+
 	t.Run("EditCaption()+ParseMode", func(t *testing.T) {
 		b.parseMode = ModeHTML
 		edited, err := b.EditCaption(msg, "<b>new caption with parse mode</b>")
@@ -415,26 +428,24 @@ func TestBot(t *testing.T) {
 		assert.NotNil(t, edited.Location)
 	})
 
-	t.Run("Notify()", func(t *testing.T) {
-		assert.Equal(t, ErrBadRecipient, b.Notify(nil, Typing))
-		assert.NoError(t, b.Notify(to, Typing))
-	})
-
 	// should be the last
 	t.Run("Delete()", func(t *testing.T) {
 		assert.NoError(t, b.Delete(msg))
 	})
 
-	t.Run("Commands", func(t *testing.T) {
-		orig := []Command{{
-			Text:        "test",
-			Description: "test command",
-		}}
-		assert.NoError(t, b.SetCommands(orig))
+	t.Run("Notify()", func(t *testing.T) {
+		assert.Equal(t, ErrBadRecipient, b.Notify(nil, Typing))
+		assert.NoError(t, b.Notify(to, Typing))
+	})
 
-		cmds, err := b.GetCommands()
-		assert.NoError(t, err)
-		assert.Equal(t, orig, cmds)
+	t.Run("Answer()", func(t *testing.T) {
+		assert.Error(t, b.Answer(&Query{}, &QueryResponse{
+			Results: Results{&ArticleResult{}},
+		}))
+	})
+
+	t.Run("Respond()", func(t *testing.T) {
+		assert.Error(t, b.Respond(&Callback{}, &CallbackResponse{}))
 	})
 
 	t.Run("Payments", func(t *testing.T) {
@@ -448,5 +459,17 @@ func TestBot(t *testing.T) {
 			b.Ship(&ShippingQuery{}, ShippingOption{}, ShippingOption{})
 			assert.Equal(t, ErrUnsupportedWhat, b.Ship(&ShippingQuery{}, 0))
 		})
+	})
+
+	t.Run("Commands", func(t *testing.T) {
+		orig := []Command{{
+			Text:        "test",
+			Description: "test command",
+		}}
+		assert.NoError(t, b.SetCommands(orig))
+
+		cmds, err := b.GetCommands()
+		assert.NoError(t, err)
+		assert.Equal(t, orig, cmds)
 	})
 }
