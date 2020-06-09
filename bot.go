@@ -37,6 +37,7 @@ func NewBot(pref Settings) (*Bot, error) {
 
 		handlers:    make(map[string]interface{}),
 		synchronous: pref.Synchronous,
+		verbose:     pref.Verbose,
 		parseMode:   pref.ParseMode,
 		stop:        make(chan struct{}),
 		reporter:    pref.Reporter,
@@ -66,6 +67,7 @@ type Bot struct {
 
 	handlers    map[string]interface{}
 	synchronous bool
+	verbose     bool
 	parseMode   ParseMode
 	reporter    func(error)
 	stop        chan struct{}
@@ -90,6 +92,10 @@ type Settings struct {
 	// Synchronous prevents handlers from running in parallel.
 	// It makes ProcessUpdate return after the handler is finished.
 	Synchronous bool
+
+	// Verbose mode let you to debug the bot
+	// Shows upcoming requests
+	Verbose bool
 
 	// ParseMode used to set default parse mode of all sent messages.
 	// It attaches to every send, edit or whatever method. You also
@@ -298,6 +304,7 @@ func (b *Bot) ProcessUpdate(upd Update) {
 
 			return
 		}
+
 	}
 
 	if upd.EditedMessage != nil {
@@ -442,6 +449,7 @@ func (b *Bot) ProcessUpdate(upd Update) {
 
 		return
 	}
+
 }
 
 func (b *Bot) handle(end string, m *Message) bool {

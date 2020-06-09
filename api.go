@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -36,6 +37,14 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, wrapError(err)
+	}
+
+	if b.verbose {
+		log.Printf(`[verbose] telebot: sent request
+Method: %v
+URL: %v
+Params: %v
+Response: %v`, method, strings.Replace(url, b.Token, "<token>", -1), payload, string(data))
 	}
 
 	// returning data as well
