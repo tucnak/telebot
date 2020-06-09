@@ -339,7 +339,7 @@ func TestBot(t *testing.T) {
 	t.Run("Edit(what=InputMedia)", func(t *testing.T) {
 		edited, err := b.Edit(msg, photo)
 		assert.NoError(t, err)
-		assert.Equal(t, edited.Photo.FileID, photo.FileID)
+		assert.Equal(t, edited.Photo.UniqueID, photo.UniqueID)
 	})
 
 	t.Run("Send(what=string)", func(t *testing.T) {
