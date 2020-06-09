@@ -17,9 +17,9 @@ type WebhookTLS struct {
 
 // A WebhookEndpoint describes the endpoint to which telegram will send its requests.
 // This must be a public URL and can be a loadbalancer or something similar. If the
-// endpoint uses TLS and the certificate is selfsigned you have to add the certificate
+// endpoint uses TLS and the certificate is self-signed you have to add the certificate
 // path of this certificate so telegram will trust it. This field can be ignored if you
-// have a trusted certifcate (letsencrypt, ...).
+// have a trusted certificate (letsencrypt, ...).
 type WebhookEndpoint struct {
 	PublicURL string
 	Cert      string
@@ -28,13 +28,16 @@ type WebhookEndpoint struct {
 // A Webhook configures the poller for webhooks. It opens a port on the given
 // listen address. If TLS is filled, the listener will use the key and cert to open
 // a secure port. Otherwise it will use plain HTTP.
+//
 // If you have a loadbalancer ore other infrastructure in front of your service, you
 // must fill the Endpoint structure so this poller will send this data to telegram. If
 // you leave these values empty, your local address will be sent to telegram which is mostly
 // not what you want (at least while developing). If you have a single instance of your
 // bot you should consider to use the LongPoller instead of a WebHook.
+//
 // You can also leave the Listen field empty. In this case it is up to the caller to
 // add the Webhook to a http-mux.
+//
 type Webhook struct {
 	Listen         string   `json:"url"`
 	MaxConnections int      `json:"max_connections"`

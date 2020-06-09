@@ -139,7 +139,7 @@ func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, e
 		"chat_id": to.Recipient(),
 		"text":    text,
 	}
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	data, err := b.Raw("sendMessage", params)
 	if err != nil {

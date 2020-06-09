@@ -30,7 +30,7 @@ func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"caption": p.Caption,
 	}
 
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&p.File, "photo", params, nil)
 	if err != nil {
@@ -58,7 +58,7 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		params["duration"] = strconv.Itoa(a.Duration)
 	}
 
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&a.File, "audio", params, thumbnailToFilemap(a.Thumbnail))
 	if err != nil {
@@ -91,7 +91,7 @@ func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 		params["file_size"] = strconv.Itoa(d.FileSize)
 	}
 
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&d.File, "document", params, thumbnailToFilemap(d.Thumbnail))
 	if err != nil {
@@ -110,7 +110,7 @@ func (s *Sticker) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 	params := map[string]string{
 		"chat_id": to.Recipient(),
 	}
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&s.File, "sticker", params, nil)
 	if err != nil {
@@ -144,7 +144,7 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		params["supports_streaming"] = "true"
 	}
 
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&v.File, "video", params, thumbnailToFilemap(v.Thumbnail))
 	if err != nil {
@@ -191,7 +191,7 @@ func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 		params["file_name"] = filepath.Base(a.File.FileLocal)
 	}
 
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&a.File, "animation", params, nil)
 	if err != nil {
@@ -215,7 +215,7 @@ func (v *Voice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		params["duration"] = strconv.Itoa(v.Duration)
 	}
 
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&v.File, "voice", params, nil)
 	if err != nil {
@@ -241,7 +241,7 @@ func (v *VideoNote) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 		params["length"] = strconv.Itoa(v.Length)
 	}
 
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	msg, err := b.sendObject(&v.File, "videoNote", params, thumbnailToFilemap(v.Thumbnail))
 	if err != nil {
@@ -262,7 +262,7 @@ func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 		"longitude":   fmt.Sprintf("%f", x.Lng),
 		"live_period": strconv.Itoa(x.LivePeriod),
 	}
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	data, err := b.Raw("sendLocation", params)
 	if err != nil {
@@ -283,7 +283,7 @@ func (v *Venue) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"foursquare_id":   v.FoursquareID,
 		"foursquare_type": v.FoursquareType,
 	}
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	data, err := b.Raw("sendVenue", params)
 	if err != nil {
@@ -329,7 +329,7 @@ func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 		data, _ := json.Marshal(i.Prices)
 		params["prices"] = string(data)
 	}
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	data, err := b.Raw("sendInvoice", params)
 	if err != nil {
@@ -359,7 +359,7 @@ func (p *Poll) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	} else if p.CloseUnixdate != 0 {
 		params["close_date"] = strconv.FormatInt(p.CloseUnixdate, 10)
 	}
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	var options []string
 	for _, o := range p.Options {
@@ -382,7 +382,7 @@ func (d *Dice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"chat_id": to.Recipient(),
 		"emoji":   string(d.Type),
 	}
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	data, err := b.Raw("sendDice", params)
 	if err != nil {
@@ -398,7 +398,7 @@ func (g *Game) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"chat_id":         to.Recipient(),
 		"game_short_name": g.Title,
 	}
-	embedSendOptions(params, opt)
+	b.embedSendOptions(params, opt)
 
 	data, err := b.Raw("sendGame", params)
 	if err != nil {

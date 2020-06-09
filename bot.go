@@ -38,6 +38,7 @@ func NewBot(pref Settings) (*Bot, error) {
 		handlers:    make(map[string]interface{}),
 		synchronous: pref.Synchronous,
 		verbose:     pref.Verbose,
+		parseMode:   pref.ParseMode,
 		stop:        make(chan struct{}),
 		reporter:    pref.Reporter,
 		client:      client,
@@ -67,6 +68,7 @@ type Bot struct {
 	handlers    map[string]interface{}
 	synchronous bool
 	verbose     bool
+	parseMode   ParseMode
 	reporter    func(error)
 	stop        chan struct{}
 	client      *http.Client
@@ -94,6 +96,11 @@ type Settings struct {
 	// Verbose mode let you to debug the bot
 	// Shows upcoming requests
 	Verbose bool
+
+	// ParseMode used to set default parse mode of all sent messages.
+	// It attaches to every send, edit or whatever method. You also
+	// will be able to override the default mode by passing a new one.
+	ParseMode ParseMode
 
 	// Reporter is a callback function that will get called
 	// on any panics recovered from endpoint handlers.
@@ -524,7 +531,7 @@ func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Mes
 
 // SendAlbum sends multiple instances of media as a single message.
 //
-// From all existing options, it only supports tb.Silent option.
+// From all existing options, it only supports tb.Silent.
 func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
@@ -596,7 +603,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.sendFiles("sendMediaGroup", files, params)
 	if err != nil {
@@ -655,7 +662,7 @@ func (b *Bot) Forward(to Recipient, msg Editable, options ...interface{}) (*Mess
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw("forwardMessage", params)
 	if err != nil {
@@ -667,11 +674,16 @@ func (b *Bot) Forward(to Recipient, msg Editable, options ...interface{}) (*Mess
 
 // Edit is magic, it lets you change already sent message.
 //
+// If edited message is sent by the bot, returns it,
+// otherwise returns nil and ErrTrueResult.
+//
 // Use cases:
 //
-//     b.Edit(msg, msg.Text, newMarkup)
-//     b.Edit(msg, "new <b>text</b>", tb.ModeHTML)
-//     b.Edit(msg, tb.Location{42.1337, 69.4242})
+//     b.Edit(m, m.Text, newMarkup)
+//     b.Edit(m, "new <b>text</b>", tb.ModeHTML)
+//     b.Edit(m, &tb.ReplyMarkup{...})
+//     b.Edit(m, &tb.Photo{File: ...})
+//     b.Edit(m, tb.Location{42.1337, 69.4242})
 //
 // This function will panic upon nil Editable.
 func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Message, error) {
@@ -681,6 +693,10 @@ func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Mes
 	)
 
 	switch v := what.(type) {
+	case *ReplyMarkup:
+		return b.EditReplyMarkup(msg, v)
+	case InputMedia:
+		return b.EditMedia(msg, v, options...)
 	case string:
 		method = "editMessageText"
 		params["text"] = v
@@ -702,7 +718,7 @@ func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Mes
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw(method, params)
 	if err != nil {
@@ -714,6 +730,9 @@ func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Mes
 
 // EditReplyMarkup edits reply markup of already sent message.
 // Pass nil or empty ReplyMarkup to delete it from the message.
+//
+// If edited message is sent by the bot, returns it,
+// otherwise returns nil and ErrTrueResult.
 //
 // On success, returns edited message object.
 // This function will panic upon nil Editable.
@@ -747,6 +766,9 @@ func (b *Bot) EditReplyMarkup(msg Editable, markup *ReplyMarkup) (*Message, erro
 
 // EditCaption edits already sent photo caption with known recipient and message id.
 //
+// If edited message is sent by the bot, returns it,
+// otherwise returns nil and ErrTrueResult.
+//
 // On success, returns edited message object.
 // This function will panic upon nil Editable.
 func (b *Bot) EditCaption(msg Editable, caption string, options ...interface{}) (*Message, error) {
@@ -764,7 +786,7 @@ func (b *Bot) EditCaption(msg Editable, caption string, options ...interface{}) 
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw("editMessageCaption", params)
 	if err != nil {
@@ -776,10 +798,13 @@ func (b *Bot) EditCaption(msg Editable, caption string, options ...interface{}) 
 
 // EditMedia edits already sent media with known recipient and message id.
 //
+// If edited message is sent by the bot, returns it,
+// otherwise returns nil and ErrTrueResult.
+//
 // Use cases:
 //
-//     bot.EditMedia(msg, &tb.Photo{File: tb.FromDisk("chicken.jpg")})
-//     bot.EditMedia(msg, &tb.Video{File: tb.FromURL("http://video.mp4")})
+//     b.EditMedia(m, &tb.Photo{File: tb.FromDisk("chicken.jpg")})
+//     b.EditMedia(m, &tb.Video{File: tb.FromURL("http://video.mp4")})
 //
 // This function will panic upon nil Editable.
 func (b *Bot) EditMedia(msg Editable, media InputMedia, options ...interface{}) (*Message, error) {
@@ -875,7 +900,7 @@ func (b *Bot) EditMedia(msg Editable, media InputMedia, options ...interface{}) 
 	params := make(map[string]string)
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	if sendOpts != nil {
 		result.ParseMode = sendOpts.ParseMode
@@ -888,7 +913,7 @@ func (b *Bot) EditMedia(msg Editable, media InputMedia, options ...interface{}) 
 	data, _ := json.Marshal(result)
 	params["media"] = string(data)
 
-	if chatID == 0 { // If inline message.
+	if chatID == 0 { // if inline message
 		params["inline_message_id"] = msgID
 	} else {
 		params["chat_id"] = strconv.FormatInt(chatID, 10)
@@ -1121,6 +1146,9 @@ func (b *Bot) GetFile(file *File) (io.ReadCloser, error) {
 // StopLiveLocation stops broadcasting live message location
 // before Location.LivePeriod expires.
 //
+// If the message is sent by the bot, returns it,
+// otherwise returns nil and ErrTrueResult.
+//
 // It supports tb.ReplyMarkup.
 // This function will panic upon nil Editable.
 func (b *Bot) StopLiveLocation(msg Editable, options ...interface{}) (*Message, error) {
@@ -1132,7 +1160,7 @@ func (b *Bot) StopLiveLocation(msg Editable, options ...interface{}) (*Message, 
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw("stopMessageLiveLocation", params)
 	if err != nil {
@@ -1156,7 +1184,7 @@ func (b *Bot) StopPoll(msg Editable, options ...interface{}) (*Poll, error) {
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw("stopPoll", params)
 	if err != nil {
@@ -1289,7 +1317,7 @@ func (b *Bot) Pin(msg Editable, options ...interface{}) error {
 	}
 
 	sendOpts := extractOptions(options)
-	embedSendOptions(params, sendOpts)
+	b.embedSendOptions(params, sendOpts)
 
 	_, err := b.Raw("pinChatMessage", params)
 	return err

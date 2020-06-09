@@ -13,11 +13,7 @@ type Sticker struct {
 	Animated     bool          `json:"is_animated"`
 	Thumbnail    *Photo        `json:"thumb"`
 	Emoji        string        `json:"emoji"`
-	Name         string        `json:"name"`
 	SetName      string        `json:"set_name"`
-	PNG          *File         `json:"png_sticker"`
-	TGS          *File         `json:"tgs_file"`
-	Emojis       string        `json:"emojis"`
 	MaskPosition *MaskPosition `json:"mask_position"`
 }
 
@@ -26,12 +22,12 @@ type StickerSet struct {
 	Name          string        `json:"name"`
 	Title         string        `json:"title"`
 	Animated      bool          `json:"is_animated"`
-	ContainsMasks bool          `json:"contains_masks"`
 	Stickers      []Sticker     `json:"stickers"`
 	Thumbnail     *Photo        `json:"thumb"`
 	PNG           *File         `json:"png_sticker"`
-	TGS           *File         `json:"tgs_file"`
+	TGS           *File         `json:"tgs_sticker"`
 	Emojis        string        `json:"emojis"`
+	ContainsMasks bool          `json:"contains_masks"`
 	MaskPosition  *MaskPosition `json:"mask_position"`
 }
 
@@ -42,15 +38,6 @@ type MaskPosition struct {
 	XShift  float32     `json:"x_shift"`
 	YShift  float32     `json:"y_shift"`
 	Scale   float32     `json:"scale"`
-}
-
-// StickerSetParams describes the payload in creating new sticker set api-method.
-type StickerSetParams struct {
-	UserID     int
-	Name       string
-	Title      string
-	PngSticker *File
-	Emojis     string
 }
 
 // UploadStickerFile uploads a .PNG file with a sticker for later use.
@@ -123,7 +110,7 @@ func (b *Bot) CreateNewStickerSet(to Recipient, s StickerSet) error {
 }
 
 // AddStickerToSet adds new sticker to existing sticker set.
-func (b *Bot) AddStickerToSet(to Recipient, s Sticker) error {
+func (b *Bot) AddStickerToSet(to Recipient, s StickerSet) error {
 	files := make(map[string]File)
 	if s.PNG != nil {
 		files["png_sticker"] = *s.PNG
@@ -176,7 +163,7 @@ func (b *Bot) DeleteStickerFromSet(sticker string) error {
 //
 // Animated sticker set thumbnail can't be uploaded via HTTP URL.
 //
-func (b *Bot) SetStickerSetThumb(to Recipient, s Sticker) error {
+func (b *Bot) SetStickerSetThumb(to Recipient, s StickerSet) error {
 	files := map[string]File{}
 	if s.PNG != nil {
 		files["thumb"] = *s.PNG

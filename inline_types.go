@@ -182,6 +182,13 @@ type GifResult struct {
 	// Optional. Duration of the GIF.
 	Duration int `json:"gif_duration,omitempty"`
 
+	// URL of the static thumbnail for the result (jpeg or gif).
+	ThumbURL string `json:"thumb_url"`
+
+	// Optional. MIME type of the thumbnail, must be one of
+	// “image/jpeg”, “image/gif”, or “video/mp4”.
+	ThumbMIME string `json:"thumb_mime_type,omitempty"`
+
 	// Optional. Title for the result.
 	Title string `json:"title,omitempty"`
 
@@ -191,9 +198,6 @@ type GifResult struct {
 	// Optional. Send Markdown or HTML, if you want Telegram apps to show
 	// bold, italic, fixed-width text or inline URLs in the media caption.
 	ParseMode ParseMode `json:"parse_mode,omitempty"`
-
-	// URL of the static thumbnail for the result (jpeg or gif).
-	ThumbURL string `json:"thumb_url"`
 
 	// If Cache != "", it'll be used instead
 	Cache string `json:"gif_file_id,omitempty"`
@@ -233,6 +237,10 @@ type Mpeg4GifResult struct {
 
 	// URL of the static thumbnail (jpeg or gif) for the result.
 	ThumbURL string `json:"thumb_url,omitempty"`
+
+	// Optional. MIME type of the thumbnail, must be one of
+	// “image/jpeg”, “image/gif”, or “video/mp4”.
+	ThumbMIME string `json:"thumb_mime_type,omitempty"`
 
 	// Optional. Title for the result.
 	Title string `json:"title,omitempty"`
