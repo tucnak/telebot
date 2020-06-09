@@ -93,8 +93,8 @@ type Settings struct {
 	// It makes ProcessUpdate return after the handler is finished.
 	Synchronous bool
 
-	// Verbose mode let you to debug the bot
-	// Shows upcoming requests
+	// Verbose forces bot to log all upcoming requests.
+	// Use for debugging purposes only.
 	Verbose bool
 
 	// ParseMode used to set default parse mode of all sent messages.

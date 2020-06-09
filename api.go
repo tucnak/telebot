@@ -40,11 +40,20 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 	}
 
 	if b.verbose {
-		log.Printf(`[verbose] telebot: sent request
-Method: %v
-URL: %v
-Params: %v
-Response: %v`, method, strings.Replace(url, b.Token, "<token>", -1), payload, string(data))
+		body, _ := json.Marshal(payload)
+		body = bytes.ReplaceAll(body, []byte(`\"`), []byte(`"`))
+		body = bytes.ReplaceAll(body, []byte(`"{`), []byte(`{`))
+		body = bytes.ReplaceAll(body, []byte(`}"`), []byte(`}`))
+
+		indent := func(b []byte) string {
+			buf.Reset()
+			json.Indent(&buf, b, "", "\t")
+			return buf.String()
+		}
+
+		log.Printf("[verbose] telebot: sent request\n"+
+			"Method: %v\nParams: %v\nResponse: %v",
+			method, indent(body), indent(data))
 	}
 
 	// returning data as well
