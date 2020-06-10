@@ -339,14 +339,18 @@ func TestBot(t *testing.T) {
 
 	t.Run("EditCaption()+ParseMode", func(t *testing.T) {
 		b.parseMode = ModeHTML
-		edited, err := b.EditCaption(msg, "<b>new caption with parse mode</b>")
+
+		edited, err := b.EditCaption(msg, "<b>new caption with html</b>")
 		assert.NoError(t, err)
-		assert.Equal(t, "new caption with parse mode", edited.Caption)
+		assert.Equal(t, "new caption with html", edited.Caption)
+		assert.Equal(t, EntityBold, edited.CaptionEntities[0].Type)
+
+		edited, err = b.EditCaption(msg, "*new caption with markdown*", ModeMarkdown)
+		assert.NoError(t, err)
+		assert.Equal(t, "new caption with markdown", edited.Caption)
+		assert.Equal(t, EntityBold, edited.CaptionEntities[0].Type)
 
 		b.parseMode = ModeDefault
-		edited, err = b.EditCaption(msg, "*new caption w/o parse mode*", ModeMarkdown)
-		assert.NoError(t, err)
-		assert.Equal(t, "new caption w/o parse mode", edited.Caption)
 	})
 
 	t.Run("Edit(what=InputMedia)", func(t *testing.T) {
