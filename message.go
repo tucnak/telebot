@@ -27,6 +27,17 @@ type Message struct {
 	// forwarded from a channel.
 	OriginalChat *Chat `json:"forward_from_chat"`
 
+	// For forwarded messages, identifier of the original message
+	// when forwarded from a channel.
+	OriginalMessageID int `json:"forward_from_message_id"`
+
+	// For forwarded messages, signature of the post author.
+	OriginalSignature string `json:"forward_signature"`
+
+	// For forwarded messages, sender's name from users who
+	// disallow adding a link to their account.
+	OriginalSenderName string `json:"forward_sender_name"`
+
 	// For forwarded messages, unixtime of the original message.
 	OriginalUnixtime int `json:"forward_date"`
 
