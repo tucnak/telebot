@@ -81,26 +81,32 @@ func (b *Bot) sendFiles(method string, files map[string]File, params map[string]
 		return b.Raw(method, params)
 	}
 
-	var buf bytes.Buffer
-	writer := multipart.NewWriter(&buf)
+	pipeReader, pipeWriter := io.Pipe()
+	writer := multipart.NewWriter(pipeWriter)
+	go func() {
+		defer pipeWriter.Close()
 
-	for field, file := range rawFiles {
-		if err := addFileToWriter(writer, params["file_name"], field, file); err != nil {
-			return nil, wrapError(err)
+		for field, file := range rawFiles {
+			if err := addFileToWriter(writer, params["file_name"], field, file); err != nil {
+				pipeWriter.CloseWithError(wrapError(err))
+				return
+			}
 		}
-	}
-	for field, value := range params {
-		if err := writer.WriteField(field, value); err != nil {
-			return nil, wrapError(err)
+		for field, value := range params {
+			if err := writer.WriteField(field, value); err != nil {
+				pipeWriter.CloseWithError(wrapError(err))
+				return
+			}
 		}
-	}
-	if err := writer.Close(); err != nil {
-		return nil, wrapError(err)
-	}
+		if err := writer.Close(); err != nil {
+			pipeWriter.CloseWithError(wrapError(err))
+			return
+		}
+	}()
 
 	url := b.URL + "/bot" + b.Token + "/" + method
 
-	resp, err := b.client.Post(url, writer.FormDataContentType(), &buf)
+	resp, err := b.client.Post(url, writer.FormDataContentType(), pipeReader)
 	if err != nil {
 		return nil, wrapError(err)
 	}
