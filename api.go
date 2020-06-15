@@ -88,18 +88,18 @@ func (b *Bot) sendFiles(method string, files map[string]File, params map[string]
 
 		for field, file := range rawFiles {
 			if err := addFileToWriter(writer, params["file_name"], field, file); err != nil {
-				pipeWriter.CloseWithError(wrapError(err))
+				pipeWriter.CloseWithError(err)
 				return
 			}
 		}
 		for field, value := range params {
 			if err := writer.WriteField(field, value); err != nil {
-				pipeWriter.CloseWithError(wrapError(err))
+				pipeWriter.CloseWithError(err)
 				return
 			}
 		}
 		if err := writer.Close(); err != nil {
-			pipeWriter.CloseWithError(wrapError(err))
+			pipeWriter.CloseWithError(err)
 			return
 		}
 	}()
@@ -108,7 +108,9 @@ func (b *Bot) sendFiles(method string, files map[string]File, params map[string]
 
 	resp, err := b.client.Post(url, writer.FormDataContentType(), pipeReader)
 	if err != nil {
-		return nil, wrapError(err)
+		err = wrapError(err)
+		pipeReader.CloseWithError(err)
+		return nil, err
 	}
 	resp.Close = true
 	defer resp.Body.Close()
