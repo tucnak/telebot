@@ -35,6 +35,7 @@ var (
 	ErrUnsupportedWhat = errors.New("telebot: unsupported what argument")
 	ErrCouldNotUpdate  = errors.New("telebot: could not fetch new updates")
 	ErrTrueResult      = errors.New("telebot: result is True")
+	ErrBadContext      = errors.New("telebot: context does not contain message")
 )
 
 const DefaultApiURL = "https://api.telegram.org"
