@@ -146,16 +146,15 @@ func (h *Webhook) waitForStop(stop chan struct{}) {
 // and writes them to the update channel.
 func (h *Webhook) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var update Update
-	err := json.NewDecoder(r.Body).Decode(&update)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
 		h.bot.debug(fmt.Errorf("cannot decode update: %v", err))
 		return
 	}
 	h.dest <- update
 }
 
-// GetWebhook returns current webhook status.
-func (b *Bot) GetWebhook() (*Webhook, error) {
+// Webhook returns the current webhook status.
+func (b *Bot) Webhook() (*Webhook, error) {
 	data, err := b.Raw("getWebhookInfo", nil)
 	if err != nil {
 		return nil, err
@@ -165,7 +164,7 @@ func (b *Bot) GetWebhook() (*Webhook, error) {
 		Result Webhook
 	}
 	if err := json.Unmarshal(data, &resp); err != nil {
-		return nil, err
+		return nil, wrapError(err)
 	}
 	return &resp.Result, nil
 }

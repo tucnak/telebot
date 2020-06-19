@@ -3,12 +3,14 @@ package telebot
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/pkg/errors"
 )
 
 // ChosenInlineResult represents a result of an inline query that was chosen
 // by the user and sent to their chat partner.
 type ChosenInlineResult struct {
-	From      User      `json:"from"`
+	Sender    *User     `json:"from"`
 	Location  *Location `json:"location,omitempty"`
 	ResultID  string    `json:"result_id"`
 	Query     string    `json:"query"`
@@ -23,7 +25,7 @@ type Query struct {
 	ID string `json:"id"`
 
 	// Sender.
-	From User `json:"from"`
+	Sender *User `json:"from"`
 
 	// Sender location, only for bots that request user location.
 	Location *Location `json:"location"`
@@ -36,7 +38,6 @@ type Query struct {
 }
 
 // QueryResponse builds a response to an inline Query.
-// See also: https://core.telegram.org/bots/api#answerinlinequery
 type QueryResponse struct {
 	// The ID of the query to which this is a response.
 	//
@@ -124,7 +125,7 @@ func inferIQR(result Result) error {
 	case *StickerResult:
 		r.Type = "sticker"
 	default:
-		return fmt.Errorf("result %v is not supported", result)
+		return errors.Errorf("telebot: result %v is not supported", result)
 	}
 
 	return nil

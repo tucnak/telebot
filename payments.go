@@ -119,7 +119,7 @@ func (c Currency) ToTotal(total float64) int {
 	return int(total) * int(math.Pow(10, float64(c.Exp)))
 }
 
-var SupportedCurrencies = map[string]Currency{}
+var SupportedCurrencies = make(map[string]Currency)
 
 func init() {
 	err := json.Unmarshal([]byte(dataCurrencies), &SupportedCurrencies)

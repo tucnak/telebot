@@ -2,14 +2,12 @@ package telebot
 
 // InputMessageContent objects represent the content of a message to be sent
 // as a result of an inline query.
-// See also: https://core.telegram.org/bots/api#inputmessagecontent
 type InputMessageContent interface {
 	IsInputMessageContent() bool
 }
 
 // InputTextMessageContent represents the content of a text message to be
 // sent as the result of an inline query.
-// See also: https://core.telegram.org/bots/api#inputtextmessagecontent
 type InputTextMessageContent struct {
 	// Text of the message to be sent, 1-4096 characters.
 	Text string `json:"message_text"`
@@ -28,7 +26,6 @@ func (input *InputTextMessageContent) IsInputMessageContent() bool {
 
 // InputLocationMessageContent represents the content of a location message
 // to be sent as the result of an inline query.
-// See also: https://core.telegram.org/bots/api#inputlocationmessagecontent
 type InputLocationMessageContent struct {
 	Lat float32 `json:"latitude"`
 	Lng float32 `json:"longitude"`
@@ -40,7 +37,6 @@ func (input *InputLocationMessageContent) IsInputMessageContent() bool {
 
 // InputVenueMessageContent represents the content of a venue message to
 // be sent as the result of an inline query.
-// See also: https://core.telegram.org/bots/api#inputvenuemessagecontent
 type InputVenueMessageContent struct {
 	Lat float32 `json:"latitude"`
 	Lng float32 `json:"longitude"`
@@ -61,7 +57,6 @@ func (input *InputVenueMessageContent) IsInputMessageContent() bool {
 
 // InputContactMessageContent represents the content of a contact
 // message to be sent as the result of an inline query.
-// See also: https://core.telegram.org/bots/api#inputcontactmessagecontent
 type InputContactMessageContent struct {
 	// Contact's phone number.
 	PhoneNumber string `json:"phone_number"`

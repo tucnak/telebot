@@ -61,7 +61,7 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 }
 
 func (b *Bot) sendFiles(method string, files map[string]File, params map[string]string) ([]byte, error) {
-	rawFiles := map[string]interface{}{}
+	rawFiles := make(map[string]interface{})
 	for name, f := range files {
 		switch {
 		case f.InCloud():
@@ -73,7 +73,7 @@ func (b *Bot) sendFiles(method string, files map[string]File, params map[string]
 		case f.FileReader != nil:
 			rawFiles[name] = f.FileReader
 		default:
-			return nil, errors.Errorf("telebot: File for field %s doesn't exist", name)
+			return nil, errors.Errorf("telebot: file for field %s doesn't exist", name)
 		}
 	}
 
@@ -139,7 +139,7 @@ func addFileToWriter(writer *multipart.Writer, filename, field string, file inte
 		defer f.Close()
 		reader = f
 	} else {
-		return errors.Errorf("telebot: File for field %v should be an io.ReadCloser or string", field)
+		return errors.Errorf("telebot: file for field %v should be an io.ReadCloser or string", field)
 	}
 
 	part, err := writer.CreateFormFile(field, filename)

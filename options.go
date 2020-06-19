@@ -12,6 +12,7 @@ import (
 // flags instead.
 //
 // Supported options are defined as iota-constants.
+//
 type Option int
 
 const (
@@ -35,6 +36,7 @@ const (
 // Despite its power, SendOptions is rather inconvenient to use all
 // the way through bot logic, so you might want to consider storing
 // and re-using it somewhere or be using Option flags instead.
+//
 type SendOptions struct {
 	// If the message is a reply, original message.
 	ReplyTo *Message
@@ -132,7 +134,7 @@ func (r *ReplyMarkup) copy() *ReplyMarkup {
 //
 // Set either Contact or Location to true in order to request
 // sensitive info, such as user's phone number or current location.
-// (Available in private chats only.)
+//
 type ReplyButton struct {
 	Text string `json:"text"`
 

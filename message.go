@@ -293,6 +293,7 @@ func (m *Message) FromChannel() bool {
 // Service messages are automatically sent messages, which
 // typically occur on some global action. For instance, when
 // anyone leaves the chat or chat title changes.
+//
 func (m *Message) IsService() bool {
 	fact := false
 

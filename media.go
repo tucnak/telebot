@@ -6,8 +6,6 @@ import (
 
 // Album lets you group multiple media (so-called InputMedia)
 // into a single message.
-//
-// On older clients albums look like N regular messages.
 type Album []InputMedia
 
 // InputMedia is a generic type for all kinds of media you
@@ -32,6 +30,7 @@ type Photo struct {
 
 type photoSize struct {
 	File
+
 	Width   int    `json:"width"`
 	Height  int    `json:"height"`
 	Caption string `json:"caption,omitempty"`
@@ -44,8 +43,7 @@ func (p *Photo) MediaFile() *File {
 
 // UnmarshalJSON is custom unmarshaller required to abstract
 // away the hassle of treating different thumbnail sizes.
-// Instead, Telebot chooses the hi-res one and just sticks to
-// it.
+// Instead, Telebot chooses the hi-res one and just sticks to it.
 //
 // I really do find it a beautiful solution.
 func (p *Photo) UnmarshalJSON(jsonStr []byte) error {
@@ -76,7 +74,6 @@ func (p *Photo) UnmarshalJSON(jsonStr []byte) error {
 type Audio struct {
 	File
 
-	// Duration of the recording in seconds as defined by sender.
 	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
@@ -114,9 +111,8 @@ func (d *Document) MediaFile() *File {
 type Video struct {
 	File
 
-	Width  int `json:"width"`
-	Height int `json:"height"`
-
+	Width    int `json:"width"`
+	Height   int `json:"height"`
 	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
@@ -136,9 +132,8 @@ func (v *Video) MediaFile() *File {
 type Animation struct {
 	File
 
-	Width  int `json:"width"`
-	Height int `json:"height"`
-
+	Width    int `json:"width"`
+	Height   int `json:"height"`
 	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
@@ -157,7 +152,6 @@ func (a *Animation) MediaFile() *File {
 type Voice struct {
 	File
 
-	// Duration of the recording in seconds as defined by sender.
 	Duration int `json:"duration"`
 
 	// (Optional)
@@ -168,8 +162,6 @@ type Voice struct {
 // as of v.4.0).
 type VideoNote struct {
 	File
-
-	// Duration of the recording in seconds as defined by sender.
 	Duration int `json:"duration"`
 
 	// (Optional)
@@ -189,13 +181,11 @@ type Contact struct {
 
 // Location object represents geographic position.
 type Location struct {
-	// Latitude
 	Lat float32 `json:"latitude"`
-	// Longitude
 	Lng float32 `json:"longitude"`
 
-	// Period in seconds for which the location will be updated
-	// (see Live Locations, should be between 60 and 86400.)
+	// Period in seconds for which the location will be updated,
+	// should be between 60 and 86400.
 	LivePeriod int `json:"live_period,omitempty"`
 }
 

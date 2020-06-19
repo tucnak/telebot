@@ -44,6 +44,7 @@ const DefaultApiURL = "https://api.telegram.org"
 //
 // For convenience, all Telebot-provided endpoints start with
 // an "alert" character \a.
+//
 const (
 	// Basic message handlers.
 	//

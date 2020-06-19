@@ -43,7 +43,6 @@ func (r *ResultBase) Process() {
 }
 
 // ArticleResult represents a link to an article or web page.
-// See also: https://core.telegram.org/bots/api#inlinequeryresultarticle
 type ArticleResult struct {
 	ResultBase
 
@@ -101,7 +100,6 @@ type AudioResult struct {
 }
 
 // ContentResult represents a contact with a phone number.
-// See also: https://core.telegram.org/bots/api#inlinequeryresultcontact
 type ContactResult struct {
 	ResultBase
 
@@ -128,7 +126,6 @@ type ContactResult struct {
 }
 
 // DocumentResult represents a link to a file.
-// See also: https://core.telegram.org/bots/api#inlinequeryresultdocument
 type DocumentResult struct {
 	ResultBase
 
@@ -166,7 +163,6 @@ type DocumentResult struct {
 }
 
 // GifResult represents a link to an animated GIF file.
-// See also: https://core.telegram.org/bots/api#inlinequeryresultgif
 type GifResult struct {
 	ResultBase
 
@@ -204,7 +200,6 @@ type GifResult struct {
 }
 
 // LocationResult represents a location on a map.
-// See also: https://core.telegram.org/bots/api#inlinequeryresultlocation
 type LocationResult struct {
 	ResultBase
 
@@ -219,7 +214,6 @@ type LocationResult struct {
 
 // ResultMpeg4Gif represents a link to a video animation
 // (H.264/MPEG-4 AVC video without sound).
-// See also: https://core.telegram.org/bots/api#inlinequeryresultmpeg4gif
 type Mpeg4GifResult struct {
 	ResultBase
 
@@ -257,7 +251,6 @@ type Mpeg4GifResult struct {
 }
 
 // ResultResult represents a link to a photo.
-// See also: https://core.telegram.org/bots/api#inlinequeryresultphoto
 type PhotoResult struct {
 	ResultBase
 
@@ -292,7 +285,6 @@ type PhotoResult struct {
 }
 
 // VenueResult represents a venue.
-// See also: https://core.telegram.org/bots/api#inlinequeryresultvenue
 type VenueResult struct {
 	ResultBase
 
@@ -319,7 +311,6 @@ type VenueResult struct {
 
 // VideoResult represents a link to a page containing an embedded
 // video player or a video file.
-// See also: https://core.telegram.org/bots/api#inlinequeryresultvideo
 type VideoResult struct {
 	ResultBase
 
@@ -360,8 +351,6 @@ type VideoResult struct {
 
 // VoiceResult represents a link to a voice recording in an .ogg
 // container encoded with OPUS.
-//
-// See also: https://core.telegram.org/bots/api#inlinequeryresultvoice
 type VoiceResult struct {
 	ResultBase
 

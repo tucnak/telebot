@@ -85,15 +85,15 @@ func (c *nativeContext) Sender() Recipient {
 	case c.Callback != nil:
 		return c.Callback.Sender
 	case c.Query != nil:
-		return &c.Query.From
+		return c.Query.Sender
 	case c.ChosenInlineResult != nil:
-		return &c.ChosenInlineResult.From
+		return c.ChosenInlineResult.Sender
 	case c.ShippingQuery != nil:
 		return c.ShippingQuery.Sender
 	case c.PreCheckoutQuery != nil:
 		return c.PreCheckoutQuery.Sender
 	case c.PollAnswer != nil:
-		return &c.PollAnswer.User
+		return c.PollAnswer.Sender
 	default:
 		return nil
 	}

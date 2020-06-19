@@ -472,7 +472,7 @@ func TestBot(t *testing.T) {
 		}}
 		assert.NoError(t, b.SetCommands(orig))
 
-		cmds, err := b.GetCommands()
+		cmds, err := b.Commands()
 		assert.NoError(t, err)
 		assert.Equal(t, orig, cmds)
 	})

@@ -31,16 +31,17 @@ type GameHighScore struct {
 	NoEdit bool `json:"disable_edit_message"`
 }
 
-// GetGameScores returns the score of the specified user
+// GameScores returns the score of the specified user
 // and several of their neighbors in a game.
 //
-// This method will currently return scores for the target user,
+// This function will panic upon nil Editable.
+//
+// Currently, it returns scores for the target user,
 // plus two of their closest neighbors on each side.
 // Will also return the top three users
 // if the user and his neighbors are not among them.
 //
-// This function will panic upon nil Editable.
-func (b *Bot) GetGameScores(user Recipient, msg Editable) ([]GameHighScore, error) {
+func (b *Bot) GameScores(user Recipient, msg Editable) ([]GameHighScore, error) {
 	msgID, chatID := msg.MessageSig()
 
 	params := map[string]string{

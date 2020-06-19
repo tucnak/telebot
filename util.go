@@ -2,7 +2,6 @@ package telebot
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"strconv"
 
@@ -58,7 +57,7 @@ func extractOk(data []byte) error {
 	err := ErrByDescription(desc)
 	if err == nil {
 		code, _ := strconv.Atoi(match[1])
-		err = fmt.Errorf("telegram unknown: %s (%d)", desc, code)
+		err = errors.Errorf("telegram unknown: %s (%d)", desc, code)
 	}
 	return err
 }

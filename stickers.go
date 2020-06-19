@@ -40,8 +40,8 @@ type MaskPosition struct {
 	Scale   float32     `json:"scale"`
 }
 
-// UploadStickerFile uploads a .PNG file with a sticker for later use.
-func (b *Bot) UploadStickerFile(to Recipient, png *File) (*File, error) {
+// UploadSticker uploads a PNG file with a sticker for later use.
+func (b *Bot) UploadSticker(to Recipient, png *File) (*File, error) {
 	files := map[string]File{
 		"png_sticker": *png,
 	}
@@ -63,8 +63,8 @@ func (b *Bot) UploadStickerFile(to Recipient, png *File) (*File, error) {
 	return &resp.Result, nil
 }
 
-// GetStickerSet returns a StickerSet on success.
-func (b *Bot) GetStickerSet(name string) (*StickerSet, error) {
+// StickerSet returns a sticker set on success.
+func (b *Bot) StickerSet(name string) (*StickerSet, error) {
 	data, err := b.Raw("getStickerSet", map[string]string{"name": name})
 	if err != nil {
 		return nil, err
@@ -79,8 +79,8 @@ func (b *Bot) GetStickerSet(name string) (*StickerSet, error) {
 	return resp.Result, nil
 }
 
-// CreateNewStickerSet creates a new sticker set.
-func (b *Bot) CreateNewStickerSet(to Recipient, s StickerSet) error {
+// CreateStickerSet creates a new sticker set.
+func (b *Bot) CreateStickerSet(to Recipient, s StickerSet) error {
 	files := make(map[string]File)
 	if s.PNG != nil {
 		files["png_sticker"] = *s.PNG
@@ -98,10 +98,7 @@ func (b *Bot) CreateNewStickerSet(to Recipient, s StickerSet) error {
 	}
 
 	if s.MaskPosition != nil {
-		data, err := json.Marshal(&s.MaskPosition)
-		if err != nil {
-			return err
-		}
+		data, _ := json.Marshal(&s.MaskPosition)
 		params["mask_position"] = string(data)
 	}
 
@@ -109,8 +106,8 @@ func (b *Bot) CreateNewStickerSet(to Recipient, s StickerSet) error {
 	return err
 }
 
-// AddStickerToSet adds new sticker to existing sticker set.
-func (b *Bot) AddStickerToSet(to Recipient, s StickerSet) error {
+// AddSticker adds a new sticker to the existing sticker set.
+func (b *Bot) AddSticker(to Recipient, s StickerSet) error {
 	files := make(map[string]File)
 	if s.PNG != nil {
 		files["png_sticker"] = *s.PNG
@@ -125,10 +122,7 @@ func (b *Bot) AddStickerToSet(to Recipient, s StickerSet) error {
 	}
 
 	if s.MaskPosition != nil {
-		data, err := json.Marshal(&s.MaskPosition)
-		if err != nil {
-			return err
-		}
+		data, _ := json.Marshal(&s.MaskPosition)
 		params["mask_position"] = string(data)
 	}
 
@@ -136,8 +130,8 @@ func (b *Bot) AddStickerToSet(to Recipient, s StickerSet) error {
 	return err
 }
 
-// SetStickerPositionInSet moves a sticker in set to a specific position.
-func (b *Bot) SetStickerPositionInSet(sticker string, position int) error {
+// SetStickerPosition moves a sticker in set to a specific position.
+func (b *Bot) SetStickerPosition(sticker string, position int) error {
 	params := map[string]string{
 		"sticker":  sticker,
 		"position": strconv.Itoa(position),
@@ -147,14 +141,14 @@ func (b *Bot) SetStickerPositionInSet(sticker string, position int) error {
 	return err
 }
 
-// DeleteStickerFromSet deletes sticker from set created by the bot.
-func (b *Bot) DeleteStickerFromSet(sticker string) error {
+// DeleteSticker deletes a sticker from a set created by the bot.
+func (b *Bot) DeleteSticker(sticker string) error {
 	_, err := b.Raw("deleteStickerFromSet", map[string]string{"sticker": sticker})
 	return err
 
 }
 
-// SetStickerSetThumb sets the thumbnail of a sticker set.
+// SetStickerSetThumb sets a thumbnail of the sticker set.
 // Animated thumbnails can be set for animated sticker sets only.
 //
 // Thumbnail must be a PNG image, up to 128 kilobytes in size
@@ -164,7 +158,7 @@ func (b *Bot) DeleteStickerFromSet(sticker string) error {
 // Animated sticker set thumbnail can't be uploaded via HTTP URL.
 //
 func (b *Bot) SetStickerSetThumb(to Recipient, s StickerSet) error {
-	files := map[string]File{}
+	files := make(map[string]File)
 	if s.PNG != nil {
 		files["thumb"] = *s.PNG
 	} else if s.TGS != nil {

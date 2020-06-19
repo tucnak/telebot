@@ -149,7 +149,7 @@ type Command struct {
 //     b.Handle(tb.OnText, func (m *tb.Message) {})
 //     b.Handle(tb.OnQuery, func (q *tb.Query) {})
 //
-//     // make a hook for one of your preserved (by-pointer) inline buttons.
+//     // make a hook for one of your preserved inline buttons.
 //     b.Handle(&inlineButton, func (c *tb.Callback) {})
 //
 func (b *Bot) Handle(endpoint interface{}, handler interface{}) {
@@ -460,7 +460,6 @@ func (b *Bot) handle(end string, m *Message) bool {
 		}
 
 		b.runHandler(func() { handler(m) })
-
 		return true
 	}
 
@@ -502,7 +501,8 @@ func (b *Bot) handleMedia(m *Message) bool {
 // Send accepts 2+ arguments, starting with destination chat, followed by
 // some Sendable (or string!) and optional send options.
 //
-// Note: since most arguments are of type interface{}, but have pointer
+// NOTE:
+// 		Since most arguments are of type interface{}, but have pointer
 // 		method receivers, make sure to pass them by-pointer, NOT by-value.
 //
 // What is a send option exactly? It can be one of the following types:
@@ -512,12 +512,12 @@ func (b *Bot) handleMedia(m *Message) bool {
 //     - Option (a shortcut flag for popular options)
 //     - ParseMode (HTML, Markdown, etc)
 //
-func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Message, error) {
+func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
 	}
 
-	sendOpts := extractOptions(options)
+	sendOpts := extractOptions(opts)
 
 	switch object := what.(type) {
 	case string:
@@ -530,9 +530,8 @@ func (b *Bot) Send(to Recipient, what interface{}, options ...interface{}) (*Mes
 }
 
 // SendAlbum sends multiple instances of media as a single message.
-//
 // From all existing options, it only supports tb.Silent.
-func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Message, error) {
+func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
 	}
@@ -602,7 +601,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 		"media":   "[" + strings.Join(media, ",") + "]",
 	}
 
-	sendOpts := extractOptions(options)
+	sendOpts := extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.sendFiles("sendMediaGroup", files, params)
@@ -634,10 +633,9 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 }
 
 // Reply behaves just like Send() with an exception of "reply-to" indicator.
-//
 // This function will panic upon nil Message.
-func (b *Bot) Reply(to *Message, what interface{}, options ...interface{}) (*Message, error) {
-	sendOpts := extractOptions(options)
+func (b *Bot) Reply(to *Message, what interface{}, opts ...interface{}) (*Message, error) {
+	sendOpts := extractOptions(opts)
 	if sendOpts == nil {
 		sendOpts = &SendOptions{}
 	}
@@ -647,9 +645,8 @@ func (b *Bot) Reply(to *Message, what interface{}, options ...interface{}) (*Mes
 }
 
 // Forward behaves just like Send() but of all options it only supports Silent (see Bots API).
-//
 // This function will panic upon nil Editable.
-func (b *Bot) Forward(to Recipient, msg Editable, options ...interface{}) (*Message, error) {
+func (b *Bot) Forward(to Recipient, msg Editable, opts ...interface{}) (*Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
 	}
@@ -661,7 +658,7 @@ func (b *Bot) Forward(to Recipient, msg Editable, options ...interface{}) (*Mess
 		"message_id":   msgID,
 	}
 
-	sendOpts := extractOptions(options)
+	sendOpts := extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw("forwardMessage", params)
@@ -673,6 +670,7 @@ func (b *Bot) Forward(to Recipient, msg Editable, options ...interface{}) (*Mess
 }
 
 // Edit is magic, it lets you change already sent message.
+// This function will panic upon nil Editable.
 //
 // If edited message is sent by the bot, returns it,
 // otherwise returns nil and ErrTrueResult.
@@ -685,8 +683,7 @@ func (b *Bot) Forward(to Recipient, msg Editable, options ...interface{}) (*Mess
 //     b.Edit(m, &tb.Photo{File: ...})
 //     b.Edit(m, tb.Location{42.1337, 69.4242})
 //
-// This function will panic upon nil Editable.
-func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Message, error) {
+func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Message, error) {
 	var (
 		method string
 		params = make(map[string]string)
@@ -696,7 +693,7 @@ func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Mes
 	case *ReplyMarkup:
 		return b.EditReplyMarkup(msg, v)
 	case InputMedia:
-		return b.EditMedia(msg, v, options...)
+		return b.EditMedia(msg, v, opts...)
 	case string:
 		method = "editMessageText"
 		params["text"] = v
@@ -717,7 +714,7 @@ func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Mes
 		params["message_id"] = msgID
 	}
 
-	sendOpts := extractOptions(options)
+	sendOpts := extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw(method, params)
@@ -729,13 +726,12 @@ func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Mes
 }
 
 // EditReplyMarkup edits reply markup of already sent message.
+// This function will panic upon nil Editable.
 // Pass nil or empty ReplyMarkup to delete it from the message.
 //
 // If edited message is sent by the bot, returns it,
 // otherwise returns nil and ErrTrueResult.
 //
-// On success, returns edited message object.
-// This function will panic upon nil Editable.
 func (b *Bot) EditReplyMarkup(msg Editable, markup *ReplyMarkup) (*Message, error) {
 	msgID, chatID := msg.MessageSig()
 	params := make(map[string]string)
@@ -765,13 +761,12 @@ func (b *Bot) EditReplyMarkup(msg Editable, markup *ReplyMarkup) (*Message, erro
 }
 
 // EditCaption edits already sent photo caption with known recipient and message id.
+// This function will panic upon nil Editable.
 //
 // If edited message is sent by the bot, returns it,
 // otherwise returns nil and ErrTrueResult.
 //
-// On success, returns edited message object.
-// This function will panic upon nil Editable.
-func (b *Bot) EditCaption(msg Editable, caption string, options ...interface{}) (*Message, error) {
+func (b *Bot) EditCaption(msg Editable, caption string, opts ...interface{}) (*Message, error) {
 	msgID, chatID := msg.MessageSig()
 
 	params := map[string]string{
@@ -785,7 +780,7 @@ func (b *Bot) EditCaption(msg Editable, caption string, options ...interface{}) 
 		params["message_id"] = msgID
 	}
 
-	sendOpts := extractOptions(options)
+	sendOpts := extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw("editMessageCaption", params)
@@ -797,6 +792,7 @@ func (b *Bot) EditCaption(msg Editable, caption string, options ...interface{}) 
 }
 
 // EditMedia edits already sent media with known recipient and message id.
+// This function will panic upon nil Editable.
 //
 // If edited message is sent by the bot, returns it,
 // otherwise returns nil and ErrTrueResult.
@@ -806,8 +802,7 @@ func (b *Bot) EditCaption(msg Editable, caption string, options ...interface{}) 
 //     b.EditMedia(m, &tb.Photo{File: tb.FromDisk("chicken.jpg")})
 //     b.EditMedia(m, &tb.Video{File: tb.FromURL("http://video.mp4")})
 //
-// This function will panic upon nil Editable.
-func (b *Bot) EditMedia(msg Editable, media InputMedia, options ...interface{}) (*Message, error) {
+func (b *Bot) EditMedia(msg Editable, media InputMedia, opts ...interface{}) (*Message, error) {
 	var (
 		repr  string
 		thumb *Photo
@@ -899,7 +894,7 @@ func (b *Bot) EditMedia(msg Editable, media InputMedia, options ...interface{}) 
 	msgID, chatID := msg.MessageSig()
 	params := make(map[string]string)
 
-	sendOpts := extractOptions(options)
+	sendOpts := extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
 	if sendOpts != nil {
@@ -928,18 +923,18 @@ func (b *Bot) EditMedia(msg Editable, media InputMedia, options ...interface{}) 
 	return extractMessage(data)
 }
 
-// Delete removes the message, including service messages,
-// with the following limitations:
+// Delete removes the message, including service messages.
+// This function will panic upon nil Editable.
 //
 //     * A message can only be deleted if it was sent less than 48 hours ago.
-//     * Bots can delete outgoing messages in groups and supergroups.
-//     * Bots granted can_post_messages permissions can delete outgoing
-//       messages in channels.
+//     * A dice message in a private chat can only be deleted if it was sent more than 24 hours ago.
+//     * Bots can delete outgoing messages in private chats, groups, and supergroups.
+//     * Bots can delete incoming messages in private chats.
+//     * Bots granted can_post_messages permissions can delete outgoing messages in channels.
 //     * If the bot is an administrator of a group, it can delete any message there.
 //     * If the bot has can_delete_messages permission in a supergroup or a
 //       channel, it can delete any message there.
 //
-// This function will panic upon nil Editable.
 func (b *Bot) Delete(msg Editable) error {
 	msgID, chatID := msg.MessageSig()
 
@@ -961,6 +956,7 @@ func (b *Bot) Delete(msg Editable) error {
 //
 // Currently, Telegram supports only a narrow range of possible
 // actions, these are aligned as constants of this package.
+//
 func (b *Bot) Notify(to Recipient, action ChatAction) error {
 	if to == nil {
 		return ErrBadRecipient
@@ -1071,6 +1067,7 @@ func (b *Bot) Respond(c *Callback, resp ...*CallbackResponse) error {
 //
 // Usually, Telegram-provided File objects miss FilePath so you might need to
 // perform an additional request to fetch them.
+//
 func (b *Bot) FileByID(fileID string) (File, error) {
 	params := map[string]string{
 		"file_id": fileID,
@@ -1091,12 +1088,11 @@ func (b *Bot) FileByID(fileID string) (File, error) {
 }
 
 // Download saves the file from Telegram servers locally.
-//
 // Maximum file size to download is 20 MB.
 func (b *Bot) Download(file *File, localFilename string) error {
-	reader, err := b.GetFile(file)
+	reader, err := b.File(file)
 	if err != nil {
-		return wrapError(err)
+		return err
 	}
 	defer reader.Close()
 
@@ -1115,8 +1111,8 @@ func (b *Bot) Download(file *File, localFilename string) error {
 	return nil
 }
 
-// GetFile gets a file from Telegram servers.
-func (b *Bot) GetFile(file *File) (io.ReadCloser, error) {
+// File gets a file from Telegram servers.
+func (b *Bot) File(file *File) (io.ReadCloser, error) {
 	f, err := b.FileByID(file.FileID)
 	if err != nil {
 		return nil, err
@@ -1146,12 +1142,13 @@ func (b *Bot) GetFile(file *File) (io.ReadCloser, error) {
 // StopLiveLocation stops broadcasting live message location
 // before Location.LivePeriod expires.
 //
+// It supports ReplyMarkup.
+// This function will panic upon nil Editable.
+//
 // If the message is sent by the bot, returns it,
 // otherwise returns nil and ErrTrueResult.
 //
-// It supports tb.ReplyMarkup.
-// This function will panic upon nil Editable.
-func (b *Bot) StopLiveLocation(msg Editable, options ...interface{}) (*Message, error) {
+func (b *Bot) StopLiveLocation(msg Editable, opts ...interface{}) (*Message, error) {
 	msgID, chatID := msg.MessageSig()
 
 	params := map[string]string{
@@ -1159,7 +1156,7 @@ func (b *Bot) StopLiveLocation(msg Editable, options ...interface{}) (*Message, 
 		"message_id": msgID,
 	}
 
-	sendOpts := extractOptions(options)
+	sendOpts := extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw("stopMessageLiveLocation", params)
@@ -1175,7 +1172,8 @@ func (b *Bot) StopLiveLocation(msg Editable, options ...interface{}) (*Message, 
 //
 // It supports ReplyMarkup.
 // This function will panic upon nil Editable.
-func (b *Bot) StopPoll(msg Editable, options ...interface{}) (*Poll, error) {
+//
+func (b *Bot) StopPoll(msg Editable, opts ...interface{}) (*Poll, error) {
 	msgID, chatID := msg.MessageSig()
 
 	params := map[string]string{
@@ -1183,7 +1181,7 @@ func (b *Bot) StopPoll(msg Editable, options ...interface{}) (*Poll, error) {
 		"message_id": msgID,
 	}
 
-	sendOpts := extractOptions(options)
+	sendOpts := extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw("stopPoll", params)
@@ -1200,8 +1198,8 @@ func (b *Bot) StopPoll(msg Editable, options ...interface{}) (*Poll, error) {
 	return resp.Result, nil
 }
 
-// GetInviteLink should be used to export chat's invite link.
-func (b *Bot) GetInviteLink(chat *Chat) (string, error) {
+// InviteLink should be used to export chat's invite link.
+func (b *Bot) InviteLink(chat *Chat) (string, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 	}
@@ -1306,9 +1304,10 @@ func (b *Bot) Leave(chat *Chat) error {
 
 // Pin pins a message in a supergroup or a channel.
 //
-// It supports tb.Silent option.
+// It supports Silent option.
 // This function will panic upon nil Editable.
-func (b *Bot) Pin(msg Editable, options ...interface{}) error {
+//
+func (b *Bot) Pin(msg Editable, opts ...interface{}) error {
 	msgID, chatID := msg.MessageSig()
 
 	params := map[string]string{
@@ -1316,7 +1315,7 @@ func (b *Bot) Pin(msg Editable, options ...interface{}) error {
 		"message_id": msgID,
 	}
 
-	sendOpts := extractOptions(options)
+	sendOpts := extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
 	_, err := b.Raw("pinChatMessage", params)
@@ -1324,8 +1323,7 @@ func (b *Bot) Pin(msg Editable, options ...interface{}) error {
 }
 
 // Unpin unpins a message in a supergroup or a channel.
-//
-// It supports tb.Silent option.
+// It supports Silent option.
 func (b *Bot) Unpin(chat *Chat) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -1340,7 +1338,6 @@ func (b *Bot) Unpin(chat *Chat) error {
 // Including current name of the user for one-on-one conversations,
 // current username of a user, group or channel, etc.
 //
-// Returns a Chat object on success.
 func (b *Bot) ChatByID(id string) (*Chat, error) {
 	params := map[string]string{
 		"chat_id": id,
@@ -1387,8 +1384,6 @@ func (b *Bot) ProfilePhotosOf(user *User) ([]Photo, error) {
 }
 
 // ChatMemberOf returns information about a member of a chat.
-//
-// Returns a ChatMember object on success.
 func (b *Bot) ChatMemberOf(chat *Chat, user *User) (*ChatMember, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -1409,18 +1404,8 @@ func (b *Bot) ChatMemberOf(chat *Chat, user *User) (*ChatMember, error) {
 	return resp.Result, nil
 }
 
-// FileURLByID returns direct url for files using FileId which you can get from File object
-func (b *Bot) FileURLByID(fileID string) (string, error) {
-	f, err := b.FileByID(fileID)
-	if err != nil {
-		return "", err
-	}
-
-	return b.URL + "/file/bot" + b.Token + "/" + f.FilePath, nil
-}
-
-// GetCommands returns the current list of the bot's commands.
-func (b *Bot) GetCommands() ([]Command, error) {
+// Commands returns the current list of the bot's commands.
+func (b *Bot) Commands() ([]Command, error) {
 	data, err := b.Raw("getMyCommands", nil)
 	if err != nil {
 		return nil, err

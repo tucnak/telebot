@@ -35,8 +35,6 @@ func (c *Callback) IsInline() bool {
 }
 
 // CallbackResponse builds a response to a Callback query.
-//
-// See also: https://core.telegram.org/bots/api#answerCallbackQuery
 type CallbackResponse struct {
 	// The ID of the callback to which this is a response.
 	//
