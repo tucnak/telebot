@@ -978,7 +978,7 @@ func (b *Bot) Notify(to Recipient, action ChatAction) error {
 // Ship replies to the shipping query, if you sent an invoice
 // requesting an address and the parameter is_flexible was specified.
 //
-// Usage:
+// Example:
 //
 //		b.Ship(query)          // OK
 //		b.Ship(query, opts...) // OK with options
@@ -1050,8 +1050,8 @@ func (b *Bot) Answer(query *Query, resp *QueryResponse) error {
 //
 // Example:
 //
-//		bot.Respond(c)
-//		bot.Respond(c, response)
+//		b.Respond(c)
+//		b.Respond(c, response)
 //
 func (b *Bot) Respond(c *Callback, resp ...*CallbackResponse) error {
 	var r *CallbackResponse
