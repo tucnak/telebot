@@ -111,7 +111,7 @@ func (b *Bot) Unban(chat *Chat, user *User) error {
 func (b *Bot) Restrict(chat *Chat, member *ChatMember) error {
 	prv, until := member.Rights, member.RestrictedUntil
 
-	params := map[string]string{
+	params := map[string]interface{}{
 		"chat_id":    chat.Recipient(),
 		"user_id":    member.User.Recipient(),
 		"until_date": strconv.FormatInt(until, 10),
@@ -136,7 +136,7 @@ func (b *Bot) Restrict(chat *Chat, member *ChatMember) error {
 func (b *Bot) Promote(chat *Chat, member *ChatMember) error {
 	prv := member.Rights
 
-	params := map[string]string{
+	params := map[string]interface{}{
 		"chat_id": chat.Recipient(),
 		"user_id": member.User.Recipient(),
 	}

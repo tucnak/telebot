@@ -26,3 +26,24 @@ func TestExtractMessage(t *testing.T) {
 	_, err = extractMessage(data)
 	assert.NoError(t, err)
 }
+
+func TestEmbedRights(t *testing.T) {
+	rights := NoRestrictions()
+	params := map[string]interface{}{
+		"chat_id": "1",
+		"user_id": "2",
+	}
+	embedRights(params, rights)
+
+	expected := map[string]interface{}{
+		"chat_id":                   "1",
+		"user_id":                   "2",
+		"can_be_edited":             true,
+		"can_send_messages":         true,
+		"can_send_media_messages":   true,
+		"can_send_polls":            true,
+		"can_send_other_messages":   true,
+		"can_add_web_page_previews": true,
+	}
+	assert.Equal(t, expected, params)
+}
