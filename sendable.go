@@ -389,7 +389,7 @@ func (d *Dice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 func (g *Game) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
 		"chat_id":         to.Recipient(),
-		"game_short_name": g.Title,
+		"game_short_name": g.Name,
 	}
 	b.embedSendOptions(params, opt)
 
