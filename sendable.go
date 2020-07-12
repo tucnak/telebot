@@ -194,8 +194,17 @@ func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 		return nil, err
 	}
 
-	msg.Animation.File.stealRef(&a.File)
-	*a = *msg.Animation
+	if msg.Animation != nil {
+		msg.Animation.File.stealRef(&a.File)
+		*a = *msg.Animation
+	} else {
+		*a = Animation{
+			File:      msg.Document.File,
+			Thumbnail: msg.Document.Thumbnail,
+			MIME:      msg.Document.MIME,
+			FileName:  msg.Document.FileName,
+		}
+	}
 	a.Caption = msg.Caption
 
 	return msg, nil
