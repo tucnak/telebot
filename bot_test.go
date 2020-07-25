@@ -213,6 +213,14 @@ func TestBotProcessUpdate(t *testing.T) {
 		assert.NotNil(t, c.Message().Venue)
 		return nil
 	})
+	b.Handle(OnInvoice, func(c Context) error {
+		assert.NotNil(t, c.Message().Invoice)
+		return nil
+	})
+	b.Handle(OnPayment, func(c Context) error {
+		assert.NotNil(t, c.Message().Payment)
+		return nil
+	})
 	b.Handle(OnAddedToGroup, func(c Context) error {
 		assert.NotNil(t, c.Message().GroupCreated)
 		return nil
@@ -273,6 +281,10 @@ func TestBotProcessUpdate(t *testing.T) {
 		assert.Equal(t, "result", c.ChosenInlineResult().ResultID)
 		return nil
 	})
+	b.Handle(OnShipping, func(c Context) error {
+		assert.Equal(t, "shipping", c.ShippingQuery().ID)
+		return nil
+	})
 	b.Handle(OnCheckout, func(c Context) error {
 		assert.Equal(t, "checkout", c.PreCheckoutQuery().ID)
 		return nil
@@ -302,6 +314,8 @@ func TestBotProcessUpdate(t *testing.T) {
 	b.ProcessUpdate(Update{Message: &Message{Contact: &Contact{}}})
 	b.ProcessUpdate(Update{Message: &Message{Location: &Location{}}})
 	b.ProcessUpdate(Update{Message: &Message{Venue: &Venue{}}})
+	b.ProcessUpdate(Update{Message: &Message{Invoice: &Invoice{}}})
+	b.ProcessUpdate(Update{Message: &Message{Payment: &Payment{}}})
 	b.ProcessUpdate(Update{Message: &Message{Dice: &Dice{}}})
 	b.ProcessUpdate(Update{Message: &Message{GroupCreated: true}})
 	b.ProcessUpdate(Update{Message: &Message{UserJoined: &User{ID: 1}}})
@@ -320,6 +334,7 @@ func TestBotProcessUpdate(t *testing.T) {
 	b.ProcessUpdate(Update{Callback: &Callback{Data: "\funique|callback"}})
 	b.ProcessUpdate(Update{Query: &Query{Text: "query"}})
 	b.ProcessUpdate(Update{ChosenInlineResult: &ChosenInlineResult{ResultID: "result"}})
+	b.ProcessUpdate(Update{ShippingQuery: &ShippingQuery{ID: "shipping"}})
 	b.ProcessUpdate(Update{PreCheckoutQuery: &PreCheckoutQuery{ID: "checkout"}})
 	b.ProcessUpdate(Update{Poll: &Poll{ID: "poll"}})
 	b.ProcessUpdate(Update{PollAnswer: &PollAnswer{PollID: "poll"}})
