@@ -10,8 +10,8 @@ import (
 
 func (b *Bot) debug(err error) {
 	err = errors.WithStack(err)
-	if b.reporter != nil {
-		b.reporter(err)
+	if b.OnError != nil {
+		b.OnError(err)
 	} else {
 		log.Printf("%+v\n", err)
 	}
@@ -27,10 +27,12 @@ func (b *Bot) deferDebug() {
 	}
 }
 
-func (b *Bot) runHandler(handler func()) {
+func (b *Bot) runHandler(handler HandlerFunc, c Context) {
 	f := func() {
 		defer b.deferDebug()
-		handler()
+		if err := handler(c); err != nil {
+			b.OnError(err)
+		}
 	}
 	if b.synchronous {
 		f()
