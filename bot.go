@@ -67,7 +67,9 @@ type Bot struct {
 	Poller  Poller
 	OnError func(error)
 
-	handlers    map[string]HandlerFunc
+	handlers   map[string]HandlerFunc
+	middleware map[string][]MiddlewareFunc
+
 	synchronous bool
 	verbose     bool
 	parseMode   ParseMode
@@ -139,24 +141,42 @@ type Command struct {
 	Description string `json:"description"`
 }
 
+// Group returns a new group.
+func (b *Bot) Group() *Group {
+	return &Group{b: b}
+}
+
 // Handle lets you set the handler for some command name or
-// one of the supported endpoints.
+// one of the supported endpoints. It also applies middleware
+// if such passed to the function.
 //
 // Example:
 //
-//     b.Handle("/help", func (c tb.Context) {})
-//     b.Handle(tb.OnText, func (c tb.Context) {})
-//     b.Handle(tb.OnQuery, func (c tb.Context) {})
+//		b.Handle("/start", func (c tele.Context) error {
+//			return c.Reply("Hello!")
+// 		})
 //
-//     // make a hook for one of your preserved inline buttons.
-//     b.Handle(&inlineButton, func (c tb.Context) {})
+//		b.Handle(&inlineButton, func (c tele.Context) error {
+//			return c.Respond(&tb.CallbackResponse{Text: "Hello!"})
+//		})
 //
-func (b *Bot) Handle(endpoint interface{}, handler HandlerFunc) {
+// Middleware usage:
+//
+//		protected := telemw.Whitelist(ids...)
+//		b.Handle("/ban", onBan, protected)
+//
+func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
+	if m != nil {
+		h = func(c Context) error {
+			return applyMiddleware(h, m...)(c)
+		}
+	}
+
 	switch end := endpoint.(type) {
 	case string:
-		b.handlers[end] = handler
+		b.handlers[end] = h
 	case CallbackEndpoint:
-		b.handlers[end.CallbackUnique()] = handler
+		b.handlers[end.CallbackUnique()] = h
 	default:
 		panic("telebot: unsupported endpoint")
 	}

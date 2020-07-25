@@ -27,10 +27,10 @@ func (b *Bot) deferDebug() {
 	}
 }
 
-func (b *Bot) runHandler(handler HandlerFunc, c Context) {
+func (b *Bot) runHandler(h HandlerFunc, c Context) {
 	f := func() {
 		defer b.deferDebug()
-		if err := handler(c); err != nil {
+		if err := h(c); err != nil && err != ErrSkip {
 			b.OnError(err)
 		}
 	}
@@ -39,6 +39,13 @@ func (b *Bot) runHandler(handler HandlerFunc, c Context) {
 	} else {
 		go f()
 	}
+}
+
+func applyMiddleware(h HandlerFunc, middleware ...MiddlewareFunc) HandlerFunc {
+	for i := len(middleware) - 1; i >= 0; i-- {
+		h = middleware[i](h)
+	}
+	return h
 }
 
 // wrapError returns new wrapped telebot-related error.

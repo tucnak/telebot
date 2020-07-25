@@ -31,6 +31,7 @@ package telebot
 import "github.com/pkg/errors"
 
 var (
+	ErrSkip            = errors.New("telebot: skip")
 	ErrBadRecipient    = errors.New("telebot: recipient is nil")
 	ErrUnsupportedWhat = errors.New("telebot: unsupported what argument")
 	ErrCouldNotUpdate  = errors.New("telebot: could not fetch new updates")

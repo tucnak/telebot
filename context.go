@@ -6,8 +6,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// HandlerFunc represents a handler function type
-// which is used to handle endpoints.
+// HandlerFunc represents a handler function, which is
+// used to handle actual endpoints.
 type HandlerFunc func(Context) error
 
 // Context represents a context of the current event. It stores data
