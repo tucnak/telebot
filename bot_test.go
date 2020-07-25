@@ -1,6 +1,7 @@
 package telebot
 
 import (
+	"errors"
 	"net/http"
 	"os"
 	"strconv"
@@ -338,6 +339,25 @@ func TestBotProcessUpdate(t *testing.T) {
 	b.ProcessUpdate(Update{PreCheckoutQuery: &PreCheckoutQuery{ID: "checkout"}})
 	b.ProcessUpdate(Update{Poll: &Poll{ID: "poll"}})
 	b.ProcessUpdate(Update{PollAnswer: &PollAnswer{PollID: "poll"}})
+}
+
+func TestBotOnError(t *testing.T) {
+	b, err := NewBot(Settings{Synchronous: true, offline: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var ok bool
+	b.OnError = func(err error) {
+		assert.NotNil(t, err)
+		ok = true
+	}
+
+	b.runHandler(func(c Context) error {
+		return errors.New("not nil")
+	}, &nativeContext{})
+
+	assert.True(t, ok)
 }
 
 func TestBot(t *testing.T) {

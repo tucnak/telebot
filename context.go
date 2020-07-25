@@ -1,6 +1,10 @@
 package telebot
 
-import "github.com/pkg/errors"
+import (
+	"strings"
+
+	"github.com/pkg/errors"
+)
 
 // HandlerFunc represents a handler function type
 // which is used to handle endpoints.
@@ -44,6 +48,10 @@ type Context interface {
 	// If the context contains payment, returns its payload.
 	// In the case when no related data presented, returns an empty string.
 	Text() string
+
+	// Args returns a raw slice of command or callback arguments as strings.
+	// The message arguments split by space, while the callback's ones by a "|" symbol.
+	Args() []string
 
 	// Send sends a message to the current recipient.
 	// See Send from bot.go.
@@ -190,6 +198,16 @@ func (c *nativeContext) Text() string {
 	default:
 		return ""
 	}
+}
+
+func (c *nativeContext) Args() []string {
+	if c.message != nil {
+		return strings.Split(c.message.Payload, " ")
+	}
+	if c.callback != nil {
+		return strings.Split(c.callback.Data, "|")
+	}
+	return nil
 }
 
 func (c *nativeContext) Send(what interface{}, opts ...interface{}) error {
