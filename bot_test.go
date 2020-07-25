@@ -348,14 +348,15 @@ func TestBotOnError(t *testing.T) {
 	}
 
 	var ok bool
-	b.OnError = func(err error) {
+	b.OnError = func(err error, c Context) {
+		assert.Equal(t, b, c.(*nativeContext).b)
 		assert.NotNil(t, err)
 		ok = true
 	}
 
 	b.runHandler(func(c Context) error {
 		return errors.New("not nil")
-	}, &nativeContext{})
+	}, &nativeContext{b: b})
 
 	assert.True(t, ok)
 }

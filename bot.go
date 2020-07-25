@@ -65,11 +65,9 @@ type Bot struct {
 	URL     string
 	Updates chan Update
 	Poller  Poller
-	OnError func(error)
+	OnError func(error, Context)
 
-	handlers   map[string]HandlerFunc
-	middleware map[string][]MiddlewareFunc
-
+	handlers    map[string]HandlerFunc
 	synchronous bool
 	verbose     bool
 	parseMode   ParseMode
@@ -102,10 +100,10 @@ type Settings struct {
 	// will be able to override the default mode by passing a new one.
 	ParseMode ParseMode
 
-	// OnError is a callback function that will get called
-	// on errors resulted from the handler. It is used as
-	// post-middleware function.
-	OnError func(error)
+	// OnError is a callback function that will get called on errors
+	// resulted from the handler. It is used as post-middleware function.
+	// Notice that context can be nil.
+	OnError func(error, Context)
 
 	// HTTP Client used to make requests to telegram api
 	Client *http.Client

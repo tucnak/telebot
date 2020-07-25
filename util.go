@@ -11,7 +11,7 @@ import (
 func (b *Bot) debug(err error) {
 	err = errors.WithStack(err)
 	if b.OnError != nil {
-		b.OnError(err)
+		b.OnError(err, nil)
 	} else {
 		log.Printf("%+v\n", err)
 	}
@@ -30,8 +30,10 @@ func (b *Bot) deferDebug() {
 func (b *Bot) runHandler(h HandlerFunc, c Context) {
 	f := func() {
 		defer b.deferDebug()
-		if err := h(c); err != nil && err != ErrSkip {
-			b.OnError(err)
+		if err := h(c); err != nil {
+			if err != ErrSkip {
+				b.OnError(err, c)
+			}
 		}
 	}
 	if b.synchronous {
