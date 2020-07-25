@@ -51,13 +51,13 @@ import (
 )
 
 func main() {
-	b, err := tb.NewBot(tb.Settings{
+	b, err := tele.NewBot(tele.Settings{
 		// You can also set custom API URL.
 		// If field is empty it equals to "https://api.telegram.org".
 		URL: "http://195.129.111.17:8012",
 
 		Token:  "TOKEN_HERE",
-		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
+		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
 	})
 
 	if err != nil {
@@ -65,7 +65,7 @@ func main() {
 		return
 	}
 
-	b.Handle("/hello", func(m *tb.Message) {
+	b.Handle("/hello", func(m *tele.Message) {
 		b.Send(m.Sender, "Hello World!")
 	})
 
@@ -81,22 +81,22 @@ endpoints. You can find the full list
 [here](https://godoc.org/gopkg.in/tucnak/telebot.v2#pkg-constants).
 
 ```go
-b, _ := tb.NewBot(settings)
+b, _ := tele.NewBot(settings)
 
-b.Handle(tb.OnText, func(m *tb.Message) {
+b.Handle(tele.OnText, func(m *tele.Message) {
 	// all the text messages that weren't
 	// captured by existing handlers
 })
 
-b.Handle(tb.OnPhoto, func(m *tb.Message) {
+b.Handle(tele.OnPhoto, func(m *tele.Message) {
 	// photos only
 })
 
-b.Handle(tb.OnChannelPost, func (m *tb.Message) {
+b.Handle(tele.OnChannelPost, func (m *tele.Message) {
 	// channel posts only
 })
 
-b.Handle(tb.OnQuery, func (q *tb.Query) {
+b.Handle(tele.OnQuery, func (q *tele.Query) {
 	// incoming inline queries
 })
 ```
@@ -133,8 +133,8 @@ can plug telebot into whatever existing bot infrastructure (load balancers?) you
 need, if you need to. Another great thing about pollers is that you can chain
 them, making some sort of middleware:
 ```go
-poller := &tb.LongPoller{Timeout: 15 * time.Second}
-spamProtected := tb.NewMiddlewarePoller(poller, func(upd *tb.Update) bool {
+poller := &tele.LongPoller{Timeout: 15 * time.Second}
+spamProtected := tele.NewMiddlewarePoller(poller, func(upd *tele.Update) bool {
 	if upd.Message == nil {
 		return true
 	}
@@ -146,7 +146,7 @@ spamProtected := tb.NewMiddlewarePoller(poller, func(upd *tb.Update) bool {
 	return true
 })
 
-bot, _ := tb.NewBot(tb.Settings{
+bot, _ := tele.NewBot(tele.Settings{
 	// ...
 	Poller: spamProtected,
 })
@@ -167,7 +167,7 @@ other bot, even if [privacy mode](https://core.telegram.org/bots#privacy-mode) i
 For simplified deep-linking, telebot also extracts payload:
 ```go
 // Command: /start <PAYLOAD>
-b.Handle("/start", func(m *tb.Message) {
+b.Handle("/start", func(m *tele.Message) {
 	if !m.Private() {
 		return
 	}
@@ -183,7 +183,7 @@ Telebot allows to both upload (from disk / by URL) and download (from Telegram)
 and files in bot's scope. Also, sending any kind of media with a File created
 from disk will upload the file to Telegram automatically:
 ```go
-a := &tb.Audio{File: tb.FromDisk("file.ogg")}
+a := &tele.Audio{File: tele.FromDisk("file.ogg")}
 
 fmt.Println(a.OnDisk()) // true
 fmt.Println(a.InCloud()) // false
@@ -227,10 +227,10 @@ for that. Albums were added not so long ago, so they are slightly quirky for bac
 compatibilities sake. In fact, an `Album` can be sent, but never received. Instead,
 Telegram returns a `[]Message`, one for each media object in the album:
 ```go
-p := &tb.Photo{File: tb.FromDisk("chicken.jpg")}
-v := &tb.Video{File: tb.FromURL("http://video.mp4")}
+p := &tele.Photo{File: tele.FromDisk("chicken.jpg")}
+v := &tele.Video{File: tele.FromURL("http://video.mp4")}
 
-msgs, err := b.SendAlbum(user, tb.Album{p, v})
+msgs, err := b.SendAlbum(user, tele.Album{p, v})
 ```
 
 ### Send options
@@ -241,18 +241,18 @@ the message supported by Telegram. The only drawback is that it's rather
 inconvenient to use at times, so `Send()` supports multiple shorthands:
 ```go
 // regular send options
-b.Send(user, "text", &tb.SendOptions{
+b.Send(user, "text", &tele.SendOptions{
 	// ...
 })
 
 // ReplyMarkup is a part of SendOptions,
 // but often it's the only option you need
-b.Send(user, "text", &tb.ReplyMarkup{
+b.Send(user, "text", &tele.ReplyMarkup{
 	// ...
 })
 
 // flags: no notification && no web link preview
-b.Send(user, "text", tb.Silent, tb.NoPreview)
+b.Send(user, "text", tele.Silent, tele.NoPreview)
 ```
 
 Full list of supported option-flags you can find
@@ -303,7 +303,7 @@ func (x StoredMessage) MessageSig() (int, int64) {
 Why bother at all? Well, it allows you to do things like this:
 ```go
 // just two integer columns in the database
-var msgs []tb.StoredMessage
+var msgs []tele.StoredMessage
 db.Find(&msgs) // gorm syntax
 
 for _, msg := range msgs {
@@ -333,7 +333,7 @@ The main goal is to avoid a lot of boilerplate and to make code clearer.
 
 ```go
 func main() {
-	b, _ := tb.NewBot(tb.Settings{...})
+	b, _ := tele.NewBot(tele.Settings{...})
 
 	var (
 		// Universal markup builders.
@@ -365,7 +365,7 @@ func main() {
 	)
 
 	// Command: /start <PAYLOAD>
-	b.Handle("/start", func(m *tb.Message) {
+	b.Handle("/start", func(m *tele.Message) {
 		if !m.Private() {
 			return
 		}
@@ -374,13 +374,13 @@ func main() {
 	})
 
 	// On reply button pressed (message)
-	b.Handle(&btnHelp, func(m *tb.Message) {...})
+	b.Handle(&btnHelp, func(m *tele.Message) {...})
 
 	// On inline button pressed (callback)
-	b.Handle(&btnPrev, func(c *tb.Callback) {
+	b.Handle(&btnPrev, func(c *tele.Callback) {
 		// ...
 		// Always respond!
-		b.Respond(c, &tb.CallbackResponse{...})
+		b.Respond(c, &tele.CallbackResponse{...})
 	})
 
 	b.Start()
@@ -395,7 +395,7 @@ r := &ReplyMarkup{}
 r.Text("Hello!")
 r.Contact("Send phone number")
 r.Location("Send location")
-r.Poll(tb.PollQuiz)
+r.Poll(tele.PollQuiz)
 
 // Inline buttons:
 r.Data("Show help", "help") // data is optional
@@ -403,25 +403,25 @@ r.Data("Delete item", "delete", item.ID)
 r.URL("Visit", "https://google.com")
 r.Query("Search", query)
 r.QueryChat("Share", query)
-r.Login("Login", &tb.Login{...})
+r.Login("Login", &tele.Login{...})
 ```
 
 ## Inline mode
-So if you want to handle incoming inline queries you better plug the `tb.OnQuery`
+So if you want to handle incoming inline queries you better plug the `tele.OnQuery`
 endpoint and then use the `Answer()` method to send a list of inline queries
 back. I think at the time of writing, telebot supports all of the provided result
 types (but not the cached ones). This is how it looks like:
 
 ```go
-b.Handle(tb.OnQuery, func(q *tb.Query) {
+b.Handle(tele.OnQuery, func(q *tele.Query) {
 	urls := []string{
 		"http://photo.jpg",
 		"http://photo2.jpg",
 	}
 
-	results := make(tb.Results, len(urls)) // []tb.Result
+	results := make(tele.Results, len(urls)) // []tele.Result
 	for i, url := range urls {
-		result := &tb.PhotoResult{
+		result := &tele.PhotoResult{
 			URL: url,
 
 			// required for photos
@@ -433,7 +433,7 @@ b.Handle(tb.OnQuery, func(q *tb.Query) {
 		results[i].SetResultID(strconv.Itoa(i))
 	}
 
-	err := b.Answer(q, &tb.QueryResponse{
+	err := b.Answer(q, &tele.QueryResponse{
 		Results:   results,
 		CacheTime: 60, // a minute
 	})

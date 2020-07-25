@@ -10,16 +10,16 @@
 //		)
 //
 //		func main() {
-//			b, err := tb.NewBot(tb.Settings{
+//			b, err := tele.NewBot(tele.Settings{
 //				Token: "TOKEN_HERE",
-//				Poller: &tb.LongPoller{Timeout: 10 * time.Second},
+//				Poller: &tele.LongPoller{Timeout: 10 * time.Second},
 //			})
 //
 //			if err != nil {
 //				return
 //			}
 //
-//			b.Handle(tb.OnText, func(m *tb.Message) {
+//			b.Handle(tele.OnText, func(m *tele.Message) {
 //				b.Send(m.Sender, "hello world")
 //			})
 //

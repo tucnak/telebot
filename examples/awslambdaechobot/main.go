@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	b, err := tb.NewBot(tb.Settings{
+	b, err := tele.NewBot(tele.Settings{
 		Token:       os.Getenv("TELEBOT_SECRET"),
 		Synchronous: true,
 	})
@@ -18,10 +18,10 @@ func main() {
 		panic(err)
 	}
 
-	b.Handle(tb.OnText, func(m *tb.Message) { b.Send(m.Chat, m.Text) })
+	b.Handle(tele.OnText, func(m *tele.Message) { b.Send(m.Chat, m.Text) })
 
 	lambda.Start(func(req events.APIGatewayProxyRequest) (err error) {
-		var u tb.Update
+		var u tele.Update
 		if err = json.Unmarshal([]byte(req.Body), &u); err == nil {
 			b.ProcessUpdate(u)
 		}

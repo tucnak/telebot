@@ -155,7 +155,7 @@ func (b *Bot) Group() *Group {
 // 		})
 //
 //		b.Handle(&inlineButton, func (c tele.Context) error {
-//			return c.Respond(&tb.CallbackResponse{Text: "Hello!"})
+//			return c.Respond(&tele.CallbackResponse{Text: "Hello!"})
 //		})
 //
 // Middleware usage:
@@ -488,7 +488,7 @@ func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Messag
 }
 
 // SendAlbum sends multiple instances of media as a single message.
-// From all existing options, it only supports tb.Silent.
+// From all existing options, it only supports tele.Silent.
 func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
@@ -636,10 +636,10 @@ func (b *Bot) Forward(to Recipient, msg Editable, opts ...interface{}) (*Message
 // Use cases:
 //
 //     b.Edit(m, m.Text, newMarkup)
-//     b.Edit(m, "new <b>text</b>", tb.ModeHTML)
-//     b.Edit(m, &tb.ReplyMarkup{...})
-//     b.Edit(m, &tb.Photo{File: ...})
-//     b.Edit(m, tb.Location{42.1337, 69.4242})
+//     b.Edit(m, "new <b>text</b>", tele.ModeHTML)
+//     b.Edit(m, &tele.ReplyMarkup{...})
+//     b.Edit(m, &tele.Photo{File: ...})
+//     b.Edit(m, tele.Location{42.1337, 69.4242})
 //
 func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Message, error) {
 	var (
@@ -757,8 +757,8 @@ func (b *Bot) EditCaption(msg Editable, caption string, opts ...interface{}) (*M
 //
 // Use cases:
 //
-//     b.EditMedia(m, &tb.Photo{File: tb.FromDisk("chicken.jpg")})
-//     b.EditMedia(m, &tb.Video{File: tb.FromURL("http://video.mp4")})
+//     b.EditMedia(m, &tele.Photo{File: tele.FromDisk("chicken.jpg")})
+//     b.EditMedia(m, &tele.Video{File: tele.FromURL("http://video.mp4")})
 //
 func (b *Bot) EditMedia(msg Editable, media InputMedia, opts ...interface{}) (*Message, error) {
 	var (

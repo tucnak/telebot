@@ -82,7 +82,7 @@ type ChatMember struct {
 	// 30 seconds from the current time, they are considered to be
 	// restricted forever.
 	//
-	// Use tb.Forever().
+	// Use tele.Forever().
 	//
 	RestrictedUntil int64 `json:"until_date,omitempty"`
 }
@@ -90,15 +90,15 @@ type ChatMember struct {
 // ChatID represents a chat or an user integer ID, which can be used
 // as recipient in bot methods. It is very useful in cases where
 // you have special group IDs, for example in your config, and don't
-// want to wrap it into *tb.Chat every time you send messages.
+// want to wrap it into *tele.Chat every time you send messages.
 //
 // Example:
 //
-//		group := tb.ChatID(-100756389456)
+//		group := tele.ChatID(-100756389456)
 //		b.Send(group, "Hello!")
 //
 //		type Config struct {
-//			AdminGroup tb.ChatID `json:"admin_group"`
+//			AdminGroup tele.ChatID `json:"admin_group"`
 //		}
 //		b.Send(conf.AdminGroup, "Hello!")
 //

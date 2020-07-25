@@ -30,7 +30,7 @@ func NoRights() Rights { return Rights{} }
 // NoRestrictions should be used when un-restricting or
 // un-promoting user.
 //
-//		member.Rights = tb.NoRestrictions()
+//		member.Rights = tele.NoRestrictions()
 //		b.Restrict(chat, member)
 //
 func NoRestrictions() Rights {
