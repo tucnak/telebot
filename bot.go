@@ -55,6 +55,7 @@ func NewBot(pref Settings) (*Bot, error) {
 		bot.Me = user
 	}
 
+	bot.group = bot.Group()
 	return bot, nil
 }
 
@@ -67,6 +68,7 @@ type Bot struct {
 	Poller  Poller
 	OnError func(error, Context)
 
+	group       *Group
 	handlers    map[string]HandlerFunc
 	synchronous bool
 	verbose     bool
@@ -137,6 +139,11 @@ type Command struct {
 
 	// Description of the command, 3-256 characters.
 	Description string `json:"description"`
+}
+
+// Use adds middleware to the global bot chain.
+func (b *Bot) Use(middleware ...MiddlewareFunc) {
+	b.group.Use(middleware...)
 }
 
 // Group returns a new group.
