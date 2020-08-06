@@ -28,6 +28,9 @@ func NewBot(pref Settings) (*Bot, error) {
 	if pref.URL == "" {
 		pref.URL = DefaultApiURL
 	}
+	if pref.Poller == nil {
+		pref.Poller = &LongPoller{}
+	}
 
 	bot := &Bot{
 		Token:   pref.Token,
