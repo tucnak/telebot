@@ -8,20 +8,20 @@ import (
 
 // Rights is a list of privileges available to chat members.
 type Rights struct {
-	CanBeEdited        bool `json:"can_be_edited,omitempty"`
-	CanChangeInfo      bool `json:"can_change_info,omitempty"`
-	CanPostMessages    bool `json:"can_post_messages,omitempty"`
-	CanEditMessages    bool `json:"can_edit_messages,omitempty"`
-	CanDeleteMessages  bool `json:"can_delete_messages,omitempty"`
-	CanInviteUsers     bool `json:"can_invite_users,omitempty"`
-	CanRestrictMembers bool `json:"can_restrict_members,omitempty"`
-	CanPinMessages     bool `json:"can_pin_messages,omitempty"`
-	CanPromoteMembers  bool `json:"can_promote_members,omitempty"`
-	CanSendMessages    bool `json:"can_send_messages,omitempty"`
-	CanSendMedia       bool `json:"can_send_media_messages,omitempty"`
-	CanSendPolls       bool `json:"can_send_polls,omitempty"`
-	CanSendOther       bool `json:"can_send_other_messages,omitempty"`
-	CanAddPreviews     bool `json:"can_add_web_page_previews,omitempty"`
+	CanBeEdited        bool `json:"can_be_edited"`
+	CanChangeInfo      bool `json:"can_change_info"`
+	CanPostMessages    bool `json:"can_post_messages"`
+	CanEditMessages    bool `json:"can_edit_messages"`
+	CanDeleteMessages  bool `json:"can_delete_messages"`
+	CanInviteUsers     bool `json:"can_invite_users"`
+	CanRestrictMembers bool `json:"can_restrict_members"`
+	CanPinMessages     bool `json:"can_pin_messages"`
+	CanPromoteMembers  bool `json:"can_promote_members"`
+	CanSendMessages    bool `json:"can_send_messages"`
+	CanSendMedia       bool `json:"can_send_media_messages"`
+	CanSendPolls       bool `json:"can_send_polls"`
+	CanSendOther       bool `json:"can_send_other_messages"`
+	CanAddPreviews     bool `json:"can_add_web_page_previews"`
 }
 
 // NoRights is the default Rights{}.
