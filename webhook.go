@@ -9,10 +9,10 @@ import (
 )
 
 // A WebhookTLS specifies the path to a key and a cert so the poller can open
-// a TLS listener
+// a TLS listener.
 type WebhookTLS struct {
-	Key  string
-	Cert string
+	Key  string `json:"key"`
+	Cert string `json:"cert"`
 }
 
 // A WebhookEndpoint describes the endpoint to which telegram will send its requests.
@@ -21,8 +21,8 @@ type WebhookTLS struct {
 // path of this certificate so telegram will trust it. This field can be ignored if you
 // have a trusted certificate (letsencrypt, ...).
 type WebhookEndpoint struct {
-	PublicURL string
-	Cert      string
+	PublicURL string `json:"public_url"`
+	Cert      string `json:"cert"`
 }
 
 // A Webhook configures the poller for webhooks. It opens a port on the given
@@ -49,8 +49,8 @@ type Webhook struct {
 	ErrorUnixtime  int64  `json:"last_error_date"`
 	ErrorMessage   string `json:"last_error_message"`
 
-	TLS      *WebhookTLS
-	Endpoint *WebhookEndpoint
+	TLS      *WebhookTLS      `json:"tls,omitempty"`
+	Endpoint *WebhookEndpoint `json:"endpoint,omitempty"`
 
 	dest chan<- Update
 	bot  *Bot

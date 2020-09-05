@@ -1,0 +1,31 @@
+settings:
+  token_env: TOKEN
+  parse_mode: html
+  long_poller: {}
+
+config:
+  str: string
+  num: 123
+  dur: 10m
+
+buttons:
+  - button: &anchored
+      unique: anchored
+      callback_data:
+      text:
+
+markups:
+  reply:
+    keyboard:
+      - - text: Send a contact
+          request_contact: true
+    one_time_keyboard: true
+  inline:
+    - - unique: inline
+        callback_data:
+        text:
+  embedded:
+    - - Help
+    - - Settings
+  anchored:
+    - - *anchored
