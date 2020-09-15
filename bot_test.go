@@ -82,7 +82,7 @@ func TestBotHandle(t *testing.T) {
 	}
 
 	b.Handle("/start", func(c Context) error { return nil })
-	assert.Contains(t, b.handlers, "/start")
+	assert.Contains(t, b.group.handlers, "/start")
 
 	reply := ReplyButton{Text: "reply"}
 	b.Handle(&reply, func(c Context) error { return nil })
@@ -96,19 +96,16 @@ func TestBotHandle(t *testing.T) {
 	btnInline := (&ReplyMarkup{}).Data("", "btnInline")
 	b.Handle(&btnInline, func(c Context) error { return nil })
 
-	assert.Contains(t, b.handlers, btnReply.CallbackUnique())
-	assert.Contains(t, b.handlers, btnInline.CallbackUnique())
-	assert.Contains(t, b.handlers, reply.CallbackUnique())
-	assert.Contains(t, b.handlers, inline.CallbackUnique())
+	assert.Contains(t, b.group.handlers, btnReply.CallbackUnique())
+	assert.Contains(t, b.group.handlers, btnInline.CallbackUnique())
+	assert.Contains(t, b.group.handlers, reply.CallbackUnique())
+	assert.Contains(t, b.group.handlers, inline.CallbackUnique())
 }
 
 func TestBotStart(t *testing.T) {
 	if token == "" {
 		t.Skip("TELEBOT_SECRET is required")
 	}
-
-	// cached bot has no poller
-	assert.Panics(t, func() { b.Start() })
 
 	pref := defaultSettings()
 	pref.Poller = &LongPoller{}

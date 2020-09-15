@@ -38,9 +38,8 @@ func NewBot(pref Settings) (*Bot, error) {
 		Poller:  pref.Poller,
 		OnError: pref.OnError,
 
-		Updates:  make(chan Update, pref.Updates),
-		handlers: make(map[string]HandlerFunc),
-		stop:     make(chan struct{}),
+		Updates: make(chan Update, pref.Updates),
+		stop:    make(chan struct{}),
 
 		synchronous: pref.Synchronous,
 		verbose:     pref.Verbose,
@@ -72,7 +71,6 @@ type Bot struct {
 	OnError func(error, Context)
 
 	group       *Group
-	handlers    map[string]HandlerFunc
 	synchronous bool
 	verbose     bool
 	parseMode   ParseMode
@@ -144,14 +142,14 @@ type Command struct {
 	Description string `json:"description"`
 }
 
+// Group returns a new group.
+func (b *Bot) Group() *Group {
+	return &Group{handlers: make(map[string]HandlerFunc)}
+}
+
 // Use adds middleware to the global bot chain.
 func (b *Bot) Use(middleware ...MiddlewareFunc) {
 	b.group.Use(middleware...)
-}
-
-// Group returns a new group.
-func (b *Bot) Group() *Group {
-	return &Group{b: b}
 }
 
 // Handle lets you set the handler for some command name or
@@ -174,20 +172,7 @@ func (b *Bot) Group() *Group {
 //		b.Handle("/ban", onBan, protected)
 //
 func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
-	if m != nil {
-		h = func(c Context) error {
-			return applyMiddleware(h, m...)(c)
-		}
-	}
-
-	switch end := endpoint.(type) {
-	case string:
-		b.handlers[end] = h
-	case CallbackEndpoint:
-		b.handlers[end.CallbackUnique()] = h
-	default:
-		panic("telebot: unsupported endpoint")
-	}
+	b.group.Handle(endpoint, h, m...)
 }
 
 var (
@@ -380,7 +365,7 @@ func (b *Bot) ProcessUpdate(upd Update) {
 				if match != nil {
 					unique, payload := match[0][1], match[0][3]
 
-					if handler, ok := b.handlers["\f"+unique]; ok {
+					if handler, ok := b.group.handlers["\f"+unique]; ok {
 						upd.Callback.Data = payload
 						b.runHandler(handler, c)
 						return
@@ -425,7 +410,7 @@ func (b *Bot) ProcessUpdate(upd Update) {
 }
 
 func (b *Bot) handle(end string, c Context) bool {
-	if handler, ok := b.handlers[end]; ok {
+	if handler, ok := b.group.handlers[end]; ok {
 		b.runHandler(handler, c)
 		return true
 	}
