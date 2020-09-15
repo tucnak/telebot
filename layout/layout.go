@@ -43,7 +43,7 @@ func New(path string) (*Layout, error) {
 		return nil, err
 	}
 
-	var lt Layout
+	lt := Layout{ctxs: make(map[tele.Context]string)}
 	return &lt, yaml.Unmarshal(data, &lt)
 }
 
