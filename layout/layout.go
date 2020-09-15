@@ -81,7 +81,7 @@ func (lt *Layout) Duration(k string) time.Duration {
 }
 
 func (lt *Layout) Text(k string, args ...interface{}) string {
-	if lt.Locales == nil {
+	if len(lt.Locales) == 0 {
 		return ""
 	}
 
@@ -103,7 +103,7 @@ func (lt *Layout) Text(k string, args ...interface{}) string {
 }
 
 func (lt *Layout) Markup(k string, args ...interface{}) *tele.ReplyMarkup {
-	if lt.Markups == nil {
+	if len(lt.Markups) == 0 {
 		return nil
 	}
 

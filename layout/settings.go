@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/goccy/go-yaml"
@@ -160,9 +161,10 @@ func (lt *Layout) parseLocales(dir string) error {
 			return err
 		}
 
-		name := filepath.Base(fi.Name())
-		tmpl := template.New(name)
+		name := fi.Name()
+		name = strings.TrimSuffix(name, filepath.Ext(name))
 
+		tmpl := template.New(name)
 		for _, text := range texts {
 			t, err := tmpl.Parse(text)
 			if err != nil {
