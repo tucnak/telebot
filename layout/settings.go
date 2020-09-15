@@ -165,12 +165,12 @@ func (lt *Layout) parseLocales(dir string) error {
 		name = strings.TrimSuffix(name, filepath.Ext(name))
 
 		tmpl := template.New(name)
-		for _, text := range texts {
-			t, err := tmpl.Parse(text)
+		for key, text := range texts {
+			text = strings.Trim(text, "\r\n")
+			tmpl, err = tmpl.New(key).Parse(text)
 			if err != nil {
 				return err
 			}
-			tmpl = t
 		}
 
 		lt.Locales[name] = tmpl
