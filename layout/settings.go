@@ -16,9 +16,10 @@ type (
 		Token   string
 		Updates int
 
-		LocalesDir string `json:"locales_dir"`
-		TokenEnv   string `json:"token_env"`
-		ParseMode  string `json:"parse_mode"`
+		LocalesDir    string `json:"locales_dir"`
+		DefaultLocale string `json:"default_locale"`
+		TokenEnv      string `json:"token_env"`
+		ParseMode     string `json:"parse_mode"`
 
 		Webhook    *tele.Webhook    `json:"webhook"`
 		LongPoller *tele.LongPoller `json:"long_poller"`
@@ -39,6 +40,8 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 	lt.Config = aux.Config
 
 	if pref := aux.Settings; pref != nil {
+		lt.DefaultLocale = pref.DefaultLocale
+
 		lt.pref = &tele.Settings{
 			URL:       pref.URL,
 			Token:     pref.Token,
@@ -46,9 +49,6 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 			ParseMode: pref.ParseMode,
 		}
 
-		if pref.LocalesDir == "" {
-			aux.Settings.LocalesDir = "locales"
-		}
 		if pref.TokenEnv != "" {
 			lt.pref.Token = os.Getenv(pref.TokenEnv)
 		}
@@ -136,6 +136,9 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 	}
 
 	if aux.Locales == nil {
+		if aux.Settings.LocalesDir == "" {
+			aux.Settings.LocalesDir = "locales"
+		}
 		return lt.parseLocales(aux.Settings.LocalesDir)
 	}
 
