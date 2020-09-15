@@ -18,10 +18,11 @@ type (
 		Markups map[string]Markup
 		Locales map[string]*template.Template
 
-		pref          *tele.Settings
-		ctx           tele.Context
-		defaultLocale string
-		localeFunc    LocaleFunc
+		DefaultLocale string
+		LocaleFunc    LocaleFunc
+
+		pref *tele.Settings
+		ctx  tele.Context
 	}
 
 	Markup struct {
@@ -145,9 +146,11 @@ func (lt *Layout) Markup(k string, args ...interface{}) *tele.ReplyMarkup {
 }
 
 func (lt *Layout) Locale() string {
-	locale := lt.localeFunc(lt.ctx.Sender())
-	if locale == "" {
-		locale = lt.defaultLocale
+	if lt.LocaleFunc != nil {
+		locale := lt.LocaleFunc(lt.ctx.Sender())
+		if locale != "" {
+			return locale
+		}
 	}
-	return locale
+	return lt.DefaultLocale
 }
