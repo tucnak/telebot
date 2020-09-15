@@ -13,9 +13,6 @@ type HandlerFunc func(Context) error
 // Context represents a context of the current event. It stores data
 // depending on its type, whether it's a message, callback or whatever.
 type Context interface {
-	// Lt returns Layout instance. May be nil, if no layout was registered.
-	Lt() Layout
-
 	// Message returns stored message if such presented.
 	Message() *Message
 
@@ -108,8 +105,7 @@ type Context interface {
 // nativeContext is a native implementation of the Context interface.
 // "context" is taken by context package, maybe there is a better name.
 type nativeContext struct {
-	b  *Bot
-	lt Layout
+	b *Bot
 
 	message            *Message
 	callback           *Callback
@@ -119,10 +115,6 @@ type nativeContext struct {
 	preCheckoutQuery   *PreCheckoutQuery
 	poll               *Poll
 	pollAnswer         *PollAnswer
-}
-
-func (c *nativeContext) Lt() Layout {
-	return c.lt.With(c)
 }
 
 func (c *nativeContext) Message() *Message {

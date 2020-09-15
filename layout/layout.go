@@ -14,15 +14,13 @@ import (
 
 type (
 	Layout struct {
+		pref   *tele.Settings
+		ctxs   map[tele.Context]string
+		locale string
+
 		Config  map[string]interface{}
 		Markups map[string]Markup
 		Locales map[string]*template.Template
-
-		DefaultLocale string
-		LocaleFunc    LocaleFunc
-
-		pref *tele.Settings
-		ctx  tele.Context
 	}
 
 	Markup struct {
@@ -56,9 +54,9 @@ func (lt *Layout) Settings() tele.Settings {
 	return *lt.pref
 }
 
-func (lt *Layout) With(c tele.Context) tele.Layout {
+func (lt *Layout) With(c tele.Context) *Layout {
 	cp := *lt
-	cp.ctx = c
+	cp.locale = lt.ctxs[c]
 	return &cp
 }
 
@@ -87,7 +85,7 @@ func (lt *Layout) Text(k string, args ...interface{}) string {
 		return ""
 	}
 
-	tmpl, ok := lt.Locales[lt.Locale()]
+	tmpl, ok := lt.Locales[lt.locale]
 	if !ok {
 		return ""
 	}
@@ -143,14 +141,4 @@ func (lt *Layout) Markup(k string, args ...interface{}) *tele.ReplyMarkup {
 	}
 
 	return &r
-}
-
-func (lt *Layout) Locale() string {
-	if lt.LocaleFunc != nil {
-		locale := lt.LocaleFunc(lt.ctx.Sender())
-		if locale != "" {
-			return locale
-		}
-	}
-	return lt.DefaultLocale
 }
