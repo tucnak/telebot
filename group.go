@@ -21,17 +21,16 @@ func (g *Group) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc)
 	if len(g.middleware) > 0 {
 		m = append(g.middleware, m...)
 	}
-	if len(m) > 0 {
-		h = func(c Context) error {
-			return applyMiddleware(h, m...)(c)
-		}
+
+	handler := func(c Context) error {
+		return applyMiddleware(h, m...)(c)
 	}
 
 	switch end := endpoint.(type) {
 	case string:
-		g.handlers[end] = h
+		g.handlers[end] = handler
 	case CallbackEndpoint:
-		g.handlers[end.CallbackUnique()] = h
+		g.handlers[end.CallbackUnique()] = handler
 	default:
 		panic("telebot: unsupported endpoint")
 	}
