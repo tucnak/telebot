@@ -143,6 +143,8 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 }
 
 func (lt *Layout) parseLocales(dir string) error {
+	lt.Locales = make(map[string]*template.Template)
+
 	return filepath.Walk(dir, func(path string, fi os.FileInfo, _ error) error {
 		if fi == nil || fi.IsDir() {
 			return nil
