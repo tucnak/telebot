@@ -1,6 +1,8 @@
 package layout
 
-import tele "gopkg.in/tucnak/telebot.v3"
+import (
+	tele "gopkg.in/tucnak/telebot.v3"
+)
 
 func (lt *Layout) Middleware(defaultLocale string, localeFunc ...LocaleFunc) tele.MiddlewareFunc {
 	var f LocaleFunc
@@ -17,7 +19,9 @@ func (lt *Layout) Middleware(defaultLocale string, localeFunc ...LocaleFunc) tel
 				}
 			}
 
+			lt.mu.Lock()
 			lt.ctxs[c] = locale
+			lt.mu.Unlock()
 			return next(c)
 		}
 	}

@@ -37,7 +37,7 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 		return err
 	}
 
-	lt.Config = aux.Config
+	lt.config = aux.Config
 
 	if pref := aux.Settings; pref != nil {
 		lt.pref = &tele.Settings{
@@ -58,7 +58,7 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 		}
 	}
 
-	lt.Markups = make(map[string]Markup, len(aux.Markups))
+	lt.markups = make(map[string]Markup, len(aux.Markups))
 	for _, item := range aux.Markups {
 		k, v := item.Key.(string), item.Value
 
@@ -79,15 +79,15 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 				return err
 			}
 
-			tmpl, err := template.New(k).Parse(string(data))
+			tmpl, err := template.New(k).Funcs(lt.funcs).Parse(string(data))
 			if err != nil {
 				return err
 			}
 
-			markup.Markup.Keyboard = tmpl
+			markup.Markup.keyboard = tmpl
 			markup.ResizeReplyKeyboard = markup.Resize == nil || *markup.Resize
 
-			lt.Markups[k] = markup.Markup
+			lt.markups[k] = markup.Markup
 		}
 
 		// 2. Shortened reply markup.
@@ -108,27 +108,27 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 				return err
 			}
 
-			tmpl, err := template.New(k).Parse(string(data))
+			tmpl, err := template.New(k).Funcs(lt.funcs).Parse(string(data))
 			if err != nil {
 				return err
 			}
 
-			markup := Markup{Keyboard: tmpl}
+			markup := Markup{keyboard: tmpl}
 			markup.ResizeReplyKeyboard = true
-			lt.Markups[k] = markup
+			lt.markups[k] = markup
 		}
 
 		// 3. Shortened inline markup.
 
 		if yaml.Unmarshal(data, &[][]tele.InlineButton{}) == nil {
-			tmpl, err := template.New(k).Parse(string(data))
+			tmpl, err := template.New(k).Funcs(lt.funcs).Parse(string(data))
 			if err != nil {
 				return err
 			}
 
-			lt.Markups[k] = Markup{
+			lt.markups[k] = Markup{
+				keyboard: tmpl,
 				inline:   true,
-				Keyboard: tmpl,
 			}
 		}
 	}
@@ -144,7 +144,7 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 }
 
 func (lt *Layout) parseLocales(dir string) error {
-	lt.Locales = make(map[string]*template.Template)
+	lt.locales = make(map[string]*template.Template)
 
 	return filepath.Walk(dir, func(path string, fi os.FileInfo, _ error) error {
 		if fi == nil || fi.IsDir() {
@@ -167,13 +167,13 @@ func (lt *Layout) parseLocales(dir string) error {
 		tmpl := template.New(name)
 		for key, text := range texts {
 			text = strings.Trim(text, "\r\n")
-			tmpl, err = tmpl.New(key).Parse(text)
+			tmpl, err = tmpl.New(key).Funcs(lt.funcs).Parse(text)
 			if err != nil {
 				return err
 			}
 		}
 
-		lt.Locales[name] = tmpl
+		lt.locales[name] = tmpl
 		return nil
 	})
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"sync"
 	"text/template"
 	"time"
 
@@ -14,24 +15,21 @@ import (
 
 type (
 	Layout struct {
-		pref   *tele.Settings
-		ctxs   map[tele.Context]string
-		locale string
+		pref  *tele.Settings
+		mu    sync.RWMutex // protects ctxs
+		ctxs  map[tele.Context]string
+		funcs template.FuncMap
 
-		Config  map[string]interface{}
-		Markups map[string]Markup
-		Locales map[string]*template.Template
+		config  map[string]interface{}
+		markups map[string]Markup
+		locales map[string]*template.Template
 	}
 
 	Markup struct {
 		tele.ReplyMarkup `yaml:",inline"`
-		Keyboard         *template.Template `yaml:"-"`
-		inline           bool
-	}
 
-	Button struct {
-		tele.ReplyButton  `yaml:",inline"`
-		tele.InlineButton `yaml:",inline"`
+		keyboard *template.Template
+		inline   bool
 	}
 
 	LocaleFunc func(tele.Recipient) string
@@ -43,8 +41,33 @@ func New(path string) (*Layout, error) {
 		return nil, err
 	}
 
-	lt := Layout{ctxs: make(map[tele.Context]string)}
+	lt := Layout{
+		ctxs:  make(map[tele.Context]string),
+		funcs: make(template.FuncMap),
+	}
+
+	for k, v := range funcs {
+		lt.funcs[k] = v
+	}
+
+	// Built-in blank and helper functions
+	lt.funcs["config"] = lt.Get
+	lt.funcs["locale"] = func() string { return "" }
+	lt.funcs["text"] = func(k string) string { return "" }
+
 	return &lt, yaml.Unmarshal(data, &lt)
+}
+
+var funcs = make(template.FuncMap)
+
+func AddFunc(key string, fn interface{}) {
+	funcs[key] = fn
+}
+
+func AddFuncs(fm template.FuncMap) {
+	for k, v := range fm {
+		funcs[k] = v
+	}
 }
 
 func (lt *Layout) Settings() tele.Settings {
@@ -54,38 +77,37 @@ func (lt *Layout) Settings() tele.Settings {
 	return *lt.pref
 }
 
-func (lt *Layout) With(c tele.Context) *Layout {
-	cp := *lt
-	cp.locale = lt.ctxs[c]
-	return &cp
-}
-
 func (lt *Layout) Get(k string) string {
-	return fmt.Sprint(lt.Config[k])
+	return fmt.Sprint(lt.config[k])
 }
 
 func (lt *Layout) Int(k string) int {
-	return cast.ToInt(lt.Config[k])
+	return cast.ToInt(lt.config[k])
 }
 
 func (lt *Layout) Int64(k string) int64 {
-	return cast.ToInt64(lt.Config[k])
+	return cast.ToInt64(lt.config[k])
 }
 
 func (lt *Layout) Float(k string) float64 {
-	return cast.ToFloat64(lt.Config[k])
+	return cast.ToFloat64(lt.config[k])
 }
 
 func (lt *Layout) Duration(k string) time.Duration {
-	return cast.ToDuration(lt.Config[k])
+	return cast.ToDuration(lt.config[k])
 }
 
-func (lt *Layout) Text(k string, args ...interface{}) string {
-	if len(lt.Locales) == 0 {
+func (lt *Layout) Text(c tele.Context, k string, args ...interface{}) string {
+	locale, ok := lt.locale(c)
+	if !ok {
 		return ""
 	}
 
-	tmpl, ok := lt.Locales[lt.locale]
+	return lt.text(locale, k, args...)
+}
+
+func (lt *Layout) text(locale, k string, args ...interface{}) string {
+	tmpl, ok := lt.locales[locale]
 	if !ok {
 		return ""
 	}
@@ -96,18 +118,15 @@ func (lt *Layout) Text(k string, args ...interface{}) string {
 	}
 
 	var buf bytes.Buffer
-	if err := tmpl.ExecuteTemplate(&buf, k, arg); err != nil {
+	if err := lt.template(tmpl, locale).ExecuteTemplate(&buf, k, arg); err != nil {
 		// TODO: Log.
 	}
+
 	return buf.String()
 }
 
-func (lt *Layout) Markup(k string, args ...interface{}) *tele.ReplyMarkup {
-	if len(lt.Markups) == 0 {
-		return nil
-	}
-
-	markup, ok := lt.Markups[k]
+func (lt *Layout) Markup(c tele.Context, k string, args ...interface{}) *tele.ReplyMarkup {
+	markup, ok := lt.markups[k]
 	if !ok {
 		return nil
 	}
@@ -118,7 +137,8 @@ func (lt *Layout) Markup(k string, args ...interface{}) *tele.ReplyMarkup {
 	}
 
 	var buf bytes.Buffer
-	if err := markup.Keyboard.Execute(&buf, arg); err != nil {
+	locale, _ := lt.locale(c)
+	if err := lt.template(markup.keyboard, locale).Execute(&buf, arg); err != nil {
 		// TODO: Log.
 	}
 
@@ -141,4 +161,21 @@ func (lt *Layout) Markup(k string, args ...interface{}) *tele.ReplyMarkup {
 	}
 
 	return &r
+}
+
+func (lt *Layout) locale(c tele.Context) (string, bool) {
+	lt.mu.RLock()
+	defer lt.mu.RUnlock()
+	locale, ok := lt.ctxs[c]
+	return locale, ok
+}
+
+func (lt *Layout) template(tmpl *template.Template, locale string) *template.Template {
+	funcs := make(template.FuncMap)
+
+	// Redefining built-in blank functions
+	funcs["text"] = func(k string) string { return lt.text(locale, k) }
+	funcs["locale"] = func() string { return locale }
+
+	return tmpl.Funcs(funcs)
 }
