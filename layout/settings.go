@@ -1,6 +1,7 @@
 package layout
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -30,6 +31,7 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 	var aux struct {
 		Settings *Settings
 		Config   map[string]interface{}
+		Buttons  yaml.MapSlice
 		Markups  yaml.MapSlice
 		Locales  map[string]map[string]string
 	}
@@ -58,6 +60,32 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 		}
 	}
 
+	lt.buttons = make(map[string]Button, len(aux.Buttons))
+	for _, item := range aux.Buttons {
+		k, v := item.Key.(string), item.Value
+
+		// 1. Shortened reply button
+
+		if v, ok := v.(string); ok {
+			lt.buttons[k] = Button{Text: v}
+			continue
+		}
+
+		// 2. Extended reply or inline button
+
+		data, err := yaml.Marshal(v)
+		if err != nil {
+			return err
+		}
+
+		var btn Button
+		if err := yaml.Unmarshal(data, &btn); err != nil {
+			return err
+		}
+
+		lt.buttons[k] = btn
+	}
+
 	lt.markups = make(map[string]Markup, len(aux.Markups))
 	for _, item := range aux.Markups {
 		k, v := item.Key.(string), item.Value
@@ -67,38 +95,19 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 			return err
 		}
 
-		// 1. Normal markup.
+		var shortenedMarkup [][]string
+		if yaml.Unmarshal(data, &shortenedMarkup) == nil {
+			// 1. Shortened reply or inline markup
 
-		var markup struct {
-			Markup `yaml:",inline"`
-			Resize *bool `json:"resize_keyboard"`
-		}
-		if yaml.Unmarshal(data, &markup) == nil {
-			data, err := yaml.Marshal(markup.ReplyKeyboard)
-			if err != nil {
-				return err
-			}
-
-			tmpl, err := template.New(k).Funcs(lt.funcs).Parse(string(data))
-			if err != nil {
-				return err
-			}
-
-			markup.Markup.keyboard = tmpl
-			markup.ResizeReplyKeyboard = markup.Resize == nil || *markup.Resize
-
-			lt.markups[k] = markup.Markup
-		}
-
-		// 2. Shortened reply markup.
-
-		var embeddedMarkup [][]string
-		if yaml.Unmarshal(data, &embeddedMarkup) == nil {
-			kb := make([][]tele.ReplyButton, len(embeddedMarkup))
-			for i, btns := range embeddedMarkup {
-				row := make([]tele.ReplyButton, len(btns))
+			kb := make([][]Button, len(shortenedMarkup))
+			for i, btns := range shortenedMarkup {
+				row := make([]Button, len(btns))
 				for j, btn := range btns {
-					row[j] = tele.ReplyButton{Text: btn}
+					b, ok := lt.buttons[btn]
+					if !ok {
+						return fmt.Errorf("telebot/layout: no %s button for %s markup", btn, k)
+					}
+					row[j] = b
 				}
 				kb[i] = row
 			}
@@ -114,22 +123,51 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 			}
 
 			markup := Markup{keyboard: tmpl}
-			markup.ResizeReplyKeyboard = true
+			for _, row := range kb {
+				for _, btn := range row {
+					inline := btn.Unique != ""
+					if markup.inline == nil {
+						markup.inline = &inline
+					} else if *markup.inline != inline {
+						return fmt.Errorf("telebot/layout: mixed reply and inline buttons in %s markup", k)
+					}
+				}
+			}
+
 			lt.markups[k] = markup
-		}
+		} else {
+			// 2. Extended reply markup
 
-		// 3. Shortened inline markup.
+			var markup struct {
+				Markup   `yaml:",inline"`
+				Keyboard [][]string `json:"keyboard"`
+			}
+			if err := yaml.Unmarshal(data, &markup); err != nil {
+				return err
+			}
 
-		if yaml.Unmarshal(data, &[][]tele.InlineButton{}) == nil {
+			kb := make([][]tele.ReplyButton, len(markup.Keyboard))
+			for i, btns := range markup.Keyboard {
+				row := make([]tele.ReplyButton, len(btns))
+				for j, btn := range btns {
+					row[j] = *lt.buttons[btn].Reply()
+				}
+				kb[i] = row
+			}
+
+			data, err := yaml.Marshal(kb)
+			if err != nil {
+				return err
+			}
+
 			tmpl, err := template.New(k).Funcs(lt.funcs).Parse(string(data))
 			if err != nil {
 				return err
 			}
 
-			lt.markups[k] = Markup{
-				keyboard: tmpl,
-				inline:   true,
-			}
+			markup.inline = new(bool)
+			markup.Markup.keyboard = tmpl
+			lt.markups[k] = markup.Markup
 		}
 	}
 

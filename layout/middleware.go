@@ -4,6 +4,8 @@ import (
 	tele "gopkg.in/tucnak/telebot.v3"
 )
 
+type LocaleFunc func(tele.Recipient) string
+
 func (lt *Layout) Middleware(defaultLocale string, localeFunc ...LocaleFunc) tele.MiddlewareFunc {
 	var f LocaleFunc
 	if len(localeFunc) > 0 {

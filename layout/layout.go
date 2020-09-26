@@ -21,18 +21,22 @@ type (
 		funcs template.FuncMap
 
 		config  map[string]interface{}
+		buttons map[string]Button
 		markups map[string]Markup
 		locales map[string]*template.Template
 	}
 
+	Button = tele.Btn
+
 	Markup struct {
-		tele.ReplyMarkup `yaml:",inline"`
-
-		keyboard *template.Template
-		inline   bool
+		inline          *bool
+		keyboard        *template.Template
+		ResizeKeyboard  *bool `json:"resize_keyboard,omitempty"` // nil == true
+		ForceReply      bool  `json:"force_reply,omitempty"`
+		OneTimeKeyboard bool  `json:"one_time_keyboard,omitempty"`
+		RemoveKeyboard  bool  `json:"remove_keyboard,omitempty"`
+		Selective       bool  `json:"selective,omitempty"`
 	}
-
-	LocaleFunc func(tele.Recipient) string
 )
 
 func New(path string) (*Layout, error) {
@@ -125,6 +129,11 @@ func (lt *Layout) text(locale, k string, args ...interface{}) string {
 	return buf.String()
 }
 
+func (lt *Layout) Button(k string) tele.CallbackEndpoint {
+	btn := lt.buttons[k]
+	return &btn
+}
+
 func (lt *Layout) Markup(c tele.Context, k string, args ...interface{}) *tele.ReplyMarkup {
 	markup, ok := lt.markups[k]
 	if !ok {
@@ -142,25 +151,24 @@ func (lt *Layout) Markup(c tele.Context, k string, args ...interface{}) *tele.Re
 		// TODO: Log.
 	}
 
-	r := tele.ReplyMarkup{
-		ForceReply:          markup.ForceReply,
-		ResizeReplyKeyboard: markup.ResizeReplyKeyboard,
-		OneTimeKeyboard:     markup.OneTimeKeyboard,
-		ReplyKeyboardRemove: markup.ReplyKeyboardRemove,
-		Selective:           markup.Selective,
-	}
-
-	if markup.inline {
+	r := &tele.ReplyMarkup{}
+	if *markup.inline {
 		if err := yaml.Unmarshal(buf.Bytes(), &r.InlineKeyboard); err != nil {
 			// TODO: Log.
 		}
 	} else {
+		r.ResizeKeyboard = markup.ResizeKeyboard == nil || *markup.ResizeKeyboard
+		r.ForceReply = markup.ForceReply
+		r.OneTimeKeyboard = markup.OneTimeKeyboard
+		r.RemoveKeyboard = markup.RemoveKeyboard
+		r.Selective = markup.Selective
+
 		if err := yaml.Unmarshal(buf.Bytes(), &r.ReplyKeyboard); err != nil {
 			// TODO: Log.
 		}
 	}
 
-	return &r
+	return r
 }
 
 func (lt *Layout) template(tmpl *template.Template, locale string) *template.Template {

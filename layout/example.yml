@@ -9,23 +9,28 @@ config:
   dur: 10m
 
 buttons:
-  - button: &anchored
-      unique: anchored
-      callback_data:
-      text:
+  # Shortened reply buttons
+  help: Help
+  settings: Settings
+
+  # Extended reply button
+  contact:
+    text: Send a contact
+    request_contact: true
+
+  # Inline button
+  stop:
+    unique: stop
+    text: Stop
+    callback_data: '{{.}}'
 
 markups:
-  reply:
+  reply_shortened:
+    - [ help ]
+    - [ settings ]
+  reply_extended:
     keyboard:
-      - - text: Send a contact
-          request_contact: true
+      - [ contact ]
     one_time_keyboard: true
   inline:
-    - - unique: inline
-        callback_data:
-        text:
-  embedded:
-    - - Help
-    - - Settings
-  anchored:
-    - - *anchored
+    - [ stop ]

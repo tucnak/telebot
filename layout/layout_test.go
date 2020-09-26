@@ -29,24 +29,20 @@ func TestLayout(t *testing.T) {
 	assert.Equal(t, 10*time.Minute, lt.Duration("dur"))
 
 	assert.Equal(t, &tele.ReplyMarkup{
-		ReplyKeyboard:       [][]tele.ReplyButton{{{Text: "Send a contact", Contact: true}}},
-		ResizeReplyKeyboard: true,
-		OneTimeKeyboard:     true,
-	}, lt.Markup(nil, "reply"))
-
-	assert.Equal(t, &tele.ReplyMarkup{
-		InlineKeyboard: [][]tele.InlineButton{{{Unique: "inline"}}},
-	}, lt.Markup(nil, "inline"))
-
-	assert.Equal(t, &tele.ReplyMarkup{
 		ReplyKeyboard: [][]tele.ReplyButton{
 			{{Text: "Help"}},
 			{{Text: "Settings"}},
 		},
-		ResizeReplyKeyboard: true,
-	}, lt.Markup(nil, "embedded"))
+		ResizeKeyboard: true,
+	}, lt.Markup(nil, "reply_shortened"))
 
 	assert.Equal(t, &tele.ReplyMarkup{
-		InlineKeyboard: [][]tele.InlineButton{{{Unique: "anchored"}}},
-	}, lt.Markup(nil, "anchored"))
+		ReplyKeyboard:   [][]tele.ReplyButton{{{Text: "Send a contact", Contact: true}}},
+		ResizeKeyboard:  true,
+		OneTimeKeyboard: true,
+	}, lt.Markup(nil, "reply_extended"))
+
+	assert.Equal(t, &tele.ReplyMarkup{
+		InlineKeyboard: [][]tele.InlineButton{{{Unique: "stop", Text: "Stop", Data: "1"}}},
+	}, lt.Markup(nil, "inline", 1))
 }
