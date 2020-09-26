@@ -221,10 +221,11 @@ func (c *nativeContext) SendAlbum(a Album, opts ...interface{}) error {
 }
 
 func (c *nativeContext) Reply(what interface{}, opts ...interface{}) error {
-	if c.message == nil {
+	msg := c.Message()
+	if msg == nil {
 		return ErrBadContext
 	}
-	_, err := c.b.Reply(c.message, what, opts...)
+	_, err := c.b.Reply(msg, what, opts...)
 	return err
 }
 
@@ -234,26 +235,29 @@ func (c *nativeContext) Forward(msg Editable, opts ...interface{}) error {
 }
 
 func (c *nativeContext) Edit(what interface{}, opts ...interface{}) error {
-	if c.message == nil {
+	msg := c.Message()
+	if msg == nil {
 		return ErrBadContext
 	}
-	_, err := c.b.Edit(c.message, what, opts...)
+	_, err := c.b.Edit(msg, what, opts...)
 	return err
 }
 
 func (c *nativeContext) EditCaption(caption string, opts ...interface{}) error {
-	if c.message == nil {
+	msg := c.Message()
+	if msg == nil {
 		return ErrBadContext
 	}
-	_, err := c.b.EditCaption(c.message, caption, opts...)
+	_, err := c.b.EditCaption(msg, caption, opts...)
 	return err
 }
 
 func (c *nativeContext) Delete() error {
-	if c.message == nil {
+	msg := c.Message()
+	if msg == nil {
 		return ErrBadContext
 	}
-	return c.b.Delete(c.message)
+	return c.b.Delete(msg)
 }
 
 func (c *nativeContext) Notify(action ChatAction) error {

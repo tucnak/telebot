@@ -86,7 +86,7 @@ type ReplyMarkup struct {
 	//
 	// Defaults to false, in which case the custom keyboard is always of the
 	// same height as the app's standard keyboard.
-	ResizeReplyKeyboard bool `json:"resize_keyboard,omitempty"`
+	ResizeKeyboard bool `json:"resize_keyboard,omitempty"`
 
 	// Requests clients to hide the reply keyboard as soon as it's been used.
 	//
@@ -96,7 +96,7 @@ type ReplyMarkup struct {
 	// Requests clients to remove the reply keyboard.
 	//
 	// Defaults to false.
-	ReplyKeyboardRemove bool `json:"remove_keyboard,omitempty"`
+	RemoveKeyboard bool `json:"remove_keyboard,omitempty"`
 
 	// Use this param if you want to force reply from
 	// specific users only.
@@ -248,16 +248,16 @@ func (r *ReplyMarkup) Login(text string, login *Login) Btn {
 
 // Btn is a constructor button, which will later become either a reply, or an inline button.
 type Btn struct {
-	Unique          string
-	Text            string
-	URL             string
-	Data            string
-	InlineQuery     string
-	InlineQueryChat string
-	Contact         bool
-	Location        bool
-	Poll            PollType
-	Login           *Login
+	Unique          string   `json:"unique,omitempty"`
+	Text            string   `json:"text,omitempty"`
+	URL             string   `json:"url,omitempty"`
+	Data            string   `json:"callback_data,omitempty"`
+	InlineQuery     string   `json:"switch_inline_query,omitempty"`
+	InlineQueryChat string   `json:"switch_inline_query_current_chat,omitempty"`
+	Contact         bool     `json:"request_contact,omitempty"`
+	Location        bool     `json:"request_location,omitempty"`
+	Poll            PollType `json:"request_poll,omitempty"`
+	Login           *Login   `json:"login_url,omitempty"`
 }
 
 func (b Btn) Inline() *InlineButton {
