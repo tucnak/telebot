@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPoll(t *testing.T) {
@@ -18,8 +19,8 @@ func TestPoll(t *testing.T) {
 }
 
 func TestPollSend(t *testing.T) {
-	if token == "" {
-		t.Skip("TELEBOT_SECRET is required")
+	if b == nil {
+		t.Skip("Cached bot instance is bad (probably wrong or empty TELEBOT_SECRET)")
 	}
 	if userID == 0 {
 		t.Skip("USER_ID is required for Poll methods test")
@@ -37,7 +38,7 @@ func TestPollSend(t *testing.T) {
 	poll.AddOptions("1", "2")
 
 	msg, err := b.Send(user, poll)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, poll.Type, msg.Poll.Type)
 	assert.Equal(t, poll.Question, msg.Poll.Question)
 	assert.Equal(t, poll.Options, msg.Poll.Options)
@@ -45,7 +46,7 @@ func TestPollSend(t *testing.T) {
 	assert.Equal(t, poll.CloseDate(), msg.Poll.CloseDate())
 
 	p, err := b.StopPoll(msg)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, poll.Options, p.Options)
 	assert.Equal(t, 0, p.VoterCount)
 }

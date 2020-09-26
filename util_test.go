@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestExtractOk(t *testing.T) {
 	data := []byte(`{"ok":true,"result":{"foo":"bar"}}`)
-	assert.NoError(t, extractOk(data))
+	require.NoError(t, extractOk(data))
 
 	data = []byte(`{"ok":false,"error_code":429,"description":"Too Many Requests: retry after 8","parameters":{"retry_after":8}}`)
 	assert.Error(t, extractOk(data))
@@ -24,7 +25,7 @@ func TestExtractMessage(t *testing.T) {
 
 	data = []byte(`{"ok":true,"result":{"foo":"bar"}}`)
 	_, err = extractMessage(data)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func TestEmbedRights(t *testing.T) {
@@ -44,6 +45,14 @@ func TestEmbedRights(t *testing.T) {
 		"can_send_polls":            true,
 		"can_send_other_messages":   true,
 		"can_add_web_page_previews": true,
+		"can_change_info":           false,
+		"can_post_messages":         false,
+		"can_edit_messages":         false,
+		"can_delete_messages":       false,
+		"can_invite_users":          false,
+		"can_restrict_members":      false,
+		"can_pin_messages":          false,
+		"can_promote_members":       false,
 	}
 	assert.Equal(t, expected, params)
 }
