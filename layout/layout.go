@@ -98,7 +98,7 @@ func (lt *Layout) Duration(k string) time.Duration {
 }
 
 func (lt *Layout) Text(c tele.Context, k string, args ...interface{}) string {
-	locale, ok := lt.locale(c)
+	locale, ok := lt.Locale(c)
 	if !ok {
 		return ""
 	}
@@ -137,7 +137,7 @@ func (lt *Layout) Markup(c tele.Context, k string, args ...interface{}) *tele.Re
 	}
 
 	var buf bytes.Buffer
-	locale, _ := lt.locale(c)
+	locale, _ := lt.Locale(c)
 	if err := lt.template(markup.keyboard, locale).Execute(&buf, arg); err != nil {
 		// TODO: Log.
 	}
@@ -163,13 +163,6 @@ func (lt *Layout) Markup(c tele.Context, k string, args ...interface{}) *tele.Re
 	return &r
 }
 
-func (lt *Layout) locale(c tele.Context) (string, bool) {
-	lt.mu.RLock()
-	defer lt.mu.RUnlock()
-	locale, ok := lt.ctxs[c]
-	return locale, ok
-}
-
 func (lt *Layout) template(tmpl *template.Template, locale string) *template.Template {
 	funcs := make(template.FuncMap)
 
@@ -178,4 +171,17 @@ func (lt *Layout) template(tmpl *template.Template, locale string) *template.Tem
 	funcs["locale"] = func() string { return locale }
 
 	return tmpl.Funcs(funcs)
+}
+
+func (lt *Layout) SetLocale(c tele.Context, locale string) {
+	lt.mu.Lock()
+	lt.ctxs[c] = locale
+	lt.mu.Unlock()
+}
+
+func (lt *Layout) Locale(c tele.Context) (string, bool) {
+	lt.mu.RLock()
+	defer lt.mu.RUnlock()
+	locale, ok := lt.ctxs[c]
+	return locale, ok
 }

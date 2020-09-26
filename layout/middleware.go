@@ -19,9 +19,7 @@ func (lt *Layout) Middleware(defaultLocale string, localeFunc ...LocaleFunc) tel
 				}
 			}
 
-			lt.mu.Lock()
-			lt.ctxs[c] = locale
-			lt.mu.Unlock()
+			lt.SetLocale(c, locale)
 			return next(c)
 		}
 	}
