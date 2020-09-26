@@ -130,7 +130,10 @@ func (lt *Layout) text(locale, k string, args ...interface{}) string {
 }
 
 func (lt *Layout) Button(k string) tele.CallbackEndpoint {
-	btn := lt.buttons[k]
+	btn, ok := lt.buttons[k]
+	if !ok {
+		return nil
+	}
 	return &btn
 }
 
