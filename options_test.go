@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBtn(t *testing.T) {
@@ -58,6 +59,6 @@ func TestOptions(t *testing.T) {
 	assert.Equal(t, o.copy(), o)
 
 	data, err := PollQuiz.MarshalJSON()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []byte(`{"type":"quiz"}`), data)
 }

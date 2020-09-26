@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -67,7 +68,7 @@ func TestNewBot(t *testing.T) {
 	pref.offline = true
 
 	b, err = NewBot(pref)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, client, b.client)
 	assert.Equal(t, pref.URL, b.URL)
 	assert.Equal(t, pref.Poller, b.Poller)
@@ -120,7 +121,7 @@ func TestBotStart(t *testing.T) {
 	}
 
 	// remove webhook to be sure that bot can poll
-	assert.NoError(t, b.RemoveWebhook())
+	require.NoError(t, b.RemoveWebhook())
 
 	go b.Start()
 	b.Stop()
@@ -131,7 +132,7 @@ func TestBotStart(t *testing.T) {
 	}()
 
 	b, err = NewBot(pref)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	b.Poller = tp
 
 	var ok bool
@@ -319,7 +320,7 @@ func TestBot(t *testing.T) {
 
 	t.Run("Send(what=Sendable)", func(t *testing.T) {
 		msg, err = b.Send(to, photo)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, msg.Photo)
 		assert.Equal(t, photo.Caption, msg.Caption)
 	})
@@ -332,7 +333,7 @@ func TestBot(t *testing.T) {
 		assert.Error(t, err)
 
 		msgs, err := b.SendAlbum(to, Album{photo, photo})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, msgs, 2)
 		assert.NotEmpty(t, msgs[0].AlbumID)
 	})
@@ -341,12 +342,12 @@ func TestBot(t *testing.T) {
 		b.parseMode = ModeHTML
 
 		edited, err := b.EditCaption(msg, "<b>new caption with html</b>")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "new caption with html", edited.Caption)
 		assert.Equal(t, EntityBold, edited.CaptionEntities[0].Type)
 
 		edited, err = b.EditCaption(msg, "*new caption with markdown*", ModeMarkdown)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "new caption with markdown", edited.Caption)
 		assert.Equal(t, EntityBold, edited.CaptionEntities[0].Type)
 
@@ -355,24 +356,24 @@ func TestBot(t *testing.T) {
 
 	t.Run("Edit(what=InputMedia)", func(t *testing.T) {
 		edited, err := b.Edit(msg, photo)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, edited.Photo.UniqueID, photo.UniqueID)
 	})
 
 	t.Run("Send(what=string)", func(t *testing.T) {
 		msg, err = b.Send(to, t.Name())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, t.Name(), msg.Text)
 
 		rpl, err := b.Reply(msg, t.Name())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, rpl.Text, msg.Text)
 		assert.NotNil(t, rpl.ReplyTo)
 		assert.Equal(t, rpl.ReplyTo, msg)
 		assert.True(t, rpl.IsReply())
 
 		fwd, err := b.Forward(to, msg)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, msg, fwd)
 		assert.True(t, fwd.IsForwarded())
 
@@ -383,7 +384,7 @@ func TestBot(t *testing.T) {
 
 	t.Run("Edit(what=string)", func(t *testing.T) {
 		msg, err = b.Edit(msg, t.Name())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, t.Name(), msg.Text)
 
 		_, err = b.Edit(msg, msg.Text)
@@ -409,11 +410,11 @@ func TestBot(t *testing.T) {
 		}
 
 		edited, err := b.Edit(msg, good)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, edited.ReplyMarkup.InlineKeyboard, good.InlineKeyboard)
 
 		edited, err = b.EditReplyMarkup(edited, nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Nil(t, edited.ReplyMarkup.InlineKeyboard)
 
 		_, err = b.Edit(edited, bad)
@@ -423,23 +424,23 @@ func TestBot(t *testing.T) {
 	t.Run("Edit(what=Location)", func(t *testing.T) {
 		loc := &Location{Lat: 42, Lng: 69, LivePeriod: 60}
 		edited, err := b.Send(to, loc)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, edited.Location)
 
 		loc = &Location{Lat: loc.Lng, Lng: loc.Lat}
 		edited, err = b.Edit(edited, *loc)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, edited.Location)
 	})
 
 	// should be the last
 	t.Run("Delete()", func(t *testing.T) {
-		assert.NoError(t, b.Delete(msg))
+		require.NoError(t, b.Delete(msg))
 	})
 
 	t.Run("Notify()", func(t *testing.T) {
 		assert.Equal(t, ErrBadRecipient, b.Notify(nil, Typing))
-		assert.NoError(t, b.Notify(to, Typing))
+		require.NoError(t, b.Notify(to, Typing))
 	})
 
 	t.Run("Answer()", func(t *testing.T) {
@@ -470,10 +471,10 @@ func TestBot(t *testing.T) {
 			Text:        "test",
 			Description: "test command",
 		}}
-		assert.NoError(t, b.SetCommands(orig))
+		require.NoError(t, b.SetCommands(orig))
 
 		cmds, err := b.GetCommands()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, orig, cmds)
 	})
 }
