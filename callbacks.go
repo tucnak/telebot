@@ -82,7 +82,7 @@ func (t *InlineButton) With(data string) *InlineButton {
 	return &InlineButton{
 		Unique:          t.Unique,
 		Text:            t.Text,
-		URL:             t.Text,
+		URL:             t.URL,
 		InlineQuery:     t.InlineQuery,
 		InlineQueryChat: t.InlineQueryChat,
 		Login:           t.Login,
