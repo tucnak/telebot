@@ -22,6 +22,13 @@ func (lt *Layout) Middleware(defaultLocale string, localeFunc ...LocaleFunc) tel
 			}
 
 			lt.SetLocale(c, locale)
+
+			defer func() {
+				lt.mu.Lock()
+				delete(lt.ctxs, c)
+				lt.mu.Unlock()
+			}()
+
 			return next(c)
 		}
 	}
