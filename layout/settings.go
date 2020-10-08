@@ -12,20 +12,18 @@ import (
 	tele "gopkg.in/tucnak/telebot.v3"
 )
 
-type (
-	Settings struct {
-		URL     string
-		Token   string
-		Updates int
+type Settings struct {
+	URL     string
+	Token   string
+	Updates int
 
-		LocalesDir string `json:"locales_dir"`
-		TokenEnv   string `json:"token_env"`
-		ParseMode  string `json:"parse_mode"`
+	LocalesDir string `json:"locales_dir"`
+	TokenEnv   string `json:"token_env"`
+	ParseMode  string `json:"parse_mode"`
 
-		Webhook    *tele.Webhook    `json:"webhook"`
-		LongPoller *tele.LongPoller `json:"long_poller"`
-	}
-)
+	Webhook    *tele.Webhook    `json:"webhook"`
+	LongPoller *tele.LongPoller `json:"long_poller"`
+}
 
 func (lt *Layout) UnmarshalYAML(data []byte) error {
 	var aux struct {
@@ -39,7 +37,9 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 		return err
 	}
 
-	lt.config = aux.Config
+	lt.Config = &Config{
+		v: aux.Config,
+	}
 
 	if pref := aux.Settings; pref != nil {
 		lt.pref = &tele.Settings{

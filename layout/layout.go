@@ -2,14 +2,11 @@ package layout
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"sync"
 	"text/template"
-	"time"
 
 	"github.com/goccy/go-yaml"
-	"github.com/spf13/cast"
 	tele "gopkg.in/tucnak/telebot.v3"
 )
 
@@ -20,10 +17,11 @@ type (
 		ctxs  map[tele.Context]string
 		funcs template.FuncMap
 
-		config  map[string]interface{}
 		buttons map[string]Button
 		markups map[string]Markup
 		locales map[string]*template.Template
+
+		*Config
 	}
 
 	Button = tele.Btn
@@ -55,7 +53,7 @@ func New(path string) (*Layout, error) {
 	}
 
 	// Built-in blank and helper functions
-	lt.funcs["config"] = lt.Get
+	lt.funcs["config"] = lt.String
 	lt.funcs["locale"] = func() string { return "" }
 	lt.funcs["text"] = func(k string) string { return "" }
 
@@ -79,30 +77,6 @@ func (lt *Layout) Settings() tele.Settings {
 		panic("telebot/layout: settings is empty")
 	}
 	return *lt.pref
-}
-
-func (lt *Layout) Get(k string) string {
-	return fmt.Sprint(lt.config[k])
-}
-
-func (lt *Layout) Int(k string) int {
-	return cast.ToInt(lt.config[k])
-}
-
-func (lt *Layout) Int64(k string) int64 {
-	return cast.ToInt64(lt.config[k])
-}
-
-func (lt *Layout) Float(k string) float64 {
-	return cast.ToFloat64(lt.config[k])
-}
-
-func (lt *Layout) Duration(k string) time.Duration {
-	return cast.ToDuration(lt.config[k])
-}
-
-func (lt *Layout) ChatID(k string) tele.ChatID {
-	return tele.ChatID(lt.Int64(k))
 }
 
 func (lt *Layout) Text(c tele.Context, k string, args ...interface{}) string {
