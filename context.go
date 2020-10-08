@@ -40,11 +40,11 @@ type Context interface {
 	// Migration returns both migration from and to chat IDs.
 	Migration() (int64, int64)
 
-	// Sender returns a current recipient, depending on the context type.
+	// Sender returns the current recipient, depending on the context type.
 	// Returns nil if user is not presented.
 	Sender() Recipient
 
-	// Text returns a current text, depending on the context type.
+	// Text returns the current text, depending on the context type.
 	// If the context contains payment, returns its payload.
 	// In the case when no related data presented, returns an empty string.
 	Text() string
@@ -65,15 +65,19 @@ type Context interface {
 	// See Reply from bot.go.
 	Reply(what interface{}, opts ...interface{}) error
 
-	// Forward forwards a given message to the current recipient.
+	// Forward forwards the given message to the current recipient.
 	// See Forward from bot.go.
 	Forward(msg Editable, opts ...interface{}) error
 
-	// Edit edits a current message.
+	// ForwardTo forwards the current message to the given recipient.
+	// See Forward from bot.go
+	ForwardTo(to Recipient, opts ...interface{}) error
+
+	// Edit edits the current message.
 	// See Edit from bot.go.
 	Edit(what interface{}, opts ...interface{}) error
 
-	// EditCaption edits a caption of the current message.
+	// EditCaption edits the caption of the current message.
 	// See EditCaption from bot.go.
 	EditCaption(caption string, opts ...interface{}) error
 
@@ -231,6 +235,11 @@ func (c *nativeContext) Reply(what interface{}, opts ...interface{}) error {
 
 func (c *nativeContext) Forward(msg Editable, opts ...interface{}) error {
 	_, err := c.b.Forward(c.Sender(), msg, opts...)
+	return err
+}
+
+func (c *nativeContext) ForwardTo(to Recipient, opts ...interface{}) error {
+	_, err := c.b.Forward(to, c.Message(), opts...)
 	return err
 }
 
