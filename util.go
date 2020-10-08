@@ -10,11 +10,7 @@ import (
 
 func (b *Bot) debug(err error) {
 	err = errors.WithStack(err)
-	if b.OnError != nil {
-		b.OnError(err, nil)
-	} else {
-		log.Printf("%+v\n", err)
-	}
+	log.Printf("%+v\n", err)
 }
 
 func (b *Bot) deferDebug() {
