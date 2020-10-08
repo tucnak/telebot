@@ -101,6 +101,10 @@ func (lt *Layout) Duration(k string) time.Duration {
 	return cast.ToDuration(lt.config[k])
 }
 
+func (lt *Layout) ChatID(k string) tele.ChatID {
+	return tele.ChatID(lt.Int64(k))
+}
+
 func (lt *Layout) Text(c tele.Context, k string, args ...interface{}) string {
 	locale, ok := lt.Locale(c)
 	if !ok {
