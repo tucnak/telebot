@@ -383,7 +383,7 @@ func (b *Bot) ProcessUpdate(upd Update) {
 					unique, payload := match[0][1], match[0][3]
 
 					if handler, ok := b.handlers["\f"+unique]; ok {
-						upd.Callback.Data = payload
+						c.callback.Data = payload
 						b.runHandler(handler, c)
 						return
 					}
