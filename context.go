@@ -44,6 +44,10 @@ type Context interface {
 	// Returns nil if user is not presented.
 	Sender() Recipient
 
+	// Chat returns the current chat, depending on the context type.
+	// Returns nil if chat is not presented.
+	Chat() *Chat
+
 	// Text returns the current text, depending on the context type.
 	// If the context contains payment, returns its payload.
 	// In the case when no related data presented, returns an empty string.
@@ -180,6 +184,17 @@ func (c *nativeContext) Sender() Recipient {
 		return c.preCheckoutQuery.Sender
 	case c.pollAnswer != nil:
 		return c.pollAnswer.Sender
+	default:
+		return nil
+	}
+}
+
+func (c *nativeContext) Chat() *Chat {
+	switch {
+	case c.message != nil:
+		return c.message.Chat
+	case c.callback != nil:
+		return c.callback.Message.Chat
 	default:
 		return nil
 	}
