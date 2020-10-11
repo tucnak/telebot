@@ -125,7 +125,10 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 			markup := Markup{keyboard: tmpl}
 			for _, row := range kb {
 				for _, btn := range row {
-					inline := btn.Unique != ""
+					inline := btn.Unique != "" ||
+						btn.InlineQuery != "" ||
+						btn.InlineQueryChat != ""
+
 					if markup.inline == nil {
 						markup.inline = &inline
 					} else if *markup.inline != inline {
