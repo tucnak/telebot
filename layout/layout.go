@@ -3,6 +3,7 @@ package layout
 import (
 	"bytes"
 	"io/ioutil"
+	"log"
 	"sync"
 	"text/template"
 
@@ -101,7 +102,7 @@ func (lt *Layout) text(locale, k string, args ...interface{}) string {
 
 	var buf bytes.Buffer
 	if err := lt.template(tmpl, locale).ExecuteTemplate(&buf, k, arg); err != nil {
-		// TODO: Log.
+		log.Println("telebot/layout:", err)
 	}
 
 	return buf.String()
@@ -129,13 +130,13 @@ func (lt *Layout) Markup(c tele.Context, k string, args ...interface{}) *tele.Re
 	var buf bytes.Buffer
 	locale, _ := lt.Locale(c)
 	if err := lt.template(markup.keyboard, locale).Execute(&buf, arg); err != nil {
-		// TODO: Log.
+		log.Println("telebot/layout:", err)
 	}
 
 	r := &tele.ReplyMarkup{}
 	if *markup.inline {
 		if err := yaml.Unmarshal(buf.Bytes(), &r.InlineKeyboard); err != nil {
-			// TODO: Log.
+			log.Println("telebot/layout:", err)
 		}
 	} else {
 		r.ResizeKeyboard = markup.ResizeKeyboard == nil || *markup.ResizeKeyboard
@@ -145,7 +146,7 @@ func (lt *Layout) Markup(c tele.Context, k string, args ...interface{}) *tele.Re
 		r.Selective = markup.Selective
 
 		if err := yaml.Unmarshal(buf.Bytes(), &r.ReplyKeyboard); err != nil {
-			// TODO: Log.
+			log.Println("telebot/layout:", err)
 		}
 	}
 
