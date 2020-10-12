@@ -21,7 +21,12 @@ func Logger(logger *logrus.Logger, fieldsFunc ...LoggerFieldsFunc) tele.Middlewa
 
 	return func(next tele.HandlerFunc) tele.HandlerFunc {
 		return func(c tele.Context) error {
-			logger.WithFields(f(c)).Info(c.Text())
+			data := c.Data()
+			if data == "" {
+				data = c.Text()
+			}
+
+			logger.WithFields(f(c)).Info(data)
 			return next(c)
 		}
 	}
