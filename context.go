@@ -259,20 +259,20 @@ func (c *nativeContext) ForwardTo(to Recipient, opts ...interface{}) error {
 }
 
 func (c *nativeContext) Edit(what interface{}, opts ...interface{}) error {
-	msg := c.Message()
-	if msg == nil {
+	clb := c.callback
+	if clb == nil || clb.Message == nil {
 		return ErrBadContext
 	}
-	_, err := c.b.Edit(msg, what, opts...)
+	_, err := c.b.Edit(clb.Message, what, opts...)
 	return err
 }
 
 func (c *nativeContext) EditCaption(caption string, opts ...interface{}) error {
-	msg := c.Message()
-	if msg == nil {
+	clb := c.callback
+	if clb == nil || clb.Message == nil {
 		return ErrBadContext
 	}
-	_, err := c.b.EditCaption(msg, caption, opts...)
+	_, err := c.b.EditCaption(clb.Message, caption, opts...)
 	return err
 }
 
