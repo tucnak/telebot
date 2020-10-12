@@ -48,10 +48,14 @@ type Context interface {
 	// Returns nil if chat is not presented.
 	Chat() *Chat
 
-	// Text returns the current text, depending on the context type.
-	// If the context contains payment, returns its payload.
+	// Text returns the message text, depending on the context type.
 	// In the case when no related data presented, returns an empty string.
 	Text() string
+
+	// Data returns the current data, depending on the context type.
+	// If the context contains payment, returns its payload.
+	// In the case when no related data presented, returns an empty string.
+	Data() string
 
 	// Args returns a raw slice of command or callback arguments as strings.
 	// The message arguments split by space, while the callback's ones by a "|" symbol.
@@ -206,6 +210,17 @@ func (c *nativeContext) Text() string {
 		return c.message.Text
 	case c.callback != nil:
 		return c.callback.Message.Text
+	case c.query != nil:
+		return c.query.Text
+	default:
+		return ""
+	}
+}
+
+func (c *nativeContext) Data() string {
+	switch {
+	case c.callback != nil:
+		return c.callback.Data
 	case c.query != nil:
 		return c.query.Text
 	case c.chosenInlineResult != nil:
