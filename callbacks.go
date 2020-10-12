@@ -27,6 +27,11 @@ type Callback struct {
 	// Data associated with the callback button. Be aware that
 	// a bad client can send arbitrary data in this field.
 	Data string `json:"data"`
+
+	// Unique displays an unique of the button from which the
+	// callback was fired. Sets immediately before the handling,
+	// while the Data field stores only with payload.
+	Unique string `json:"-"`
 }
 
 // IsInline says whether message is an inline message.

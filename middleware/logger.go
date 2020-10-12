@@ -22,7 +22,9 @@ func Logger(logger *logrus.Logger, fieldsFunc ...LoggerFieldsFunc) tele.Middlewa
 	return func(next tele.HandlerFunc) tele.HandlerFunc {
 		return func(c tele.Context) error {
 			data := c.Data()
-			if data == "" {
+			if clb := c.Callback(); clb != nil {
+				data = clb.Unique + "|" + data
+			} else if data == "" {
 				data = c.Text()
 			}
 
