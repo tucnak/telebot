@@ -77,13 +77,13 @@ type Context interface {
 	// See Forward from bot.go
 	ForwardTo(to Recipient, opts ...interface{}) error
 
-	// Edit edits the given message omitting result.
+	// Edit edits the current message.
 	// See Edit from bot.go.
-	Edit(msg Editable, what interface{}, opts ...interface{}) error
+	Edit(what interface{}, opts ...interface{}) error
 
-	// EditCaption edits the caption of the given message.
+	// EditCaption edits the caption of the current message.
 	// See EditCaption from bot.go.
-	EditCaption(msg Editable, caption string, opts ...interface{}) error
+	EditCaption(caption string, opts ...interface{}) error
 
 	// Delete removes the current message.
 	// See Delete from bot.go.
@@ -258,12 +258,20 @@ func (c *nativeContext) ForwardTo(to Recipient, opts ...interface{}) error {
 	return err
 }
 
-func (c *nativeContext) Edit(msg Editable, what interface{}, opts ...interface{}) error {
+func (c *nativeContext) Edit(what interface{}, opts ...interface{}) error {
+	msg := c.Message()
+	if msg == nil {
+		return ErrBadContext
+	}
 	_, err := c.b.Edit(msg, what, opts...)
 	return err
 }
 
-func (c *nativeContext) EditCaption(msg Editable, caption string, opts ...interface{}) error {
+func (c *nativeContext) EditCaption(caption string, opts ...interface{}) error {
+	msg := c.Message()
+	if msg == nil {
+		return ErrBadContext
+	}
 	_, err := c.b.EditCaption(msg, caption, opts...)
 	return err
 }
