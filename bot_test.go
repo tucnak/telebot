@@ -273,7 +273,7 @@ func TestBotProcessUpdate(t *testing.T) {
 		return nil
 	})
 	b.Handle(OnQuery, func(c Context) error {
-		assert.Equal(t, "query", c.Text())
+		assert.Equal(t, "query", c.Data())
 		return nil
 	})
 	b.Handle(OnChosenInlineResult, func(c Context) error {
