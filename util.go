@@ -27,8 +27,10 @@ func (b *Bot) runHandler(h HandlerFunc, c Context) {
 	f := func() {
 		defer b.deferDebug()
 		if err := h(c); err != nil {
-			if err != ErrSkip && b.OnError != nil {
+			if b.OnError != nil {
 				b.OnError(err, c)
+			} else {
+				log.Println(err)
 			}
 		}
 	}
