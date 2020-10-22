@@ -204,6 +204,14 @@ func (c *nativeContext) Chat() *Chat {
 	}
 }
 
+func (c *nativeContext) senderOrChat() Recipient {
+	sender := c.Sender()
+	if sender != (*User)(nil) {
+		return sender
+	}
+	return c.Chat()
+}
+
 func (c *nativeContext) Text() string {
 	switch {
 	case c.message != nil:
@@ -243,12 +251,12 @@ func (c *nativeContext) Args() []string {
 }
 
 func (c *nativeContext) Send(what interface{}, opts ...interface{}) error {
-	_, err := c.b.Send(c.Sender(), what, opts...)
+	_, err := c.b.Send(c.senderOrChat(), what, opts...)
 	return err
 }
 
 func (c *nativeContext) SendAlbum(a Album, opts ...interface{}) error {
-	_, err := c.b.SendAlbum(c.Sender(), a, opts...)
+	_, err := c.b.SendAlbum(c.senderOrChat(), a, opts...)
 	return err
 }
 
@@ -262,12 +270,16 @@ func (c *nativeContext) Reply(what interface{}, opts ...interface{}) error {
 }
 
 func (c *nativeContext) Forward(msg Editable, opts ...interface{}) error {
-	_, err := c.b.Forward(c.Sender(), msg, opts...)
+	_, err := c.b.Forward(c.senderOrChat(), msg, opts...)
 	return err
 }
 
 func (c *nativeContext) ForwardTo(to Recipient, opts ...interface{}) error {
-	_, err := c.b.Forward(to, c.Message(), opts...)
+	msg := c.Message()
+	if msg == nil {
+		return ErrBadContext
+	}
+	_, err := c.b.Forward(to, msg, opts...)
 	return err
 }
 
@@ -298,7 +310,7 @@ func (c *nativeContext) Delete() error {
 }
 
 func (c *nativeContext) Notify(action ChatAction) error {
-	return c.b.Notify(c.Sender(), action)
+	return c.b.Notify(c.senderOrChat(), action)
 }
 
 func (c *nativeContext) Ship(what ...interface{}) error {
