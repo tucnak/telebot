@@ -48,6 +48,12 @@ type Context interface {
 	// Returns nil if chat is not presented.
 	Chat() *Chat
 
+	// SenderOrChat combines both Sender and Chat functions. If there is no user
+	// the chat will be returned. The native context cannot be without sender,
+	// but it is useful in the case when the context created intentionally
+	// by the NewContext constructor and have only Chat field inside.
+	SenderOrChat() Recipient
+
 	// Text returns the message text, depending on the context type.
 	// In the case when no related data presented, returns an empty string.
 	Text() string
@@ -204,7 +210,7 @@ func (c *nativeContext) Chat() *Chat {
 	}
 }
 
-func (c *nativeContext) senderOrChat() Recipient {
+func (c *nativeContext) SenderOrChat() Recipient {
 	sender := c.Sender()
 	if sender != (*User)(nil) {
 		return sender
@@ -251,12 +257,12 @@ func (c *nativeContext) Args() []string {
 }
 
 func (c *nativeContext) Send(what interface{}, opts ...interface{}) error {
-	_, err := c.b.Send(c.senderOrChat(), what, opts...)
+	_, err := c.b.Send(c.SenderOrChat(), what, opts...)
 	return err
 }
 
 func (c *nativeContext) SendAlbum(a Album, opts ...interface{}) error {
-	_, err := c.b.SendAlbum(c.senderOrChat(), a, opts...)
+	_, err := c.b.SendAlbum(c.SenderOrChat(), a, opts...)
 	return err
 }
 
@@ -270,7 +276,7 @@ func (c *nativeContext) Reply(what interface{}, opts ...interface{}) error {
 }
 
 func (c *nativeContext) Forward(msg Editable, opts ...interface{}) error {
-	_, err := c.b.Forward(c.senderOrChat(), msg, opts...)
+	_, err := c.b.Forward(c.SenderOrChat(), msg, opts...)
 	return err
 }
 
@@ -310,7 +316,7 @@ func (c *nativeContext) Delete() error {
 }
 
 func (c *nativeContext) Notify(action ChatAction) error {
-	return c.b.Notify(c.senderOrChat(), action)
+	return c.b.Notify(c.SenderOrChat(), action)
 }
 
 func (c *nativeContext) Ship(what ...interface{}) error {
