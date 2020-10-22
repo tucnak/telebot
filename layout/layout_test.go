@@ -34,15 +34,15 @@ func TestLayout(t *testing.T) {
 			{{Text: "Settings"}},
 		},
 		ResizeKeyboard: true,
-	}, lt.Markup(nil, "reply_shortened"))
+	}, lt.MarkupLocale("en", "reply_shortened"))
 
 	assert.Equal(t, &tele.ReplyMarkup{
 		ReplyKeyboard:   [][]tele.ReplyButton{{{Text: "Send a contact", Contact: true}}},
 		ResizeKeyboard:  true,
 		OneTimeKeyboard: true,
-	}, lt.Markup(nil, "reply_extended"))
+	}, lt.MarkupLocale("en", "reply_extended"))
 
 	assert.Equal(t, &tele.ReplyMarkup{
 		InlineKeyboard: [][]tele.InlineButton{{{Unique: "stop", Text: "Stop", Data: "1"}}},
-	}, lt.Markup(nil, "inline", 1))
+	}, lt.MarkupLocale("en", "inline", 1))
 }

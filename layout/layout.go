@@ -86,10 +86,10 @@ func (lt *Layout) Text(c tele.Context, k string, args ...interface{}) string {
 		return ""
 	}
 
-	return lt.text(locale, k, args...)
+	return lt.TextLocale(locale, k, args...)
 }
 
-func (lt *Layout) text(locale, k string, args ...interface{}) string {
+func (lt *Layout) TextLocale(locale, k string, args ...interface{}) string {
 	tmpl, ok := lt.locales[locale]
 	if !ok {
 		return ""
@@ -117,6 +117,15 @@ func (lt *Layout) Button(k string) tele.CallbackEndpoint {
 }
 
 func (lt *Layout) Markup(c tele.Context, k string, args ...interface{}) *tele.ReplyMarkup {
+	locale, ok := lt.Locale(c)
+	if !ok {
+		return nil
+	}
+
+	return lt.MarkupLocale(locale, k, args...)
+}
+
+func (lt *Layout) MarkupLocale(locale, k string, args ...interface{}) *tele.ReplyMarkup {
 	markup, ok := lt.markups[k]
 	if !ok {
 		return nil
@@ -128,7 +137,6 @@ func (lt *Layout) Markup(c tele.Context, k string, args ...interface{}) *tele.Re
 	}
 
 	var buf bytes.Buffer
-	locale, _ := lt.Locale(c)
 	if err := lt.template(markup.keyboard, locale).Execute(&buf, arg); err != nil {
 		log.Println("telebot/layout:", err)
 	}
@@ -157,7 +165,7 @@ func (lt *Layout) template(tmpl *template.Template, locale string) *template.Tem
 	funcs := make(template.FuncMap)
 
 	// Redefining built-in blank functions
-	funcs["text"] = func(k string) string { return lt.text(locale, k) }
+	funcs["text"] = func(k string) string { return lt.TextLocale(locale, k) }
 	funcs["locale"] = func() string { return locale }
 
 	return tmpl.Funcs(funcs)
