@@ -225,10 +225,15 @@ func (b *Bot) Stop() {
 	b.stop <- struct{}{}
 }
 
-// ProcessUpdate processes a single incoming update.
-// A started bot calls this function automatically.
-func (b *Bot) ProcessUpdate(upd Update) {
-	c := &nativeContext{
+// NewMarkup simply returns newly created markup instance.
+func (b *Bot) NewMarkup() *ReplyMarkup {
+	return &ReplyMarkup{}
+}
+
+// NewContext returns a new native context object,
+// field by the passed update.
+func (b *Bot) NewContext(upd Update) Context {
+	return &nativeContext{
 		b:                  b,
 		message:            upd.Message,
 		callback:           upd.Callback,
@@ -239,6 +244,12 @@ func (b *Bot) ProcessUpdate(upd Update) {
 		poll:               upd.Poll,
 		pollAnswer:         upd.PollAnswer,
 	}
+}
+
+// ProcessUpdate processes a single incoming update.
+// A started bot calls this function automatically.
+func (b *Bot) ProcessUpdate(upd Update) {
+	c := b.NewContext(upd).(*nativeContext)
 
 	if upd.Message != nil {
 		m := upd.Message
@@ -1401,8 +1412,4 @@ func (b *Bot) SetCommands(cmds []Command) error {
 
 	_, err := b.Raw("setMyCommands", params)
 	return err
-}
-
-func (b *Bot) NewMarkup() *ReplyMarkup {
-	return &ReplyMarkup{}
 }
