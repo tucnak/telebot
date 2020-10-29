@@ -116,6 +116,39 @@ func (lt *Layout) Button(k string) tele.CallbackEndpoint {
 	return &btn
 }
 
+func (lt *Layout) ButtonLocale(locale, k string, args ...interface{}) tele.CallbackEndpoint {
+	btn, ok := lt.buttons[k]
+	if !ok {
+		return nil
+	}
+
+	var arg interface{}
+	if len(args) > 0 {
+		arg = args[0]
+	}
+
+	data, err := yaml.Marshal(btn)
+	if err != nil {
+		return nil
+	}
+
+	tmpl, err := template.New(k).Parse(string(data))
+	if err != nil {
+		return nil
+	}
+
+	var buf bytes.Buffer
+	if err := lt.template(tmpl, locale).Execute(&buf, arg); err != nil {
+		log.Println("telebot/layout:", err)
+	}
+
+	if err := yaml.Unmarshal(data, &btn); err != nil {
+		log.Println("telebot/layout:", err)
+	}
+
+	return &btn
+}
+
 func (lt *Layout) Markup(c tele.Context, k string, args ...interface{}) *tele.ReplyMarkup {
 	locale, ok := lt.Locale(c)
 	if !ok {
