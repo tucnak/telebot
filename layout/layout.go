@@ -53,15 +53,15 @@ func New(path string) (*Layout, error) {
 		lt.funcs[k] = v
 	}
 
-	// Built-in blank and helper functions
-	lt.funcs["config"] = lt.String
-	lt.funcs["locale"] = func() string { return "" }
-	lt.funcs["text"] = func(k string) string { return "" }
-
 	return &lt, yaml.Unmarshal(data, &lt)
 }
 
-var funcs = make(template.FuncMap)
+var funcs = template.FuncMap{
+	// Built-in blank and helper functions.
+	"locale": func() string { return "" },
+	"config": func(string) string { return "" },
+	"text":   func(string) string { return "" },
+}
 
 func AddFunc(key string, fn interface{}) {
 	funcs[key] = fn
@@ -129,21 +129,25 @@ func (lt *Layout) ButtonLocale(locale, k string, args ...interface{}) tele.Callb
 
 	data, err := yaml.Marshal(btn)
 	if err != nil {
+		log.Println("telebot/layout:", err)
 		return nil
 	}
 
-	tmpl, err := template.New(k).Parse(string(data))
+	tmpl, err := lt.template(template.New(k), locale).Parse(string(data))
 	if err != nil {
+		log.Println("telebot/layout:", err)
 		return nil
 	}
 
 	var buf bytes.Buffer
-	if err := lt.template(tmpl, locale).Execute(&buf, arg); err != nil {
+	if err := tmpl.Execute(&buf, arg); err != nil {
 		log.Println("telebot/layout:", err)
+		return nil
 	}
 
-	if err := yaml.Unmarshal(data, &btn); err != nil {
+	if err := yaml.Unmarshal(buf.Bytes(), &btn); err != nil {
 		log.Println("telebot/layout:", err)
+		return nil
 	}
 
 	return &btn
@@ -198,6 +202,7 @@ func (lt *Layout) template(tmpl *template.Template, locale string) *template.Tem
 	funcs := make(template.FuncMap)
 
 	// Redefining built-in blank functions
+	funcs["config"] = lt.String
 	funcs["text"] = func(k string) string { return lt.TextLocale(locale, k) }
 	funcs["locale"] = func() string { return locale }
 
