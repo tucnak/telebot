@@ -108,7 +108,7 @@ func (lt *Layout) TextLocale(locale, k string, args ...interface{}) string {
 	return buf.String()
 }
 
-func (lt *Layout) Button(k string) tele.CallbackEndpoint {
+func (lt *Layout) Callback(k string) tele.CallbackEndpoint {
 	btn, ok := lt.buttons[k]
 	if !ok {
 		return nil
@@ -116,7 +116,16 @@ func (lt *Layout) Button(k string) tele.CallbackEndpoint {
 	return &btn
 }
 
-func (lt *Layout) ButtonLocale(locale, k string, args ...interface{}) tele.CallbackEndpoint {
+func (lt *Layout) Button(c tele.Context, k string, args ...interface{}) *tele.Btn {
+	locale, ok := lt.Locale(c)
+	if !ok {
+		return nil
+	}
+
+	return lt.ButtonLocale(locale, k, args...)
+}
+
+func (lt *Layout) ButtonLocale(locale, k string, args ...interface{}) *tele.Btn {
 	btn, ok := lt.buttons[k]
 	if !ok {
 		return nil
