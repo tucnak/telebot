@@ -367,6 +367,7 @@ func (p *Poll) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	for _, o := range p.Options {
 		options = append(options, o.Text)
 	}
+
 	opts, _ := json.Marshal(options)
 	params["options"] = string(opts)
 

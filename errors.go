@@ -12,6 +12,11 @@ type APIError struct {
 	Message     string
 }
 
+type FloodError struct {
+	*APIError
+	RetryAfter int
+}
+
 // ʔ returns description of error.
 // A tiny shortcut to make code clearer.
 func (err *APIError) ʔ() string {
@@ -45,7 +50,7 @@ func NewAPIError(code int, msgs ...string) *APIError {
 	return err
 }
 
-var errorRx = regexp.MustCompile(`{.+"error_code":(\d+),"description":"(.+)".*}`)
+var errorRx = regexp.MustCompile(`{.+"error_code":(\d+),"description":"(.+)"(?:,"parameters":{"retry_after":(\d+)})?}`)
 
 var (
 	// General errors
@@ -67,6 +72,8 @@ var (
 	ErrEmptyChatID          = NewAPIError(400, "Bad Request: chat_id is empty")
 	ErrChatNotFound         = NewAPIError(400, "Bad Request: chat not found")
 	ErrMessageNotModified   = NewAPIError(400, "Bad Request: message is not modified")
+	ErrSameMessageContent   = NewAPIError(400, "Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message")
+	ErrCantEditMessage      = NewAPIError(400, "Bad Request: message can't be edited")
 	ErrButtonDataInvalid    = NewAPIError(400, "Bad Request: BUTTON_DATA_INVALID")
 	ErrWrongTypeOfContent   = NewAPIError(400, "Bad Request: wrong type of the web page content")
 	ErrBadURLContent        = NewAPIError(400, "Bad Request: failed to get HTTP URL content")
@@ -77,7 +84,7 @@ var (
 	ErrWrongFileIDPadding   = NewAPIError(400, "Bad Request: wrong remote file id specified: Wrong padding in the string")
 	ErrFailedImageProcess   = NewAPIError(400, "Bad Request: IMAGE_PROCESS_FAILED", "Image process failed")
 	ErrInvalidStickerSet    = NewAPIError(400, "Bad Request: STICKERSET_INVALID", "Stickerset is invalid")
-	ErrBadPollOptions       = NewAPIError(400, "Bad Request: expected Array of String as options")
+	ErrBadPollOptions       = NewAPIError(400, "Bad Request: expected an Array of String as options")
 
 	// No rights errors
 	ErrNoRightsToRestrict     = NewAPIError(400, "Bad Request: not enough rights to restrict/unrestrict chat member")
@@ -124,6 +131,10 @@ func ErrByDescription(s string) error {
 		return ErrChatNotFound
 	case ErrMessageNotModified.ʔ():
 		return ErrMessageNotModified
+	case ErrSameMessageContent.ʔ():
+		return ErrSameMessageContent
+	case ErrCantEditMessage.ʔ():
+		return ErrCantEditMessage
 	case ErrButtonDataInvalid.ʔ():
 		return ErrButtonDataInvalid
 	case ErrBadPollOptions.ʔ():

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -56,10 +57,22 @@ func extractOk(data []byte) error {
 
 	desc := match[2]
 	err := ErrByDescription(desc)
+
 	if err == nil {
 		code, _ := strconv.Atoi(match[1])
-		err = fmt.Errorf("telegram unknown: %s (%d)", desc, code)
+
+		switch code {
+		case http.StatusTooManyRequests:
+			retry, _ := strconv.Atoi(match[3])
+			err = FloodError{
+				APIError:   NewAPIError(429, desc),
+				RetryAfter: retry,
+			}
+		default:
+			err = fmt.Errorf("telegram unknown: %s (%d)", desc, code)
+		}
 	}
+
 	return err
 }
 
