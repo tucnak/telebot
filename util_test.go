@@ -11,11 +11,14 @@ func TestExtractOk(t *testing.T) {
 	data := []byte(`{"ok":true,"result":{"foo":"bar"}}`)
 	require.NoError(t, extractOk(data))
 
-	data = []byte(`{"ok":false,"error_code":429,"description":"Too Many Requests: retry after 8","parameters":{"retry_after":8}}`)
-	assert.Error(t, extractOk(data))
-
 	data = []byte(`{"ok":false,"error_code":400,"description":"Bad Request: reply message not found"}`)
 	assert.EqualError(t, extractOk(data), ErrToReplyNotFound.Error())
+
+	data = []byte(`{"ok":false,"error_code":429,"description":"Too Many Requests: retry after 8","parameters":{"retry_after":8}}`)
+	assert.Equal(t, FloodError{
+		APIError:   NewAPIError(429, "Too Many Requests: retry after 8"),
+		RetryAfter: 8,
+	}, extractOk(data))
 }
 
 func TestExtractMessage(t *testing.T) {
