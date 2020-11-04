@@ -4,8 +4,19 @@ import (
 	tele "gopkg.in/tucnak/telebot.v3"
 )
 
+// LocaleFunc is the function used to fetch the locale of the recipient.
+// Returned locale will be remembered and linked to the corresponding context.
 type LocaleFunc func(tele.Recipient) string
 
+// Middleware builds a global middleware to make internationalisation work.
+//
+// Usage:
+//
+//		b.Use(lt.Middleware("en", func(r tele.Recipient) string {
+//			loc, _ := db.UserLocale(r.Recipient())
+//			return loc
+//		}))
+//
 func (lt *Layout) Middleware(defaultLocale string, localeFunc ...LocaleFunc) tele.MiddlewareFunc {
 	var f LocaleFunc
 	if len(localeFunc) > 0 {
