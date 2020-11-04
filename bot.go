@@ -1231,7 +1231,7 @@ func (b *Bot) SetGroupTitle(chat *Chat, title string) error {
 	return err
 }
 
-// SetGroupDescription should be used to update group title.
+// SetGroupDescription should be used to update group description.
 func (b *Bot) SetGroupDescription(chat *Chat, description string) error {
 	params := map[string]string{
 		"chat_id":     chat.Recipient(),
