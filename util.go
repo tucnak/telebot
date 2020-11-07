@@ -117,7 +117,9 @@ func extractOptions(how []interface{}) *SendOptions {
 			if opts == nil {
 				opts = &SendOptions{}
 			}
-			opts.ReplyMarkup = opt.copy()
+			if opt != nil {
+				opts.ReplyMarkup = opt.copy()
+			}
 		case Option:
 			if opts == nil {
 				opts = &SendOptions{}
