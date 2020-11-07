@@ -138,6 +138,11 @@ func extractOptions(how []interface{}) *SendOptions {
 					opts.ReplyMarkup = &ReplyMarkup{}
 				}
 				opts.ReplyMarkup.OneTimeKeyboard = true
+			case RemoveKeyboard:
+				if opts.ReplyMarkup == nil {
+					opts.ReplyMarkup = &ReplyMarkup{}
+				}
+				opts.ReplyMarkup.RemoveKeyboard = true
 			default:
 				panic("telebot: unsupported flag-option")
 			}

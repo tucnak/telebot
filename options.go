@@ -27,6 +27,9 @@ const (
 
 	// OneTimeKeyboard = ReplyMarkup.OneTimeKeyboard
 	OneTimeKeyboard
+
+	// RemoveKeyboard = ReplyMarkup.RemoveKeyboard
+	RemoveKeyboard
 )
 
 // SendOptions has most complete control over in what way the message
