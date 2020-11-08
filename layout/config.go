@@ -69,3 +69,25 @@ func (c *Config) Duration(k string) time.Duration {
 func (c *Config) ChatID(k string) tele.ChatID {
 	return tele.ChatID(c.Int64(k))
 }
+
+// Strings returns a field casted to the string slice.
+func (c *Config) Strings(k string) []string {
+	return cast.ToStringSlice(c.v[k])
+}
+
+// Ints returns a field casted to the int slice.
+func (c *Config) Ints(k string) []int {
+	return cast.ToIntSlice(c.v[k])
+}
+
+// Floats returns a field casted to the float slice.
+func (c *Config) Floats(k string) []float64 {
+	slice := cast.ToSlice(c.v[k])
+
+	fs := make([]float64, len(slice))
+	for i, a := range slice {
+		fs[i] = cast.ToFloat64(a)
+	}
+
+	return fs
+}
