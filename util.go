@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-
+	"bytes"
 	"github.com/pkg/errors"
 )
 
@@ -57,7 +57,10 @@ func extractOk(data []byte) error {
 		Description string                 `json:"description"`
 		Parameters  map[string]interface{} `json:"parameters"`
 	}
-	err := json.Unmarshal(data, &tgramApiError)
+	jdecoder := json.NewDecoder(bytes.NewReader(data))
+	jdecoder.UseNumber()
+
+	err := jdecoder.Decode(&tgramApiError)
 	if err != nil {
 		//return errors.Wrap(err, "can't parse JSON reply, the Telegram server is mibehaving")
 		// FIXME / TODO: in this case the error might be at HTTP level, or the content is not JSON (eg. image?)
