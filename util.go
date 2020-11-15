@@ -61,10 +61,10 @@ func wrapError(err error) error {
 func extractOk(data []byte) error {
 	// Parse the error message as JSON
 	var tgramApiError struct {
-		Ok bool `json:"ok"`
-		ErrorCode int `json:"error_code"`
-		Description string `json:"description"`
-		Parameters map[string]interface{} `json:"parameters"`
+		Ok          bool                   `json:"ok"`
+		ErrorCode   int                    `json:"error_code"`
+		Description string                 `json:"description"`
+		Parameters  map[string]interface{} `json:"parameters"`
 	}
 	err := json.Unmarshal(data, &tgramApiError)
 	if err != nil {
