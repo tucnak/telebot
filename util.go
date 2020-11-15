@@ -70,22 +70,29 @@ func extractOk(data []byte) error {
 	}
 
 	err = ErrByDescription(tgramApiError.Description)
-	if err == nil {
-		switch tgramApiError.ErrorCode {
-		case http.StatusTooManyRequests:
-			retryAfter, ok := tgramApiError.Parameters["retry_after"]
-			if !ok {
-				return NewAPIError(429, tgramApiError.Description)
-			}
-			retryAfterInt, _ := strconv.Atoi(fmt.Sprint(retryAfter))
+	if err != nil {
+		apierr, _ := err.(*APIError)
+		// Formally this is wrong, as the error is not created on the fly
+		// However, given the current way of handling errors, this a working
+		// workaround which doesn't break the API
+		apierr.Parameters = tgramApiError.Parameters
+		return apierr
+	}
 
-			err = FloodError{
-				APIError:   NewAPIError(429, tgramApiError.Description),
-				RetryAfter: retryAfterInt,
-			}
-		default:
-			err = fmt.Errorf("telegram unknown: %s (%d)", tgramApiError.Description, tgramApiError.ErrorCode)
+	switch tgramApiError.ErrorCode {
+	case http.StatusTooManyRequests:
+		retryAfter, ok := tgramApiError.Parameters["retry_after"]
+		if !ok {
+			return NewAPIError(429, tgramApiError.Description)
 		}
+		retryAfterInt, _ := strconv.Atoi(fmt.Sprint(retryAfter))
+
+		err = FloodError{
+			APIError:   NewAPIError(429, tgramApiError.Description),
+			RetryAfter: retryAfterInt,
+		}
+	default:
+		err = fmt.Errorf("telegram unknown: %s (%d)", tgramApiError.Description, tgramApiError.ErrorCode)
 	}
 
 	return err
