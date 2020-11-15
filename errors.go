@@ -2,7 +2,6 @@ package telebot
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 )
 
@@ -49,8 +48,6 @@ func NewAPIError(code int, msgs ...string) *APIError {
 	}
 	return err
 }
-
-var errorRx = regexp.MustCompile(`{.+"error_code":(\d+),"description":"(.+)"(?:,"parameters":{"retry_after":(\d+)})?}`)
 
 var (
 	// General errors
