@@ -9,6 +9,7 @@ type APIError struct {
 	Code        int
 	Description string
 	Message     string
+	Parameters  map[string]interface{}
 }
 
 type FloodError struct {
