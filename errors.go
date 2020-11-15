@@ -85,6 +85,7 @@ var (
 	ErrFailedImageProcess   = NewAPIError(400, "Bad Request: IMAGE_PROCESS_FAILED", "Image process failed")
 	ErrInvalidStickerSet    = NewAPIError(400, "Bad Request: STICKERSET_INVALID", "Stickerset is invalid")
 	ErrBadPollOptions       = NewAPIError(400, "Bad Request: expected an Array of String as options")
+	ErrGroupMigrated        = NewAPIError(400, "Bad Request: group chat was upgraded to a supergroup chat")
 
 	// No rights errors
 	ErrNoRightsToRestrict     = NewAPIError(400, "Bad Request: not enough rights to restrict/unrestrict chat member")
@@ -177,6 +178,8 @@ func ErrByDescription(s string) error {
 		return ErrFailedImageProcess
 	case ErrInvalidStickerSet.ʔ():
 		return ErrInvalidStickerSet
+	case ErrGroupMigrated.ʔ():
+		return ErrGroupMigrated
 	default:
 		return nil
 	}
