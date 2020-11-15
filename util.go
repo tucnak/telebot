@@ -59,26 +59,41 @@ func wrapError(err error) error {
 // In other cases it extracts API error. If error is not presented
 // in errors.go, it will be prefixed with `unknown` keyword.
 func extractOk(data []byte) error {
-	match := errorRx.FindStringSubmatch(string(data))
-	if match == nil || len(match) < 3 {
+	// Parse the error message as JSON
+	var tgramApiError struct {
+		Ok bool `json:"ok"`
+		ErrorCode int `json:"error_code"`
+		Description string `json:"description"`
+		Parameters map[string]interface{} `json:"parameters"`
+	}
+	err := json.Unmarshal(data, &tgramApiError)
+	if err != nil {
+		//return errors.Wrap(err, "can't parse JSON reply, the Telegram server is mibehaving")
+		// FIXME / TODO: in this case the error might be at HTTP level, or the content is not JSON (eg. image?)
 		return nil
 	}
 
-	desc := match[2]
-	err := ErrByDescription(desc)
+	if tgramApiError.Ok {
+		// No error
+		return nil
+	}
 
+	err = ErrByDescription(tgramApiError.Description)
 	if err == nil {
-		code, _ := strconv.Atoi(match[1])
-
-		switch code {
+		switch tgramApiError.ErrorCode {
 		case http.StatusTooManyRequests:
-			retry, _ := strconv.Atoi(match[3])
+			retryAfter, ok := tgramApiError.Parameters["retry_after"]
+			if !ok {
+				return NewAPIError(429, tgramApiError.Description)
+			}
+			retryAfterInt, _ := strconv.Atoi(fmt.Sprint(retryAfter))
+
 			err = FloodError{
-				APIError:   NewAPIError(429, desc),
-				RetryAfter: retry,
+				APIError:   NewAPIError(429, tgramApiError.Description),
+				RetryAfter: retryAfterInt,
 			}
 		default:
-			err = fmt.Errorf("telegram unknown: %s (%d)", desc, code)
+			err = fmt.Errorf("telegram unknown: %s (%d)", tgramApiError.Description, tgramApiError.ErrorCode)
 		}
 	}
 
