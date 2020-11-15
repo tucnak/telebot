@@ -165,12 +165,28 @@ func (pt PollType) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&aux)
 }
 
-// Row represents an array of buttons, a row
+// Row represents an array of buttons, a row.
 type Row []Btn
 
-// Row create a row of buttons
+// Row creates a row of buttons.
 func (r *ReplyMarkup) Row(many ...Btn) Row {
 	return many
+}
+
+// Split splits the keyboard into the rows with N maximum number of buttons.
+// For example, if you pass six buttons and 3 as the max, you get two rows with
+// three buttons in each.
+//
+// Split(3, six buttons...) -> [[1, 2, 3], [4, 5, 6]]
+// Split(2, six buttons...) -> [[1, 2],[3, 4],[5, 6]]
+//
+func (r *ReplyMarkup) Split(max int, bs ...Btn) []Row {
+	rows := make([]Row, (1+len(bs))/max)
+	for i, b := range bs {
+		i /= max
+		rows[i] = append(rows[i], b)
+	}
+	return rows
 }
 
 func (r *ReplyMarkup) Inline(rows ...Row) {
