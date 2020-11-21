@@ -24,13 +24,45 @@ func (c *Config) Unmarshal(v interface{}) error {
 }
 
 // Get returns child map field wrapped into Config.
-// If the field isn't map, returns nil.
+// If the field isn't a map, returns nil.
 func (c *Config) Get(k string) *Config {
 	v, ok := c.v[k].(map[string]interface{})
 	if !ok {
 		return nil
 	}
 	return &Config{v: v}
+}
+
+// Index returns an i element from the array field, wrapped into Config.
+// If the element isn't a map, returns nil. See also: Strings, Ints, Floats.
+func (c *Config) Index(k string, i int) *Config {
+	a, ok := c.v[k].([]interface{})
+	if !ok {
+		return nil
+	}
+	if i >= len(a) {
+		return nil
+	}
+	v, ok := a[i].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	return &Config{v: v}
+}
+
+// Each iterates over the array field. Use it only with map elements.
+func (c *Config) Each(k string, f func(int, *Config)) {
+	a, ok := c.v[k].([]interface{})
+	if !ok {
+		return
+	}
+
+	for i, e := range a {
+		v, ok := e.(map[string]interface{})
+		if ok {
+			f(i, &Config{v: v})
+		}
+	}
 }
 
 // String returns a field casted to the string.
@@ -68,6 +100,12 @@ func (c *Config) Duration(k string) time.Duration {
 // The value must be an integer.
 func (c *Config) ChatID(k string) tele.ChatID {
 	return tele.ChatID(c.Int64(k))
+}
+
+// Len returns the array field length.
+func (c *Config) Len(k string) int {
+	a := c.v[k].([]interface{})
+	return len(a)
 }
 
 // Strings returns a field casted to the string slice.
