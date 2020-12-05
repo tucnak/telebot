@@ -590,6 +590,18 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 				Duration:          y.Duration,
 				SupportsStreaming: y.SupportsStreaming,
 			})
+		case *Document:
+			data, _ = json.Marshal(struct {
+				Type     string `json:"type"`
+				Media    string `json:"media"`
+				Caption  string `json:"caption,omitempty"`
+				FileName string `json:"file_name,omitempty"`
+			}{
+				Type:     "document",
+				Media:    repr,
+				Caption:  y.Caption,
+				FileName: y.FileName,
+			})
 		default:
 			return nil, errors.Errorf("telebot: album entry #%d is not valid", i)
 		}
@@ -1231,7 +1243,7 @@ func (b *Bot) SetGroupTitle(chat *Chat, title string) error {
 	return err
 }
 
-// SetGroupDescription should be used to update group description.
+// SetGroupDescription should be used to update group title.
 func (b *Bot) SetGroupDescription(chat *Chat, description string) error {
 	params := map[string]string{
 		"chat_id":     chat.Recipient(),
