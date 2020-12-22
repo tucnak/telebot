@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -152,6 +153,15 @@ func TestBotProcessUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	rSample, err := regexp.Compile("^dog")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	b.Handle(rSample, func(c Context) error {
+		assert.Regexp(t, rSample, c.Text())
+		return nil
+	})
 	b.Handle("/start", func(c Context) error {
 		assert.Equal(t, "/start", c.Text())
 		return nil
@@ -301,6 +311,7 @@ func TestBotProcessUpdate(t *testing.T) {
 	b.ProcessUpdate(Update{Message: &Message{Text: "/start@other_bot"}})
 	b.ProcessUpdate(Update{Message: &Message{Text: "hello"}})
 	b.ProcessUpdate(Update{Message: &Message{Text: "text"}})
+	b.ProcessUpdate(Update{Message: &Message{Text: "dog lesha is so nice"}})
 	b.ProcessUpdate(Update{Message: &Message{PinnedMessage: &Message{}}})
 	b.ProcessUpdate(Update{Message: &Message{Photo: &Photo{}}})
 	b.ProcessUpdate(Update{Message: &Message{Voice: &Voice{}}})

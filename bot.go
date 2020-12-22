@@ -38,9 +38,10 @@ func NewBot(pref Settings) (*Bot, error) {
 		Poller:  pref.Poller,
 		OnError: pref.OnError,
 
-		Updates:  make(chan Update, pref.Updates),
-		handlers: make(map[string]HandlerFunc),
-		stop:     make(chan struct{}),
+		Updates:        make(chan Update, pref.Updates),
+		handlers:       make(map[interface{}]HandlerFunc),
+		regexpHandlers: make([]*regexp.Regexp, 0),
+		stop:           make(chan struct{}),
 
 		synchronous: pref.Synchronous,
 		verbose:     pref.Verbose,
@@ -71,13 +72,14 @@ type Bot struct {
 	Poller  Poller
 	OnError func(error, Context)
 
-	group       *Group
-	handlers    map[string]HandlerFunc
-	synchronous bool
-	verbose     bool
-	parseMode   ParseMode
-	stop        chan struct{}
-	client      *http.Client
+	group          *Group
+	handlers       map[interface{}]HandlerFunc
+	regexpHandlers []*regexp.Regexp
+	synchronous    bool
+	verbose        bool
+	parseMode      ParseMode
+	stop           chan struct{}
+	client         *http.Client
 }
 
 // Settings represents a utility struct for passing certain
@@ -187,6 +189,12 @@ func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
 		b.handlers[end] = handler
 	case CallbackEndpoint:
 		b.handlers[end.CallbackUnique()] = handler
+	case *regexp.Regexp:
+		if end == nil {
+			panic("telebot: regexp is nil")
+		}
+		b.handlers[end] = handler
+		b.regexpHandlers = append(b.regexpHandlers, end)
 	default:
 		panic("telebot: unsupported endpoint")
 	}
@@ -283,6 +291,18 @@ func (b *Bot) ProcessUpdate(upd Update) {
 
 			// 1:1 satisfaction
 			if b.handle(m.Text, c) {
+				return
+			}
+
+			rMatch := false
+			for _, r := range b.regexpHandlers {
+				if r.Match([]byte(m.Text)) {
+					if b.handle(r, c) {
+						rMatch = true // don't return to handle all matches
+					}
+				}
+			}
+			if rMatch { // if at least 1 match, return
 				return
 			}
 
@@ -438,7 +458,7 @@ func (b *Bot) ProcessUpdate(upd Update) {
 	}
 }
 
-func (b *Bot) handle(end string, c Context) bool {
+func (b *Bot) handle(end interface{}, c Context) bool {
 	if handler, ok := b.handlers[end]; ok {
 		b.runHandler(handler, c)
 		return true
