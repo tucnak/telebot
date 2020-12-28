@@ -13,7 +13,7 @@ type Editable interface {
 	// MessageSig is a "message signature".
 	//
 	// For inline messages, return chatID = 0.
-	MessageSig() (messageID string, chatID int64)
+	MessageSig() (messageID int, chatID int64)
 }
 
 // StoredMessage is an example struct suitable for being
@@ -21,10 +21,10 @@ type Editable interface {
 // a larger struct, which is often the case (you might
 // want to store some metadata alongside, or might not.)
 type StoredMessage struct {
-	MessageID string `sql:"message_id" json:"message_id"`
+	MessageID int `sql:"message_id" json:"message_id"`
 	ChatID    int64  `sql:"chat_id" json:"chat_id"`
 }
 
-func (x StoredMessage) MessageSig() (string, int64) {
+func (x StoredMessage) MessageSig() (int, int64) {
 	return x.MessageID, x.ChatID
 }
