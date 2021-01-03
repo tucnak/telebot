@@ -22,12 +22,9 @@ type InputMedia interface {
 type Photo struct {
 	File
 
-	Width  int `json:"width"`
-	Height int `json:"height"`
-
-	// (Optional)
-	Caption   string    `json:"caption,omitempty"`
-	ParseMode ParseMode `json:"parse_mode,omitempty"`
+	Width   int    `json:"width"`
+	Height  int    `json:"height"`
+	Caption string `json:"caption,omitempty"`
 }
 
 type photoSize struct {
@@ -57,7 +54,6 @@ func (p *Photo) UnmarshalJSON(jsonStr []byte) error {
 		}
 	} else {
 		var sizes []photoSize
-
 		if err := json.Unmarshal(jsonStr, &sizes); err != nil {
 			return err
 		}
@@ -136,9 +132,8 @@ func (v *Video) MediaFile() *File {
 type Animation struct {
 	File
 
-	Width  int `json:"width"`
-	Height int `json:"height"`
-
+	Width    int `json:"width"`
+	Height   int `json:"height"`
 	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
@@ -198,11 +193,11 @@ type Location struct {
 	// Horizontal Accuracy
 	HorizontalAccuracy *float32 `json:"horizontal_accuracy,omitempty"`
 
-	Heading int `json:"heading,omitempty"`
-
 	// Period in seconds for which the location will be updated
 	// (see Live Locations, should be between 60 and 86400.)
 	LivePeriod int `json:"live_period,omitempty"`
+
+	Heading int `json:"heading,omitempty"`
 
 	ProximityAlertRadius int `json:"proximity_alert_radius,omitempty"`
 }
