@@ -50,7 +50,6 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"caption":   a.Caption,
 		"performer": a.Performer,
 		"title":     a.Title,
-		"file_name": a.FileName,
 	}
 	b.embedSendOptions(params, opt)
 
@@ -58,7 +57,7 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		params["duration"] = strconv.Itoa(a.Duration)
 	}
 
-	msg, err := b.sendObject(&a.File, "audio", params, thumbnailToFilemap(a.Thumbnail))
+	msg, err := b.sendObject(a.MediaFile(), "audio", params, thumbnailToFilemap(a.Thumbnail))
 	if err != nil {
 		return nil, err
 	}
@@ -80,9 +79,8 @@ func (a *Audio) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 // Send delivers media through bot b to recipient.
 func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id":   to.Recipient(),
-		"caption":   d.Caption,
-		"file_name": d.FileName,
+		"chat_id": to.Recipient(),
+		"caption": d.Caption,
 	}
 	b.embedSendOptions(params, opt)
 
@@ -90,7 +88,7 @@ func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 		params["file_size"] = strconv.Itoa(d.FileSize)
 	}
 
-	msg, err := b.sendObject(&d.File, "document", params, thumbnailToFilemap(d.Thumbnail))
+	msg, err := b.sendObject(d.MediaFile(), "document", params, thumbnailToFilemap(d.Thumbnail))
 	if err != nil {
 		return nil, err
 	}
@@ -123,9 +121,8 @@ func (s *Sticker) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 // Send delivers media through bot b to recipient.
 func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id":   to.Recipient(),
-		"caption":   v.Caption,
-		"file_name": v.FileName,
+		"chat_id": to.Recipient(),
+		"caption": v.Caption,
 	}
 	b.embedSendOptions(params, opt)
 
@@ -142,7 +139,7 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		params["supports_streaming"] = "true"
 	}
 
-	msg, err := b.sendObject(&v.File, "video", params, thumbnailToFilemap(v.Thumbnail))
+	msg, err := b.sendObject(v.MediaFile(), "video", params, thumbnailToFilemap(v.Thumbnail))
 	if err != nil {
 		return nil, err
 	}
@@ -167,9 +164,8 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 // @see https://core.telegram.org/bots/api#sendanimation
 func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id":   to.Recipient(),
-		"caption":   a.Caption,
-		"file_name": a.FileName,
+		"chat_id": to.Recipient(),
+		"caption": a.Caption,
 	}
 	b.embedSendOptions(params, opt)
 
@@ -183,12 +179,12 @@ func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 		params["height"] = strconv.Itoa(a.Height)
 	}
 
-	// file_name is required, without file_name GIFs sent as document
-	if params["file_name"] == "" && a.File.OnDisk() {
-		params["file_name"] = filepath.Base(a.File.FileLocal)
+	// Without the FileName GIF sends as a document.
+	if a.FileName == "" && a.File.OnDisk() {
+		a.FileName = filepath.Base(a.File.FileLocal)
 	}
 
-	msg, err := b.sendObject(&a.File, "animation", params, nil)
+	msg, err := b.sendObject(a.MediaFile(), "animation", params, nil)
 	if err != nil {
 		return nil, err
 	}
