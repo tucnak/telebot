@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
@@ -1446,11 +1447,18 @@ func (b *Bot) ChatMemberOf(chat *Chat, user *User) (*ChatMember, error) {
 	return resp.Result, nil
 }
 
-// FileURLByID returns direct url for files using FileId which you can get from File object
+// FileURLByID returns direct url for files using FileID which you can get from
+// File object. It returns a file:/// URL when the target file is on the
+// local disk (it happens if you are using a local Bot API server, see
+// https://core.telegram.org/bots/api#using-a-local-bot-api-server for details).
 func (b *Bot) FileURLByID(fileID string) (string, error) {
 	f, err := b.FileByID(fileID)
 	if err != nil {
 		return "", err
+	}
+
+	if path.IsAbs(f.FilePath) {
+		return "file://" + f.FilePath, nil
 	}
 
 	return b.URL + "/file/bot" + b.Token + "/" + f.FilePath, nil
