@@ -216,10 +216,10 @@ const (
 type DiceType string
 
 var (
-	Cube    = &Dice{Type: "🎲"}
-	Dart    = &Dice{Type: "🎯"}
-	Ball    = &Dice{Type: "🏀"}
-	Goal    = &Dice{Type: "⚽"}
-	Slot    = &Dice{Type: "🎰"}
-	Bowling = &Dice{Type: "🎳"}
+	Cube = &Dice{Type: "🎲"}
+	Dart = &Dice{Type: "🎯"}
+	Ball = &Dice{Type: "🏀"}
+	Goal = &Dice{Type: "⚽"}
+	Slot = &Dice{Type: "🎰"}
+	Bowl = &Dice{Type: "🎳"}
 )
