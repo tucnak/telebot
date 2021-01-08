@@ -221,4 +221,5 @@ var (
 	Ball = &Dice{Type: "🏀"}
 	Goal = &Dice{Type: "⚽"}
 	Slot = &Dice{Type: "🎰"}
+	Bowl = &Dice{Type: "🎳"}
 )
