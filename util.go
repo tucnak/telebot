@@ -94,6 +94,11 @@ func extractMessage(data []byte) (*Message, error) {
 		}
 		return nil, wrapError(err)
 	}
+
+	if resp.Result == nil {
+		return nil, ErrNilResponse
+	}
+
 	return resp.Result, nil
 }
 
