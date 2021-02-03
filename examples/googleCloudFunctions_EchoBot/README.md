@@ -19,7 +19,7 @@ This is a simple example how to deploy a Telegram Bot at [Google Cloud Functions
 
 ## First Steps
 
-- Create or clone this project and download this library module `go get -u gopkg.in/tucnak/telebot.v2
+- Create or [clone this project](https://github.com/seupedro/EchoTelegramBot) and download this library module `go get -u gopkg.in/tucnak/telebot.v2
   `
 - Add your token at `env.yaml` file
 - Deploy executing `deploy.sh` file if you have [gcloud cli](https://cloud.google.com/sdk/gcloud "gcloud cli ") installed in your system. If you haven't gcloud cli, you can [deploy using web browser console](https://cloud.google.com/functions/docs/deploying/console "deploy using web browser console") following these instructions.
