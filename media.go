@@ -16,9 +16,6 @@ type InputMedia interface {
 	// As some files must be uploaded (instead of referencing)
 	// outer layers of Telebot require it.
 	MediaFile() *File
-
-	// NOTE: To add in v3.
-	// Type() string
 }
 
 // Photo object represents a single photo file.
@@ -83,18 +80,16 @@ type Audio struct {
 	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
-	Caption   string    `json:"caption,omitempty"`
-	Thumbnail *Photo    `json:"thumb,omitempty"`
-	Title     string    `json:"title,omitempty"`
-	Performer string    `json:"performer,omitempty"`
-	MIME      string    `json:"mime_type,omitempty"`
-	FileName  string    `json:"file_name,omitempty"`
-	ParseMode ParseMode `json:"parse_mode,omitempty"`
+	Caption   string `json:"caption,omitempty"`
+	Thumbnail *Photo `json:"thumb,omitempty"`
+	Title     string `json:"title,omitempty"`
+	Performer string `json:"performer,omitempty"`
+	MIME      string `json:"mime_type,omitempty"`
+	FileName  string `json:"file_name,omitempty"`
 }
 
 // MediaFile returns &Audio.File
 func (a *Audio) MediaFile() *File {
-	a.fileName = a.FileName
 	return &a.File
 }
 
@@ -104,16 +99,14 @@ type Document struct {
 	File
 
 	// (Optional)
-	Thumbnail *Photo    `json:"thumb,omitempty"`
-	Caption   string    `json:"caption,omitempty"`
-	MIME      string    `json:"mime_type"`
-	FileName  string    `json:"file_name,omitempty"`
-	ParseMode ParseMode `json:"parse_mode,omitempty"`
+	Thumbnail *Photo `json:"thumb,omitempty"`
+	Caption   string `json:"caption,omitempty"`
+	MIME      string `json:"mime_type"`
+	FileName  string `json:"file_name,omitempty"`
 }
 
 // MediaFile returns &Document.File
 func (d *Document) MediaFile() *File {
-	d.fileName = d.FileName
 	return &d.File
 }
 
@@ -127,17 +120,15 @@ type Video struct {
 	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
-	Caption           string    `json:"caption,omitempty"`
-	Thumbnail         *Photo    `json:"thumb,omitempty"`
-	SupportsStreaming bool      `json:"supports_streaming,omitempty"`
-	MIME              string    `json:"mime_type,omitempty"`
-	FileName          string    `json:"file_name,omitempty"`
-	ParseMode         ParseMode `json:"parse_mode,omitempty"`
+	Caption           string `json:"caption,omitempty"`
+	Thumbnail         *Photo `json:"thumb,omitempty"`
+	SupportsStreaming bool   `json:"supports_streaming,omitempty"`
+	MIME              string `json:"mime_type,omitempty"`
+	FileName          string `json:"file_name,omitempty"`
 }
 
 // MediaFile returns &Video.File
 func (v *Video) MediaFile() *File {
-	v.fileName = v.FileName
 	return &v.File
 }
 
@@ -159,7 +150,6 @@ type Animation struct {
 
 // MediaFile returns &Animation.File
 func (a *Animation) MediaFile() *File {
-	a.fileName = a.FileName
 	return &a.File
 }
 

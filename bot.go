@@ -450,6 +450,7 @@ func (b *Bot) ProcessUpdate(upd Update) {
 
 		return
 	}
+
 }
 
 func (b *Bot) handle(end string, m *Message) bool {
@@ -562,10 +563,10 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 		switch y := x.(type) {
 		case *Photo:
 			data, _ = json.Marshal(struct {
-				Type      string `json:"type"`
-				Media     string `json:"media"`
-				Caption   string `json:"caption,omitempty"`
-				ParseMode string `json:"parse_mode,omitempty"`
+				Type      string    `json:"type"`
+				Media     string    `json:"media"`
+				Caption   string    `json:"caption,omitempty"`
+				ParseMode ParseMode `json:"parse_mode,omitempty"`
 			}{
 				Type:      "photo",
 				Media:     repr,
@@ -581,7 +582,6 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 				Height            int    `json:"height,omitempty"`
 				Duration          int    `json:"duration,omitempty"`
 				SupportsStreaming bool   `json:"supports_streaming,omitempty"`
-				ParseMode         string `json:"parse_mode,omitempty"`
 			}{
 				Type:              "video",
 				Caption:           y.Caption,
@@ -590,37 +590,6 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 				Height:            y.Height,
 				Duration:          y.Duration,
 				SupportsStreaming: y.SupportsStreaming,
-				ParseMode:         y.ParseMode,
-			})
-		case *Audio:
-			data, _ = json.Marshal(struct {
-				Type      string `json:"type"`
-				Media     string `json:"media"`
-				Caption   string `json:"caption,omitempty"`
-				Duration  int    `json:"duration,omitempty"`
-				Performer string `json:"performer,omitempty"`
-				Title     string `json:"title,omitempty"`
-				ParseMode string `json:"parse_mode,omitempty"`
-			}{
-				Type:      "audio",
-				Media:     repr,
-				Caption:   y.Caption,
-				Duration:  y.Duration,
-				Performer: y.Performer,
-				Title:     y.Title,
-				ParseMode: y.ParseMode,
-			})
-		case *Document:
-			data, _ = json.Marshal(struct {
-				Type      string `json:"type"`
-				Media     string `json:"media"`
-				Caption   string `json:"caption,omitempty"`
-				ParseMode string `json:"parse_mode,omitempty"`
-			}{
-				Type:      "document",
-				Media:     repr,
-				Caption:   y.Caption,
-				ParseMode: y.ParseMode,
 			})
 		default:
 			return nil, errors.Errorf("telebot: album entry #%d is not valid", i)
@@ -651,18 +620,12 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 
 	for attachName := range files {
 		i, _ := strconv.Atoi(attachName)
-		r := resp.Result[i]
 
 		var newID string
-		switch {
-		case r.Photo != nil:
-			newID = r.Photo.FileID
-		case r.Video != nil:
-			newID = r.Video.FileID
-		case r.Audio != nil:
-			newID = r.Audio.FileID
-		case r.Document != nil:
-			newID = r.Document.FileID
+		if resp.Result[i].Photo != nil {
+			newID = resp.Result[i].Photo.FileID
+		} else {
+			newID = resp.Result[i].Video.FileID
 		}
 
 		a[i].MediaFile().FileID = newID
