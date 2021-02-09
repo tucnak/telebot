@@ -260,16 +260,14 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			return
 		}
 
-		if m.UserJoined != nil {
-			b.handle(OnUserJoined, m)
-			return
-		}
-
 		if m.UsersJoined != nil {
-			for _, user := range m.UsersJoined {
-				m.UserJoined = &user
+			for index := range m.UsersJoined {
+				m.UserJoined = &m.UsersJoined[index]
 				b.handle(OnUserJoined, m)
 			}
+			return
+		} else if m.UserJoined != nil {
+			b.handle(OnUserJoined, m)
 			return
 		}
 
