@@ -262,11 +262,15 @@ func (b *Bot) ProcessUpdate(upd Update) {
 
 		if m.UsersJoined != nil {
 			for index := range m.UsersJoined {
-				m.UserJoined = &m.UsersJoined[index]
-				b.handle(OnUserJoined, m)
+				// Shallow copy message to prevent data race in async mode
+				mm := *m
+				mm.UserJoined = &m.UsersJoined[index]
+				b.handle(OnUserJoined, &mm)
 			}
 			return
-		} else if m.UserJoined != nil {
+		}
+
+		if m.UserJoined != nil {
 			b.handle(OnUserJoined, m)
 			return
 		}
