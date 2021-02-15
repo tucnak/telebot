@@ -194,7 +194,7 @@ func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
 
 var (
 	cmdRx   = regexp.MustCompile(`^(/\w+)(@(\w+))?(\s|$)(.+)?`)
-	cbackRx = regexp.MustCompile(`^\f(\w+)(\|(.+))?$`)
+	cbackRx = regexp.MustCompile(`^\f([-\w]+)(\|(.+))?$`)
 )
 
 // Start brings bot into motion by consuming incoming
