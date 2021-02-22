@@ -48,7 +48,7 @@ func NewBot(pref Settings) (*Bot, error) {
 		client:      client,
 	}
 
-	if pref.offline {
+	if pref.Offline {
 		bot.Me = &User{}
 	} else {
 		user, err := bot.getMe()
@@ -113,8 +113,8 @@ type Settings struct {
 	// HTTP Client used to make requests to telegram api
 	Client *http.Client
 
-	// offline allows to create a bot without network for testing purposes.
-	offline bool
+	// Offline allows to create a bot without network for testing purposes.
+	Offline bool
 }
 
 // Update object represents an incoming update.
