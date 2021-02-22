@@ -35,7 +35,7 @@ func TestMiddlewarePoller(t *testing.T) {
 	var ids []int
 
 	pref := defaultSettings()
-	pref.offline = true
+	pref.Offline = true
 
 	b, err := NewBot(pref)
 	if err != nil {
