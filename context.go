@@ -2,6 +2,7 @@ package telebot
 
 import (
 	"strings"
+	"sync"
 
 	"github.com/pkg/errors"
 )
@@ -118,6 +119,12 @@ type Context interface {
 	// Respond sends a response for the current callback query.
 	// See Respond from bot.go.
 	Respond(resp ...*CallbackResponse) error
+
+	// Get retrieves data from the context.
+	Get(key string) interface{}
+
+	// Set saves data in the context.
+	Set(key string, val interface{})
 }
 
 // nativeContext is a native implementation of the Context interface.
@@ -133,6 +140,9 @@ type nativeContext struct {
 	preCheckoutQuery   *PreCheckoutQuery
 	poll               *Poll
 	pollAnswer         *PollAnswer
+
+	lock  sync.RWMutex
+	store map[string]interface{}
 }
 
 func (c *nativeContext) Message() *Message {
@@ -345,4 +355,20 @@ func (c *nativeContext) Respond(resp ...*CallbackResponse) error {
 		return errors.New("telebot: context callback is nil")
 	}
 	return c.b.Respond(c.callback, resp...)
+}
+
+func (c *nativeContext) Set(key string, value interface{}) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	if c.store == nil {
+		c.store = make(map[string]interface{})
+	}
+	c.store[key] = value
+}
+
+func (c *nativeContext) Get(key string) interface{} {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+	return c.store[key]
 }
