@@ -217,6 +217,15 @@ type Message struct {
 
 	// Inline keyboard attached to the message.
 	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup"`
+
+	// For a service message, a voice chat started in the chat.
+	VoiceChatStarted *VoiceChatStarted `json:"voice_chat_started,omitempty"`
+
+	// For a service message, a voice chat ended in the chat.
+	VoiceChatEnded *VoiceChatEnded `json:"voice_chat_ended,omitempty"`
+
+	// For a service message, some users were invited in the voice chat.
+	VoiceChatPartecipantsInvited *VoiceChatPartecipantsInvited `json:"voice_chat_partecipants_invited,omitempty"`
 }
 
 // MessageEntity object represents "special" parts of text messages,

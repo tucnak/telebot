@@ -306,6 +306,44 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			return
 		}
 
+		if m.VoiceChatStarted != nil {
+			if handler, ok := b.handlers[OnVoiceChatStarted]; ok {
+				handler, ok := handler.(func(*Message))
+				if !ok {
+					panic("telebot: voice chat started handler is bad")
+				}
+
+				b.runHandler(func() { handler(m) })
+			}
+
+			return
+		}
+
+		if m.VoiceChatEnded != nil {
+			if handler, ok := b.handlers[OnVoiceChatEnded]; ok {
+				handler, ok := handler.(func(*Message))
+				if !ok {
+					panic("telebot: voice chat ended handler is bad")
+				}
+
+				b.runHandler(func() { handler(m) })
+			}
+
+			return
+		}
+
+		if m.VoiceChatPartecipantsInvited != nil {
+			if handler, ok := b.handlers[OnVoiceChatPartecipantsInvited]; ok {
+				handler, ok := handler.(func(*Message))
+				if !ok {
+					panic("telebot: voice chat partecipants invited handler is bad")
+				}
+
+				b.runHandler(func() { handler(m) })
+			}
+
+			return
+		}
 	}
 
 	if upd.EditedMessage != nil {
