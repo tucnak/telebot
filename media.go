@@ -80,12 +80,13 @@ type Audio struct {
 	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
-	Caption   string `json:"caption,omitempty"`
-	Thumbnail *Photo `json:"thumb,omitempty"`
-	Title     string `json:"title,omitempty"`
-	Performer string `json:"performer,omitempty"`
-	MIME      string `json:"mime_type,omitempty"`
-	FileName  string `json:"file_name,omitempty"`
+	Caption   string    `json:"caption,omitempty"`
+	ParseMode ParseMode `json:"parse_mode,omitempty"`
+	Thumbnail *Photo    `json:"thumb,omitempty"`
+	Title     string    `json:"title,omitempty"`
+	Performer string    `json:"performer,omitempty"`
+	MIME      string    `json:"mime_type,omitempty"`
+	FileName  string    `json:"file_name,omitempty"`
 }
 
 // MediaFile returns &Audio.File
@@ -99,10 +100,11 @@ type Document struct {
 	File
 
 	// (Optional)
-	Thumbnail *Photo `json:"thumb,omitempty"`
-	Caption   string `json:"caption,omitempty"`
-	MIME      string `json:"mime_type"`
-	FileName  string `json:"file_name,omitempty"`
+	Thumbnail *Photo    `json:"thumb,omitempty"`
+	Caption   string    `json:"caption,omitempty"`
+	ParseMode ParseMode `json:"parse_mode,omitempty"`
+	MIME      string    `json:"mime_type"`
+	FileName  string    `json:"file_name,omitempty"`
 }
 
 // MediaFile returns &Document.File
@@ -120,11 +122,12 @@ type Video struct {
 	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
-	Caption           string `json:"caption,omitempty"`
-	Thumbnail         *Photo `json:"thumb,omitempty"`
-	SupportsStreaming bool   `json:"supports_streaming,omitempty"`
-	MIME              string `json:"mime_type,omitempty"`
-	FileName          string `json:"file_name,omitempty"`
+	Caption           string    `json:"caption,omitempty"`
+	ParseMode         ParseMode `json:"parse_mode,omitempty"`
+	Thumbnail         *Photo    `json:"thumb,omitempty"`
+	SupportsStreaming bool      `json:"supports_streaming,omitempty"`
+	MIME              string    `json:"mime_type,omitempty"`
+	FileName          string    `json:"file_name,omitempty"`
 }
 
 // MediaFile returns &Video.File
@@ -142,10 +145,11 @@ type Animation struct {
 	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
-	Caption   string `json:"caption,omitempty"`
-	Thumbnail *Photo `json:"thumb,omitempty"`
-	MIME      string `json:"mime_type,omitempty"`
-	FileName  string `json:"file_name,omitempty"`
+	Caption   string    `json:"caption,omitempty"`
+	ParseMode ParseMode `json:"parse_mode,omitempty"`
+	Thumbnail *Photo    `json:"thumb,omitempty"`
+	MIME      string    `json:"mime_type,omitempty"`
+	FileName  string    `json:"file_name,omitempty"`
 }
 
 // MediaFile returns &Animation.File
