@@ -349,6 +349,21 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			b.handle(OnMigration, c)
 			return
 		}
+
+		if m.VoiceChatStarted != nil {
+			b.handle(OnVoiceChatStarted, c)
+			return
+		}
+
+		if m.VoiceChatEnded != nil {
+			b.handle(OnVoiceChatEnded, c)
+			return
+		}
+
+		if m.VoiceChatParticipants != nil {
+			b.handle(OnVoiceChatParticipants, c)
+			return
+		}
 	}
 
 	if upd.EditedMessage != nil {

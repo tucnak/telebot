@@ -121,6 +121,21 @@ const (
 	//
 	// Handler: func(*PollAnswer)
 	OnPollAnswer = "\apoll_answer"
+
+	// Will fire on VoiceChatStarted
+	//
+	// Handler: func(*Message)
+	OnVoiceChatStarted = "\avoice_chat_started"
+
+	// Will fire on VoiceChatEnded
+	//
+	// Handler: func(*Message)
+	OnVoiceChatEnded = "\avoice_chat_ended"
+
+	// Will fire on VoiceChatParticipants
+	//
+	// Handler: func(*Message)
+	OnVoiceChatParticipants = "\avoice_chat_participants_invited"
 )
 
 // ChatAction is a client-side status indicating bot activity.

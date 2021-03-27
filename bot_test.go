@@ -49,7 +49,7 @@ func TestNewBot(t *testing.T) {
 	_, err = NewBot(pref)
 	assert.Error(t, err)
 
-	b, err := NewBot(Settings{offline: true})
+	b, err := NewBot(Settings{Offline: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func TestNewBot(t *testing.T) {
 	pref.Poller = &LongPoller{Timeout: time.Second}
 	pref.Updates = 50
 	pref.ParseMode = ModeHTML
-	pref.offline = true
+	pref.Offline = true
 
 	b, err = NewBot(pref)
 	require.NoError(t, err)
@@ -147,7 +147,7 @@ func TestBotStart(t *testing.T) {
 }
 
 func TestBotProcessUpdate(t *testing.T) {
-	b, err := NewBot(Settings{Synchronous: true, offline: true})
+	b, err := NewBot(Settings{Synchronous: true, Offline: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -340,7 +340,7 @@ func TestBotProcessUpdate(t *testing.T) {
 }
 
 func TestBotOnError(t *testing.T) {
-	b, err := NewBot(Settings{Synchronous: true, offline: true})
+	b, err := NewBot(Settings{Synchronous: true, Offline: true})
 	if err != nil {
 		t.Fatal(err)
 	}
