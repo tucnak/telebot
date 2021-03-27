@@ -8,20 +8,21 @@ import (
 
 // Rights is a list of privileges available to chat members.
 type Rights struct {
-	CanBeEdited        bool `json:"can_be_edited"`
-	CanChangeInfo      bool `json:"can_change_info"`
-	CanPostMessages    bool `json:"can_post_messages"`
-	CanEditMessages    bool `json:"can_edit_messages"`
-	CanDeleteMessages  bool `json:"can_delete_messages"`
-	CanInviteUsers     bool `json:"can_invite_users"`
-	CanRestrictMembers bool `json:"can_restrict_members"`
-	CanPinMessages     bool `json:"can_pin_messages"`
-	CanPromoteMembers  bool `json:"can_promote_members"`
-	CanSendMessages    bool `json:"can_send_messages"`
-	CanSendMedia       bool `json:"can_send_media_messages"`
-	CanSendPolls       bool `json:"can_send_polls"`
-	CanSendOther       bool `json:"can_send_other_messages"`
-	CanAddPreviews     bool `json:"can_add_web_page_previews"`
+	CanBeEdited         bool `json:"can_be_edited"`
+	CanChangeInfo       bool `json:"can_change_info"`
+	CanPostMessages     bool `json:"can_post_messages"`
+	CanEditMessages     bool `json:"can_edit_messages"`
+	CanDeleteMessages   bool `json:"can_delete_messages"`
+	CanInviteUsers      bool `json:"can_invite_users"`
+	CanRestrictMembers  bool `json:"can_restrict_members"`
+	CanPinMessages      bool `json:"can_pin_messages"`
+	CanPromoteMembers   bool `json:"can_promote_members"`
+	CanSendMessages     bool `json:"can_send_messages"`
+	CanSendMedia        bool `json:"can_send_media_messages"`
+	CanSendPolls        bool `json:"can_send_polls"`
+	CanSendOther        bool `json:"can_send_other_messages"`
+	CanAddPreviews      bool `json:"can_add_web_page_previews"`
+	CanManageVoiceChats bool `json:"can_manage_voice_chats"`
 }
 
 // NoRights is the default Rights{}.
@@ -35,40 +36,42 @@ func NoRights() Rights { return Rights{} }
 //
 func NoRestrictions() Rights {
 	return Rights{
-		CanBeEdited:        true,
-		CanChangeInfo:      false,
-		CanPostMessages:    false,
-		CanEditMessages:    false,
-		CanDeleteMessages:  false,
-		CanInviteUsers:     false,
-		CanRestrictMembers: false,
-		CanPinMessages:     false,
-		CanPromoteMembers:  false,
-		CanSendMessages:    true,
-		CanSendMedia:       true,
-		CanSendPolls:       true,
-		CanSendOther:       true,
-		CanAddPreviews:     true,
+		CanBeEdited:         true,
+		CanChangeInfo:       false,
+		CanPostMessages:     false,
+		CanEditMessages:     false,
+		CanDeleteMessages:   false,
+		CanInviteUsers:      false,
+		CanRestrictMembers:  false,
+		CanPinMessages:      false,
+		CanPromoteMembers:   false,
+		CanSendMessages:     true,
+		CanSendMedia:        true,
+		CanSendPolls:        true,
+		CanSendOther:        true,
+		CanAddPreviews:      true,
+		CanManageVoiceChats: false,
 	}
 }
 
 // AdminRights could be used to promote user to admin.
 func AdminRights() Rights {
 	return Rights{
-		CanBeEdited:        true,
-		CanChangeInfo:      true,
-		CanPostMessages:    true,
-		CanEditMessages:    true,
-		CanDeleteMessages:  true,
-		CanInviteUsers:     true,
-		CanRestrictMembers: true,
-		CanPinMessages:     true,
-		CanPromoteMembers:  true,
-		CanSendMessages:    true,
-		CanSendMedia:       true,
-		CanSendPolls:       true,
-		CanSendOther:       true,
-		CanAddPreviews:     true,
+		CanBeEdited:         true,
+		CanChangeInfo:       true,
+		CanPostMessages:     true,
+		CanEditMessages:     true,
+		CanDeleteMessages:   true,
+		CanInviteUsers:      true,
+		CanRestrictMembers:  true,
+		CanPinMessages:      true,
+		CanPromoteMembers:   true,
+		CanSendMessages:     true,
+		CanSendMedia:        true,
+		CanSendPolls:        true,
+		CanSendOther:        true,
+		CanAddPreviews:      true,
+		CanManageVoiceChats: true,
 	}
 }
 
