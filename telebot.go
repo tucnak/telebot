@@ -122,6 +122,16 @@ const (
 	// Handler: func(*PollAnswer)
 	OnPollAnswer = "\apoll_answer"
 
+	// Will fire on MyChatMember
+	//
+	// Handler: func(*ChatMemberUpdated)
+	OnMyChatMember = "\amy_chat_member"
+
+	// Will fire on ChatMember
+	//
+	// Handler: func(*ChatMemberUpdated)
+	OnChatMember = "\achat_member"
+
 	// Will fire on VoiceChatStarted
 	//
 	// Handler: func(*Message)

@@ -132,6 +132,8 @@ type Update struct {
 	PreCheckoutQuery   *PreCheckoutQuery   `json:"pre_checkout_query,omitempty"`
 	Poll               *Poll               `json:"poll,omitempty"`
 	PollAnswer         *PollAnswer         `json:"poll_answer,omitempty"`
+	MyChatMember       *ChatMemberUpdated  `json:"my_chat_member,omitempty"`
+	ChatMember         *ChatMemberUpdated  `json:"chat_member,omitempty"`
 }
 
 // Command represents a bot command.
@@ -449,6 +451,16 @@ func (b *Bot) ProcessUpdate(upd Update) {
 
 	if upd.PollAnswer != nil {
 		b.handle(OnPollAnswer, c)
+		return
+	}
+
+	if upd.MyChatMember != nil {
+		b.handle(OnMyChatMember, c)
+		return
+	}
+
+	if upd.ChatMember != nil {
+		b.handle(OnChatMember, c)
 		return
 	}
 }
