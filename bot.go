@@ -129,6 +129,8 @@ type Update struct {
 	PreCheckoutQuery   *PreCheckoutQuery   `json:"pre_checkout_query,omitempty"`
 	Poll               *Poll               `json:"poll,omitempty"`
 	PollAnswer         *PollAnswer         `json:"poll_answer,omitempty"`
+	MyChatMember       *ChatMemberUpdated  `json:"my_chat_member,omitempty"`
+	ChatMember         *ChatMemberUpdated  `json:"chat_member,omitempty"`
 }
 
 // Command represents a bot command.
@@ -486,6 +488,32 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			}
 
 			b.runHandler(func() { handler(upd.PollAnswer) })
+		}
+
+		return
+	}
+
+	if upd.MyChatMember != nil {
+		if handler, ok := b.handlers[OnMyChatMember]; ok {
+			handler, ok := handler.(func(*ChatMemberUpdated))
+			if !ok {
+				panic("telebot: my chat member handler is bad")
+			}
+
+			b.runHandler(func() { handler(upd.MyChatMember) })
+		}
+
+		return
+	}
+
+	if upd.ChatMember != nil {
+		if handler, ok := b.handlers[OnChatMember]; ok {
+			handler, ok := handler.(func(*ChatMemberUpdated))
+			if !ok {
+				panic("telebot: my chat member handler is bad")
+			}
+
+			b.runHandler(func() { handler(upd.MyChatMember) })
 		}
 
 		return

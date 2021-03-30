@@ -6,6 +6,61 @@ import (
 	"time"
 )
 
+// ChatInviteLink object represents an invite for a chat.
+type ChatInviteLink struct {
+	// The invite link.
+	InviteLink string `json:"invite_link"`
+
+	// The creator of the link.
+	Creator *User `json:"creator"`
+
+	// If the link is primary.
+	IsPrimary bool `json:"is_primary"`
+
+	// If the link is revoked.
+	IsRevoked bool `json:"is_revoked"`
+
+	// (Optional) Point in time when the link will expire, use
+	// ChatInviteLink.ExpireTime() to get time.Time
+	Unixtime int64 `json:"expire_date,omitempty"`
+
+	// (Optional) Maximum number of users that can be members of
+	// the chat simultaneously.
+	MemberLimit int `json:"member_limit,omitempty"`
+}
+
+// ExpireTime returns the moment of the link expiration in local time.
+func (c *ChatInviteLink) ExpireTime() time.Time {
+	return time.Unix(c.Unixtime, 0)
+}
+
+// ChatMemberUpdated object represents changes in the status of a chat member.
+type ChatMemberUpdated struct {
+	// Chat where the user belongs to.
+	Chat Chat `json:"chat"`
+
+	// From which user the action was triggered.
+	From User `json:"user"`
+
+	// Unixtime, use ChatMemberUpdated.Time() to get time.Time
+	Unixtime int64 `json:"date"`
+
+	// Previous information about the chat member.
+	OldChatMember *ChatMember `json:"old_chat_member"`
+
+	// New information about the chat member.
+	NewChatMember *ChatMember `json:"new_chat_member"`
+
+	// (Optional) ChatInviteLink which was used by the user to
+	// join the chat; for joining by invite link events only.
+	ChatInviteLink *ChatInviteLink `json:"chat_invite_link"`
+}
+
+// Time returns the moment of the change in local time.
+func (c *ChatMemberUpdated) Time() time.Time {
+	return time.Unix(c.Unixtime, 0)
+}
+
 // Rights is a list of privileges available to chat members.
 type Rights struct {
 	CanBeEdited         bool `json:"can_be_edited"`
