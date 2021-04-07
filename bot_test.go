@@ -158,6 +158,9 @@ func TestBotProcessUpdate(t *testing.T) {
 	b.Handle("/start", func(m *Message) {
 		assert.Equal(t, "/start", m.Text)
 	})
+	b.Handle("/add", func(m *Message) {
+		assert.Equal(t, "1\n2", m.Payload)
+	})
 	b.Handle("hello", func(m *Message) {
 		assert.Equal(t, "hello", m.Text)
 	})
@@ -257,6 +260,7 @@ func TestBotProcessUpdate(t *testing.T) {
 
 	b.ProcessUpdate(Update{Message: &Message{Text: "/start"}})
 	b.ProcessUpdate(Update{Message: &Message{Text: "/start@other_bot"}})
+	b.ProcessUpdate(Update{Message: &Message{Text: "/add 1\n2"}})
 	b.ProcessUpdate(Update{Message: &Message{Text: "hello"}})
 	b.ProcessUpdate(Update{Message: &Message{Text: "text"}})
 	b.ProcessUpdate(Update{Message: &Message{PinnedMessage: &Message{}}})
