@@ -155,7 +155,8 @@ type Voice struct {
 	Duration int `json:"duration"`
 
 	// (Optional)
-	MIME string `json:"mime_type,omitempty"`
+	Caption string `json:"caption,omitempty"`
+	MIME    string `json:"mime_type,omitempty"`
 }
 
 // VideoNote represents a video message (available in Telegram apps
