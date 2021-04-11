@@ -36,8 +36,8 @@ const (
 // the way through bot logic, so you might want to consider storing
 // and re-using it somewhere or be using Option flags instead.
 type SendOptions struct {
-	// If the message is a reply, original message.
-	ReplyTo *Message
+	// If the message is a reply, original message id.
+	ReplyToID int
 
 	// See ReplyMarkup struct definition.
 	ReplyMarkup *ReplyMarkup
@@ -101,7 +101,7 @@ type ReplyMarkup struct {
 	//
 	// Targets:
 	// 1) Users that are @mentioned in the text of the Message object;
-	// 2) If the bot's message is a reply (has SendOptions.ReplyTo),
+	// 2) If the bot's message is a reply (has SendOptions.ReplyToID),
 	//       sender of the original message.
 	Selective bool `json:"selective,omitempty"`
 }

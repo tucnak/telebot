@@ -711,7 +711,7 @@ func (b *Bot) Reply(to *Message, what interface{}, options ...interface{}) (*Mes
 		sendOpts = &SendOptions{}
 	}
 
-	sendOpts.ReplyTo = to
+	sendOpts.ReplyToID = to.ID
 	return b.Send(to.Chat, what, sendOpts)
 }
 

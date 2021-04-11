@@ -1,12 +1,13 @@
 package telebot
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
-	"bytes"
+
 	"github.com/pkg/errors"
 )
 
@@ -179,8 +180,8 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 		return
 	}
 
-	if opt.ReplyTo != nil && opt.ReplyTo.ID != 0 {
-		params["reply_to_message_id"] = strconv.Itoa(opt.ReplyTo.ID)
+	if opt.ReplyToID != 0 {
+		params["reply_to_message_id"] = strconv.Itoa(opt.ReplyToID)
 	}
 
 	if opt.DisableWebPagePreview {
