@@ -318,17 +318,28 @@ func (m *Message) IsService() bool {
 	return fact
 }
 
-// EntityText returns the substring of the message identified by the
-// given MessageEntity.
-//
-// It's safer than manually slicing Message.Text because Telegram uses
-// UTF-16 indices whereas Go string are []byte.
-func (m *Message) EntityText(e *MessageEntity) string {
-	offset := e.Offset
-	length := e.Length
-	s := utf16.Encode([]rune(m.Text))
+func utf16Substr(text string, offset int, length int) string {
+	s := utf16.Encode([]rune(text))
 	if offset < 0 || offset+length > len(s) {
 		return ""
 	}
 	return string(utf16.Decode(s[offset : offset+length]))
+}
+
+// EntityText returns the substring of the message text identified by
+// the given MessageEntity.
+//
+// It's safer than manually slicing Message.Text because Telegram uses
+// UTF-16 indices whereas Go strings are []byte.
+func (m *Message) EntityText(e *MessageEntity) string {
+	return utf16Substr(m.Text, e.Offset, e.Length)
+}
+
+// CaptionEntityText returns the substring of the message caption
+// identified by the given MessageEntity.
+//
+// It's safer than manually slicing Message.Caption because Telegram
+// uses UTF-16 indices whereas Go strings are []byte.
+func (m *Message) CaptionEntityText(e *MessageEntity) string {
+	return utf16Substr(m.Caption, e.Offset, e.Length)
 }
