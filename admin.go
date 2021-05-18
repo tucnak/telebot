@@ -136,11 +136,12 @@ func Forever() int64 {
 }
 
 // Ban will ban user from chat until `member.RestrictedUntil`.
-func (b *Bot) Ban(chat *Chat, member *ChatMember) error {
+func (b *Bot) Ban(chat *Chat, member *ChatMember, revokeMessages bool) error {
 	params := map[string]string{
-		"chat_id":    chat.Recipient(),
-		"user_id":    member.User.Recipient(),
-		"until_date": strconv.FormatInt(member.RestrictedUntil, 10),
+		"chat_id":         chat.Recipient(),
+		"user_id":         member.User.Recipient(),
+		"until_date":      strconv.FormatInt(member.RestrictedUntil, 10),
+		"revoke_messages": strconv.FormatBool(revokeMessages),
 	}
 
 	_, err := b.Raw("kickChatMember", params)
