@@ -1395,12 +1395,29 @@ func (b *Bot) Pin(msg Editable, options ...interface{}) error {
 // Unpin unpins a message in a supergroup or a channel.
 //
 // It supports tb.Silent option.
-func (b *Bot) Unpin(chat *Chat) error {
+// MessageID is a specific pinned message
+func (b *Bot) Unpin(chat *Chat, messageID ...int) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+	if len(messageID) > 0 {
+		params["message_id"] = strconv.Itoa(messageID[0])
+	}
+
+	_, err := b.Raw("unpinChatMessage", params)
+	return err
+}
+
+// Unpin unpins all messages in a supergroup or a channel.
+//
+// It supports tb.Silent option.
+// MessageID is a specific pinned message
+func (b *Bot) UnpinAll(chat *Chat) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 	}
 
-	_, err := b.Raw("unpinChatMessage", params)
+	_, err := b.Raw("unpinAllChatMessages", params)
 	return err
 }
 
