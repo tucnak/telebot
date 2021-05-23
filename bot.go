@@ -1526,3 +1526,37 @@ func (b *Bot) SetCommands(cmds []Command) error {
 func (b *Bot) NewMarkup() *ReplyMarkup {
 	return &ReplyMarkup{}
 }
+
+// Logout log out from the cloud Bot API server before launching the bot locally,
+func (b *Bot) Logout() (bool, error) {
+	data, err := b.Raw("logOut", nil)
+	if err != nil {
+		return false, err
+	}
+
+	var resp struct {
+		Result bool `json:"result"`
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return false, wrapError(err)
+	}
+
+	return resp.Result, nil
+}
+
+// Close closes the bot instance before moving it from one local server to another,
+func (b *Bot) Close() (bool, error) {
+	data, err := b.Raw("close", nil)
+	if err != nil {
+		return false, err
+	}
+
+	var resp struct {
+		Result bool `json:"result"`
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return false, wrapError(err)
+	}
+
+	return resp.Result, nil
+}
