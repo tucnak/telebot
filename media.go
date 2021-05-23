@@ -195,9 +195,24 @@ type Location struct {
 	// Longitude
 	Lng float32 `json:"longitude"`
 
+	// Horizontal Accuracy
+	HorizontalAccuracy *float32 `json:"horizontal_accuracy,omitempty"`
+
+	Heading int `json:"heading,omitempty"`
+
 	// Period in seconds for which the location will be updated
 	// (see Live Locations, should be between 60 and 86400.)
 	LivePeriod int `json:"live_period,omitempty"`
+
+	ProximityAlertRadius int `json:"proximity_alert_radius,omitempty"`
+}
+
+// ProximityAlertTriggered sent whenever
+// a user in the chat triggers a proximity alert set by another user.
+type ProximityAlertTriggered struct {
+	Traveler *User `json:"traveler,omitempty"`
+	Watcher  *User `json:"watcher,omitempty"`
+	Distance int   `json:"distance"`
 }
 
 // Venue object represents a venue location with name, address and
@@ -208,8 +223,10 @@ type Venue struct {
 	Address  string   `json:"address"`
 
 	// (Optional)
-	FoursquareID   string `json:"foursquare_id,omitempty"`
-	FoursquareType string `json:"foursquare_type,omitempty"`
+	FoursquareID    string `json:"foursquare_id,omitempty"`
+	FoursquareType  string `json:"foursquare_type,omitempty"`
+	GooglePlaceID   string `json:"google_place_id,omitempty"`
+	GooglePlaceType string `json:"google_place_type,omitempty"`
 }
 
 // Dice object represents a dice with a random value
