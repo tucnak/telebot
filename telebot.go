@@ -144,6 +144,11 @@ const (
 	//
 	// Handler: func(*Message)
 	OnVoiceChatPartecipantsInvited = "\avoice_chat_partecipants_invited"
+
+	// Will fire on ProximityAlertTriggered
+	//
+	// Handler: func(*Message)
+	OnProximityAlertTriggered = "\aproximity_alert_triggered"
 )
 
 // ChatAction is a client-side status indicating bot activity.

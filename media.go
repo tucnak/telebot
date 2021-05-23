@@ -195,9 +195,24 @@ type Location struct {
 	// Longitude
 	Lng float32 `json:"longitude"`
 
+	// Horizontal Accuracy
+	HA *float32 `json:"horizontal_accuracy,omitempty"`
+
+	Heading int `json:"heading,omitempty"`
+
 	// Period in seconds for which the location will be updated
 	// (see Live Locations, should be between 60 and 86400.)
 	LivePeriod int `json:"live_period,omitempty"`
+
+	ProximityAlertRadius int `json:"proximity_alert_radius,omitempty"`
+}
+
+// ProximityAlertTriggered object represents sent whenever
+// a user in the chat triggers a proximity alert set by another user.
+type ProximityAlertTriggered struct {
+	Traveler *User `json:"traveler,omitempty"`
+	Watcher  *User `json:"watcher,omitempty"`
+	Distance int   `json:"distance"`
 }
 
 // Venue object represents a venue location with name, address and

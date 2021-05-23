@@ -348,6 +348,19 @@ func (b *Bot) ProcessUpdate(upd Update) {
 
 			return
 		}
+
+		if m.ProximityAlertTriggered != nil {
+			if handler, ok := b.handlers[OnProximityAlertTriggered]; ok {
+				handler, ok := handler.(func(*Message))
+				if !ok {
+					panic("telebot: proximity alert triggered handler is bad")
+				}
+
+				b.runHandler(func() { handler(m) })
+			}
+
+			return
+		}
 	}
 
 	if upd.EditedMessage != nil {
@@ -773,6 +786,15 @@ func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Mes
 		method = "editMessageLiveLocation"
 		params["latitude"] = fmt.Sprintf("%f", v.Lat)
 		params["longitude"] = fmt.Sprintf("%f", v.Lng)
+		if v.HA != nil {
+			params["horizontal_accuracy"] = fmt.Sprintf("%f", *v.HA)
+		}
+		if v.Heading != 0 {
+			params["heading"] = strconv.Itoa(v.Heading)
+		}
+		if v.ProximityAlertRadius != 0 {
+			params["proximity_alert_radius"] = strconv.Itoa(v.Heading)
+		}
 	default:
 		return nil, ErrUnsupportedWhat
 	}

@@ -226,6 +226,10 @@ type Message struct {
 
 	// For a service message, some users were invited in the voice chat.
 	VoiceChatPartecipantsInvited *VoiceChatPartecipantsInvited `json:"voice_chat_partecipants_invited,omitempty"`
+
+	// For a service message, represents the content of a service message,
+	// sent whenever a user in the chat triggers a proximity alert set by another user.
+	ProximityAlertTriggered *ProximityAlertTriggered `json:"proximity_alert_triggered,omitempty"`
 }
 
 // MessageEntity object represents "special" parts of text messages,

@@ -265,6 +265,15 @@ func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 		"longitude":   fmt.Sprintf("%f", x.Lng),
 		"live_period": strconv.Itoa(x.LivePeriod),
 	}
+	if x.HA != nil {
+		params["horizontal_accuracy"] = fmt.Sprintf("%f", *x.HA)
+	}
+	if x.Heading != 0 {
+		params["heading"] = strconv.Itoa(x.Heading)
+	}
+	if x.ProximityAlertRadius != 0 {
+		params["proximity_alert_radius"] = strconv.Itoa(x.Heading)
+	}
 	b.embedSendOptions(params, opt)
 
 	data, err := b.Raw("sendLocation", params)
