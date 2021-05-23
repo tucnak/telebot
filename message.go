@@ -20,6 +20,9 @@ type Message struct {
 	// Conversation the message belongs to.
 	Chat *Chat `json:"chat"`
 
+	// Sender of the message, sent on behalf of a chat.
+	SenderChat *Chat `json:"sender_chat"`
+
 	// For forwarded messages, sender of the original message.
 	OriginalSender *User `json:"forward_from"`
 
@@ -226,6 +229,10 @@ type Message struct {
 
 	// For a service message, some users were invited in the voice chat.
 	VoiceChatParticipants *VoiceChatParticipants `json:"voice_chat_participants_invited,omitempty"`
+
+	// For a service message, represents the content of a service message,
+	// sent whenever a user in the chat triggers a proximity alert set by another user.
+	ProximityAlert *ProximityAlert `json:"proximity_alert_triggered,omitempty"`
 }
 
 // MessageEntity object represents "special" parts of text messages,

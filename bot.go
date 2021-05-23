@@ -366,6 +366,11 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			b.handle(OnVoiceChatParticipants, c)
 			return
 		}
+
+		if m.ProximityAlert != nil {
+			b.handle(OnProximityAlert, c)
+			return
+		}
 	}
 
 	if upd.EditedMessage != nil {
@@ -710,6 +715,16 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 		method = "editMessageLiveLocation"
 		params["latitude"] = fmt.Sprintf("%f", v.Lat)
 		params["longitude"] = fmt.Sprintf("%f", v.Lng)
+
+		if v.HorizontalAccuracy != nil {
+			params["horizontal_accuracy"] = fmt.Sprintf("%f", *v.HorizontalAccuracy)
+		}
+		if v.Heading != 0 {
+			params["heading"] = strconv.Itoa(v.Heading)
+		}
+		if v.AlertRadius != 0 {
+			params["proximity_alert_radius"] = strconv.Itoa(v.AlertRadius)
+		}
 	default:
 		return nil, ErrUnsupportedWhat
 	}
@@ -1332,13 +1347,28 @@ func (b *Bot) Pin(msg Editable, opts ...interface{}) error {
 }
 
 // Unpin unpins a message in a supergroup or a channel.
-// It supports Silent option.
-func (b *Bot) Unpin(chat *Chat) error {
+// It supports tb.Silent option.
+func (b *Bot) Unpin(chat *Chat, messageID ...int) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+	if len(messageID) > 0 {
+		params["message_id"] = strconv.Itoa(messageID[0])
+	}
+
+	_, err := b.Raw("unpinChatMessage", params)
+	return err
+}
+
+// UnpinAll unpins all messages in a supergroup or a channel.
+//
+// It supports tb.Silent option.
+func (b *Bot) UnpinAll(chat *Chat) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 	}
 
-	_, err := b.Raw("unpinChatMessage", params)
+	_, err := b.Raw("unpinAllChatMessages", params)
 	return err
 }
 
@@ -1439,4 +1469,38 @@ func (b *Bot) SetCommands(cmds []Command) error {
 
 	_, err := b.Raw("setMyCommands", params)
 	return err
+}
+
+// Logout logs out from the cloud Bot API server before launching the bot locally.
+func (b *Bot) Logout() (bool, error) {
+	data, err := b.Raw("logOut", nil)
+	if err != nil {
+		return false, err
+	}
+
+	var resp struct {
+		Result bool `json:"result"`
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return false, wrapError(err)
+	}
+
+	return resp.Result, nil
+}
+
+// Close closes the bot instance before moving it from one local server to another.
+func (b *Bot) Close() (bool, error) {
+	data, err := b.Raw("close", nil)
+	if err != nil {
+		return false, err
+	}
+
+	var resp struct {
+		Result bool `json:"result"`
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return false, wrapError(err)
+	}
+
+	return resp.Result, nil
 }

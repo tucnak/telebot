@@ -1,13 +1,13 @@
 package telebot
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 	"log"
 	"net/http"
 	"strconv"
-	"bytes"
-	"github.com/pkg/errors"
 )
 
 func (b *Bot) debug(err error) {
@@ -209,6 +209,14 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 
 	if opt.ParseMode != ModeDefault {
 		params["parse_mode"] = opt.ParseMode
+	}
+
+	if opt.DisableContentDetection {
+		params["disable_content_type_detection"] = "true"
+	}
+
+	if opt.AllowWithoutReply {
+		params["allow_sending_without_reply"] = "true"
 	}
 
 	if opt.ReplyMarkup != nil {

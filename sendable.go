@@ -265,6 +265,15 @@ func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 		"longitude":   fmt.Sprintf("%f", x.Lng),
 		"live_period": strconv.Itoa(x.LivePeriod),
 	}
+	if x.HorizontalAccuracy != nil {
+		params["horizontal_accuracy"] = fmt.Sprintf("%f", *x.HorizontalAccuracy)
+	}
+	if x.Heading != 0 {
+		params["heading"] = strconv.Itoa(x.Heading)
+	}
+	if x.AlertRadius != 0 {
+		params["proximity_alert_radius"] = strconv.Itoa(x.Heading)
+	}
 	b.embedSendOptions(params, opt)
 
 	data, err := b.Raw("sendLocation", params)
@@ -278,13 +287,15 @@ func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 // Send delivers media through bot b to recipient.
 func (v *Venue) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id":         to.Recipient(),
-		"latitude":        fmt.Sprintf("%f", v.Location.Lat),
-		"longitude":       fmt.Sprintf("%f", v.Location.Lng),
-		"title":           v.Title,
-		"address":         v.Address,
-		"foursquare_id":   v.FoursquareID,
-		"foursquare_type": v.FoursquareType,
+		"chat_id":           to.Recipient(),
+		"latitude":          fmt.Sprintf("%f", v.Location.Lat),
+		"longitude":         fmt.Sprintf("%f", v.Location.Lng),
+		"title":             v.Title,
+		"address":           v.Address,
+		"foursquare_id":     v.FoursquareID,
+		"foursquare_type":   v.FoursquareType,
+		"google_place_id":   v.GooglePlaceID,
+		"google_place_type": v.GooglePlaceType,
 	}
 	b.embedSendOptions(params, opt)
 

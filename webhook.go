@@ -42,6 +42,8 @@ type Webhook struct {
 	Listen         string   `json:"url"`
 	MaxConnections int      `json:"max_connections"`
 	AllowedUpdates []string `json:"allowed_updates"`
+	IP             string   `json:"ip_address"`
+	DropUpdates    bool     `json:"drop_pending_updates"`
 
 	// (WebhookInfo)
 	HasCustomCert  bool   `json:"has_custom_certificate"`
@@ -49,8 +51,8 @@ type Webhook struct {
 	ErrorUnixtime  int64  `json:"last_error_date"`
 	ErrorMessage   string `json:"last_error_message"`
 
-	TLS      *WebhookTLS      `json:"tls,omitempty"`
-	Endpoint *WebhookEndpoint `json:"endpoint,omitempty"`
+	TLS      *WebhookTLS
+	Endpoint *WebhookEndpoint
 
 	dest chan<- Update
 	bot  *Bot
@@ -87,6 +89,12 @@ func (h *Webhook) getParams() map[string]string {
 	if len(h.AllowedUpdates) > 0 {
 		data, _ := json.Marshal(h.AllowedUpdates)
 		params["allowed_updates"] = string(data)
+	}
+	if h.IP != "" {
+		params["ip_address"] = h.IP
+	}
+	if h.DropUpdates {
+		params["drop_pending_updates"] = strconv.FormatBool(h.DropUpdates)
 	}
 
 	if h.TLS != nil {
@@ -177,7 +185,13 @@ func (b *Bot) SetWebhook(w *Webhook) error {
 }
 
 // RemoveWebhook removes webhook integration.
-func (b *Bot) RemoveWebhook() error {
-	_, err := b.Raw("deleteWebhook", nil)
+func (b *Bot) RemoveWebhook(dropPending ...bool) error {
+	drop := false
+	if len(dropPending) > 0 {
+		drop = dropPending[0]
+	}
+	_, err := b.Raw("deleteWebhook", map[string]bool{
+		"drop_pending_updates": drop,
+	})
 	return err
 }
