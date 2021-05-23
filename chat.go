@@ -78,9 +78,10 @@ func (c *Chat) Recipient() string {
 type ChatMember struct {
 	Rights
 
-	User  *User        `json:"user"`
-	Role  MemberStatus `json:"status"`
-	Title string       `json:"custom_title"`
+	User        *User        `json:"user"`
+	Role        MemberStatus `json:"status"`
+	Title       string       `json:"custom_title"`
+	IsAnonymous bool         `json:"is_anonymous"`
 
 	// Date when restrictions will be lifted for the user, unix time.
 	//

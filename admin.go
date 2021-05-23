@@ -199,8 +199,9 @@ func (b *Bot) Promote(chat *Chat, member *ChatMember) error {
 	prv := member.Rights
 
 	params := map[string]interface{}{
-		"chat_id": chat.Recipient(),
-		"user_id": member.User.Recipient(),
+		"chat_id":      chat.Recipient(),
+		"user_id":      member.User.Recipient(),
+		"is_anonymous": member.IsAnonymous,
 	}
 	embedRights(params, prv)
 
