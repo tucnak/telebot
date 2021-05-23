@@ -140,10 +140,10 @@ const (
 	// Handler: func(*Message)
 	OnVoiceChatEnded = "\avoice_chat_ended"
 
-	// Will fire on VoiceChatPartecipantsInvited
+	// Will fire on VoiceChatParticipantsInvited
 	//
 	// Handler: func(*Message)
-	OnVoiceChatPartecipantsInvited = "\avoice_chat_partecipants_invited"
+	OnVoiceChatParticipantsInvited = "\avoice_chat_participants_invited"
 
 	// Will fire on ProximityAlert
 	//

@@ -12,9 +12,9 @@ type VoiceChatEnded struct {
 	Duration int `json:"duration"`
 }
 
-// VoiceChatPartecipantsInvited represents a service message about new
+// VoiceChatParticipantsInvited represents a service message about new
 // members invited to a voice chat
-type VoiceChatPartecipantsInvited struct {
+type VoiceChatParticipantsInvited struct {
 	Users []User `json:"users"`
 }
 

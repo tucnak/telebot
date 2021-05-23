@@ -230,7 +230,7 @@ type Message struct {
 	VoiceChatEnded *VoiceChatEnded `json:"voice_chat_ended,omitempty"`
 
 	// For a service message, some users were invited in the voice chat.
-	VoiceChatPartecipantsInvited *VoiceChatPartecipantsInvited `json:"voice_chat_partecipants_invited,omitempty"`
+	VoiceChatParticipantsInvited *VoiceChatParticipantsInvited `json:"voice_chat_participants_invited,omitempty"`
 
 	// For a service message, represents the content of a service message,
 	// sent whenever a user in the chat triggers a proximity alert set by another user.
