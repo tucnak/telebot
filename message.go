@@ -20,6 +20,9 @@ type Message struct {
 	// Conversation the message belongs to.
 	Chat *Chat `json:"chat"`
 
+	// Sender of the message, sent on behalf of a chat.
+	SenderChat *Chat `json:"sender_chat"`
+
 	// For forwarded messages, sender of the original message.
 	OriginalSender *User `json:"forward_from"`
 
