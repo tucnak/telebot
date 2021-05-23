@@ -1566,7 +1566,7 @@ func (b *Bot) NewMarkup() *ReplyMarkup {
 	return &ReplyMarkup{}
 }
 
-// Logout logs out from the cloud Bot API server before launching the bot locally,
+// Logout logs out from the cloud Bot API server before launching the bot locally.
 func (b *Bot) Logout() (bool, error) {
 	data, err := b.Raw("logOut", nil)
 	if err != nil {
@@ -1583,7 +1583,7 @@ func (b *Bot) Logout() (bool, error) {
 	return resp.Result, nil
 }
 
-// Close closes the bot instance before moving it from one local server to another,
+// Close closes the bot instance before moving it from one local server to another.
 func (b *Bot) Close() (bool, error) {
 	data, err := b.Raw("close", nil)
 	if err != nil {
