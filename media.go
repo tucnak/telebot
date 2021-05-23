@@ -223,8 +223,10 @@ type Venue struct {
 	Address  string   `json:"address"`
 
 	// (Optional)
-	FoursquareID   string `json:"foursquare_id,omitempty"`
-	FoursquareType string `json:"foursquare_type,omitempty"`
+	FoursquareID    string `json:"foursquare_id,omitempty"`
+	FoursquareType  string `json:"foursquare_type,omitempty"`
+	GooglePlaceID   string `json:"google_place_id,omitempty"`
+	GooglePlaceType string `json:"google_place_type,omitempty"`
 }
 
 // Dice object represents a dice with a random value

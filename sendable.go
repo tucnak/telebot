@@ -287,13 +287,15 @@ func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 // Send delivers media through bot b to recipient.
 func (v *Venue) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id":         to.Recipient(),
-		"latitude":        fmt.Sprintf("%f", v.Location.Lat),
-		"longitude":       fmt.Sprintf("%f", v.Location.Lng),
-		"title":           v.Title,
-		"address":         v.Address,
-		"foursquare_id":   v.FoursquareID,
-		"foursquare_type": v.FoursquareType,
+		"chat_id":           to.Recipient(),
+		"latitude":          fmt.Sprintf("%f", v.Location.Lat),
+		"longitude":         fmt.Sprintf("%f", v.Location.Lng),
+		"title":             v.Title,
+		"address":           v.Address,
+		"foursquare_id":     v.FoursquareID,
+		"foursquare_type":   v.FoursquareType,
+		"google_place_id":   v.GooglePlaceID,
+		"google_place_type": v.GooglePlaceType,
 	}
 	b.embedSendOptions(params, opt)
 
