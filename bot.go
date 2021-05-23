@@ -337,7 +337,7 @@ func (b *Bot) ProcessUpdate(upd Update) {
 		}
 
 		if m.VoiceChatParticipantsInvited != nil {
-			if handler, ok := b.handlers[OnVoiceChatPartecipantsInvited]; ok {
+			if handler, ok := b.handlers[OnVoiceChatParticipantsInvited]; ok {
 				handler, ok := handler.(func(*Message))
 				if !ok {
 					panic("telebot: voice chat participants invited handler is bad")
