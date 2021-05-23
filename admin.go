@@ -21,17 +21,17 @@ type ChatInviteLink struct {
 	IsRevoked bool `json:"is_revoked"`
 
 	// (Optional) Point in time when the link will expire, use
-	// ChatInviteLink.ExpireTime() to get time.Time
-	Unixtime int64 `json:"expire_date,omitempty"`
+	// ChatInviteLink.ExpireDate() to get time.Time
+	ExpireUnixtime int64 `json:"expire_date,omitempty"`
 
 	// (Optional) Maximum number of users that can be members of
 	// the chat simultaneously.
 	MemberLimit int `json:"member_limit,omitempty"`
 }
 
-// ExpireTime returns the moment of the link expiration in local time.
-func (c *ChatInviteLink) ExpireTime() time.Time {
-	return time.Unix(c.Unixtime, 0)
+// ExpireDate returns the moment of the link expiration in local time.
+func (c *ChatInviteLink) ExpireDate() time.Time {
+	return time.Unix(c.ExpireUnixtime, 0)
 }
 
 // ChatMemberUpdated object represents changes in the status of a chat member.
@@ -51,9 +51,9 @@ type ChatMemberUpdated struct {
 	// New information about the chat member.
 	NewChatMember *ChatMember `json:"new_chat_member"`
 
-	// (Optional) ChatInviteLink which was used by the user to
+	// (Optional) InviteLink which was used by the user to
 	// join the chat; for joining by invite link events only.
-	ChatInviteLink *ChatInviteLink `json:"chat_invite_link"`
+	InviteLink *ChatInviteLink `json:"invite_link"`
 }
 
 // Time returns the moment of the change in local time.
@@ -78,6 +78,7 @@ type Rights struct {
 	CanSendOther        bool `json:"can_send_other_messages"`
 	CanAddPreviews      bool `json:"can_add_web_page_previews"`
 	CanManageVoiceChats bool `json:"can_manage_voice_chats"`
+	CanManageChat       bool `json:"can_manage_chat"`
 }
 
 // NoRights is the default Rights{}.
@@ -106,6 +107,7 @@ func NoRestrictions() Rights {
 		CanSendOther:        true,
 		CanAddPreviews:      true,
 		CanManageVoiceChats: false,
+		CanManageChat:       false,
 	}
 }
 
@@ -127,20 +129,24 @@ func AdminRights() Rights {
 		CanSendOther:        true,
 		CanAddPreviews:      true,
 		CanManageVoiceChats: true,
+		CanManageChat:       true,
 	}
 }
 
-// Forever is a Unixtime of "forever" banning.
+// Forever is a ExpireUnixtime of "forever" banning.
 func Forever() int64 {
 	return time.Now().Add(367 * 24 * time.Hour).Unix()
 }
 
 // Ban will ban user from chat until `member.RestrictedUntil`.
-func (b *Bot) Ban(chat *Chat, member *ChatMember) error {
+func (b *Bot) Ban(chat *Chat, member *ChatMember, revokeMessages ...bool) error {
 	params := map[string]string{
 		"chat_id":    chat.Recipient(),
 		"user_id":    member.User.Recipient(),
 		"until_date": strconv.FormatInt(member.RestrictedUntil, 10),
+	}
+	if len(revokeMessages) > 0 {
+		params["revoke_messages"] = strconv.FormatBool(revokeMessages[0])
 	}
 
 	_, err := b.Raw("kickChatMember", params)

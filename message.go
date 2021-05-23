@@ -233,6 +233,14 @@ type Message struct {
 	// For a service message, represents the content of a service message,
 	// sent whenever a user in the chat triggers a proximity alert set by another user.
 	ProximityAlert *ProximityAlert `json:"proximity_alert_triggered,omitempty"`
+
+	// For a service message, represents about a change in auto-delete timer settings.
+	AutoDeleteTimer *AutoDeleteTimer `json:"message_auto_delete_timer_changed,omitempty"`
+}
+
+// AutoDeleteTimer represents a service message about a change in auto-delete timer settings.
+type AutoDeleteTimer struct {
+	Unixtime int `json:"message_auto_delete_time"`
 }
 
 // MessageEntity object represents "special" parts of text messages,
