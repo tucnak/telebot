@@ -78,6 +78,7 @@ type Rights struct {
 	CanSendOther        bool `json:"can_send_other_messages"`
 	CanAddPreviews      bool `json:"can_add_web_page_previews"`
 	CanManageVoiceChats bool `json:"can_manage_voice_chats"`
+	CanManageChat       bool `json:"can_manage_chat"`
 }
 
 // NoRights is the default Rights{}.
@@ -106,6 +107,7 @@ func NoRestrictions() Rights {
 		CanSendOther:        true,
 		CanAddPreviews:      true,
 		CanManageVoiceChats: false,
+		CanManageChat:       false,
 	}
 }
 
@@ -127,6 +129,7 @@ func AdminRights() Rights {
 		CanSendOther:        true,
 		CanAddPreviews:      true,
 		CanManageVoiceChats: true,
+		CanManageChat:       true,
 	}
 }
 
@@ -138,9 +141,10 @@ func Forever() int64 {
 // Ban will ban user from chat until `member.RestrictedUntil`.
 func (b *Bot) Ban(chat *Chat, member *ChatMember) error {
 	params := map[string]string{
-		"chat_id":    chat.Recipient(),
-		"user_id":    member.User.Recipient(),
-		"until_date": strconv.FormatInt(member.RestrictedUntil, 10),
+		"chat_id":         chat.Recipient(),
+		"user_id":         member.User.Recipient(),
+		"until_date":      strconv.FormatInt(member.RestrictedUntil, 10),
+		"revoke_messages": strconv.FormatBool(member.RevokeMessages),
 	}
 
 	_, err := b.Raw("kickChatMember", params)
