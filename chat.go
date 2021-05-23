@@ -42,6 +42,7 @@ type Chat struct {
 	Still bool `json:"is_member,omitempty"`
 
 	// Returns only in getChat
+	Bio              string     `json:"bio,omitempty"`
 	Photo            *ChatPhoto `json:"photo,omitempty"`
 	Description      string     `json:"description,omitempty"`
 	InviteLink       string     `json:"invite_link,omitempty"`
@@ -50,6 +51,11 @@ type Chat struct {
 	SlowMode         int        `json:"slow_mode_delay,omitempty"`
 	StickerSet       string     `json:"sticker_set_name,omitempty"`
 	CanSetStickerSet bool       `json:"can_set_sticker_set,omitempty"`
+	LinkedChatID     int64      `json:"linked_chat_id,omitempty"`
+	ChatLocation     *struct {
+		Location Location `json:"location,omitempty"`
+		Address  string   `json:"address,omitempty"`
+	} `json:"location,omitempty"`
 }
 
 // ChatPhoto object represents a chat photo.

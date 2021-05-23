@@ -148,10 +148,14 @@ func (b *Bot) Ban(chat *Chat, member *ChatMember) error {
 }
 
 // Unban will unban user from chat, who would have thought eh?
-func (b *Bot) Unban(chat *Chat, user *User) error {
+func (b *Bot) Unban(chat *Chat, user *User, isBanned ...bool) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 		"user_id": user.Recipient(),
+	}
+
+	if len(isBanned) > 0 {
+		params["only_if_banned"] = strconv.FormatBool(isBanned[0])
 	}
 
 	_, err := b.Raw("unbanChatMember", params)
