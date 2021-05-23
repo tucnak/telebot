@@ -374,6 +374,19 @@ func (b *Bot) ProcessUpdate(upd Update) {
 
 			return
 		}
+
+		if m.VoiceChatSchedule != nil {
+			if handler, ok := b.handlers[OnVoiceChatScheduled]; ok {
+				handler, ok := handler.(func(*Message))
+				if !ok {
+					panic("telebot: voice chat scheduled is bad")
+				}
+
+				b.runHandler(func() { handler(m) })
+			}
+
+			return
+		}
 	}
 
 	if upd.EditedMessage != nil {
