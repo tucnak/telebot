@@ -349,7 +349,7 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			return
 		}
 
-		if m.ProximityAlertTriggered != nil {
+		if m.ProximityAlert != nil {
 			if handler, ok := b.handlers[OnProximityAlert]; ok {
 				handler, ok := handler.(func(*Message))
 				if !ok {
@@ -362,7 +362,7 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			return
 		}
 
-		if m.AutoDeleteTimerChanged != nil {
+		if m.AutoDeleteTimer != nil {
 			if handler, ok := b.handlers[OnAutoDeleteTimer]; ok {
 				handler, ok := handler.(func(*Message))
 				if !ok {
@@ -1618,7 +1618,7 @@ func (b *Bot) CreateInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLin
 		"chat_id": chat.Recipient(),
 	}
 	if link != nil {
-		params["expire_date"] = strconv.FormatInt(link.ExpireDate, 10)
+		params["expire_date"] = strconv.FormatInt(link.ExpireUnixtime, 10)
 		params["member_limit"] = strconv.Itoa(link.MemberLimit)
 	}
 
@@ -1642,7 +1642,7 @@ func (b *Bot) EditInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink,
 	}
 	if link != nil {
 		params["invite_link"] = link.InviteLink
-		params["expire_date"] = strconv.FormatInt(link.ExpireDate, 10)
+		params["expire_date"] = strconv.FormatInt(link.ExpireUnixtime, 10)
 		params["member_limit"] = strconv.Itoa(link.MemberLimit)
 	}
 

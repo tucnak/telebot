@@ -21,17 +21,17 @@ type ChatInviteLink struct {
 	IsRevoked bool `json:"is_revoked"`
 
 	// (Optional) Point in time when the link will expire, use
-	// ChatInviteLink.ExpireTime() to get time.Time
-	ExpireDate int64 `json:"expire_date,omitempty"`
+	// ChatInviteLink.ExpireDate() to get time.Time
+	ExpireUnixtime int64 `json:"expire_date,omitempty"`
 
 	// (Optional) Maximum number of users that can be members of
 	// the chat simultaneously.
 	MemberLimit int `json:"member_limit,omitempty"`
 }
 
-// ExpireTime returns the moment of the link expiration in local time.
-func (c *ChatInviteLink) ExpireTime() time.Time {
-	return time.Unix(c.ExpireDate, 0)
+// ExpireDate returns the moment of the link expiration in local time.
+func (c *ChatInviteLink) ExpireDate() time.Time {
+	return time.Unix(c.ExpireUnixtime, 0)
 }
 
 // ChatMemberUpdated object represents changes in the status of a chat member.
@@ -51,9 +51,9 @@ type ChatMemberUpdated struct {
 	// New information about the chat member.
 	NewChatMember *ChatMember `json:"new_chat_member"`
 
-	// (Optional) ChatInviteLink which was used by the user to
+	// (Optional) InviteLink which was used by the user to
 	// join the chat; for joining by invite link events only.
-	ChatInviteLink *ChatInviteLink `json:"invite_link"`
+	InviteLink *ChatInviteLink `json:"invite_link"`
 }
 
 // Time returns the moment of the change in local time.
@@ -133,7 +133,7 @@ func AdminRights() Rights {
 	}
 }
 
-// Forever is a ExpireDate of "forever" banning.
+// Forever is a ExpireUnixtime of "forever" banning.
 func Forever() int64 {
 	return time.Now().Add(367 * 24 * time.Hour).Unix()
 }

@@ -232,10 +232,10 @@ type Message struct {
 
 	// For a service message, represents the content of a service message,
 	// sent whenever a user in the chat triggers a proximity alert set by another user.
-	ProximityAlertTriggered *ProximityAlertTriggered `json:"proximity_alert_triggered,omitempty"`
+	ProximityAlert *ProximityAlertTriggered `json:"proximity_alert_triggered,omitempty"`
 
 	// For a service message, represents about a change in auto-delete timer settings.
-	AutoDeleteTimerChanged *MessageAutoDeleteTimerChanged `json:"message_auto_delete_timer_changed,omitempty"`
+	AutoDeleteTimer *MessageAutoDeleteTimerChanged `json:"message_auto_delete_timer_changed,omitempty"`
 }
 
 // MessageAutoDeleteTimerChanged represents a service message about a change in auto-delete timer settings.
