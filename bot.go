@@ -1628,6 +1628,7 @@ func (b *Bot) EditInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink,
 		"chat_id": chat.Recipient(),
 	}
 	if link != nil {
+		params["invite_link"] = link.InviteLink
 		params["expire_date"] = strconv.FormatInt(link.ExpireDate, 10)
 		params["member_limit"] = strconv.Itoa(link.MemberLimit)
 	}

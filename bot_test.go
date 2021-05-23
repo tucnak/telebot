@@ -318,6 +318,19 @@ func TestBot(t *testing.T) {
 	}
 	var msg *Message
 
+	t.Run("Link", func(t *testing.T) {
+		b.Send(to, "test")
+
+		l, err := b.CreateInviteLink(to, &ChatInviteLink{
+			InviteLink:  "test1",
+			MemberLimit: 0,
+		})
+		assert.Nil(t, err)
+		t.Log(l)
+	})
+
+	return
+
 	t.Run("Send(what=Sendable)", func(t *testing.T) {
 		msg, err = b.Send(to, photo)
 		require.NoError(t, err)
