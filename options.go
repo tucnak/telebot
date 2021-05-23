@@ -50,6 +50,9 @@ type SendOptions struct {
 
 	// ParseMode controls how client apps render your message.
 	ParseMode ParseMode
+
+	// DisableContentDetection abilities to disable server-side file content type detection.
+	DisableContentDetection bool
 }
 
 func (og *SendOptions) copy() *SendOptions {
