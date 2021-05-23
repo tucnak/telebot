@@ -149,6 +149,11 @@ const (
 	//
 	// Handler: func(*Message)
 	OnProximityAlert = "\aproximity_alert_triggered"
+
+	// Will fire on AudoDeleteTimer
+	//
+	// Handler: func(*Message)
+	OnAutoDeleteTimer = "\amessage_auto_delete_timer_changed"
 )
 
 // ChatAction is a client-side status indicating bot activity.

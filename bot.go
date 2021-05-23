@@ -361,6 +361,19 @@ func (b *Bot) ProcessUpdate(upd Update) {
 
 			return
 		}
+
+		if m.AutoDeleteTimerChanged != nil {
+			if handler, ok := b.handlers[OnAutoDeleteTimer]; ok {
+				handler, ok := handler.(func(*Message))
+				if !ok {
+					panic("telebot: auto delete timer handler is bad")
+				}
+
+				b.runHandler(func() { handler(m) })
+			}
+
+			return
+		}
 	}
 
 	if upd.EditedMessage != nil {
