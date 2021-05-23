@@ -349,11 +349,24 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			return
 		}
 
-		if m.ProximityAlertTriggered != nil {
+		if m.ProximityAlert != nil {
 			if handler, ok := b.handlers[OnProximityAlert]; ok {
 				handler, ok := handler.(func(*Message))
 				if !ok {
 					panic("telebot: proximity alert handler is bad")
+				}
+
+				b.runHandler(func() { handler(m) })
+			}
+
+			return
+		}
+
+		if m.AutoDeleteTimer != nil {
+			if handler, ok := b.handlers[OnAutoDeleteTimer]; ok {
+				handler, ok := handler.(func(*Message))
+				if !ok {
+					panic("telebot: auto delete timer handler is bad")
 				}
 
 				b.runHandler(func() { handler(m) })
@@ -1597,4 +1610,71 @@ func (b *Bot) Close() (bool, error) {
 	}
 
 	return resp.Result, nil
+}
+
+// CreateInviteLink creates an additional invite link for a chat.
+func (b *Bot) CreateInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink, error) {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+	if link != nil {
+		params["expire_date"] = strconv.FormatInt(link.ExpireUnixtime, 10)
+		params["member_limit"] = strconv.Itoa(link.MemberLimit)
+	}
+
+	data, err := b.Raw("createChatInviteLink", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp ChatInviteLink
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+
+	return &resp, nil
+}
+
+// EditInviteLink edits a non-primary invite link created by the bot.
+func (b *Bot) EditInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink, error) {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+	if link != nil {
+		params["invite_link"] = link.InviteLink
+		params["expire_date"] = strconv.FormatInt(link.ExpireUnixtime, 10)
+		params["member_limit"] = strconv.Itoa(link.MemberLimit)
+	}
+
+	data, err := b.Raw("editChatInviteLink", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp ChatInviteLink
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+
+	return &resp, nil
+}
+
+// RevokeInviteLink revokes an invite link created by the bot.
+func (b *Bot) RevokeInviteLink(chat *Chat, link string) (*ChatInviteLink, error) {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+		"link":    link,
+	}
+
+	data, err := b.Raw("revokeChatInviteLink", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp ChatInviteLink
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+
+	return &resp, nil
 }
