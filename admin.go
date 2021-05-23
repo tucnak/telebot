@@ -148,14 +148,15 @@ func (b *Bot) Ban(chat *Chat, member *ChatMember) error {
 }
 
 // Unban will unban user from chat, who would have thought eh?
-func (b *Bot) Unban(chat *Chat, user *User, isBanned ...bool) error {
+// forBanned does nothing if the user is not banned.
+func (b *Bot) Unban(chat *Chat, user *User, forBanned ...bool) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 		"user_id": user.Recipient(),
 	}
 
-	if len(isBanned) > 0 {
-		params["only_if_banned"] = strconv.FormatBool(isBanned[0])
+	if len(forBanned) > 0 {
+		params["only_if_banned"] = strconv.FormatBool(forBanned[0])
 	}
 
 	_, err := b.Raw("unbanChatMember", params)
@@ -201,7 +202,7 @@ func (b *Bot) Promote(chat *Chat, member *ChatMember) error {
 	params := map[string]interface{}{
 		"chat_id":      chat.Recipient(),
 		"user_id":      member.User.Recipient(),
-		"is_anonymous": member.IsAnonymous,
+		"is_anonymous": member.Anonymous,
 	}
 	embedRights(params, prv)
 

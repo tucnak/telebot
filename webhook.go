@@ -49,8 +49,8 @@ type Webhook struct {
 	ErrorUnixtime  int64  `json:"last_error_date"`
 	ErrorMessage   string `json:"last_error_message"`
 
-	IpAddress          string `json:"ip_address"`
-	DropPendingUpdates bool   `json:"drop_pending_updates"`
+	Ip          string `json:"ip_address"`
+	DropUpdates bool   `json:"drop_pending_updates"`
 
 	TLS      *WebhookTLS
 	Endpoint *WebhookEndpoint
@@ -91,11 +91,11 @@ func (h *Webhook) getParams() map[string]string {
 		data, _ := json.Marshal(h.AllowedUpdates)
 		params["allowed_updates"] = string(data)
 	}
-	if h.IpAddress != "" {
-		params["ip_address"] = h.IpAddress
+	if h.Ip != "" {
+		params["ip_address"] = h.Ip
 	}
-	if h.DropPendingUpdates {
-		params["drop_pending_updates"] = strconv.FormatBool(h.DropPendingUpdates)
+	if h.DropUpdates {
+		params["drop_pending_updates"] = strconv.FormatBool(h.DropUpdates)
 	}
 
 	if h.TLS != nil {

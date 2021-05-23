@@ -265,8 +265,8 @@ func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 		"longitude":   fmt.Sprintf("%f", x.Lng),
 		"live_period": strconv.Itoa(x.LivePeriod),
 	}
-	if x.HA != nil {
-		params["horizontal_accuracy"] = fmt.Sprintf("%f", *x.HA)
+	if x.HorizontalAccuracy != nil {
+		params["horizontal_accuracy"] = fmt.Sprintf("%f", *x.HorizontalAccuracy)
 	}
 	if x.Heading != 0 {
 		params["heading"] = strconv.Itoa(x.Heading)

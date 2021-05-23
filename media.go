@@ -196,7 +196,7 @@ type Location struct {
 	Lng float32 `json:"longitude"`
 
 	// Horizontal Accuracy
-	HA *float32 `json:"horizontal_accuracy,omitempty"`
+	HorizontalAccuracy *float32 `json:"horizontal_accuracy,omitempty"`
 
 	Heading int `json:"heading,omitempty"`
 
@@ -207,7 +207,7 @@ type Location struct {
 	ProximityAlertRadius int `json:"proximity_alert_radius,omitempty"`
 }
 
-// ProximityAlertTriggered object represents sent whenever
+// ProximityAlertTriggered sent whenever
 // a user in the chat triggers a proximity alert set by another user.
 type ProximityAlertTriggered struct {
 	Traveler *User `json:"traveler,omitempty"`

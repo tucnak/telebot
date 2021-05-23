@@ -350,10 +350,10 @@ func (b *Bot) ProcessUpdate(upd Update) {
 		}
 
 		if m.ProximityAlertTriggered != nil {
-			if handler, ok := b.handlers[OnProximityAlertTriggered]; ok {
+			if handler, ok := b.handlers[OnProximityAlert]; ok {
 				handler, ok := handler.(func(*Message))
 				if !ok {
-					panic("telebot: proximity alert triggered handler is bad")
+					panic("telebot: proximity alert handler is bad")
 				}
 
 				b.runHandler(func() { handler(m) })
@@ -786,8 +786,8 @@ func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Mes
 		method = "editMessageLiveLocation"
 		params["latitude"] = fmt.Sprintf("%f", v.Lat)
 		params["longitude"] = fmt.Sprintf("%f", v.Lng)
-		if v.HA != nil {
-			params["horizontal_accuracy"] = fmt.Sprintf("%f", *v.HA)
+		if v.HorizontalAccuracy != nil {
+			params["horizontal_accuracy"] = fmt.Sprintf("%f", *v.HorizontalAccuracy)
 		}
 		if v.Heading != 0 {
 			params["heading"] = strconv.Itoa(v.Heading)
@@ -1430,10 +1430,9 @@ func (b *Bot) Unpin(chat *Chat, messageID ...int) error {
 	return err
 }
 
-// Unpin unpins all messages in a supergroup or a channel.
+// UnpinAll unpins all messages in a supergroup or a channel.
 //
 // It supports tb.Silent option.
-// MessageID is a specific pinned message
 func (b *Bot) UnpinAll(chat *Chat) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
