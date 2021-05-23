@@ -53,6 +53,9 @@ type SendOptions struct {
 
 	// DisableContentDetection abilities to disable server-side file content type detection.
 	DisableContentDetection bool
+
+	// AllowWithoutReply allows sending messages not a as reply if the replied-to message has already been deleted.
+	AllowWithoutReply bool
 }
 
 func (og *SendOptions) copy() *SendOptions {

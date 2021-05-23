@@ -199,6 +199,10 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 		params["disable_content_type_detection"] = "true"
 	}
 
+	if opt.AllowWithoutReply {
+		params["allow_sending_without_reply"] = "true"
+	}
+
 	if opt.ReplyMarkup != nil {
 		processButtons(opt.ReplyMarkup.InlineKeyboard)
 		replyMarkup, _ := json.Marshal(opt.ReplyMarkup)
