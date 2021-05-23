@@ -148,7 +148,7 @@ const (
 	// Will fire on ProximityAlert
 	//
 	// Handler: func(*Message)
-	OnProximityAlert = "\aproximity_alert"
+	OnProximityAlert = "\aproximity_alert_triggered"
 )
 
 // ChatAction is a client-side status indicating bot activity.
