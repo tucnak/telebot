@@ -767,6 +767,32 @@ func (b *Bot) Forward(to Recipient, msg Editable, options ...interface{}) (*Mess
 	return extractMessage(data)
 }
 
+// Copy behaves just like Forward() but the copied message doesn't have a link to the original message (see Bots API).
+//
+// This function will panic upon nil Editable.
+func (b *Bot) Copy(to Recipient, msg Editable, options ...interface{}) (*Message, error) {
+	if to == nil {
+		return nil, ErrBadRecipient
+	}
+	msgID, chatID := msg.MessageSig()
+
+	params := map[string]string{
+		"chat_id":      to.Recipient(),
+		"from_chat_id": strconv.FormatInt(chatID, 10),
+		"message_id":   msgID,
+	}
+
+	sendOpts := extractOptions(options)
+	b.embedSendOptions(params, sendOpts)
+
+	data, err := b.Raw("copyMessage", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMessage(data)
+}
+
 // Edit is magic, it lets you change already sent message.
 //
 // If edited message is sent by the bot, returns it,
