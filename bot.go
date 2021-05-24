@@ -1295,33 +1295,6 @@ func (b *Bot) StopPoll(msg Editable, options ...interface{}) (*Poll, error) {
 	return resp.Result, nil
 }
 
-// CreateChatInviteLink should be used to create an additional invite link for a chat.
-func (b *Bot) CreateChatInviteLink(chat *Chat, expireDate int64, memberLimit int) (*ChatInviteLink, error) {
-	params := map[string]string{
-		"chat_id": chat.Recipient(),
-	}
-	if expireDate > 0 {
-		params["expire_date"] = fmt.Sprintf("%d", expireDate)
-	}
-	if memberLimit > 0 {
-		params["member_limit"] = fmt.Sprintf("%d", memberLimit)
-	}
-
-	data, err := b.Raw("createChatInviteLink", params)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		Result *ChatInviteLink
-	}
-
-	if err := json.Unmarshal(data, &resp); err != nil {
-		return nil, wrapError(err)
-	}
-	return resp.Result, nil
-}
-
 // GetInviteLink should be used to export chat's invite link.
 func (b *Bot) GetInviteLink(chat *Chat) (string, error) {
 	params := map[string]string{
