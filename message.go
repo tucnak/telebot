@@ -221,7 +221,7 @@ type Message struct {
 	// Inline keyboard attached to the message.
 	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup"`
 
-	VoiceChatSchedule *VoiceChatSchedule `json:"voice_chat_scheduled,omitempty"`
+	VoiceChatSchedule *VoiceChatScheduled `json:"voice_chat_scheduled,omitempty"`
 
 	// For a service message, a voice chat started in the chat.
 	VoiceChatStarted *VoiceChatStarted `json:"voice_chat_started,omitempty"`

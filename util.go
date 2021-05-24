@@ -252,10 +252,9 @@ func isUserInList(user *User, list []User) bool {
 	return false
 }
 
-func sliceIntToString(ns []int) (s string) {
+func intsToStrs(ns []int) (s []string) {
 	for _, n := range ns {
-		s += strconv.Itoa(n) + ","
+		s = append(s, strconv.Itoa(n))
 	}
-	s = s[:len(s)-1]
 	return
 }

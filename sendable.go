@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 // Recipient is any possible endpoint you can send
@@ -345,7 +346,7 @@ func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 		params["prices"] = string(data)
 	}
 	if len(i.SuggestedTipAmounts) > 0 {
-		params["suggested_tip_amounts"] = sliceIntToString(i.SuggestedTipAmounts)
+		params["suggested_tip_amounts"] = "[" + strings.Join(intsToStrs(i.SuggestedTipAmounts), ",") + "]"
 	}
 	b.embedSendOptions(params, opt)
 

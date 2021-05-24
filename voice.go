@@ -18,12 +18,12 @@ type VoiceChatParticipantsInvited struct {
 	Users []User `json:"users"`
 }
 
-// VoiceChatSchedule represents a service message about a voice chat scheduled in the chat.
-type VoiceChatSchedule struct {
-	StartUnixTime int64 `json:"start_date"`
+// VoiceChatScheduled represents a service message about a voice chat scheduled in the chat.
+type VoiceChatScheduled struct {
+	Unixtime int64 `json:"start_date"`
 }
 
 // ExpireDate returns the point when the voice chat is supposed to be started by a chat administrator.
-func (v *VoiceChatSchedule) ExpireDate() time.Time {
-	return time.Unix(v.StartUnixTime, 0)
+func (v *VoiceChatScheduled) ExpireDate() time.Time {
+	return time.Unix(v.Unixtime, 0)
 }
