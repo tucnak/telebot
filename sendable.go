@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 // Recipient is any possible endpoint you can send
@@ -317,6 +318,7 @@ func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 		"payload":                       i.Payload,
 		"provider_token":                i.Token,
 		"currency":                      i.Currency,
+		"max_tip_amount":                strconv.Itoa(i.MaxTipAmount),
 		"need_name":                     strconv.FormatBool(i.NeedName),
 		"need_phone_number":             strconv.FormatBool(i.NeedPhoneNumber),
 		"need_email":                    strconv.FormatBool(i.NeedEmail),
@@ -342,6 +344,9 @@ func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 	if len(i.Prices) > 0 {
 		data, _ := json.Marshal(i.Prices)
 		params["prices"] = string(data)
+	}
+	if len(i.SuggestedTipAmounts) > 0 {
+		params["suggested_tip_amounts"] = "[" + strings.Join(intsToStrs(i.SuggestedTipAmounts), ",") + "]"
 	}
 	b.embedSendOptions(params, opt)
 

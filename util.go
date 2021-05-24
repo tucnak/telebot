@@ -251,3 +251,10 @@ func isUserInList(user *User, list []User) bool {
 	}
 	return false
 }
+
+func intsToStrs(ns []int) (s []string) {
+	for _, n := range ns {
+		s = append(s, strconv.Itoa(n))
+	}
+	return
+}
