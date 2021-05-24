@@ -156,6 +156,11 @@ const (
 	//
 	// Handler: func(*Message)
 	OnAutoDeleteTimer = "\amessage_auto_delete_timer_changed"
+
+	// Will fire on OnVoiceChatScheduled
+	//
+	// Handler: func(*Message)
+	OnVoiceChatScheduled = "\avoice_chat_scheduled"
 )
 
 // ChatAction is a client-side status indicating bot activity.

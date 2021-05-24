@@ -376,6 +376,11 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			b.handle(OnAutoDeleteTimer, c)
 			return
 		}
+
+		if m.VoiceChatSchedule != nil {
+			b.handle(OnVoiceChatScheduled, c)
+			return
+		}
 	}
 
 	if upd.EditedMessage != nil {
