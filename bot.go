@@ -549,10 +549,10 @@ func (b *Bot) ProcessUpdate(upd Update) {
 		if handler, ok := b.handlers[OnChatMember]; ok {
 			handler, ok := handler.(func(*ChatMemberUpdated))
 			if !ok {
-				panic("telebot: my chat member handler is bad")
+				panic("telebot: chat member handler is bad")
 			}
 
-			b.runHandler(func() { handler(upd.MyChatMember) })
+			b.runHandler(func() { handler(upd.ChatMember) })
 		}
 
 		return
