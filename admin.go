@@ -40,7 +40,7 @@ type ChatMemberUpdated struct {
 	Chat Chat `json:"chat"`
 
 	// From which user the action was triggered.
-	From User `json:"user"`
+	From User `json:"from"`
 
 	// Unixtime, use ChatMemberUpdated.Time() to get time.Time
 	Unixtime int64 `json:"date"`
