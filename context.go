@@ -211,11 +211,11 @@ func (c *nativeContext) Chat() *Chat {
 }
 
 func (c *nativeContext) Recipient() Recipient {
-	sender := c.Sender()
-	if sender != nil {
-		return sender
+	chat := c.Chat()
+	if chat != nil {
+		return chat
 	}
-	return c.Chat()
+	return c.Sender()
 }
 
 func (c *nativeContext) Text() string {
