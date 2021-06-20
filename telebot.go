@@ -140,10 +140,25 @@ const (
 	// Handler: func(*Message)
 	OnVoiceChatEnded = "\avoice_chat_ended"
 
-	// Will fire on VoiceChatPartecipantsInvited
+	// Will fire on VoiceChatParticipantsInvited
 	//
 	// Handler: func(*Message)
-	OnVoiceChatPartecipantsInvited = "\avoice_chat_partecipants_invited"
+	OnVoiceChatParticipantsInvited = "\avoice_chat_participants_invited"
+
+	// Will fire on ProximityAlert
+	//
+	// Handler: func(*Message)
+	OnProximityAlert = "\aproximity_alert_triggered"
+
+	// Will fire on AudoDeleteTimer
+	//
+	// Handler: func(*Message)
+	OnAutoDeleteTimer = "\amessage_auto_delete_timer_changed"
+
+	// Will fire on OnVoiceChatScheduled
+	//
+	// Handler: func(*Message)
+	OnVoiceChatScheduled = "\avoice_chat_scheduled"
 )
 
 // ChatAction is a client-side status indicating bot activity.

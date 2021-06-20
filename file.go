@@ -9,6 +9,7 @@ import (
 type File struct {
 	FileID   string `json:"file_id"`
 	UniqueID string `json:"file_unique_id"`
+	FileName string `json:"file_name"`
 	FileSize int    `json:"file_size"`
 
 	// file on telegram server https://core.telegram.org/bots/api#file

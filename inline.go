@@ -33,6 +33,9 @@ type Query struct {
 
 	// Offset of the results to be returned, can be controlled by the bot.
 	Offset string `json:"offset"`
+
+	// ChatType of the type of the chat, from which the inline query was sent.
+	ChatType string `json:"chat_type"`
 }
 
 // QueryResponse builds a response to an inline Query.

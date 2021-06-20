@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 // Recipient is any possible endpoint you can send
@@ -265,6 +266,15 @@ func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 		"longitude":   fmt.Sprintf("%f", x.Lng),
 		"live_period": strconv.Itoa(x.LivePeriod),
 	}
+	if x.HorizontalAccuracy != nil {
+		params["horizontal_accuracy"] = fmt.Sprintf("%f", *x.HorizontalAccuracy)
+	}
+	if x.Heading != 0 {
+		params["heading"] = strconv.Itoa(x.Heading)
+	}
+	if x.ProximityAlertRadius != 0 {
+		params["proximity_alert_radius"] = strconv.Itoa(x.Heading)
+	}
 	b.embedSendOptions(params, opt)
 
 	data, err := b.Raw("sendLocation", params)
@@ -278,13 +288,15 @@ func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 // Send delivers media through bot b to recipient.
 func (v *Venue) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id":         to.Recipient(),
-		"latitude":        fmt.Sprintf("%f", v.Location.Lat),
-		"longitude":       fmt.Sprintf("%f", v.Location.Lng),
-		"title":           v.Title,
-		"address":         v.Address,
-		"foursquare_id":   v.FoursquareID,
-		"foursquare_type": v.FoursquareType,
+		"chat_id":           to.Recipient(),
+		"latitude":          fmt.Sprintf("%f", v.Location.Lat),
+		"longitude":         fmt.Sprintf("%f", v.Location.Lng),
+		"title":             v.Title,
+		"address":           v.Address,
+		"foursquare_id":     v.FoursquareID,
+		"foursquare_type":   v.FoursquareType,
+		"google_place_id":   v.GooglePlaceID,
+		"google_place_type": v.GooglePlaceType,
 	}
 	b.embedSendOptions(params, opt)
 
@@ -306,6 +318,7 @@ func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 		"payload":                       i.Payload,
 		"provider_token":                i.Token,
 		"currency":                      i.Currency,
+		"max_tip_amount":                strconv.Itoa(i.MaxTipAmount),
 		"need_name":                     strconv.FormatBool(i.NeedName),
 		"need_phone_number":             strconv.FormatBool(i.NeedPhoneNumber),
 		"need_email":                    strconv.FormatBool(i.NeedEmail),
@@ -331,6 +344,9 @@ func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 	if len(i.Prices) > 0 {
 		data, _ := json.Marshal(i.Prices)
 		params["prices"] = string(data)
+	}
+	if len(i.SuggestedTipAmounts) > 0 {
+		params["suggested_tip_amounts"] = "[" + strings.Join(intsToStrs(i.SuggestedTipAmounts), ",") + "]"
 	}
 	b.embedSendOptions(params, opt)
 
