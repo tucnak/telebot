@@ -1366,7 +1366,7 @@ func (b *Bot) ProfilePhotosOf(user *User) ([]Photo, error) {
 }
 
 // ChatMemberOf returns information about a member of a chat.
-func (b *Bot) ChatMemberOf(chat *Chat, user *User) (*ChatMember, error) {
+func (b *Bot) ChatMemberOf(chat, user Recipient) (*ChatMember, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 		"user_id": user.Recipient(),
