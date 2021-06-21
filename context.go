@@ -59,6 +59,7 @@ type Context interface {
 	Text() string
 
 	// Data returns the current data, depending on the context type.
+	// If the context contains command, returns its arguments string.
 	// If the context contains payment, returns its payload.
 	// In the case when no related data presented, returns an empty string.
 	Data() string
@@ -231,6 +232,8 @@ func (c *nativeContext) Text() string {
 
 func (c *nativeContext) Data() string {
 	switch {
+	case c.message != nil:
+		return c.message.Payload
 	case c.callback != nil:
 		return c.callback.Data
 	case c.query != nil:
