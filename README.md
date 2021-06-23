@@ -1,5 +1,3 @@
-**#SupportStallman** https://rms-support-letter.github.io/
-
 # Telebot
 >"I never knew creating Telegram bots could be so _sexy_!"
 
