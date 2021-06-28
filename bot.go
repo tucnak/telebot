@@ -572,7 +572,7 @@ func (b *Bot) handleMedia(m *Message) bool {
 // some Sendable (or string!) and optional send options.
 //
 // Note: since most arguments are of type interface{}, but have pointer
-// 		method receivers, make sure to pass them by-pointer, NOT by-value.
+// method receivers, make sure to pass them by-pointer, NOT by-value.
 //
 // What is a send option exactly? It can be one of the following types:
 //
