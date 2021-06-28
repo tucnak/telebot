@@ -336,11 +336,50 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			return
 		}
 
-		if m.VoiceChatPartecipantsInvited != nil {
-			if handler, ok := b.handlers[OnVoiceChatPartecipantsInvited]; ok {
+		if m.VoiceChatParticipantsInvited != nil {
+			if handler, ok := b.handlers[OnVoiceChatParticipantsInvited]; ok {
 				handler, ok := handler.(func(*Message))
 				if !ok {
-					panic("telebot: voice chat partecipants invited handler is bad")
+					panic("telebot: voice chat participants invited handler is bad")
+				}
+
+				b.runHandler(func() { handler(m) })
+			}
+
+			return
+		}
+
+		if m.ProximityAlert != nil {
+			if handler, ok := b.handlers[OnProximityAlert]; ok {
+				handler, ok := handler.(func(*Message))
+				if !ok {
+					panic("telebot: proximity alert handler is bad")
+				}
+
+				b.runHandler(func() { handler(m) })
+			}
+
+			return
+		}
+
+		if m.AutoDeleteTimer != nil {
+			if handler, ok := b.handlers[OnAutoDeleteTimer]; ok {
+				handler, ok := handler.(func(*Message))
+				if !ok {
+					panic("telebot: auto delete timer handler is bad")
+				}
+
+				b.runHandler(func() { handler(m) })
+			}
+
+			return
+		}
+
+		if m.VoiceChatSchedule != nil {
+			if handler, ok := b.handlers[OnVoiceChatScheduled]; ok {
+				handler, ok := handler.(func(*Message))
+				if !ok {
+					panic("telebot: voice chat scheduled is bad")
 				}
 
 				b.runHandler(func() { handler(m) })
@@ -510,10 +549,10 @@ func (b *Bot) ProcessUpdate(upd Update) {
 		if handler, ok := b.handlers[OnChatMember]; ok {
 			handler, ok := handler.(func(*ChatMemberUpdated))
 			if !ok {
-				panic("telebot: my chat member handler is bad")
+				panic("telebot: chat member handler is bad")
 			}
 
-			b.runHandler(func() { handler(upd.MyChatMember) })
+			b.runHandler(func() { handler(upd.ChatMember) })
 		}
 
 		return
@@ -741,6 +780,32 @@ func (b *Bot) Forward(to Recipient, msg Editable, options ...interface{}) (*Mess
 	return extractMessage(data)
 }
 
+// Copy behaves just like Forward() but the copied message doesn't have a link to the original message (see Bots API).
+//
+// This function will panic upon nil Editable.
+func (b *Bot) Copy(to Recipient, msg Editable, options ...interface{}) (*Message, error) {
+	if to == nil {
+		return nil, ErrBadRecipient
+	}
+	msgID, chatID := msg.MessageSig()
+
+	params := map[string]string{
+		"chat_id":      to.Recipient(),
+		"from_chat_id": strconv.FormatInt(chatID, 10),
+		"message_id":   msgID,
+	}
+
+	sendOpts := extractOptions(options)
+	b.embedSendOptions(params, sendOpts)
+
+	data, err := b.Raw("copyMessage", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMessage(data)
+}
+
 // Edit is magic, it lets you change already sent message.
 //
 // If edited message is sent by the bot, returns it,
@@ -773,6 +838,15 @@ func (b *Bot) Edit(msg Editable, what interface{}, options ...interface{}) (*Mes
 		method = "editMessageLiveLocation"
 		params["latitude"] = fmt.Sprintf("%f", v.Lat)
 		params["longitude"] = fmt.Sprintf("%f", v.Lng)
+		if v.HorizontalAccuracy != nil {
+			params["horizontal_accuracy"] = fmt.Sprintf("%f", *v.HorizontalAccuracy)
+		}
+		if v.Heading != 0 {
+			params["heading"] = strconv.Itoa(v.Heading)
+		}
+		if v.ProximityAlertRadius != 0 {
+			params["proximity_alert_radius"] = strconv.Itoa(v.Heading)
+		}
 	default:
 		return nil, ErrUnsupportedWhat
 	}
@@ -1395,12 +1469,28 @@ func (b *Bot) Pin(msg Editable, options ...interface{}) error {
 // Unpin unpins a message in a supergroup or a channel.
 //
 // It supports tb.Silent option.
-func (b *Bot) Unpin(chat *Chat) error {
+// MessageID is a specific pinned message
+func (b *Bot) Unpin(chat *Chat, messageID ...int) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+	if len(messageID) > 0 {
+		params["message_id"] = strconv.Itoa(messageID[0])
+	}
+
+	_, err := b.Raw("unpinChatMessage", params)
+	return err
+}
+
+// UnpinAll unpins all messages in a supergroup or a channel.
+//
+// It supports tb.Silent option.
+func (b *Bot) UnpinAll(chat *Chat) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 	}
 
-	_, err := b.Raw("unpinChatMessage", params)
+	_, err := b.Raw("unpinAllChatMessages", params)
 	return err
 }
 
@@ -1525,4 +1615,105 @@ func (b *Bot) SetCommands(cmds []Command) error {
 
 func (b *Bot) NewMarkup() *ReplyMarkup {
 	return &ReplyMarkup{}
+}
+
+// Logout logs out from the cloud Bot API server before launching the bot locally.
+func (b *Bot) Logout() (bool, error) {
+	data, err := b.Raw("logOut", nil)
+	if err != nil {
+		return false, err
+	}
+
+	var resp struct {
+		Result bool `json:"result"`
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return false, wrapError(err)
+	}
+
+	return resp.Result, nil
+}
+
+// Close closes the bot instance before moving it from one local server to another.
+func (b *Bot) Close() (bool, error) {
+	data, err := b.Raw("close", nil)
+	if err != nil {
+		return false, err
+	}
+
+	var resp struct {
+		Result bool `json:"result"`
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return false, wrapError(err)
+	}
+
+	return resp.Result, nil
+}
+
+// CreateInviteLink creates an additional invite link for a chat.
+func (b *Bot) CreateInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink, error) {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+	if link != nil {
+		params["expire_date"] = strconv.FormatInt(link.ExpireUnixtime, 10)
+		params["member_limit"] = strconv.Itoa(link.MemberLimit)
+	}
+
+	data, err := b.Raw("createChatInviteLink", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp ChatInviteLink
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+
+	return &resp, nil
+}
+
+// EditInviteLink edits a non-primary invite link created by the bot.
+func (b *Bot) EditInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink, error) {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+	if link != nil {
+		params["invite_link"] = link.InviteLink
+		params["expire_date"] = strconv.FormatInt(link.ExpireUnixtime, 10)
+		params["member_limit"] = strconv.Itoa(link.MemberLimit)
+	}
+
+	data, err := b.Raw("editChatInviteLink", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp ChatInviteLink
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+
+	return &resp, nil
+}
+
+// RevokeInviteLink revokes an invite link created by the bot.
+func (b *Bot) RevokeInviteLink(chat *Chat, link string) (*ChatInviteLink, error) {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+		"link":    link,
+	}
+
+	data, err := b.Raw("revokeChatInviteLink", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp ChatInviteLink
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+
+	return &resp, nil
 }

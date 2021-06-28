@@ -1,5 +1,3 @@
-**#SupportStallman** https://rms-support-letter.github.io/
-
 # Telebot
 >"I never knew creating Telegram bots could be so _sexy_!"
 
@@ -467,7 +465,9 @@ I do coding for fun but I also try to search for interesting solutions and
 optimize them as much as possible.
 If you feel like it's a good piece of software, I wouldn't mind a tip!
 
-Bitcoin: `1DkfrFvSRqgBnBuxv9BzAz83dqur5zrdTH`
+Litecoin: `ltc1qskt5ltrtyg7esfjm0ftx6jnacwffhpzpqmerus`
+
+Ethereum: `0xB78A2Ac1D83a0aD0b993046F9fDEfC5e619efCAB`
 
 # License
 

@@ -74,12 +74,15 @@ type Invoice struct {
 	PhotoSize int    `json:"photo_size"`
 
 	// Unique deep-linking parameter that can be used to
-	// generate this invoice when used as a start parameter.
+	// generate this invoice when used as a start parameter (0).
 	Start string `json:"start_parameter"`
 
 	// Shows the total price in the smallest units of the currency.
 	// For example, for a price of US$ 1.45 pass amount = 145.
 	Total int `json:"total_amount"`
+
+	MaxTipAmount        int   `json:"max_tip_amount"`
+	SuggestedTipAmounts []int `json:"suggested_tip_amounts"`
 
 	NeedName            bool `json:"need_name"`
 	NeedPhoneNumber     bool `json:"need_phone_number"`
