@@ -280,7 +280,7 @@ type Editable interface {
 	// MessageSig is a "message signature".
 	//
 	// For inline messages, return chatID = 0.
-	MessageSig() (messageID int, chatID int64)
+	MessageSig() (messageID string, chatID int64)
 }
 ```
 
@@ -292,11 +292,11 @@ type, provided by telebot:
 // a larger struct, which is often the case (you might
 // want to store some metadata alongside, or might not.)
 type StoredMessage struct {
-	MessageID int   `sql:"message_id" json:"message_id"`
-	ChatID    int64 `sql:"chat_id" json:"chat_id"`
+	MessageID string `sql:"message_id" json:"message_id"`
+	ChatID    int64  `sql:"chat_id" json:"chat_id"`
 }
 
-func (x StoredMessage) MessageSig() (int, int64) {
+func (x StoredMessage) MessageSig() (string, int64) {
 	return x.MessageID, x.ChatID
 }
 ```
@@ -338,8 +338,8 @@ func main() {
 
 	var (
 		// Universal markup builders.
-		menu     = &ReplyMarkup{ResizeReplyKeyboard: true}
-		selector = &ReplyMarkup{}
+		menu     = &tb.ReplyMarkup{ResizeReplyKeyboard: true}
+		selector = &tb.ReplyMarkup{}
 
 		// Reply buttons.
 		btnHelp     = menu.Text("ℹ Help")
@@ -390,7 +390,7 @@ func main() {
 
 You can use markup constructor for every type of possible buttons:
 ```go
-r := &ReplyMarkup{}
+r := &tb.ReplyMarkup{}
 
 // Reply buttons:
 r.Text("Hello!")
