@@ -91,7 +91,10 @@ type Message struct {
 
 	// For a photo, all available sizes (thumbnails).
 	Photo *Photo `json:"photo"`
-
+	
+	// For a game, information about it.
+	Game *Game `json:"game"`
+	
 	// For a sticker, information about it.
 	Sticker *Sticker `json:"sticker"`
 
