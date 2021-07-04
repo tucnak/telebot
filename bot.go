@@ -1522,6 +1522,27 @@ func (b *Bot) ChatByID(id string) (*Chat, error) {
 	return resp.Result, nil
 }
 
+// ChatMemberCountByID fetches member count of its ID.
+func (b *Bot) ChatMemberCountByID(id string) (int, error) {
+	params := map[string]string{
+		"chat_id": id,
+	}
+
+	data, err := b.Raw("getChatMemberCount", params)
+	if err != nil {
+		return 0, err
+	}
+
+	var resp struct {
+		Result int
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return 0, wrapError(err)
+	}
+
+	return resp.Result, nil
+}
+
 // ProfilePhotosOf returns list of profile pictures for a user.
 func (b *Bot) ProfilePhotosOf(user *User) ([]Photo, error) {
 	params := map[string]string{
