@@ -1015,7 +1015,7 @@ func (b *Bot) Answer(query *Query, resp *QueryResponse) error {
 	resp.QueryID = query.ID
 
 	for _, result := range resp.Results {
-		result.Process()
+		result.Process(b)
 	}
 
 	_, err := b.Raw("answerInlineQuery", resp)

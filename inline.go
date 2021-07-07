@@ -76,9 +76,10 @@ type QueryResponse struct {
 type Result interface {
 	ResultID() string
 	SetResultID(string)
+	SetParseMode(ParseMode)
 	SetContent(InputMessageContent)
 	SetReplyMarkup([][]InlineButton)
-	Process()
+	Process(*Bot)
 }
 
 // Results is a slice wrapper for convenient marshalling.
