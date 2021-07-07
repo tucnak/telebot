@@ -147,8 +147,10 @@ func (h *Webhook) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 }
 
 func (h *Webhook) waitForStop(stop chan struct{}) {
-	<-stop
-	close(stop)
+	_, ok := <-stop
+	if ok {
+		close(stop)
+	}
 }
 
 // The handler simply reads the update from the body of the requests
