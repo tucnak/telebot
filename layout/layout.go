@@ -106,6 +106,15 @@ func (lt *Layout) Settings() tele.Settings {
 	return *lt.pref
 }
 
+// Locales returns all presented locales.
+func (lt *Layout) Locales() []string {
+	var keys []string
+	for k := range lt.locales {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
 // Locale returns the context locale.
 func (lt *Layout) Locale(c tele.Context) (string, bool) {
 	lt.mu.RLock()
