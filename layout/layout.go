@@ -34,11 +34,11 @@ type (
 	Markup struct {
 		inline          *bool
 		keyboard        *template.Template
-		ResizeKeyboard  *bool `json:"resize_keyboard,omitempty"` // nil == true
-		ForceReply      bool  `json:"force_reply,omitempty"`
-		OneTimeKeyboard bool  `json:"one_time_keyboard,omitempty"`
-		RemoveKeyboard  bool  `json:"remove_keyboard,omitempty"`
-		Selective       bool  `json:"selective,omitempty"`
+		ResizeKeyboard  *bool `yaml:"resize_keyboard,omitempty"` // nil == true
+		ForceReply      bool  `yaml:"force_reply,omitempty"`
+		OneTimeKeyboard bool  `yaml:"one_time_keyboard,omitempty"`
+		RemoveKeyboard  bool  `yaml:"remove_keyboard,omitempty"`
+		Selective       bool  `yaml:"selective,omitempty"`
 	}
 )
 

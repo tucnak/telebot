@@ -17,12 +17,12 @@ type Settings struct {
 	Token   string
 	Updates int
 
-	LocalesDir string `json:"locales_dir"`
-	TokenEnv   string `json:"token_env"`
-	ParseMode  string `json:"parse_mode"`
+	LocalesDir string `"locales_dir"`
+	TokenEnv   string `yaml:"token_env"`
+	ParseMode  string `yaml:"parse_mode"`
 
-	Webhook    *tele.Webhook    `json:"webhook"`
-	LongPoller *tele.LongPoller `json:"long_poller"`
+	Webhook    *tele.Webhook    `yaml:"webhook"`
+	LongPoller *tele.LongPoller `yaml:"long_poller"`
 }
 
 func (lt *Layout) UnmarshalYAML(data []byte) error {
@@ -80,7 +80,7 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 
 		var btn struct {
 			Button `yaml:",inline"`
-			Data   interface{} `json:"data"`
+			Data   interface{} `yaml:"data"`
 		}
 		if err := yaml.Unmarshal(data, &btn); err != nil {
 			return err
@@ -161,7 +161,7 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 
 			var markup struct {
 				Markup   `yaml:",inline"`
-				Keyboard [][]string `json:"keyboard"`
+				Keyboard [][]string `yaml:"keyboard"`
 			}
 			if err := yaml.Unmarshal(data, &markup); err != nil {
 				return err
