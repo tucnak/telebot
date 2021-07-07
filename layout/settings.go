@@ -78,12 +78,29 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 			return err
 		}
 
-		var btn Button
+		var btn struct {
+			Button `yaml:",inline"`
+			Data   interface{} `json:"data"`
+		}
 		if err := yaml.Unmarshal(data, &btn); err != nil {
 			return err
 		}
 
-		lt.buttons[k] = btn
+		if btn.Data != nil {
+			if a, ok := btn.Data.([]interface{}); ok {
+				s := make([]string, len(a))
+				for i, v := range a {
+					s[i] = fmt.Sprint(v)
+				}
+				btn.Button.Data = strings.Join(s, "|")
+			} else if s, ok := btn.Data.(string); ok {
+				btn.Button.Data = s
+			} else {
+				return fmt.Errorf("telebot/layout: invalid callback_data for %s button", k)
+			}
+		}
+
+		lt.buttons[k] = btn.Button
 	}
 
 	lt.markups = make(map[string]Markup, len(aux.Markups))

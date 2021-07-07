@@ -22,7 +22,16 @@ buttons:
   stop:
     unique: stop
     text: Stop
-    callback_data: '{{.}}'
+    data: '{{.}}'
+
+  # Callback data
+  pay:
+    unique: pay
+    text: Pay
+    data:
+      - '{{.UserID}}'
+      - '{{.Amount}}'
+      - '{{.Currency}}'
 
 markups:
   reply_shortened:
