@@ -8,9 +8,11 @@ import (
 
 var _ Context = (*nativeContext)(nil)
 
-func TestContextStore(t *testing.T) {
-	var c Context
-	c = new(nativeContext)
-	c.Set("name", "Jon Snow")
-	assert.Equal(t, "Jon Snow", c.Get("name"))
+func TestContext(t *testing.T) {
+	t.Run("Get,Set", func(t *testing.T) {
+		var c Context
+		c = new(nativeContext)
+		c.Set("name", "Jon Snow")
+		assert.Equal(t, "Jon Snow", c.Get("name"))
+	})
 }

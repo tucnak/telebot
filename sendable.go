@@ -10,8 +10,7 @@ import (
 // Recipient is any possible endpoint you can send
 // messages to: either user, group or a channel.
 type Recipient interface {
-	// Must return legit Telegram chat_id or username
-	Recipient() string
+	Recipient() string // must return legit Telegram chat_id or username
 }
 
 // Sendable is any object that can send itself.

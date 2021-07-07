@@ -261,11 +261,11 @@ func (c *nativeContext) Data() string {
 
 func (c *nativeContext) Args() []string {
 	if c.message != nil {
-		message := strings.Trim(c.message.Payload, " ")
-		if message == "" {
+		payload := strings.Trim(c.message.Payload, " ")
+		if payload == "" {
 			return nil
 		}
-		return strings.Split(message, " ")
+		return strings.Split(payload, " ")
 	}
 	if c.callback != nil {
 		return strings.Split(c.callback.Data, "|")
