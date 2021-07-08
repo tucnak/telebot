@@ -97,6 +97,14 @@ type Context interface {
 	// See EditCaption from bot.go.
 	EditCaption(caption string, opts ...interface{}) error
 
+	// EditOrSend edits the current message if the update is callback,
+	// otherwise the content is sent to the chat as a separate message.
+	EditOrSend(what interface{}, opts ...interface{}) error
+
+	// EditOrReply edits the current message if the update is callback,
+	// otherwise the content is replied as a separate message.
+	EditOrReply(what interface{}, opts ...interface{}) error
+
 	// Delete removes the current message.
 	// See Delete from bot.go.
 	Delete() error
@@ -322,6 +330,20 @@ func (c *nativeContext) EditCaption(caption string, opts ...interface{}) error {
 	}
 	_, err := c.b.EditCaption(clb.Message, caption, opts...)
 	return err
+}
+
+func (c *nativeContext) EditOrSend(what interface{}, opts ...interface{}) error {
+	if c.callback != nil {
+		return c.Edit(what, opts...)
+	}
+	return c.Send(what, opts...)
+}
+
+func (c *nativeContext) EditOrReply(what interface{}, opts ...interface{}) error {
+	if c.callback != nil {
+		return c.Edit(what, opts...)
+	}
+	return c.Reply(what, opts...)
 }
 
 func (c *nativeContext) Delete() error {
