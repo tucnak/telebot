@@ -106,6 +106,13 @@ func (lt *Layout) Settings() tele.Settings {
 	return *lt.pref
 }
 
+// Default returns a simplified layout instance with pre-defined locale.
+// It's useful when you have no need in localization and don't want to pass
+// context each time you use layout functions.
+func (lt *Layout) Default(locale string) *DefaultLayout {
+	return &DefaultLayout{lt: lt, locale: locale}
+}
+
 // Locales returns all presented locales.
 func (lt *Layout) Locales() []string {
 	var keys []string
@@ -137,7 +144,7 @@ func (lt *Layout) SetLocale(c tele.Context, locale string) {
 //		start: Hi, {{.FirstName}}!
 //
 // Usage:
-//		func OnStart(c tele.Context) error {
+//		func onStart(c tele.Context) error {
 //			return c.Send(lt.Text(c, "start", c.Sender()))
 //		}
 //
@@ -150,7 +157,7 @@ func (lt *Layout) Text(c tele.Context, k string, args ...interface{}) string {
 	return lt.TextLocale(locale, k, args...)
 }
 
-// TextLocale returns a localised text processed with standard template engine.
+// TextLocale returns a localized text processed with standard template engine.
 // See Text for more details.
 func (lt *Layout) TextLocale(locale, k string, args ...interface{}) string {
 	tmpl, ok := lt.locales[locale]
@@ -175,9 +182,8 @@ func (lt *Layout) TextLocale(locale, k string, args ...interface{}) string {
 // useful for handlers registering.
 //
 // Example:
-//
 //		// Handling settings button
-//		b.Handle(lt.Callback("settings"), OnSettings)
+//		b.Handle(lt.Callback("settings"), onSettings)
 //
 func (lt *Layout) Callback(k string) tele.CallbackEndpoint {
 	btn, ok := lt.buttons[k]
@@ -221,7 +227,7 @@ func (lt *Layout) Button(c tele.Context, k string, args ...interface{}) *tele.Bt
 	return lt.ButtonLocale(locale, k, args...)
 }
 
-// ButtonLocale returns a localised button processed with standard template engine.
+// ButtonLocale returns a localized button processed with standard template engine.
 // See Button for more details.
 func (lt *Layout) ButtonLocale(locale, k string, args ...interface{}) *tele.Btn {
 	btn, ok := lt.buttons[k]
@@ -270,7 +276,7 @@ func (lt *Layout) ButtonLocale(locale, k string, args ...interface{}) *tele.Btn 
 //		    - [settings]
 //
 // Usage:
-//		func OnStart(c tele.Context) error {
+//		func onStart(c tele.Context) error {
 //			return c.Send(
 //				lt.Text(c, "start"),
 //				lt.Markup(c, "menu"))
@@ -285,7 +291,7 @@ func (lt *Layout) Markup(c tele.Context, k string, args ...interface{}) *tele.Re
 	return lt.MarkupLocale(locale, k, args...)
 }
 
-// MarkupLocale returns a localised markup processed with standard template engine.
+// MarkupLocale returns a localized markup processed with standard template engine.
 // See Markup for more details.
 func (lt *Layout) MarkupLocale(locale, k string, args ...interface{}) *tele.ReplyMarkup {
 	markup, ok := lt.markups[k]

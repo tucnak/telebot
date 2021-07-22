@@ -8,10 +8,9 @@ import (
 // Returned locale will be remembered and linked to the corresponding context.
 type LocaleFunc func(tele.Recipient) string
 
-// Middleware builds a global middleware to make internationalisation work.
+// Middleware builds a telebot middleware to make localization work.
 //
 // Usage:
-//
 //		b.Use(lt.Middleware("en", func(r tele.Recipient) string {
 //			loc, _ := db.UserLocale(r.Recipient())
 //			return loc
@@ -43,4 +42,9 @@ func (lt *Layout) Middleware(defaultLocale string, localeFunc ...LocaleFunc) tel
 			return next(c)
 		}
 	}
+}
+
+// Middleware wraps ordinary layout middleware with your default locale.
+func (dlt *DefaultLayout) Middleware() tele.MiddlewareFunc {
+	return dlt.lt.Middleware(dlt.locale)
 }
