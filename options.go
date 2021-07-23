@@ -35,7 +35,10 @@ const (
 // Placeholder is used to set input field placeholder as a send option.
 func Placeholder(text string) *SendOptions {
 	return &SendOptions{
-		ReplyMarkup: &ReplyMarkup{Placeholder: text},
+		ReplyMarkup: &ReplyMarkup{
+			ForceReply:  true,
+			Placeholder: text,
+		},
 	}
 }
 
