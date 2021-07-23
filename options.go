@@ -32,6 +32,13 @@ const (
 	RemoveKeyboard
 )
 
+// Placeholder is used to set input field placeholder as a send option.
+func Placeholder(text string) *SendOptions {
+	return &SendOptions{
+		ReplyMarkup: &ReplyMarkup{Placeholder: text},
+	}
+}
+
 // SendOptions has most complete control over in what way the message
 // must be sent, providing an API-complete set of custom properties
 // and options.
@@ -109,6 +116,9 @@ type ReplyMarkup struct {
 	// 2) If the bot's message is a reply (has SendOptions.ReplyTo),
 	//       sender of the original message.
 	Selective bool `json:"selective,omitempty"`
+
+	// Placeholder will be shown in the input field when the reply is active.
+	Placeholder string `json:"input_field_placeholder,omitempty"`
 }
 
 func (r *ReplyMarkup) copy() *ReplyMarkup {
