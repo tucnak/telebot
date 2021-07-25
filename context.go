@@ -23,8 +23,8 @@ type Context interface {
 	// Query returns stored query if such presented.
 	Query() *Query
 
-	// ChosenInlineResult returns stored inline result if such presented.
-	ChosenInlineResult() *ChosenInlineResult
+	// InlineResult returns stored inline result if such presented.
+	InlineResult() *InlineResult
 
 	// ShippingQuery returns stored shipping query if such presented.
 	ShippingQuery() *ShippingQuery
@@ -141,14 +141,14 @@ type Context interface {
 type nativeContext struct {
 	b *Bot
 
-	message            *Message
-	callback           *Callback
-	query              *Query
-	chosenInlineResult *ChosenInlineResult
-	shippingQuery      *ShippingQuery
-	preCheckoutQuery   *PreCheckoutQuery
-	poll               *Poll
-	pollAnswer         *PollAnswer
+	message          *Message
+	callback         *Callback
+	query            *Query
+	inlineResult     *InlineResult
+	shippingQuery    *ShippingQuery
+	preCheckoutQuery *PreCheckoutQuery
+	poll             *Poll
+	pollAnswer       *PollAnswer
 
 	lock  sync.RWMutex
 	store map[string]interface{}
@@ -173,8 +173,8 @@ func (c *nativeContext) Query() *Query {
 	return c.query
 }
 
-func (c *nativeContext) ChosenInlineResult() *ChosenInlineResult {
-	return c.chosenInlineResult
+func (c *nativeContext) InlineResult() *InlineResult {
+	return c.inlineResult
 }
 
 func (c *nativeContext) ShippingQuery() *ShippingQuery {
@@ -205,8 +205,8 @@ func (c *nativeContext) Sender() *User {
 		return c.callback.Sender
 	case c.query != nil:
 		return c.query.Sender
-	case c.chosenInlineResult != nil:
-		return c.chosenInlineResult.Sender
+	case c.inlineResult != nil:
+		return c.inlineResult.Sender
 	case c.shippingQuery != nil:
 		return c.shippingQuery.Sender
 	case c.preCheckoutQuery != nil:
@@ -256,8 +256,8 @@ func (c *nativeContext) Data() string {
 		return c.callback.Data
 	case c.query != nil:
 		return c.query.Text
-	case c.chosenInlineResult != nil:
-		return c.chosenInlineResult.Query
+	case c.inlineResult != nil:
+		return c.inlineResult.Query
 	case c.shippingQuery != nil:
 		return c.shippingQuery.Payload
 	case c.preCheckoutQuery != nil:

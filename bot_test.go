@@ -276,8 +276,8 @@ func TestBotProcessUpdate(t *testing.T) {
 		assert.Equal(t, "query", c.Data())
 		return nil
 	})
-	b.Handle(OnChosenInlineResult, func(c Context) error {
-		assert.Equal(t, "result", c.ChosenInlineResult().ResultID)
+	b.Handle(OnInlineResult, func(c Context) error {
+		assert.Equal(t, "result", c.InlineResult().ResultID)
 		return nil
 	})
 	b.Handle(OnShipping, func(c Context) error {
@@ -332,7 +332,7 @@ func TestBotProcessUpdate(t *testing.T) {
 	b.ProcessUpdate(Update{Callback: &Callback{Data: "callback"}})
 	b.ProcessUpdate(Update{Callback: &Callback{Data: "\funique|callback"}})
 	b.ProcessUpdate(Update{Query: &Query{Text: "query"}})
-	b.ProcessUpdate(Update{ChosenInlineResult: &ChosenInlineResult{ResultID: "result"}})
+	b.ProcessUpdate(Update{InlineResult: &InlineResult{ResultID: "result"}})
 	b.ProcessUpdate(Update{ShippingQuery: &ShippingQuery{ID: "shipping"}})
 	b.ProcessUpdate(Update{PreCheckoutQuery: &PreCheckoutQuery{ID: "checkout"}})
 	b.ProcessUpdate(Update{Poll: &Poll{ID: "poll"}})

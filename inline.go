@@ -7,9 +7,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-// ChosenInlineResult represents a result of an inline query that was chosen
+// InlineResult represents a result of an inline query that was chosen
 // by the user and sent to their chat partner.
-type ChosenInlineResult struct {
+type InlineResult struct {
 	Sender    *User     `json:"from"`
 	Location  *Location `json:"location,omitempty"`
 	ResultID  string    `json:"result_id"`

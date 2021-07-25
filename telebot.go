@@ -90,7 +90,7 @@ const (
 	OnQuery = "\aquery"
 
 	// Will fire on chosen inline results.
-	OnChosenInlineResult = "\achosen_inline_result"
+	OnInlineResult = "\achosen_inline_result"
 
 	// Will fire on a shipping query.
 	OnShipping = "\ashipping_query"

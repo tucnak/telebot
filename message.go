@@ -221,8 +221,6 @@ type Message struct {
 	// Inline keyboard attached to the message.
 	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup"`
 
-	VoiceChatSchedule *VoiceChatScheduled `json:"voice_chat_scheduled,omitempty"`
-
 	// For a service message, a voice chat started in the chat.
 	VoiceChatStarted *VoiceChatStarted `json:"voice_chat_started,omitempty"`
 
@@ -231,6 +229,9 @@ type Message struct {
 
 	// For a service message, some users were invited in the voice chat.
 	VoiceChatParticipants *VoiceChatParticipants `json:"voice_chat_participants_invited,omitempty"`
+
+	// For a service message, a voice chat schedule in the chat.
+	VoiceChatScheduled *VoiceChatScheduled `json:"voice_chat_scheduled,omitempty"`
 
 	// For a service message, represents the content of a service message,
 	// sent whenever a user in the chat triggers a proximity alert set by another user.
