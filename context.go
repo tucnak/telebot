@@ -315,6 +315,10 @@ func (c *nativeContext) ForwardTo(to Recipient, opts ...interface{}) error {
 }
 
 func (c *nativeContext) Edit(what interface{}, opts ...interface{}) error {
+	if c.inlineResult != nil {
+		_, err := c.b.Edit(c.inlineResult, what, opts...)
+		return err
+	}
 	clb := c.callback
 	if clb == nil || clb.Message == nil {
 		return ErrBadContext

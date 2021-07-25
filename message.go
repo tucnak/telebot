@@ -9,8 +9,6 @@ import (
 type Message struct {
 	ID int `json:"message_id"`
 
-	InlineID string `json:"-"`
-
 	// For message sent to channels, Sender will be nil
 	Sender *User `json:"from"`
 
@@ -241,11 +239,6 @@ type Message struct {
 	AutoDeleteTimer *AutoDeleteTimer `json:"message_auto_delete_timer_changed,omitempty"`
 }
 
-// AutoDeleteTimer represents a service message about a change in auto-delete timer settings.
-type AutoDeleteTimer struct {
-	Unixtime int `json:"message_auto_delete_time"`
-}
-
 // MessageEntity object represents "special" parts of text messages,
 // including hashtags, usernames, URLs, etc.
 type MessageEntity struct {
@@ -270,11 +263,13 @@ type MessageEntity struct {
 	Language string `json:"language,omitempty"`
 }
 
+// AutoDeleteTimer represents a service message about a change in auto-delete timer settings.
+type AutoDeleteTimer struct {
+	Unixtime int `json:"message_auto_delete_time"`
+}
+
 // MessageSig satisfies Editable interface (see Editable.)
 func (m *Message) MessageSig() (string, int64) {
-	if m.InlineID != "" {
-		return m.InlineID, 0
-	}
 	return strconv.Itoa(m.ID), m.Chat.ID
 }
 

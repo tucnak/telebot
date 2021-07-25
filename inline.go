@@ -7,16 +7,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// InlineResult represents a result of an inline query that was chosen
-// by the user and sent to their chat partner.
-type InlineResult struct {
-	Sender    *User     `json:"from"`
-	Location  *Location `json:"location,omitempty"`
-	ResultID  string    `json:"result_id"`
-	Query     string    `json:"query"`
-	MessageID string    `json:"inline_message_id"` // inline messages only!
-}
-
 // Query is an incoming inline query. When the user sends
 // an empty query, your bot could return some default or
 // trending results.
@@ -73,6 +63,21 @@ type QueryResponse struct {
 	// (Optional) Parameter for the start message sent to the bot when user
 	// presses the switch button.
 	SwitchPMParameter string `json:"switch_pm_parameter,omitempty"`
+}
+
+// InlineResult represents a result of an inline query that was chosen
+// by the user and sent to their chat partner.
+type InlineResult struct {
+	Sender    *User     `json:"from"`
+	Location  *Location `json:"location,omitempty"`
+	ResultID  string    `json:"result_id"`
+	Query     string    `json:"query"`
+	MessageID string    `json:"inline_message_id"` // inline messages only!
+}
+
+// MessageSig satisfies Editable interface.
+func (ir *InlineResult) MessageSig() (string, int64) {
+	return ir.MessageID, 0
 }
 
 // Result represents one result of an inline query.

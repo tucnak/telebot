@@ -411,20 +411,10 @@ func (b *Bot) ProcessUpdate(upd Update) {
 
 	if upd.Callback != nil {
 		if upd.Callback.Data != "" {
-			if upd.Callback.MessageID != "" {
-				upd.Callback.Message = &Message{
-					// InlineID indicates that message
-					// is inline, so we have only its id
-					InlineID: upd.Callback.MessageID,
-				}
-			}
-
-			data := upd.Callback.Data
-			if data[0] == '\f' {
+			if data := upd.Callback.Data; data[0] == '\f' {
 				match := cbackRx.FindAllStringSubmatch(data, -1)
 				if match != nil {
 					unique, payload := match[0][1], match[0][3]
-
 					if handler, ok := b.handlers["\f"+unique]; ok {
 						c.callback.Unique = unique
 						c.callback.Data = payload
@@ -732,6 +722,8 @@ func (b *Bot) Copy(to Recipient, msg Editable, options ...interface{}) (*Message
 //     b.Edit(m, &tele.ReplyMarkup{...})
 //     b.Edit(m, &tele.Photo{File: ...})
 //     b.Edit(m, tele.Location{42.1337, 69.4242})
+//     b.Edit(c, "edit inline message from the callback")
+//     b.Edit(r, "edit message from chosen inline result")
 //
 func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Message, error) {
 	var (
