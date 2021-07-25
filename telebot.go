@@ -47,8 +47,6 @@ const DefaultApiURL = "https://api.telegram.org"
 //
 const (
 	// Basic message handlers.
-	//
-	// Handler: func(*Message)
 	OnText              = "\atext"
 	OnPhoto             = "\aphoto"
 	OnAudio             = "\aaudio"
@@ -83,84 +81,52 @@ const (
 	// a supergroup. You might want to update
 	// your internal references to this chat
 	// upon switching as its ID will change.
-	//
-	// Handler: func(from, to int64)
 	OnMigration = "\amigration"
 
 	// Will fire on callback requests.
-	//
-	// Handler: func(*Callback)
 	OnCallback = "\acallback"
 
 	// Will fire on incoming inline queries.
-	//
-	// Handler: func(*Query)
 	OnQuery = "\aquery"
 
 	// Will fire on chosen inline results.
-	//
-	// Handler: func(*ChosenInlineResult)
 	OnChosenInlineResult = "\achosen_inline_result"
 
-	// Will fire on ShippingQuery.
-	//
-	// Handler: func(*ShippingQuery)
+	// Will fire on a shipping query.
 	OnShipping = "\ashipping_query"
 
-	// Will fire on PreCheckoutQuery.
-	//
-	// Handler: func(*PreCheckoutQuery)
+	// Will fire on pre checkout query.
 	OnCheckout = "\apre_checkout_query"
 
-	// Will fire on Poll.
-	//
-	// Handler: func(*Poll)
+	// Will fire on a poll.
 	OnPoll = "\apoll"
 
-	// Will fire on PollAnswer.
-	//
-	// Handler: func(*PollAnswer)
+	// Will fire on a poll answer.
 	OnPollAnswer = "\apoll_answer"
 
-	// Will fire on MyChatMember
-	//
-	// Handler: func(*ChatMemberUpdated)
+	// Will fire on bot's chat member changes.
 	OnMyChatMember = "\amy_chat_member"
 
-	// Will fire on ChatMember
-	//
-	// Handler: func(*ChatMemberUpdated)
+	// Will fire on chat member's changes.
 	OnChatMember = "\achat_member"
 
-	// Will fire on VoiceChatStarted
-	//
-	// Handler: func(*Message)
+	// Will fire on the start of a voice chat.
 	OnVoiceChatStarted = "\avoice_chat_started"
 
-	// Will fire on VoiceChatEnded
-	//
-	// Handler: func(*Message)
+	// Will fire on the end of a voice chat.
 	OnVoiceChatEnded = "\avoice_chat_ended"
 
-	// Will fire on VoiceChatParticipants
-	//
-	// Handler: func(*Message)
+	// Will fire on invited participants to the voice chat.
 	OnVoiceChatParticipants = "\avoice_chat_participants_invited"
 
-	// Will fire on ProximityAlert
-	//
-	// Handler: func(*Message)
+	// Will fire on scheduling a voice chat.
+	OnVoiceChatScheduled = "\avoice_chat_scheduled"
+
+	// Will fire on a proximity alert.
 	OnProximityAlert = "\aproximity_alert_triggered"
 
-	// Will fire on AudoDeleteTimer
-	//
-	// Handler: func(*Message)
+	// Will fire on auto delete timer set.
 	OnAutoDeleteTimer = "\amessage_auto_delete_timer_changed"
-
-	// Will fire on OnVoiceChatScheduled
-	//
-	// Handler: func(*Message)
-	OnVoiceChatScheduled = "\avoice_chat_scheduled"
 )
 
 // ChatAction is a client-side status indicating bot activity.
