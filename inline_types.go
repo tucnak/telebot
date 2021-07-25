@@ -14,7 +14,7 @@ type ResultBase struct {
 	ParseMode ParseMode `json:"parse_mode,omitempty"`
 
 	// Optional. Content of the message to be sent.
-	Content *InputMessageContent `json:"input_message_content,omitempty"`
+	Content InputMessageContent `json:"input_message_content,omitempty"`
 
 	// Optional. Inline keyboard attached to the message.
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
@@ -37,7 +37,7 @@ func (r *ResultBase) SetParseMode(mode ParseMode) {
 
 // SetContent sets ResultBase.Content.
 func (r *ResultBase) SetContent(content InputMessageContent) {
-	r.Content = &content
+	r.Content = content
 }
 
 // SetReplyMarkup sets ResultBase.ReplyMarkup.
@@ -50,7 +50,7 @@ func (r *ResultBase) Process(b *Bot) {
 		r.ParseMode = b.parseMode
 	}
 	if r.Content != nil {
-		c, ok := (*r.Content).(*InputTextMessageContent)
+		c, ok := r.Content.(*InputTextMessageContent)
 		if ok && c.ParseMode == ModeDefault {
 			c.ParseMode = r.ParseMode
 		}
