@@ -43,3 +43,12 @@ markups:
     one_time_keyboard: true
   inline:
     - [ stop ]
+
+results:
+  article:
+    type: article
+    id: '{{ .ID }}'
+    title: '{{ .Title }}'
+    description: '{{ .Description }}'
+    message_text: '{{ .Content }}'
+    thumb_url: '{{ .PreviewURL }}'

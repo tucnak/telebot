@@ -28,6 +28,20 @@ func TestLayout(t *testing.T) {
 	assert.Equal(t, float64(123), lt.Float("num"))
 	assert.Equal(t, 10*time.Minute, lt.Duration("dur"))
 
+	assert.Equal(t, &tele.Btn{
+		Unique: "pay",
+		Text:   "Pay",
+		Data:   "1|100.00|USD",
+	}, lt.ButtonLocale("en", "pay", struct {
+		UserID   int
+		Amount   string
+		Currency string
+	}{
+		UserID:   1,
+		Amount:   "100.00",
+		Currency: "USD",
+	}))
+
 	assert.Equal(t, &tele.ReplyMarkup{
 		ReplyKeyboard: [][]tele.ReplyButton{
 			{{Text: "Help"}},
@@ -46,17 +60,26 @@ func TestLayout(t *testing.T) {
 		InlineKeyboard: [][]tele.InlineButton{{{Unique: "stop", Text: "Stop", Data: "1"}}},
 	}, lt.MarkupLocale("en", "inline", 1))
 
-	assert.Equal(t, &tele.Btn{
-		Unique: "pay",
-		Text:   "Pay",
-		Data:   "1|100.00|USD",
-	}, lt.ButtonLocale("en", "pay", struct {
-		UserID   int
-		Amount   string
-		Currency string
+	assert.Equal(t, &tele.ArticleResult{
+		ResultBase: tele.ResultBase{
+			ID:   "1853",
+			Type: "article",
+		},
+		Title:       "Some title",
+		Description: "Some description",
+		Text:        "The text of the article",
+		ThumbURL:    "https://preview.picture",
+	}, lt.ResultLocale("en", "article", struct {
+		ID          int
+		Title       string
+		Description string
+		Content     string
+		PreviewURL  string
 	}{
-		UserID:   1,
-		Amount:   "100.00",
-		Currency: "USD",
+		ID:          1853,
+		Title:       "Some title",
+		Description: "Some description",
+		Content:     "The text of the article",
+		PreviewURL:  "https://preview.picture",
 	}))
 }

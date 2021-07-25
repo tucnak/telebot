@@ -24,3 +24,8 @@ func (dlt *DefaultLayout) Button(k string, args ...interface{}) *tele.Btn {
 func (dlt *DefaultLayout) Markup(k string, args ...interface{}) *tele.ReplyMarkup {
 	return dlt.lt.MarkupLocale(dlt.locale, k, args...)
 }
+
+// Result wraps localized layout function Result using your default locale.
+func (dlt *DefaultLayout) Result(k string, args ...interface{}) tele.Result {
+	return dlt.lt.ResultLocale(dlt.locale, k, args...)
+}

@@ -17,7 +17,7 @@ type Settings struct {
 	Token   string
 	Updates int
 
-	LocalesDir string `"locales_dir"`
+	LocalesDir string `yaml:"locales_dir"`
 	TokenEnv   string `yaml:"token_env"`
 	ParseMode  string `yaml:"parse_mode"`
 
@@ -31,6 +31,7 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 		Config   map[string]interface{}
 		Buttons  yaml.MapSlice
 		Markups  yaml.MapSlice
+		Results  yaml.MapSlice
 		Locales  map[string]map[string]string
 	}
 	if err := yaml.Unmarshal(data, &aux); err != nil {
@@ -190,6 +191,29 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 			markup.Markup.keyboard = tmpl
 			lt.markups[k] = markup.Markup
 		}
+	}
+
+	lt.results = make(map[string]Result, len(aux.Results))
+	for _, item := range aux.Results {
+		k, v := item.Key.(string), item.Value
+
+		data, err := yaml.Marshal(v)
+		if err != nil {
+			return err
+		}
+
+		tmpl, err := template.New(k).Funcs(lt.funcs).Parse(string(data))
+		if err != nil {
+			return err
+		}
+
+		var result Result
+		if err := yaml.Unmarshal(data, &result); err != nil {
+			return err
+		}
+
+		result.result = tmpl
+		lt.results[k] = result
 	}
 
 	if aux.Locales == nil {
