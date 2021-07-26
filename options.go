@@ -196,12 +196,12 @@ func (r *ReplyMarkup) Row(many ...Btn) Row {
 // For example, if you pass six buttons and 3 as the max, you get two rows with
 // three buttons in each.
 //
-// Split(3, six buttons...) -> [[1, 2, 3], [4, 5, 6]]
-// Split(2, six buttons...) -> [[1, 2],[3, 4],[5, 6]]
+// Split(3, []Btn{six buttons...}) -> [[1, 2, 3], [4, 5, 6]]
+// Split(2, []Btn{six buttons...}) -> [[1, 2],[3, 4],[5, 6]]
 //
-func (r *ReplyMarkup) Split(max int, bs ...Btn) []Row {
-	rows := make([]Row, (1+len(bs))/max)
-	for i, b := range bs {
+func (r *ReplyMarkup) Split(max int, btns []Btn) []Row {
+	rows := make([]Row, (1+len(btns))/max)
+	for i, b := range btns {
 		i /= max
 		rows[i] = append(rows[i], b)
 	}
