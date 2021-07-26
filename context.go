@@ -17,6 +17,9 @@ type Context interface {
 	// Message returns stored message if such presented.
 	Message() *Message
 
+	// ChatMemberUpdate returns stored message if such presented.
+	ChatMemberUpdate() *ChatMemberUpdated
+
 	// Callback returns stored callback if such presented.
 	Callback() *Callback
 
@@ -149,6 +152,8 @@ type nativeContext struct {
 	preCheckoutQuery *PreCheckoutQuery
 	poll             *Poll
 	pollAnswer       *PollAnswer
+	chatMember       *ChatMemberUpdated
+	myChatMember     *ChatMemberUpdated
 
 	lock  sync.RWMutex
 	store map[string]interface{}
@@ -160,6 +165,17 @@ func (c *nativeContext) Message() *Message {
 		return c.message
 	case c.callback != nil:
 		return c.callback.Message
+	default:
+		return nil
+	}
+}
+
+func (c *nativeContext) ChatMemberUpdate() *ChatMemberUpdated {
+	switch {
+	case c.chatMember != nil:
+		return c.chatMember
+	case c.myChatMember != nil:
+		return c.myChatMember
 	default:
 		return nil
 	}
