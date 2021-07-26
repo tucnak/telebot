@@ -88,7 +88,7 @@ var builtinFuncs = template.FuncMap{
 	// Built-in blank and helper functions.
 	"locale": func() string { return "" },
 	"config": func(string) string { return "" },
-	"text":   func(string) string { return "" },
+	"text":   func(string, ...interface{}) string { return "" },
 }
 
 // Settings returns built telebot Settings required for bot initialising.
@@ -481,7 +481,7 @@ func (lt *Layout) template(tmpl *template.Template, locale string) *template.Tem
 
 	// Redefining built-in blank functions
 	funcs["config"] = lt.String
-	funcs["text"] = func(k string) string { return lt.TextLocale(locale, k) }
+	funcs["text"] = func(k string, args ...interface{}) string { return lt.TextLocale(locale, k, args...) }
 	funcs["locale"] = func() string { return locale }
 
 	return tmpl.Funcs(funcs)
