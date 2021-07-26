@@ -41,6 +41,12 @@ type Context interface {
 	// PollAnswer returns stored poll answer if such presented.
 	PollAnswer() *PollAnswer
 
+	// MyChatMember returns bot's chat member changes.
+	MyChatMember() *ChatMemberUpdated
+
+	// ChatMember returns chat member's changes.
+	ChatMember() *ChatMemberUpdated
+
 	// Migration returns both migration from and to chat IDs.
 	Migration() (int64, int64)
 
@@ -152,8 +158,8 @@ type nativeContext struct {
 	preCheckoutQuery *PreCheckoutQuery
 	poll             *Poll
 	pollAnswer       *PollAnswer
-	chatMember       *ChatMemberUpdated
 	myChatMember     *ChatMemberUpdated
+	chatMember       *ChatMemberUpdated
 
 	lock  sync.RWMutex
 	store map[string]interface{}
@@ -207,6 +213,14 @@ func (c *nativeContext) Poll() *Poll {
 
 func (c *nativeContext) PollAnswer() *PollAnswer {
 	return c.pollAnswer
+}
+
+func (c *nativeContext) MyChatMember() *ChatMemberUpdated {
+	return c.myChatMember
+}
+
+func (c *nativeContext) ChatMember() *ChatMemberUpdated {
+	return c.chatMember
 }
 
 func (c *nativeContext) Migration() (int64, int64) {

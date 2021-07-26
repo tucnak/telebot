@@ -29,9 +29,9 @@ buttons:
     unique: pay
     text: Pay
     data:
-      - '{{.UserID}}'
-      - '{{.Amount}}'
-      - '{{.Currency}}'
+      - '{{ .UserID }}'
+      - '{{ .Amount }}'
+      - '{{ .Currency }}'
 
 markups:
   reply_shortened:

@@ -61,7 +61,7 @@ type (
 )
 
 // New reads and parses the given layout file.
-func New(path string) (*Layout, error) {
+func New(path string, funcs ...template.FuncMap) (*Layout, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -72,32 +72,23 @@ func New(path string) (*Layout, error) {
 		funcs: make(template.FuncMap),
 	}
 
-	for k, v := range funcs {
+	for k, v := range builtinFuncs {
 		lt.funcs[k] = v
+	}
+	for i := range funcs {
+		for k, v := range funcs[i] {
+			lt.funcs[k] = v
+		}
 	}
 
 	return &lt, yaml.Unmarshal(data, &lt)
 }
 
-var funcs = template.FuncMap{
+var builtinFuncs = template.FuncMap{
 	// Built-in blank and helper functions.
 	"locale": func() string { return "" },
 	"config": func(string) string { return "" },
 	"text":   func(string) string { return "" },
-}
-
-// AddFunc adds the given function to the template FuncMap.
-// Note: to make it come into effect, always add functions before New().
-func AddFunc(key string, fn interface{}) {
-	funcs[key] = fn
-}
-
-// AddFuncs extends the template FuncMap with the given one.
-// Note: to make it come into effect, always add functions before New().
-func AddFuncs(fm template.FuncMap) {
-	for k, v := range fm {
-		funcs[k] = v
-	}
 }
 
 // Settings returns built telebot Settings required for bot initialising.
@@ -264,7 +255,7 @@ func (lt *Layout) ButtonLocale(locale, k string, args ...interface{}) *tele.Btn 
 		return nil
 	}
 
-	tmpl, err := lt.template(template.New(k), locale).Parse(string(data))
+	tmpl, err := lt.template(template.New(k), locale).Funcs(lt.funcs).Parse(string(data))
 	if err != nil {
 		log.Println("telebot/layout:", err)
 		return nil
