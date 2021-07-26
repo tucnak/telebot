@@ -245,6 +245,8 @@ func (b *Bot) NewContext(upd Update) Context {
 		preCheckoutQuery: upd.PreCheckoutQuery,
 		poll:             upd.Poll,
 		pollAnswer:       upd.PollAnswer,
+		myChatMember:     upd.MyChatMember,
+		chatMember:       upd.ChatMember,
 	}
 }
 
