@@ -4,7 +4,7 @@ import "strconv"
 
 // User object represents a Telegram user, bot.
 type User struct {
-	ID int `json:"id"`
+	ID int64 `json:"id"`
 
 	FirstName    string `json:"first_name"`
 	LastName     string `json:"last_name"`
@@ -20,7 +20,7 @@ type User struct {
 
 // Recipient returns user ID (see Recipient interface).
 func (u *User) Recipient() string {
-	return strconv.Itoa(u.ID)
+	return strconv.FormatInt(u.ID, 10)
 }
 
 // Chat object represents a Telegram user, bot, group or a channel.
