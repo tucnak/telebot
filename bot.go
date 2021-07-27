@@ -66,6 +66,7 @@ type Bot struct {
 	Updates chan Update
 	Poller  Poller
 
+	middlewares []Middleware
 	handlers    map[string]interface{}
 	synchronous bool
 	verbose     bool
@@ -113,6 +114,8 @@ type Settings struct {
 	// Offline allows to create a bot without network for testing purposes.
 	Offline bool
 }
+
+type Middleware func(update *Update) error
 
 // Update object represents an incoming update.
 type Update struct {
@@ -166,6 +169,11 @@ func (b *Bot) Handle(endpoint interface{}, handler interface{}) {
 	}
 }
 
+// Use lets you set the global middlewares which will be called before handled
+func (b *Bot) Use(middlewares ...Middleware) {
+	b.middlewares = append(b.middlewares, middlewares...)
+}
+
 var (
 	cmdRx   = regexp.MustCompile(`^(/\w+)(@(\w+))?(\s|$)(.+)?`)
 	cbackRx = regexp.MustCompile(`^\f([-\w]+)(\|(.+))?$`)
@@ -202,6 +210,15 @@ func (b *Bot) Stop() {
 // ProcessUpdate processes a single incoming update.
 // A started bot calls this function automatically.
 func (b *Bot) ProcessUpdate(upd Update) {
+	defer b.deferDebug()
+
+	for _, middleware := range b.middlewares {
+		err := middleware(&upd)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	if upd.Message != nil {
 		m := upd.Message
 
