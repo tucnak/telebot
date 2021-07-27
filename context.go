@@ -38,10 +38,7 @@ type Context interface {
 	// PollAnswer returns stored poll answer if such presented.
 	PollAnswer() *PollAnswer
 
-	// MyChatMember returns bot's chat member changes.
-	MyChatMember() *ChatMemberUpdated
-
-	// ChatMember returns chat member's changes.
+	// ChatMember returns bot's chat member changes.
 	ChatMember() *ChatMemberUpdated
 
 	// Migration returns both migration from and to chat IDs.
@@ -162,6 +159,17 @@ type nativeContext struct {
 	store map[string]interface{}
 }
 
+func (c *nativeContext) ChatMemberUpdated() *ChatMemberUpdated {
+	switch {
+	case c.chatMember != nil:
+		return c.chatMember
+	case c.myChatMember != nil:
+		return c.myChatMember
+	default:
+		return nil
+	}
+}
+
 func (c *nativeContext) Message() *Message {
 	switch {
 	case c.message != nil:
@@ -199,14 +207,6 @@ func (c *nativeContext) Poll() *Poll {
 
 func (c *nativeContext) PollAnswer() *PollAnswer {
 	return c.pollAnswer
-}
-
-func (c *nativeContext) MyChatMember() *ChatMemberUpdated {
-	return c.myChatMember
-}
-
-func (c *nativeContext) ChatMember() *ChatMemberUpdated {
-	return c.chatMember
 }
 
 func (c *nativeContext) Migration() (int64, int64) {
