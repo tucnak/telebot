@@ -159,7 +159,7 @@ type nativeContext struct {
 	store map[string]interface{}
 }
 
-func (c *nativeContext) ChatMemberUpdated() *ChatMemberUpdated {
+func (c *nativeContext) ChatMember() *ChatMemberUpdated {
 	switch {
 	case c.chatMember != nil:
 		return c.chatMember
