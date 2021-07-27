@@ -11,6 +11,4 @@ require (
 	github.com/spf13/cast v1.3.1
 	github.com/stretchr/testify v1.5.1
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
-	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
-	gopkg.in/go-playground/validator.v9 v9.30.0 // indirect
 )
