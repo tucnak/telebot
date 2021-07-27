@@ -335,12 +335,11 @@ func (c *nativeContext) Edit(what interface{}, opts ...interface{}) error {
 		_, err := c.b.Edit(c.inlineResult, what, opts...)
 		return err
 	}
-	clb := c.callback
-	if clb == nil || clb.Message == nil {
-		return ErrBadContext
+	if c.callback != nil {
+		_, err := c.b.Edit(c.callback, what, opts...)
+		return err
 	}
-	_, err := c.b.Edit(clb.Message, what, opts...)
-	return err
+	return ErrBadContext
 }
 
 func (c *nativeContext) EditCaption(caption string, opts ...interface{}) error {
