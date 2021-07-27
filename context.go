@@ -38,8 +38,8 @@ type Context interface {
 	// PollAnswer returns stored poll answer if such presented.
 	PollAnswer() *PollAnswer
 
-	// ChatMemberUpdated returns bot's chat member changes.
-	ChatMemberUpdated() *ChatMemberUpdated
+	// ChatMember returns bot's chat member changes.
+	ChatMember() *ChatMemberUpdated
 
 	// Migration returns both migration from and to chat IDs.
 	Migration() (int64, int64)
