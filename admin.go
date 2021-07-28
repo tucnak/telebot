@@ -37,10 +37,10 @@ func (c *ChatInviteLink) ExpireDate() time.Time {
 // ChatMemberUpdated object represents changes in the status of a chat member.
 type ChatMemberUpdated struct {
 	// Chat where the user belongs to.
-	Chat Chat `json:"chat"`
+	Chat *Chat `json:"chat"`
 
 	// From which user the action was triggered.
-	From User `json:"from"`
+	From *User `json:"from"`
 
 	// Unixtime, use ChatMemberUpdated.Time() to get time.Time
 	Unixtime int64 `json:"date"`

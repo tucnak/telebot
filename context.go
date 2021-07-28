@@ -240,6 +240,10 @@ func (c *nativeContext) Chat() *Chat {
 		return c.message.Chat
 	case c.callback != nil && c.callback.Message != nil:
 		return c.callback.Message.Chat
+	case c.myChatMember != nil:
+		return c.myChatMember.Chat
+	case c.chatMember != nil:
+		return c.chatMember.Chat
 	default:
 		return nil
 	}
