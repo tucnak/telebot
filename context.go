@@ -257,7 +257,7 @@ func (c *nativeContext) Text() string {
 	switch {
 	case c.message != nil:
 		return c.message.Text
-	case c.callback != nil:
+	case c.callback != nil && c.callback.Message != nil:
 		return c.callback.Message.Text
 	default:
 		return ""
@@ -284,15 +284,18 @@ func (c *nativeContext) Data() string {
 }
 
 func (c *nativeContext) Args() []string {
-	if c.message != nil {
+	switch {
+	case c.message != nil:
 		payload := strings.Trim(c.message.Payload, " ")
-		if payload == "" {
-			return nil
+		if payload != "" {
+			return strings.Split(payload, " ")
 		}
-		return strings.Split(payload, " ")
-	}
-	if c.callback != nil {
+	case c.callback != nil:
 		return strings.Split(c.callback.Data, "|")
+	case c.query != nil:
+		return strings.Split(c.query.Text, " ")
+	case c.inlineResult != nil:
+		return strings.Split(c.inlineResult.Query, " ")
 	}
 	return nil
 }
