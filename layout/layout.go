@@ -60,7 +60,7 @@ type (
 	ResultContent map[string]interface{}
 )
 
-// New reads and parses the given layout file.
+// New parses the given layout file.
 func New(path string, funcs ...template.FuncMap) (*Layout, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -82,6 +82,16 @@ func New(path string, funcs ...template.FuncMap) (*Layout, error) {
 	}
 
 	return &lt, yaml.Unmarshal(data, &lt)
+}
+
+// NewDefault parses the given layout file without localization features.
+// See Layout.Default for more details.
+func NewDefault(path, locale string, funcs ...template.FuncMap) (*DefaultLayout, error) {
+	lt, err := New(path, funcs...)
+	if err != nil {
+		return nil, err
+	}
+	return lt.Default(locale), nil
 }
 
 var builtinFuncs = template.FuncMap{
@@ -187,8 +197,7 @@ func (lt *Layout) TextLocale(locale, k string, args ...interface{}) string {
 	return buf.String()
 }
 
-// Callback returns casted to CallbackEndpoint button, which mostly
-// useful for handlers registering.
+// Callback returns a callback endpoint used to handle buttons.
 //
 // Example:
 //		// Handling settings button

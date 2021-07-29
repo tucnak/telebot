@@ -15,6 +15,11 @@ func (dlt *DefaultLayout) Text(k string, args ...interface{}) string {
 	return dlt.lt.TextLocale(dlt.locale, k, args...)
 }
 
+// Callback returns a callback endpoint used to handle buttons.
+func (dlt *DefaultLayout) Callback(k string) tele.CallbackEndpoint {
+	return dlt.lt.Callback(k)
+}
+
 // Button wraps localized layout function Button using your default locale.
 func (dlt *DefaultLayout) Button(k string, args ...interface{}) *tele.Btn {
 	return dlt.lt.ButtonLocale(dlt.locale, k, args...)
