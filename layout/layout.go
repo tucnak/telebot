@@ -125,8 +125,8 @@ func (lt *Layout) Settings() tele.Settings {
 	return *lt.pref
 }
 
-// Default returns a simplified layout instance with pre-defined locale.
-// It's useful when you have no need in localization and don't want to pass
+// Default returns a simplified layout instance with the pre-defined locale.
+// It's useful when you have no need for localization and don't want to pass
 // context each time you use layout functions.
 func (lt *Layout) Default(locale string) *DefaultLayout {
 	return &DefaultLayout{lt: lt, locale: locale}
