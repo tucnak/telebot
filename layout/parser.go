@@ -74,7 +74,7 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 
 		// 2. Extended reply or inline button
 
-		data, err := yaml.Marshal(v)
+		data, err := yaml.MarshalWithOptions(v, yaml.JSON())
 		if err != nil {
 			return err
 		}
