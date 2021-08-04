@@ -29,6 +29,7 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 	var aux struct {
 		Settings *Settings
 		Config   map[string]interface{}
+		Commands map[string]string
 		Buttons  yaml.MapSlice
 		Markups  yaml.MapSlice
 		Results  yaml.MapSlice
@@ -38,9 +39,8 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 		return err
 	}
 
-	lt.Config = &Config{
-		v: aux.Config,
-	}
+	lt.Config = &Config{v: aux.Config}
+	lt.commands = aux.Commands
 
 	if pref := aux.Settings; pref != nil {
 		lt.pref = &tele.Settings{

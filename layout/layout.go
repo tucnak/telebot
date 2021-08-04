@@ -21,10 +21,11 @@ type (
 		ctxs  map[tele.Context]string
 		funcs template.FuncMap
 
-		buttons map[string]Button
-		markups map[string]Markup
-		results map[string]Result
-		locales map[string]*template.Template
+		commands map[string]string
+		buttons  map[string]Button
+		markups  map[string]Markup
+		results  map[string]Result
+		locales  map[string]*template.Template
 
 		*Config
 	}
@@ -154,6 +155,18 @@ func (lt *Layout) SetLocale(c tele.Context, locale string) {
 	lt.mu.Lock()
 	lt.ctxs[c] = locale
 	lt.mu.Unlock()
+}
+
+// Commands returns a list of telebot commands, which can be
+// used in b.SetCommands later.
+func (lt *Layout) Commands() (cmds []tele.Command) {
+	for k, v := range lt.commands {
+		cmds = append(cmds, tele.Command{
+			Text:        k,
+			Description: v,
+		})
+	}
+	return
 }
 
 // Text returns a text, which locale is dependent on the context.

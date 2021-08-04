@@ -22,6 +22,14 @@ func TestLayout(t *testing.T) {
 	assert.Equal(t, "html", pref.ParseMode)
 	assert.Equal(t, &tele.LongPoller{}, pref.Poller)
 
+	assert.Equal(t, []tele.Command{{
+		Text:        "/start",
+		Description: "Start the bot",
+	}, {
+		Text:        "/help",
+		Description: "How to use the bot",
+	}}, lt.Commands())
+
 	assert.Equal(t, "string", lt.String("str"))
 	assert.Equal(t, 123, lt.Int("num"))
 	assert.Equal(t, int64(123), lt.Int64("num"))

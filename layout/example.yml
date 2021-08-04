@@ -3,6 +3,10 @@ settings:
   parse_mode: html
   long_poller: {}
 
+commands:
+  /start: Start the bot
+  /help: How to use the bot
+
 config:
   str: string
   num: 123
