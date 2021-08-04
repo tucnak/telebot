@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"strings"
 	"sync"
 	"text/template"
 
@@ -162,7 +163,7 @@ func (lt *Layout) SetLocale(c tele.Context, locale string) {
 func (lt *Layout) Commands() (cmds []tele.Command) {
 	for k, v := range lt.commands {
 		cmds = append(cmds, tele.Command{
-			Text:        k,
+			Text:        strings.TrimLeft(k, "/"),
 			Description: v,
 		})
 	}

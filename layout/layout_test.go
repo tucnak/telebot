@@ -23,10 +23,10 @@ func TestLayout(t *testing.T) {
 	assert.Equal(t, &tele.LongPoller{}, pref.Poller)
 
 	assert.Equal(t, []tele.Command{{
-		Text:        "/start",
+		Text:        "start",
 		Description: "Start the bot",
 	}, {
-		Text:        "/help",
+		Text:        "help",
 		Description: "How to use the bot",
 	}}, lt.Commands())
 
