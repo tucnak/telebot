@@ -12,3 +12,14 @@ func AutoRespond() tele.MiddlewareFunc {
 		}
 	}
 }
+
+func IgnoreVia() tele.MiddlewareFunc {
+	return func(next tele.HandlerFunc) tele.HandlerFunc {
+		return func(c tele.Context) error {
+			if c.Message().Via != nil {
+				return nil
+			}
+			return next(c)
+		}
+	}
+}
