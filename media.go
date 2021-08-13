@@ -86,6 +86,7 @@ type Audio struct {
 
 // MediaFile returns &Audio.File
 func (a *Audio) MediaFile() *File {
+	a.fileName = a.FileName
 	return &a.File
 }
 
@@ -103,6 +104,7 @@ type Document struct {
 
 // MediaFile returns &Document.File
 func (d *Document) MediaFile() *File {
+	d.fileName = d.FileName
 	return &d.File
 }
 
@@ -125,6 +127,7 @@ type Video struct {
 
 // MediaFile returns &Video.File
 func (v *Video) MediaFile() *File {
+	v.fileName = v.FileName
 	return &v.File
 }
 
@@ -145,6 +148,7 @@ type Animation struct {
 
 // MediaFile returns &Animation.File
 func (a *Animation) MediaFile() *File {
+	a.fileName = a.FileName
 	return &a.File
 }
 

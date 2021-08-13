@@ -88,7 +88,7 @@ func (b *Bot) sendFiles(method string, files map[string]File, params map[string]
 		defer pipeWriter.Close()
 
 		for field, file := range rawFiles {
-			if err := addFileToWriter(writer, files[field].FileName, field, file); err != nil {
+			if err := addFileToWriter(writer, files[field].fileName, field, file); err != nil {
 				pipeWriter.CloseWithError(err)
 				return
 			}

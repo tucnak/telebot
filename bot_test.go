@@ -332,7 +332,10 @@ func TestBot(t *testing.T) {
 		_, err = b.SendAlbum(to, nil)
 		assert.Error(t, err)
 
-		msgs, err := b.SendAlbum(to, Album{photo, photo})
+		photo2 := *photo
+		photo2.Caption = ""
+
+		msgs, err := b.SendAlbum(to, Album{photo, &photo2}, ModeHTML)
 		require.NoError(t, err)
 		assert.Len(t, msgs, 2)
 		assert.NotEmpty(t, msgs[0].AlbumID)
@@ -433,7 +436,7 @@ func TestBot(t *testing.T) {
 		assert.NotNil(t, edited.Location)
 	})
 
-	// should be the last
+	// should be after Edit tests
 	t.Run("Delete()", func(t *testing.T) {
 		require.NoError(t, b.Delete(msg))
 	})
