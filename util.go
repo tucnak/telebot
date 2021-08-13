@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/pkg/errors"
 )
 
 func (b *Bot) debug(err error) {
@@ -197,6 +198,10 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 		processButtons(opt.ReplyMarkup.InlineKeyboard)
 		replyMarkup, _ := json.Marshal(opt.ReplyMarkup)
 		params["reply_markup"] = string(replyMarkup)
+	}
+
+	if opt.RandomID != 0 {
+		params["random_id"] = strconv.FormatInt(opt.RandomID, 10)
 	}
 }
 
