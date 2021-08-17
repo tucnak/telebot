@@ -1703,12 +1703,12 @@ func (b *Bot) CreateInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLin
 		return nil, err
 	}
 
-	var resp ChatInviteLink
+	var resp ChatInviteLinkResult
 	if err := json.Unmarshal(data, &resp); err != nil {
 		return nil, wrapError(err)
 	}
 
-	return &resp, nil
+	return &resp.Result, nil
 }
 
 // EditInviteLink edits a non-primary invite link created by the bot.
@@ -1727,19 +1727,19 @@ func (b *Bot) EditInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink,
 		return nil, err
 	}
 
-	var resp ChatInviteLink
+	var resp ChatInviteLinkResult
 	if err := json.Unmarshal(data, &resp); err != nil {
 		return nil, wrapError(err)
 	}
 
-	return &resp, nil
+	return &resp.Result, nil
 }
 
 // RevokeInviteLink revokes an invite link created by the bot.
 func (b *Bot) RevokeInviteLink(chat *Chat, link string) (*ChatInviteLink, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
-		"link":    link,
+		"invite_link":    link,
 	}
 
 	data, err := b.Raw("revokeChatInviteLink", params)
@@ -1747,10 +1747,10 @@ func (b *Bot) RevokeInviteLink(chat *Chat, link string) (*ChatInviteLink, error)
 		return nil, err
 	}
 
-	var resp ChatInviteLink
+	var resp ChatInviteLinkResult
 	if err := json.Unmarshal(data, &resp); err != nil {
 		return nil, wrapError(err)
 	}
 
-	return &resp, nil
+	return &resp.Result, nil
 }

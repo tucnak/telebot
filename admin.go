@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+// ChatInviteLinkResult object represents an invite for a chat
+type ChatInviteLinkResult struct {
+	Result ChatInviteLink `json:"result"`
+}
+
 // ChatInviteLink object represents an invite for a chat.
 type ChatInviteLink struct {
 	// The invite link.
