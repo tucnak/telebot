@@ -1703,7 +1703,9 @@ func (b *Bot) CreateInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLin
 		return nil, err
 	}
 
-	var resp ChatInviteLinkResult
+	var resp struct {
+		Result ChatInviteLink `json:"result"`
+	}
 	if err := json.Unmarshal(data, &resp); err != nil {
 		return nil, wrapError(err)
 	}
@@ -1727,7 +1729,9 @@ func (b *Bot) EditInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink,
 		return nil, err
 	}
 
-	var resp ChatInviteLinkResult
+	var resp struct {
+		Result ChatInviteLink `json:"result"`
+	}
 	if err := json.Unmarshal(data, &resp); err != nil {
 		return nil, wrapError(err)
 	}
@@ -1747,7 +1751,9 @@ func (b *Bot) RevokeInviteLink(chat *Chat, link string) (*ChatInviteLink, error)
 		return nil, err
 	}
 
-	var resp ChatInviteLinkResult
+	var resp struct {
+		Result ChatInviteLink `json:"result"`
+	}
 	if err := json.Unmarshal(data, &resp); err != nil {
 		return nil, wrapError(err)
 	}
