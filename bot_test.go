@@ -480,4 +480,30 @@ func TestBot(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, orig, cmds)
 	})
+
+	t.Run("CreateInviteLink", func(t *testing.T) {
+		inviteLink, err := b.CreateInviteLink(&Chat{ID: chatID}, nil)
+		assert.Nil(t, err)
+		assert.True(t, len(inviteLink.InviteLink) > 0)
+	})
+
+	t.Run("EditInviteLink", func(t *testing.T) {
+		inviteLink, err := b.CreateInviteLink(&Chat{ID: chatID}, nil)
+		assert.Nil(t, err)
+		assert.True(t, len(inviteLink.InviteLink) > 0)
+
+		response, err := b.EditInviteLink(&Chat{ID: chatID}, &ChatInviteLink{InviteLink: inviteLink.InviteLink})
+		assert.Nil(t, err)
+		assert.True(t, len(response.InviteLink) > 0)
+	})
+
+	t.Run("RevokeInviteLink", func(t *testing.T) {
+		inviteLink, err := b.CreateInviteLink(&Chat{ID: chatID}, nil)
+		assert.Nil(t, err)
+		assert.True(t, len(inviteLink.InviteLink) > 0)
+
+		response, err := b.RevokeInviteLink(&Chat{ID: chatID}, inviteLink.InviteLink)
+		assert.Nil(t, err)
+		assert.True(t, len(response.InviteLink) > 0)
+	})
 }
