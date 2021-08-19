@@ -11,9 +11,11 @@ import (
 // used to handle actual endpoints.
 type HandlerFunc func(Context) error
 
-// Context represents a context of the current event. It stores data
-// depending on its type, whether it's a message, callback or whatever.
+// Context wraps an update and represents the context of current event.
 type Context interface {
+	// ID returns the update ID.
+	ID() int
+
 	// Bot returns the bot instance.
 	Bot() *Bot
 
@@ -147,6 +149,7 @@ type Context interface {
 type nativeContext struct {
 	b *Bot
 
+	id               int
 	message          *Message
 	callback         *Callback
 	query            *Query
@@ -160,6 +163,10 @@ type nativeContext struct {
 
 	lock  sync.RWMutex
 	store map[string]interface{}
+}
+
+func (c *nativeContext) ID() int {
+	return c.id
 }
 
 func (c *nativeContext) Bot() *Bot {
