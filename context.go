@@ -13,11 +13,11 @@ type HandlerFunc func(Context) error
 
 // Context wraps an update and represents the context of current event.
 type Context interface {
-	// ID returns the update ID.
-	ID() int
-
 	// Bot returns the bot instance.
 	Bot() *Bot
+
+	// Update returns the original update.
+	Update() Update
 
 	// Message returns stored message if such presented.
 	Message() *Message
@@ -149,7 +149,7 @@ type Context interface {
 type nativeContext struct {
 	b *Bot
 
-	id               int
+	update           Update
 	message          *Message
 	callback         *Callback
 	query            *Query
@@ -165,12 +165,12 @@ type nativeContext struct {
 	store map[string]interface{}
 }
 
-func (c *nativeContext) ID() int {
-	return c.id
-}
-
 func (c *nativeContext) Bot() *Bot {
 	return c.b
+}
+
+func (c *nativeContext) Update() Update {
+	return c.update
 }
 
 func (c *nativeContext) Message() *Message {

@@ -237,7 +237,7 @@ func (b *Bot) NewMarkup() *ReplyMarkup {
 func (b *Bot) NewContext(upd Update) Context {
 	return &nativeContext{
 		b:                b,
-		id:               upd.ID,
+		update:           upd,
 		message:          upd.Message,
 		callback:         upd.Callback,
 		query:            upd.Query,
