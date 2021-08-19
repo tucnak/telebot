@@ -349,6 +349,21 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			return
 		}
 
+		if m.GroupCreated {
+			b.handle(OnGroupCreated, c)
+			return
+		}
+
+		if m.SuperGroupCreated {
+			b.handle(OnSuperGroupCreated, c)
+			return
+		}
+
+		if m.ChannelCreated {
+			b.handle(OnChannelCreated, c)
+			return
+		}
+
 		if m.MigrateTo != 0 {
 			m.MigrateFrom = m.Chat.ID
 			b.handle(OnMigration, c)
@@ -507,6 +522,8 @@ func (b *Bot) handleMedia(c Context) bool {
 		b.handle(OnLocation, c)
 	case m.Venue != nil:
 		b.handle(OnVenue, c)
+	case m.Game != nil:
+		b.handle(OnGame, c)
 	case m.Dice != nil:
 		b.handle(OnDice, c)
 	default:

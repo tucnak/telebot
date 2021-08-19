@@ -63,6 +63,7 @@ const (
 	OnDice       = "\adice"
 	OnInvoice    = "\ainvoice"
 	OnPayment    = "\apayment"
+	OnGame       = "\agame"
 	OnPoll       = "\apoll"
 	OnPollAnswer = "\apoll_answer"
 
@@ -73,12 +74,15 @@ const (
 	// Will fire when bot is added to a group.
 	OnAddedToGroup = "\aadded_to_group"
 
-	// Group events:
+	// Service events:
 	OnUserJoined        = "\auser_joined"
 	OnUserLeft          = "\auser_left"
 	OnNewGroupTitle     = "\anew_chat_title"
 	OnNewGroupPhoto     = "\anew_chat_photo"
 	OnGroupPhotoDeleted = "\achat_photo_deleted"
+	OnGroupCreated      = "\agroup_created"
+	OnSuperGroupCreated = "\asupergroup_created"
+	OnChannelCreated    = "\achannel_created"
 
 	// Migration happens when group switches to
 	// a supergroup. You might want to update

@@ -117,6 +117,9 @@ type Message struct {
 	// For a poll, information the native poll.
 	Poll *Poll `json:"poll"`
 
+	// For a game, information about it.
+	Game *Game `json:"game"`
+
 	// For a dice, information about it.
 	Dice *Dice `json:"dice"`
 
@@ -216,9 +219,6 @@ type Message struct {
 	// The domain name of the website on which the user has logged in.
 	ConnectedWebsite string `json:"connected_website,omitempty"`
 
-	// Inline keyboard attached to the message.
-	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup"`
-
 	// For a service message, a voice chat started in the chat.
 	VoiceChatStarted *VoiceChatStarted `json:"voice_chat_started,omitempty"`
 
@@ -237,6 +237,9 @@ type Message struct {
 
 	// For a service message, represents about a change in auto-delete timer settings.
 	AutoDeleteTimer *AutoDeleteTimer `json:"message_auto_delete_timer_changed,omitempty"`
+
+	// Inline keyboard attached to the message.
+	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup"`
 }
 
 // MessageEntity object represents "special" parts of text messages,
