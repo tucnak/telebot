@@ -6,21 +6,20 @@
 //
 //		import (
 //			"time"
-//			tb "gopkg.in/tucnak/telebot.v2"
+//			tele "gopkg.in/tucnak/telebot.v3"
 //		)
 //
 //		func main() {
 //			b, err := tele.NewBot(tele.Settings{
-//				Token: "TOKEN_HERE",
+//				Token:  "...",
 //				Poller: &tele.LongPoller{Timeout: 10 * time.Second},
 //			})
-//
 //			if err != nil {
 //				return
 //			}
 //
-//			b.Handle(tele.OnText, func(m *tele.Message) {
-//				b.Send(m.Sender, "hello world")
+//			b.Handle(tele.OnText, func(c tele.Context) error {
+//				return c.Send("Hello world!")
 //			})
 //
 //			b.Start()
@@ -47,25 +46,29 @@ const DefaultApiURL = "https://api.telegram.org"
 //
 const (
 	// Basic message handlers.
-	OnText              = "\atext"
-	OnPhoto             = "\aphoto"
-	OnAudio             = "\aaudio"
-	OnAnimation         = "\aanimation"
-	OnDocument          = "\adocument"
-	OnSticker           = "\asticker"
-	OnVideo             = "\avideo"
-	OnVoice             = "\avoice"
-	OnVideoNote         = "\avideo_note"
-	OnContact           = "\acontact"
-	OnLocation          = "\alocation"
-	OnVenue             = "\avenue"
-	OnEdited            = "\aedited"
-	OnPinned            = "\apinned"
-	OnChannelPost       = "\achan_post"
-	OnEditedChannelPost = "\achan_edited_post"
-	OnDice              = "\adice"
-	OnInvoice           = "\ainvoice"
-	OnPayment           = "\apayment"
+	OnText       = "\atext"
+	OnEdited     = "\aedited"
+	OnPhoto      = "\aphoto"
+	OnAudio      = "\aaudio"
+	OnAnimation  = "\aanimation"
+	OnDocument   = "\adocument"
+	OnSticker    = "\asticker"
+	OnVideo      = "\avideo"
+	OnVoice      = "\avoice"
+	OnVideoNote  = "\avideo_note"
+	OnContact    = "\acontact"
+	OnLocation   = "\alocation"
+	OnVenue      = "\avenue"
+	OnPinned     = "\apinned"
+	OnDice       = "\adice"
+	OnInvoice    = "\ainvoice"
+	OnPayment    = "\apayment"
+	OnPoll       = "\apoll"
+	OnPollAnswer = "\apoll_answer"
+
+	// Will fire on channel posts.
+	OnChannelPost       = "\achannel_post"
+	OnEditedChannelPost = "\aedited_channel_post"
 
 	// Will fire when bot is added to a group.
 	OnAddedToGroup = "\aadded_to_group"
@@ -75,7 +78,7 @@ const (
 	OnUserLeft          = "\auser_left"
 	OnNewGroupTitle     = "\anew_chat_title"
 	OnNewGroupPhoto     = "\anew_chat_photo"
-	OnGroupPhotoDeleted = "\achat_photo_del"
+	OnGroupPhotoDeleted = "\achat_photo_deleted"
 
 	// Migration happens when group switches to
 	// a supergroup. You might want to update
@@ -90,19 +93,13 @@ const (
 	OnQuery = "\aquery"
 
 	// Will fire on chosen inline results.
-	OnInlineResult = "\achosen_inline_result"
+	OnInlineResult = "\ainline_result"
 
 	// Will fire on a shipping query.
 	OnShipping = "\ashipping_query"
 
 	// Will fire on pre checkout query.
 	OnCheckout = "\apre_checkout_query"
-
-	// Will fire on a poll.
-	OnPoll = "\apoll"
-
-	// Will fire on a poll answer.
-	OnPollAnswer = "\apoll_answer"
 
 	// Will fire on bot's chat member changes.
 	OnMyChatMember = "\amy_chat_member"
