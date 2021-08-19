@@ -121,19 +121,19 @@ type Settings struct {
 type Update struct {
 	ID int `json:"update_id"`
 
-	Message           *Message           `json:"message,omitempty"`
-	EditedMessage     *Message           `json:"edited_message,omitempty"`
-	ChannelPost       *Message           `json:"channel_post,omitempty"`
-	EditedChannelPost *Message           `json:"edited_channel_post,omitempty"`
-	Callback          *Callback          `json:"callback_query,omitempty"`
-	Query             *Query             `json:"inline_query,omitempty"`
-	InlineResult      *InlineResult      `json:"chosen_inline_result,omitempty"`
-	ShippingQuery     *ShippingQuery     `json:"shipping_query,omitempty"`
-	PreCheckoutQuery  *PreCheckoutQuery  `json:"pre_checkout_query,omitempty"`
-	Poll              *Poll              `json:"poll,omitempty"`
-	PollAnswer        *PollAnswer        `json:"poll_answer,omitempty"`
-	MyChatMember      *ChatMemberUpdated `json:"my_chat_member,omitempty"`
-	ChatMember        *ChatMemberUpdated `json:"chat_member,omitempty"`
+	Message           *Message          `json:"message,omitempty"`
+	EditedMessage     *Message          `json:"edited_message,omitempty"`
+	ChannelPost       *Message          `json:"channel_post,omitempty"`
+	EditedChannelPost *Message          `json:"edited_channel_post,omitempty"`
+	Callback          *Callback         `json:"callback_query,omitempty"`
+	Query             *Query            `json:"inline_query,omitempty"`
+	InlineResult      *InlineResult     `json:"chosen_inline_result,omitempty"`
+	ShippingQuery     *ShippingQuery    `json:"shipping_query,omitempty"`
+	PreCheckoutQuery  *PreCheckoutQuery `json:"pre_checkout_query,omitempty"`
+	Poll              *Poll             `json:"poll,omitempty"`
+	PollAnswer        *PollAnswer       `json:"poll_answer,omitempty"`
+	MyChatMember      *ChatMemberUpdate `json:"my_chat_member,omitempty"`
+	ChatMember        *ChatMemberUpdate `json:"chat_member,omitempty"`
 }
 
 // Command represents a bot command.

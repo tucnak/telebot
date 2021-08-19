@@ -44,7 +44,7 @@ type Context interface {
 	PollAnswer() *PollAnswer
 
 	// ChatMember returns chat member changes.
-	ChatMember() *ChatMemberUpdated
+	ChatMember() *ChatMemberUpdate
 
 	// Migration returns both migration from and to chat IDs.
 	Migration() (int64, int64)
@@ -158,8 +158,8 @@ type nativeContext struct {
 	preCheckoutQuery *PreCheckoutQuery
 	poll             *Poll
 	pollAnswer       *PollAnswer
-	myChatMember     *ChatMemberUpdated
-	chatMember       *ChatMemberUpdated
+	myChatMember     *ChatMemberUpdate
+	chatMember       *ChatMemberUpdate
 
 	lock  sync.RWMutex
 	store map[string]interface{}
@@ -204,7 +204,7 @@ func (c *nativeContext) PreCheckoutQuery() *PreCheckoutQuery {
 	return c.preCheckoutQuery
 }
 
-func (c *nativeContext) ChatMember() *ChatMemberUpdated {
+func (c *nativeContext) ChatMember() *ChatMemberUpdate {
 	switch {
 	case c.chatMember != nil:
 		return c.chatMember

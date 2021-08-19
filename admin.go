@@ -20,8 +20,8 @@ type ChatInviteLink struct {
 	// If the link is revoked.
 	IsRevoked bool `json:"is_revoked"`
 
-	// (Optional) Point in time when the link will expire, use
-	// ChatInviteLink.ExpireDate() to get time.Time
+	// (Optional) Point in time when the link will expire,
+	// use ExpireDate() to get time.Time
 	ExpireUnixtime int64 `json:"expire_date,omitempty"`
 
 	// (Optional) Maximum number of users that can be members of
@@ -34,15 +34,15 @@ func (c *ChatInviteLink) ExpireDate() time.Time {
 	return time.Unix(c.ExpireUnixtime, 0)
 }
 
-// ChatMemberUpdated object represents changes in the status of a chat member.
-type ChatMemberUpdated struct {
+// ChatMemberUpdate object represents changes in the status of a chat member.
+type ChatMemberUpdate struct {
 	// Chat where the user belongs to.
 	Chat *Chat `json:"chat"`
 
-	// From which user the action was triggered.
-	From *User `json:"from"`
+	// Sender which user the action was triggered.
+	Sender *User `json:"from"`
 
-	// Unixtime, use ChatMemberUpdated.Time() to get time.Time
+	// Unixtime, use Date() to get time.Time
 	Unixtime int64 `json:"date"`
 
 	// Previous information about the chat member.
@@ -57,7 +57,7 @@ type ChatMemberUpdated struct {
 }
 
 // Time returns the moment of the change in local time.
-func (c *ChatMemberUpdated) Time() time.Time {
+func (c *ChatMemberUpdate) Time() time.Time {
 	return time.Unix(c.Unixtime, 0)
 }
 
