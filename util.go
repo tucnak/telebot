@@ -248,3 +248,16 @@ func intsToStrs(ns []int) (s []string) {
 	}
 	return
 }
+
+//markdown escape
+// '_'、'*'、'`'、'['
+func escapeMarkDown(markdownStr string) string {
+	nowords := []string{"_","*","`","["}
+	for _, word := range nowords {
+		if strings.Contains(markdownStr,word) {
+			markdownStr=strings.ReplaceAll(markdownStr,word,"\\"+word);
+		}
+	}
+	return markdownStr
+}
+
