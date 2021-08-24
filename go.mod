@@ -1,4 +1,4 @@
-module gopkg.in/tucnak/telebot.v2
+module github.com/maxposter/telebot.v2
 
 go 1.13
 

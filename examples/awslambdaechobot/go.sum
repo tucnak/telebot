@@ -17,7 +17,7 @@ github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5
 github.com/urfave/cli/v2 v2.1.1/go.mod h1:SE9GqnLQmjVa0iPEY0f1w3ygNIYcIJ0OKPMoW2caLfQ=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
-gopkg.in/tucnak/telebot.v2 v2.3.1 h1:ux26aeidIT1RcqOiTjZtNEdAgXoohc/CKM6imBSkzbw=
-gopkg.in/tucnak/telebot.v2 v2.3.1/go.mod h1:t+KVAiqFsG9ZDF0hz1ZPFTyENtlrDrDS3qmRRqhICBg=
+github.com/maxposter/telebot.v2 v2.3.1 h1:ux26aeidIT1RcqOiTjZtNEdAgXoohc/CKM6imBSkzbw=
+github.com/maxposter/telebot.v2 v2.3.1/go.mod h1:t+KVAiqFsG9ZDF0hz1ZPFTyENtlrDrDS3qmRRqhICBg=
 gopkg.in/yaml.v2 v2.2.2 h1:ZCJp+EgiOT7lHqUV2J862kp8Qj64Jo6az82+3Td9dZw=
 gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=

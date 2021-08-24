@@ -1,13 +1,13 @@
 # Telebot
 >"I never knew creating Telegram bots could be so _sexy_!"
 
-[![GoDoc](https://godoc.org/gopkg.in/tucnak/telebot.v2?status.svg)](https://godoc.org/gopkg.in/tucnak/telebot.v2)
+[![GoDoc](https://godoc.org/github.com/maxposter/telebot.v2?status.svg)](https://godoc.org/github.com/maxposter/telebot)
 [![Travis](https://travis-ci.org/tucnak/telebot.svg?branch=v2)](https://travis-ci.org/tucnak/telebot)
 [![codecov.io](https://codecov.io/gh/tucnak/telebot/coverage.svg?branch=develop)](https://codecov.io/gh/tucnak/telebot)
 [![Discuss on Telegram](https://img.shields.io/badge/telegram-discuss-0088cc.svg)](https://t.me/go_telebot)
 
 ```bash
-go get -u gopkg.in/tucnak/telebot.v2
+go get -u github.com/maxposter/telebot.v2
 ```
 
 * [Overview](#overview)
@@ -48,7 +48,7 @@ import (
 	"log"
 	"time"
 
-	tb "gopkg.in/tucnak/telebot.v2"
+	tb "github.com/maxposter/telebot.v2"
 )
 
 func main() {
@@ -79,7 +79,7 @@ Simple, innit? Telebot's routing system takes care of delivering updates
 to their endpoints, so in order to get to handle any meaningful event,
 all you got to do is just plug your function to one of the Telebot-provided
 endpoints. You can find the full list
-[here](https://godoc.org/gopkg.in/tucnak/telebot.v2#pkg-constants).
+[here](https://godoc.org/github.com/maxposter/telebot.v2#pkg-constants).
 
 ```go
 b, _ := tb.NewBot(settings)
@@ -257,7 +257,7 @@ b.Send(user, "text", tb.Silent, tb.NoPreview)
 ```
 
 Full list of supported option-flags you can find
-[here](https://github.com/tucnak/telebot/blob/v2/options.go#L9).
+[here](https://github.com/maxposter/telebot/blob/v2/options.go#L9).
 
 ## Editable
 If you want to edit some existing message, you don't really need to store the
@@ -452,7 +452,7 @@ of `QueryResponse`.
 # Contributing
 
 1. Fork it
-2. Clone develop: `git clone -b develop https://github.com/tucnak/telebot`
+2. Clone develop: `git clone -b develop https://github.com/maxposter/telebot`
 3. Create your feature branch: `git checkout -b new-feature`
 4. Make changes and add them: `git add .`
 5. Commit: `git commit -m "Add some feature"`
