@@ -1,4 +1,4 @@
-module github.com/maxposter/telebot
+module github.com/maxposter/telebot.v2
 
 go 1.13
 
