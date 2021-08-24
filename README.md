@@ -1,13 +1,13 @@
 # Telebot
 >"I never knew creating Telegram bots could be so _sexy_!"
 
-[![GoDoc](https://godoc.org/github.com/maxposter/telebot.v2?status.svg)](https://godoc.org/github.com/maxposter/telebot)
+[![GoDoc](https://godoc.org/github.com/maxposter/telebot.v2Maxposter?status.svg)](https://godoc.org/github.com/maxposter/telebot)
 [![Travis](https://travis-ci.org/tucnak/telebot.svg?branch=v2)](https://travis-ci.org/tucnak/telebot)
 [![codecov.io](https://codecov.io/gh/tucnak/telebot/coverage.svg?branch=develop)](https://codecov.io/gh/tucnak/telebot)
 [![Discuss on Telegram](https://img.shields.io/badge/telegram-discuss-0088cc.svg)](https://t.me/go_telebot)
 
 ```bash
-go get -u github.com/maxposter/telebot.v2
+go get -u github.com/maxposter/telebot.v2Maxposter
 ```
 
 * [Overview](#overview)
@@ -48,7 +48,7 @@ import (
 	"log"
 	"time"
 
-	tb "github.com/maxposter/telebot.v2"
+	tb "github.com/maxposter/telebot.v2Maxposter"
 )
 
 func main() {
@@ -79,7 +79,7 @@ Simple, innit? Telebot's routing system takes care of delivering updates
 to their endpoints, so in order to get to handle any meaningful event,
 all you got to do is just plug your function to one of the Telebot-provided
 endpoints. You can find the full list
-[here](https://godoc.org/github.com/maxposter/telebot.v2#pkg-constants).
+[here](https://godoc.org/github.com/maxposter/telebot.v2Maxposter#pkg-constants).
 
 ```go
 b, _ := tb.NewBot(settings)
