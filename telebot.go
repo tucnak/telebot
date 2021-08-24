@@ -6,7 +6,7 @@
 //
 //		import (
 //			"time"
-//			tb "github.com/maxposter/telebot.v2Maxposter"
+//			tb "github.com/maxposter/telebot"
 //		)
 //
 //		func main() {

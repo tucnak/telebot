@@ -4,5 +4,5 @@ go 1.14
 
 require (
 	github.com/aws/aws-lambda-go v1.17.0
-	github.com/maxposter/telebot.v2Maxposter v2.3.1
+	github.com/maxposter/telebot v0.0.0-20210824123731-26bce2253c0e
 )
