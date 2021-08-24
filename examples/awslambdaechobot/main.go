@@ -6,7 +6,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	tb "github.com/maxposter/telebot.v2"
+	tb "github.com/maxposter/telebot.v2Maxposter"
 )
 
 func main() {
