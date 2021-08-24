@@ -50,15 +50,19 @@ func (p *MiddlewarePoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 
 	go p.Poller.Poll(b, middle, stopPoller)
 
+	go func() {
+		<-stop
+		close(stopPoller)
+	}()
+
 	for {
-		select {
-		case <-stop:
-			close(stopPoller)
+		upd, ok := <-middle
+		if !ok {
+			close(dest)
 			return
-		case upd := <-middle:
-			if p.Filter(&upd) {
-				dest <- upd
-			}
+		}
+		if p.Filter(&upd) {
+			dest <- upd
 		}
 	}
 }
@@ -93,6 +97,7 @@ func (p *LongPoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 	for {
 		select {
 		case <-stop:
+			close(dest)
 			return
 		default:
 		}

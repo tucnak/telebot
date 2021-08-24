@@ -184,12 +184,14 @@ func (b *Bot) Start() {
 	for {
 		select {
 		// handle incoming updates
-		case upd := <-b.Updates:
+		case upd, ok := <-b.Updates:
+			if !ok {
+				return
+			}
 			b.ProcessUpdate(upd)
 		// call to stop polling
 		case <-b.stop:
 			close(stop)
-			return
 		}
 	}
 }
@@ -1742,8 +1744,8 @@ func (b *Bot) EditInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink,
 // RevokeInviteLink revokes an invite link created by the bot.
 func (b *Bot) RevokeInviteLink(chat *Chat, link string) (*ChatInviteLink, error) {
 	params := map[string]string{
-		"chat_id": chat.Recipient(),
-		"invite_link":    link,
+		"chat_id":     chat.Recipient(),
+		"invite_link": link,
 	}
 
 	data, err := b.Raw("revokeChatInviteLink", params)
