@@ -131,7 +131,11 @@ func (lt *Layout) Settings() tele.Settings {
 // It's useful when you have no need for localization and don't want to pass
 // context each time you use layout functions.
 func (lt *Layout) Default(locale string) *DefaultLayout {
-	return &DefaultLayout{lt: lt, locale: locale}
+	return &DefaultLayout{
+		locale: locale,
+		lt:     lt,
+		Config: lt.Config,
+	}
 }
 
 // Locales returns all presented locales.

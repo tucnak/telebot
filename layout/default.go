@@ -6,8 +6,9 @@ import (
 
 // DefaultLayout is a simplified layout instance with pre-defined locale by default.
 type DefaultLayout struct {
-	lt     *Layout
 	locale string
+	lt     *Layout
+	*Config
 }
 
 // Text wraps localized layout function Text using your default locale.
