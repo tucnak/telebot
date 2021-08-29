@@ -200,7 +200,7 @@ func (r *ReplyMarkup) Row(many ...Btn) Row {
 // Split(2, []Btn{six buttons...}) -> [[1, 2],[3, 4],[5, 6]]
 //
 func (r *ReplyMarkup) Split(max int, btns []Btn) []Row {
-	rows := make([]Row, (1+len(btns))/max)
+	rows := make([]Row, (max-1+len(btns))/max)
 	for i, b := range btns {
 		i /= max
 		rows[i] = append(rows[i], b)
