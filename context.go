@@ -364,26 +364,31 @@ func (c *nativeContext) Edit(what interface{}, opts ...interface{}) error {
 }
 
 func (c *nativeContext) EditCaption(caption string, opts ...interface{}) error {
-	clb := c.callback
-	if clb == nil || clb.Message == nil {
-		return ErrBadContext
+	if c.inlineResult != nil {
+		_, err := c.b.EditCaption(c.inlineResult, caption, opts...)
+		return err
 	}
-	_, err := c.b.EditCaption(clb.Message, caption, opts...)
-	return err
+	if c.callback != nil {
+		_, err := c.b.Edit(c.callback, caption, opts...)
+		return err
+	}
+	return ErrBadContext
 }
 
 func (c *nativeContext) EditOrSend(what interface{}, opts ...interface{}) error {
-	if c.callback != nil {
-		return c.Edit(what, opts...)
+	err := c.Edit(what, opts...)
+	if err == ErrBadContext {
+		return c.Send(what, opts...)
 	}
-	return c.Send(what, opts...)
+	return err
 }
 
 func (c *nativeContext) EditOrReply(what interface{}, opts ...interface{}) error {
-	if c.callback != nil {
-		return c.Edit(what, opts...)
+	err := c.Edit(what, opts...)
+	if err == ErrBadContext {
+		return c.Reply(what, opts...)
 	}
-	return c.Reply(what, opts...)
+	return err
 }
 
 func (c *nativeContext) Delete() error {
