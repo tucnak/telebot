@@ -970,7 +970,7 @@ func (b *Bot) EditMedia(msg Editable, media InputMedia, opts ...interface{}) (*M
 	b.embedSendOptions(params, sendOpts)
 
 	if sendOpts != nil {
-		result.ParseMode = sendOpts.ParseMode
+		result.ParseMode = params["parse_mode"]
 	}
 	if thumb != nil {
 		result.Thumbnail = "attach://" + thumbName
