@@ -332,7 +332,10 @@ func TestBot(t *testing.T) {
 		_, err = b.SendAlbum(to, nil)
 		assert.Error(t, err)
 
-		msgs, err := b.SendAlbum(to, Album{photo, photo})
+		photo2 := *photo
+		photo2.Caption = ""
+
+		msgs, err := b.SendAlbum(to, Album{photo, &photo2}, ModeHTML)
 		require.NoError(t, err)
 		assert.Len(t, msgs, 2)
 		assert.NotEmpty(t, msgs[0].AlbumID)
@@ -433,7 +436,7 @@ func TestBot(t *testing.T) {
 		assert.NotNil(t, edited.Location)
 	})
 
-	// should be the last
+	// should be after Edit tests
 	t.Run("Delete()", func(t *testing.T) {
 		require.NoError(t, b.Delete(msg))
 	})
@@ -476,5 +479,31 @@ func TestBot(t *testing.T) {
 		cmds, err := b.GetCommands()
 		require.NoError(t, err)
 		assert.Equal(t, orig, cmds)
+	})
+
+	t.Run("CreateInviteLink", func(t *testing.T) {
+		inviteLink, err := b.CreateInviteLink(&Chat{ID: chatID}, nil)
+		assert.Nil(t, err)
+		assert.True(t, len(inviteLink.InviteLink) > 0)
+	})
+
+	t.Run("EditInviteLink", func(t *testing.T) {
+		inviteLink, err := b.CreateInviteLink(&Chat{ID: chatID}, nil)
+		assert.Nil(t, err)
+		assert.True(t, len(inviteLink.InviteLink) > 0)
+
+		response, err := b.EditInviteLink(&Chat{ID: chatID}, &ChatInviteLink{InviteLink: inviteLink.InviteLink})
+		assert.Nil(t, err)
+		assert.True(t, len(response.InviteLink) > 0)
+	})
+
+	t.Run("RevokeInviteLink", func(t *testing.T) {
+		inviteLink, err := b.CreateInviteLink(&Chat{ID: chatID}, nil)
+		assert.Nil(t, err)
+		assert.True(t, len(inviteLink.InviteLink) > 0)
+
+		response, err := b.RevokeInviteLink(&Chat{ID: chatID}, inviteLink.InviteLink)
+		assert.Nil(t, err)
+		assert.True(t, len(response.InviteLink) > 0)
 	})
 }

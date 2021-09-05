@@ -574,7 +574,6 @@ func (b *Bot) ProcessUpdate(upd Update) {
 
 		return
 	}
-
 }
 
 func (b *Bot) handle(end string, m *Message) bool {
@@ -662,6 +661,8 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 		return nil, ErrBadRecipient
 	}
 
+	sendOpts := extractOptions(options)
+
 	media := make([]string, len(a))
 	files := make(map[string]File)
 
@@ -687,15 +688,15 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 		switch y := x.(type) {
 		case *Photo:
 			data, _ = json.Marshal(struct {
-				Type      string    `json:"type"`
-				Media     string    `json:"media"`
-				Caption   string    `json:"caption,omitempty"`
-				ParseMode ParseMode `json:"parse_mode,omitempty"`
+				Type      string `json:"type"`
+				Media     string `json:"media"`
+				Caption   string `json:"caption,omitempty"`
+				ParseMode string `json:"parse_mode,omitempty"`
 			}{
 				Type:      "photo",
 				Media:     repr,
 				Caption:   y.Caption,
-				ParseMode: y.ParseMode,
+				ParseMode: sendOpts.ParseMode,
 			})
 		case *Video:
 			data, _ = json.Marshal(struct {
@@ -706,6 +707,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 				Height            int    `json:"height,omitempty"`
 				Duration          int    `json:"duration,omitempty"`
 				SupportsStreaming bool   `json:"supports_streaming,omitempty"`
+				ParseMode         string `json:"parse_mode,omitempty"`
 			}{
 				Type:              "video",
 				Caption:           y.Caption,
@@ -714,6 +716,37 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 				Height:            y.Height,
 				Duration:          y.Duration,
 				SupportsStreaming: y.SupportsStreaming,
+				ParseMode:         sendOpts.ParseMode,
+			})
+		case *Audio:
+			data, _ = json.Marshal(struct {
+				Type      string `json:"type"`
+				Media     string `json:"media"`
+				Caption   string `json:"caption,omitempty"`
+				Duration  int    `json:"duration,omitempty"`
+				Performer string `json:"performer,omitempty"`
+				Title     string `json:"title,omitempty"`
+				ParseMode string `json:"parse_mode,omitempty"`
+			}{
+				Type:      "audio",
+				Media:     repr,
+				Caption:   y.Caption,
+				Duration:  y.Duration,
+				Performer: y.Performer,
+				Title:     y.Title,
+				ParseMode: sendOpts.ParseMode,
+			})
+		case *Document:
+			data, _ = json.Marshal(struct {
+				Type      string `json:"type"`
+				Media     string `json:"media"`
+				Caption   string `json:"caption,omitempty"`
+				ParseMode string `json:"parse_mode,omitempty"`
+			}{
+				Type:      "document",
+				Media:     repr,
+				Caption:   y.Caption,
+				ParseMode: sendOpts.ParseMode,
 			})
 		default:
 			return nil, errors.Errorf("telebot: album entry #%d is not valid", i)
@@ -726,8 +759,6 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 		"chat_id": to.Recipient(),
 		"media":   "[" + strings.Join(media, ",") + "]",
 	}
-
-	sendOpts := extractOptions(options)
 	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.sendFiles("sendMediaGroup", files, params)
@@ -744,12 +775,18 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 
 	for attachName := range files {
 		i, _ := strconv.Atoi(attachName)
+		r := resp.Result[i]
 
 		var newID string
-		if resp.Result[i].Photo != nil {
-			newID = resp.Result[i].Photo.FileID
-		} else {
-			newID = resp.Result[i].Video.FileID
+		switch {
+		case r.Photo != nil:
+			newID = r.Photo.FileID
+		case r.Video != nil:
+			newID = r.Video.FileID
+		case r.Audio != nil:
+			newID = r.Audio.FileID
+		case r.Document != nil:
+			newID = r.Document.FileID
 		}
 
 		a[i].MediaFile().FileID = newID
@@ -1704,12 +1741,14 @@ func (b *Bot) CreateInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLin
 		return nil, err
 	}
 
-	var resp ChatInviteLink
+	var resp struct {
+		Result ChatInviteLink `json:"result"`
+	}
 	if err := json.Unmarshal(data, &resp); err != nil {
 		return nil, wrapError(err)
 	}
 
-	return &resp, nil
+	return &resp.Result, nil
 }
 
 // EditInviteLink edits a non-primary invite link created by the bot.
@@ -1728,19 +1767,21 @@ func (b *Bot) EditInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink,
 		return nil, err
 	}
 
-	var resp ChatInviteLink
+	var resp struct {
+		Result ChatInviteLink `json:"result"`
+	}
 	if err := json.Unmarshal(data, &resp); err != nil {
 		return nil, wrapError(err)
 	}
 
-	return &resp, nil
+	return &resp.Result, nil
 }
 
 // RevokeInviteLink revokes an invite link created by the bot.
 func (b *Bot) RevokeInviteLink(chat *Chat, link string) (*ChatInviteLink, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
-		"link":    link,
+		"invite_link":    link,
 	}
 
 	data, err := b.Raw("revokeChatInviteLink", params)
@@ -1748,10 +1789,12 @@ func (b *Bot) RevokeInviteLink(chat *Chat, link string) (*ChatInviteLink, error)
 		return nil, err
 	}
 
-	var resp ChatInviteLink
+	var resp struct {
+		Result ChatInviteLink `json:"result"`
+	}
 	if err := json.Unmarshal(data, &resp); err != nil {
 		return nil, wrapError(err)
 	}
 
-	return &resp, nil
+	return &resp.Result, nil
 }
