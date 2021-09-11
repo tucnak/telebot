@@ -4,15 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/pkg/errors"
 )
 
 func (b *Bot) debug(err error) {
-	err = errors.WithStack(err)
-	log.Printf("%+v\n", err)
+	log.Println(err)
 }
 
 func (b *Bot) deferDebug() {
