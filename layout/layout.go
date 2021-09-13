@@ -103,7 +103,7 @@ var builtinFuncs = template.FuncMap{
 	"text":   func(string, ...interface{}) string { return "" },
 }
 
-// Settings returns built telebot Settings required for bot initialising.
+// Settings returns built telebot Settings required for bot initializing.
 //
 //		settings:
 //		  url: (custom url if needed)

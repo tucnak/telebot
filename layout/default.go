@@ -11,6 +11,11 @@ type DefaultLayout struct {
 	*Config
 }
 
+// Settings returns layout settings.
+func (dlt *DefaultLayout) Settings() tele.Settings {
+	return dlt.lt.Settings()
+}
+
 // Text wraps localized layout function Text using your default locale.
 func (dlt *DefaultLayout) Text(k string, args ...interface{}) string {
 	return dlt.lt.TextLocale(dlt.locale, k, args...)
