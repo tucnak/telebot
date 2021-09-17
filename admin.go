@@ -222,7 +222,7 @@ func (b *Bot) Promote(chat *Chat, member *ChatMember) error {
 // contains information about all chat administrators except other bots.
 // If the chat is a group or a supergroup and
 // no administrators were appointed, only the creator will be returned.
-func (b *Bot) AdminsOf(chat *Chat) ([]ChatMember, error) {
+func (b *Bot) AdminsOf(chat Recipient) ([]ChatMember, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 	}
