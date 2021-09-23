@@ -66,7 +66,7 @@ func main() {
 		return
 	}
 
-	bot.Handle("/hello", func(m tele.Context) error {
+	b.Handle("/hello", func(m tele.Context) error {
 		return m.Send("Hello")
 	})
 
