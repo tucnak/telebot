@@ -1,7 +1,7 @@
 # Telebot
 >"I never knew creating Telegram bots could be so _sexy_!"
 
-[![GoDoc](https://godoc.org/gopkg.in/tucnak/telebot.v3?status.svg)](https://godoc.org/gopkg.in/tucnak/telebot.3)
+[![GoDoc](https://godoc.org/gopkg.in/tucnak/telebot.v3?status.svg)](https://godoc.org/gopkg.in/tucnak/telebot.v3)
 [![Travis](https://travis-ci.org/tucnak/telebot.svg?branch=v3)](https://travis-ci.org/tucnak/telebot)
 [![codecov.io](https://codecov.io/gh/tucnak/telebot/coverage.svg?branch=develop)](https://codecov.io/gh/tucnak/telebot)
 [![Discuss on Telegram](https://img.shields.io/badge/telegram-discuss-0088cc.svg)](https://t.me/go_telebot)
