@@ -1336,9 +1336,9 @@ func (b *Bot) SetGroupStickerSet(chat *Chat, setName string) error {
 // SetGroupPermissions sets default chat permissions for all members.
 func (b *Bot) SetGroupPermissions(chat *Chat, perms Rights) error {
 	params := map[string]interface{}{
-		"chat_id": chat.Recipient(),
+		"chat_id":     chat.Recipient(),
+		"permissions": perms,
 	}
-	embedRights(params, perms)
 
 	_, err := b.Raw("setChatPermissions", params)
 	return err
