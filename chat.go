@@ -23,6 +23,40 @@ func (u *User) Recipient() string {
 	return strconv.FormatInt(u.ID, 10)
 }
 
+//The user's FirstName, followed by (if available) LastName.
+func (u *User) FullName() string {
+	if u.LastName != "" {
+		return u.FirstName + " " + u.LastName
+	}
+	return u.FirstName
+}
+
+//If Username is available, returns a t.me link of the user.
+func (u *User) Link() string {
+	if u.Username != "" {
+		return "https://t.me/" + u.Username
+	}
+	return ""
+}
+
+//If available, returns the user's Username prefixed with "@". If Username is not available, returns FullName.
+func (u *User) Name() string {
+	if u.Username != "" {
+		return "@" + u.Username
+	}
+	return u.FullName()
+}
+
+//The inline mention for the user as markdown.
+func (u *User) MentionMarkdown() string {
+	return "[" + u.FullName() + "](tg://user?id=" + strconv.Itoa(int(u.ID)) + ")"
+}
+
+//The inline mention for the user as HTML.
+func (u *User) MentionHTML() string {
+	return "<a href=\"tg://user?id=" + strconv.Itoa(int(u.ID)) + "\">" + u.FullName() + "</a>"
+}
+
 // Chat object represents a Telegram user, bot, group or a channel.
 type Chat struct {
 	ID int64 `json:"id"`
