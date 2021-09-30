@@ -959,6 +959,15 @@ func (b *Bot) EditMedia(msg Editable, media InputMedia, opts ...interface{}) (*M
 		result.Title = m.Title
 		result.Performer = m.Performer
 		thumb = m.Thumbnail
+	case *Animation:
+		result.Type = "animation"
+		result.Caption = m.Caption
+		result.Width = m.Width
+		result.Height = m.Height
+		result.Duration = m.Duration
+		result.MIME = m.MIME
+		result.FileName = m.FileName
+		thumb = m.Thumbnail
 	default:
 		return nil, errors.Errorf("telebot: media entry is not valid")
 	}
