@@ -324,3 +324,28 @@ func (b Btn) Reply() *ReplyButton {
 		Poll:     b.Poll,
 	}
 }
+
+// BotCommandParams controls parameters for commands-related methods (setMyCommands, deleteMyCommands and getMyCommands).
+type BotCommandParams struct {
+	Commands     []Command        `json:"commands,omitempty"`
+	Scope        *BotCommandScope `json:"scope,omitempty"`
+	LanguageCode string           `json:"language_code,omitempty"`
+}
+
+// BotCommandScope object represents a scope to which bot commands are applied.
+type BotCommandScope struct {
+	Type   string `json:"type"`
+	ChatID int64  `json:"chat_id,omitempty"`
+	UserID int64  `json:"user_id,omitempty"`
+}
+
+const (
+	// BotCommandScope types
+	BotCommandScopeDefault               = "default"
+	BotCommandScopeAllPrivateChats       = "all_private_chats"
+	BotCommandScopeAllGroupChats         = "all_group_chats"
+	BotCommandScopeAllChatAdministrators = "all_chat_administrators"
+	BotCommandScopeChat                  = "chat"
+	BotCommandScopeChatAdministrators    = "chat_administrators"
+	BotScopeChatMember                   = "chat_member"
+)
