@@ -165,7 +165,6 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 }
 
 // Send delivers animation through bot b to recipient.
-// @see https://core.telegram.org/bots/api#sendanimation
 func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
 		"chat_id":   to.Recipient(),
@@ -184,29 +183,29 @@ func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 		params["height"] = strconv.Itoa(a.Height)
 	}
 
-	// file_name is required, without file_name GIFs sent as document
+	// file_name is required, without it animation sends as a document
 	if params["file_name"] == "" && a.File.OnDisk() {
 		params["file_name"] = filepath.Base(a.File.FileLocal)
 	}
 
-	msg, err := b.sendObject(&a.File, "animation", params, nil)
+	msg, err := b.sendObject(&a.File, "animation", params, thumbnailToFilemap(a.Thumbnail))
 	if err != nil {
 		return nil, err
 	}
 
-	if msg.Animation != nil {
-		msg.Animation.File.stealRef(&a.File)
+	if anim := msg.Animation; anim != nil {
+		anim.File.stealRef(&a.File)
 		*a = *msg.Animation
-	} else {
+	} else if doc := msg.Document; doc != nil {
 		*a = Animation{
-			File:      msg.Document.File,
-			Thumbnail: msg.Document.Thumbnail,
-			MIME:      msg.Document.MIME,
-			FileName:  msg.Document.FileName,
+			File:      doc.File,
+			Thumbnail: doc.Thumbnail,
+			MIME:      doc.MIME,
+			FileName:  doc.FileName,
 		}
 	}
-	a.Caption = msg.Caption
 
+	a.Caption = msg.Caption
 	return msg, nil
 }
 

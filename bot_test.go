@@ -2,6 +2,8 @@ package telebot
 
 import (
 	"errors"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -11,10 +13,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-)
-
-const (
-	photoID = "AgACAgIAAxkDAAIBV16Ybpg7l2jPgMUiiLJ3WaQOUqTrAAJorjEbh2TBSPSOinaCHfydQO_pki4AAwEAAwIAA3kAA_NQAAIYBA"
 )
 
 var (
@@ -378,7 +376,7 @@ func TestBot(t *testing.T) {
 	assert.Equal(t, ErrBadRecipient, err)
 
 	photo := &Photo{
-		File:    File{FileID: photoID},
+		File:    FromURL("https://telegra.ph/file/65c5237b040ebf80ec278.jpg"),
 		Caption: t.Name(),
 	}
 	var msg *Message
@@ -423,7 +421,37 @@ func TestBot(t *testing.T) {
 		edited, err := b.Edit(msg, photo)
 		require.NoError(t, err)
 		assert.Equal(t, edited.Photo.UniqueID, photo.UniqueID)
+
+		resp, err := http.Get("https://telegra.ph/file/274e5eb26f348b10bd8ee.mp4")
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		file, err := ioutil.TempFile("", "")
+		require.NoError(t, err)
+
+		_, err = io.Copy(file, resp.Body)
+		require.NoError(t, err)
+
+		animation := &Animation{
+			File:     FromDisk(file.Name()),
+			Caption:  t.Name(),
+			FileName: "animation.gif",
+		}
+
+		msg, err := b.Send(msg.Chat, animation)
+		require.NoError(t, err)
+
+		if msg.Animation != nil {
+			assert.Equal(t, msg.Animation.FileID, animation.FileID)
+		} else {
+			assert.Equal(t, msg.Document.FileID, animation.FileID)
+		}
+
+		_, err = b.Edit(edited, animation)
+		require.NoError(t, err)
 	})
+
+	t.Run("Edit(what=Animation)", func(t *testing.T) {})
 
 	t.Run("Send(what=string)", func(t *testing.T) {
 		msg, err = b.Send(to, t.Name())
