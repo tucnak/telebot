@@ -1435,8 +1435,12 @@ func (b *Bot) UnpinAll(chat *Chat) error {
 // current username of a user, group or channel, etc.
 //
 func (b *Bot) ChatByID(id int64) (*Chat, error) {
+	return b.ChatByUsername(strconv.FormatInt(id, 10))
+}
+
+func (b *Bot) ChatByUsername(name string) (*Chat, error) {
 	params := map[string]string{
-		"chat_id": strconv.FormatInt(id, 10),
+		"chat_id": name,
 	}
 
 	data, err := b.Raw("getChat", params)
