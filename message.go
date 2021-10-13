@@ -3,6 +3,7 @@ package telebot
 import (
 	"strconv"
 	"time"
+	"unicode/utf16"
 )
 
 // Message object represents a message.
@@ -332,4 +333,26 @@ func (m *Message) IsService() bool {
 	fact = fact || (m.MigrateTo != m.MigrateFrom)
 
 	return fact
+}
+
+// EntityText returns the substring of the message identified by the
+// given MessageEntity.
+//
+// It's safer than manually slicing Text because Telegram uses
+// UTF-16 indices whereas Go string are []byte.
+//
+func (m *Message) EntityText(e MessageEntity) string {
+	text := m.Text
+	if text == "" {
+		text = m.Caption
+	}
+
+	a := utf16.Encode([]rune(text))
+	off, end := e.Offset, e.Offset+e.Length
+
+	if off < 0 || end > len(a) {
+		return ""
+	}
+
+	return string(utf16.Decode(a[off:end]))
 }
