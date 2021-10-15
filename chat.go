@@ -73,9 +73,6 @@ type ChatPhoto struct {
 
 // Recipient returns chat ID (see Recipient interface).
 func (c *Chat) Recipient() string {
-	if c.Type == ChatChannel && c.Username != "" {
-		return c.Username
-	}
 	return strconv.FormatInt(c.ID, 10)
 }
 
