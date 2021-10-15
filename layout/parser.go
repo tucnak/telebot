@@ -17,29 +17,30 @@ type Settings struct {
 	Token   string
 	Updates int
 
-	LocalesDir string `json:"locales_dir"`
-	TokenEnv   string `json:"token_env"`
-	ParseMode  string `json:"parse_mode"`
+	LocalesDir string `yaml:"locales_dir"`
+	TokenEnv   string `yaml:"token_env"`
+	ParseMode  string `yaml:"parse_mode"`
 
-	Webhook    *tele.Webhook    `json:"webhook"`
-	LongPoller *tele.LongPoller `json:"long_poller"`
+	Webhook    *tele.Webhook    `yaml:"webhook"`
+	LongPoller *tele.LongPoller `yaml:"long_poller"`
 }
 
 func (lt *Layout) UnmarshalYAML(data []byte) error {
 	var aux struct {
 		Settings *Settings
 		Config   map[string]interface{}
+		Commands map[string]string
 		Buttons  yaml.MapSlice
 		Markups  yaml.MapSlice
+		Results  yaml.MapSlice
 		Locales  map[string]map[string]string
 	}
 	if err := yaml.Unmarshal(data, &aux); err != nil {
 		return err
 	}
 
-	lt.Config = &Config{
-		v: aux.Config,
-	}
+	lt.Config = &Config{v: aux.Config}
+	lt.commands = aux.Commands
 
 	if pref := aux.Settings; pref != nil {
 		lt.pref = &tele.Settings{
@@ -73,17 +74,34 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 
 		// 2. Extended reply or inline button
 
-		data, err := yaml.Marshal(v)
+		data, err := yaml.MarshalWithOptions(v, yaml.JSON())
 		if err != nil {
 			return err
 		}
 
-		var btn Button
+		var btn struct {
+			Button `yaml:",inline"`
+			Data   interface{} `yaml:"data"`
+		}
 		if err := yaml.Unmarshal(data, &btn); err != nil {
 			return err
 		}
 
-		lt.buttons[k] = btn
+		if btn.Data != nil {
+			if a, ok := btn.Data.([]interface{}); ok {
+				s := make([]string, len(a))
+				for i, v := range a {
+					s[i] = fmt.Sprint(v)
+				}
+				btn.Button.Data = strings.Join(s, "|")
+			} else if s, ok := btn.Data.(string); ok {
+				btn.Button.Data = s
+			} else {
+				return fmt.Errorf("telebot/layout: invalid callback_data for %s button", k)
+			}
+		}
+
+		lt.buttons[k] = btn.Button
 	}
 
 	lt.markups = make(map[string]Markup, len(aux.Markups))
@@ -144,7 +162,7 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 
 			var markup struct {
 				Markup   `yaml:",inline"`
-				Keyboard [][]string `json:"keyboard"`
+				Keyboard [][]string `yaml:"keyboard"`
 			}
 			if err := yaml.Unmarshal(data, &markup); err != nil {
 				return err
@@ -173,6 +191,29 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 			markup.Markup.keyboard = tmpl
 			lt.markups[k] = markup.Markup
 		}
+	}
+
+	lt.results = make(map[string]Result, len(aux.Results))
+	for _, item := range aux.Results {
+		k, v := item.Key.(string), item.Value
+
+		data, err := yaml.Marshal(v)
+		if err != nil {
+			return err
+		}
+
+		tmpl, err := template.New(k).Funcs(lt.funcs).Parse(string(data))
+		if err != nil {
+			return err
+		}
+
+		var result Result
+		if err := yaml.Unmarshal(data, &result); err != nil {
+			return err
+		}
+
+		result.result = tmpl
+		lt.results[k] = result
 	}
 
 	if aux.Locales == nil {
@@ -206,10 +247,9 @@ func (lt *Layout) parseLocales(dir string) error {
 		name := fi.Name()
 		name = strings.TrimSuffix(name, filepath.Ext(name))
 
-		tmpl := template.New(name)
+		tmpl := template.New(name).Funcs(lt.funcs)
 		for key, text := range texts {
-			text = strings.Trim(text, "\r\n")
-			tmpl, err = tmpl.New(key).Funcs(lt.funcs).Parse(text)
+			_, err = tmpl.New(key).Parse(strings.Trim(text, "\r\n"))
 			if err != nil {
 				return err
 			}

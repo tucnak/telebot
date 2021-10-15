@@ -4,7 +4,7 @@ import "strconv"
 
 // User object represents a Telegram user, bot.
 type User struct {
-	ID int `json:"id"`
+	ID int64 `json:"id"`
 
 	FirstName    string `json:"first_name"`
 	LastName     string `json:"last_name"`
@@ -20,7 +20,7 @@ type User struct {
 
 // Recipient returns user ID (see Recipient interface).
 func (u *User) Recipient() string {
-	return strconv.Itoa(u.ID)
+	return strconv.FormatInt(u.ID, 10)
 }
 
 // Chat object represents a Telegram user, bot, group or a channel.
@@ -42,14 +42,22 @@ type Chat struct {
 	Still bool `json:"is_member,omitempty"`
 
 	// Returns only in getChat
-	Photo            *ChatPhoto `json:"photo,omitempty"`
-	Description      string     `json:"description,omitempty"`
-	InviteLink       string     `json:"invite_link,omitempty"`
-	PinnedMessage    *Message   `json:"pinned_message,omitempty"`
-	Permissions      *Rights    `json:"permissions,omitempty"`
-	SlowMode         int        `json:"slow_mode_delay,omitempty"`
-	StickerSet       string     `json:"sticker_set_name,omitempty"`
-	CanSetStickerSet bool       `json:"can_set_sticker_set,omitempty"`
+	Bio              string        `json:"bio,omitempty"`
+	Photo            *ChatPhoto    `json:"photo,omitempty"`
+	Description      string        `json:"description,omitempty"`
+	InviteLink       string        `json:"invite_link,omitempty"`
+	PinnedMessage    *Message      `json:"pinned_message,omitempty"`
+	Permissions      *Rights       `json:"permissions,omitempty"`
+	SlowMode         int           `json:"slow_mode_delay,omitempty"`
+	StickerSet       string        `json:"sticker_set_name,omitempty"`
+	CanSetStickerSet bool          `json:"can_set_sticker_set,omitempty"`
+	LinkedChatID     int64         `json:"linked_chat_id,omitempty"`
+	ChatLocation     *ChatLocation `json:"location,omitempty"`
+}
+
+type ChatLocation struct {
+	Location Location `json:"location,omitempty"`
+	Address  string   `json:"address,omitempty"`
 }
 
 // ChatPhoto object represents a chat photo.
@@ -75,9 +83,10 @@ func (c *Chat) Recipient() string {
 type ChatMember struct {
 	Rights
 
-	User  *User        `json:"user"`
-	Role  MemberStatus `json:"status"`
-	Title string       `json:"custom_title"`
+	User      *User        `json:"user"`
+	Role      MemberStatus `json:"status"`
+	Title     string       `json:"custom_title"`
+	Anonymous bool         `json:"is_anonymous"`
 
 	// Date when restrictions will be lifted for the user, unix time.
 	//

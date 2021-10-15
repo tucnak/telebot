@@ -34,6 +34,14 @@ type Callback struct {
 	Unique string `json:"-"`
 }
 
+// MessageSig satisfies Editable interface.
+func (c *Callback) MessageSig() (string, int64) {
+	if c.IsInline() {
+		return c.MessageID, 0
+	}
+	return c.Message.MessageSig()
+}
+
 // IsInline says whether message is an inline message.
 func (c *Callback) IsInline() bool {
 	return c.MessageID != ""

@@ -6,22 +6,79 @@ import (
 	"time"
 )
 
+// ChatInviteLink object represents an invite for a chat.
+type ChatInviteLink struct {
+	// The invite link.
+	InviteLink string `json:"invite_link"`
+
+	// The creator of the link.
+	Creator *User `json:"creator"`
+
+	// If the link is primary.
+	IsPrimary bool `json:"is_primary"`
+
+	// If the link is revoked.
+	IsRevoked bool `json:"is_revoked"`
+
+	// (Optional) Point in time when the link will expire,
+	// use ExpireDate() to get time.Time
+	ExpireUnixtime int64 `json:"expire_date,omitempty"`
+
+	// (Optional) Maximum number of users that can be members of
+	// the chat simultaneously.
+	MemberLimit int `json:"member_limit,omitempty"`
+}
+
+// ExpireDate returns the moment of the link expiration in local time.
+func (c *ChatInviteLink) ExpireDate() time.Time {
+	return time.Unix(c.ExpireUnixtime, 0)
+}
+
+// ChatMemberUpdate object represents changes in the status of a chat member.
+type ChatMemberUpdate struct {
+	// Chat where the user belongs to.
+	Chat *Chat `json:"chat"`
+
+	// Sender which user the action was triggered.
+	Sender *User `json:"from"`
+
+	// Unixtime, use Date() to get time.Time
+	Unixtime int64 `json:"date"`
+
+	// Previous information about the chat member.
+	OldChatMember *ChatMember `json:"old_chat_member"`
+
+	// New information about the chat member.
+	NewChatMember *ChatMember `json:"new_chat_member"`
+
+	// (Optional) InviteLink which was used by the user to
+	// join the chat; for joining by invite link events only.
+	InviteLink *ChatInviteLink `json:"invite_link"`
+}
+
+// Time returns the moment of the change in local time.
+func (c *ChatMemberUpdate) Time() time.Time {
+	return time.Unix(c.Unixtime, 0)
+}
+
 // Rights is a list of privileges available to chat members.
 type Rights struct {
-	CanBeEdited        bool `json:"can_be_edited"`
-	CanChangeInfo      bool `json:"can_change_info"`
-	CanPostMessages    bool `json:"can_post_messages"`
-	CanEditMessages    bool `json:"can_edit_messages"`
-	CanDeleteMessages  bool `json:"can_delete_messages"`
-	CanInviteUsers     bool `json:"can_invite_users"`
-	CanRestrictMembers bool `json:"can_restrict_members"`
-	CanPinMessages     bool `json:"can_pin_messages"`
-	CanPromoteMembers  bool `json:"can_promote_members"`
-	CanSendMessages    bool `json:"can_send_messages"`
-	CanSendMedia       bool `json:"can_send_media_messages"`
-	CanSendPolls       bool `json:"can_send_polls"`
-	CanSendOther       bool `json:"can_send_other_messages"`
-	CanAddPreviews     bool `json:"can_add_web_page_previews"`
+	CanBeEdited         bool `json:"can_be_edited"`
+	CanChangeInfo       bool `json:"can_change_info"`
+	CanPostMessages     bool `json:"can_post_messages"`
+	CanEditMessages     bool `json:"can_edit_messages"`
+	CanDeleteMessages   bool `json:"can_delete_messages"`
+	CanInviteUsers      bool `json:"can_invite_users"`
+	CanRestrictMembers  bool `json:"can_restrict_members"`
+	CanPinMessages      bool `json:"can_pin_messages"`
+	CanPromoteMembers   bool `json:"can_promote_members"`
+	CanSendMessages     bool `json:"can_send_messages"`
+	CanSendMedia        bool `json:"can_send_media_messages"`
+	CanSendPolls        bool `json:"can_send_polls"`
+	CanSendOther        bool `json:"can_send_other_messages"`
+	CanAddPreviews      bool `json:"can_add_web_page_previews"`
+	CanManageVoiceChats bool `json:"can_manage_voice_chats"`
+	CanManageChat       bool `json:"can_manage_chat"`
 }
 
 // NoRights is the default Rights{}.
@@ -35,54 +92,61 @@ func NoRights() Rights { return Rights{} }
 //
 func NoRestrictions() Rights {
 	return Rights{
-		CanBeEdited:        true,
-		CanChangeInfo:      false,
-		CanPostMessages:    false,
-		CanEditMessages:    false,
-		CanDeleteMessages:  false,
-		CanInviteUsers:     false,
-		CanRestrictMembers: false,
-		CanPinMessages:     false,
-		CanPromoteMembers:  false,
-		CanSendMessages:    true,
-		CanSendMedia:       true,
-		CanSendPolls:       true,
-		CanSendOther:       true,
-		CanAddPreviews:     true,
+		CanBeEdited:         true,
+		CanChangeInfo:       false,
+		CanPostMessages:     false,
+		CanEditMessages:     false,
+		CanDeleteMessages:   false,
+		CanInviteUsers:      false,
+		CanRestrictMembers:  false,
+		CanPinMessages:      false,
+		CanPromoteMembers:   false,
+		CanSendMessages:     true,
+		CanSendMedia:        true,
+		CanSendPolls:        true,
+		CanSendOther:        true,
+		CanAddPreviews:      true,
+		CanManageVoiceChats: false,
+		CanManageChat:       false,
 	}
 }
 
 // AdminRights could be used to promote user to admin.
 func AdminRights() Rights {
 	return Rights{
-		CanBeEdited:        true,
-		CanChangeInfo:      true,
-		CanPostMessages:    true,
-		CanEditMessages:    true,
-		CanDeleteMessages:  true,
-		CanInviteUsers:     true,
-		CanRestrictMembers: true,
-		CanPinMessages:     true,
-		CanPromoteMembers:  true,
-		CanSendMessages:    true,
-		CanSendMedia:       true,
-		CanSendPolls:       true,
-		CanSendOther:       true,
-		CanAddPreviews:     true,
+		CanBeEdited:         true,
+		CanChangeInfo:       true,
+		CanPostMessages:     true,
+		CanEditMessages:     true,
+		CanDeleteMessages:   true,
+		CanInviteUsers:      true,
+		CanRestrictMembers:  true,
+		CanPinMessages:      true,
+		CanPromoteMembers:   true,
+		CanSendMessages:     true,
+		CanSendMedia:        true,
+		CanSendPolls:        true,
+		CanSendOther:        true,
+		CanAddPreviews:      true,
+		CanManageVoiceChats: true,
+		CanManageChat:       true,
 	}
 }
 
-// Forever is a Unixtime of "forever" banning.
+// Forever is a ExpireUnixtime of "forever" banning.
 func Forever() int64 {
 	return time.Now().Add(367 * 24 * time.Hour).Unix()
 }
 
 // Ban will ban user from chat until `member.RestrictedUntil`.
-func (b *Bot) Ban(chat *Chat, member *ChatMember) error {
+func (b *Bot) Ban(chat *Chat, member *ChatMember, revokeMessages ...bool) error {
 	params := map[string]string{
 		"chat_id":    chat.Recipient(),
 		"user_id":    member.User.Recipient(),
 		"until_date": strconv.FormatInt(member.RestrictedUntil, 10),
+	}
+	if len(revokeMessages) > 0 {
+		params["revoke_messages"] = strconv.FormatBool(revokeMessages[0])
 	}
 
 	_, err := b.Raw("kickChatMember", params)
@@ -90,10 +154,15 @@ func (b *Bot) Ban(chat *Chat, member *ChatMember) error {
 }
 
 // Unban will unban user from chat, who would have thought eh?
-func (b *Bot) Unban(chat *Chat, user *User) error {
+// forBanned does nothing if the user is not banned.
+func (b *Bot) Unban(chat *Chat, user *User, forBanned ...bool) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 		"user_id": user.Recipient(),
+	}
+
+	if len(forBanned) > 0 {
+		params["only_if_banned"] = strconv.FormatBool(forBanned[0])
 	}
 
 	_, err := b.Raw("unbanChatMember", params)
@@ -137,8 +206,9 @@ func (b *Bot) Promote(chat *Chat, member *ChatMember) error {
 	prv := member.Rights
 
 	params := map[string]interface{}{
-		"chat_id": chat.Recipient(),
-		"user_id": member.User.Recipient(),
+		"chat_id":      chat.Recipient(),
+		"user_id":      member.User.Recipient(),
+		"is_anonymous": member.Anonymous,
 	}
 	embedRights(params, prv)
 

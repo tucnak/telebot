@@ -1,6 +1,7 @@
 package layout
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/goccy/go-yaml"
@@ -85,7 +86,7 @@ func (c *Config) Float(k string) float64 {
 	return cast.ToFloat64(c.v[k])
 }
 
-// Float returns a field casted to the bool.
+// Bool returns a field casted to the bool.
 func (c *Config) Bool(k string) bool {
 	return cast.ToBool(c.v[k])
 }
@@ -116,6 +117,15 @@ func (c *Config) Strings(k string) []string {
 // Ints returns a field casted to the int slice.
 func (c *Config) Ints(k string) []int {
 	return cast.ToIntSlice(c.v[k])
+}
+
+// Int64s returns a field casted to the int64 slice.
+func (c *Config) Int64s(k string) (ints []int64) {
+	for _, s := range c.Strings(k) {
+		i, _ := strconv.ParseInt(s, 10, 64)
+		ints = append(ints, i)
+	}
+	return ints
 }
 
 // Floats returns a field casted to the float slice.

@@ -32,6 +32,16 @@ const (
 	RemoveKeyboard
 )
 
+// Placeholder is used to set input field placeholder as a send option.
+func Placeholder(text string) *SendOptions {
+	return &SendOptions{
+		ReplyMarkup: &ReplyMarkup{
+			ForceReply:  true,
+			Placeholder: text,
+		},
+	}
+}
+
 // SendOptions has most complete control over in what way the message
 // must be sent, providing an API-complete set of custom properties
 // and options.
@@ -55,6 +65,12 @@ type SendOptions struct {
 
 	// ParseMode controls how client apps render your message.
 	ParseMode ParseMode
+
+	// DisableContentDetection abilities to disable server-side file content type detection.
+	DisableContentDetection bool
+
+	// AllowWithoutReply allows sending messages not a as reply if the replied-to message has already been deleted.
+	AllowWithoutReply bool
 }
 
 func (og *SendOptions) copy() *SendOptions {
@@ -109,6 +125,9 @@ type ReplyMarkup struct {
 	// 2) If the bot's message is a reply (has SendOptions.ReplyTo),
 	//       sender of the original message.
 	Selective bool `json:"selective,omitempty"`
+
+	// Placeholder will be shown in the input field when the reply is active.
+	Placeholder string `json:"input_field_placeholder,omitempty"`
 }
 
 func (r *ReplyMarkup) copy() *ReplyMarkup {
@@ -177,12 +196,12 @@ func (r *ReplyMarkup) Row(many ...Btn) Row {
 // For example, if you pass six buttons and 3 as the max, you get two rows with
 // three buttons in each.
 //
-// Split(3, six buttons...) -> [[1, 2, 3], [4, 5, 6]]
-// Split(2, six buttons...) -> [[1, 2],[3, 4],[5, 6]]
+// Split(3, []Btn{six buttons...}) -> [[1, 2, 3], [4, 5, 6]]
+// Split(2, []Btn{six buttons...}) -> [[1, 2],[3, 4],[5, 6]]
 //
-func (r *ReplyMarkup) Split(max int, bs ...Btn) []Row {
-	rows := make([]Row, (1+len(bs))/max)
-	for i, b := range bs {
+func (r *ReplyMarkup) Split(max int, btns []Btn) []Row {
+	rows := make([]Row, (max-1+len(btns))/max)
+	for i, b := range btns {
 		i /= max
 		rows[i] = append(rows[i], b)
 	}

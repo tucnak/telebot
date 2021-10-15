@@ -19,6 +19,9 @@ func TestExtractOk(t *testing.T) {
 		APIError:   NewAPIError(429, "Too Many Requests: retry after 8"),
 		RetryAfter: 8,
 	}, extractOk(data))
+
+	data = []byte(`{"ok":false,"error_code":400,"description":"Bad Request: group chat was upgraded to a supergroup chat","parameters":{"migrate_to_chat_id": -1234}}`)
+	assert.EqualError(t, extractOk(data), ErrGroupMigrated.Error())
 }
 
 func TestExtractMessage(t *testing.T) {
@@ -56,6 +59,8 @@ func TestEmbedRights(t *testing.T) {
 		"can_restrict_members":      false,
 		"can_pin_messages":          false,
 		"can_promote_members":       false,
+		"can_manage_voice_chats":    false,
+		"can_manage_chat":           false,
 	}
 	assert.Equal(t, expected, params)
 }

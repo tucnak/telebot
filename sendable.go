@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 // Recipient is any possible endpoint you can send
 // messages to: either user, group or a channel.
 type Recipient interface {
-	// Must return legit Telegram chat_id or username
-	Recipient() string
+	Recipient() string // must return legit Telegram chat_id or username
 }
 
 // Sendable is any object that can send itself.
@@ -165,7 +165,6 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 }
 
 // Send delivers animation through bot b to recipient.
-// @see https://core.telegram.org/bots/api#sendanimation
 func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
 		"chat_id":   to.Recipient(),
@@ -184,29 +183,29 @@ func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 		params["height"] = strconv.Itoa(a.Height)
 	}
 
-	// file_name is required, without file_name GIFs sent as document
+	// file_name is required, without it animation sends as a document
 	if params["file_name"] == "" && a.File.OnDisk() {
 		params["file_name"] = filepath.Base(a.File.FileLocal)
 	}
 
-	msg, err := b.sendObject(&a.File, "animation", params, nil)
+	msg, err := b.sendObject(&a.File, "animation", params, thumbnailToFilemap(a.Thumbnail))
 	if err != nil {
 		return nil, err
 	}
 
-	if msg.Animation != nil {
-		msg.Animation.File.stealRef(&a.File)
+	if anim := msg.Animation; anim != nil {
+		anim.File.stealRef(&a.File)
 		*a = *msg.Animation
-	} else {
+	} else if doc := msg.Document; doc != nil {
 		*a = Animation{
-			File:      msg.Document.File,
-			Thumbnail: msg.Document.Thumbnail,
-			MIME:      msg.Document.MIME,
-			FileName:  msg.Document.FileName,
+			File:      doc.File,
+			Thumbnail: doc.Thumbnail,
+			MIME:      doc.MIME,
+			FileName:  doc.FileName,
 		}
 	}
-	a.Caption = msg.Caption
 
+	a.Caption = msg.Caption
 	return msg, nil
 }
 
@@ -214,6 +213,7 @@ func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 func (v *Voice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
 		"chat_id": to.Recipient(),
+		"caption": v.Caption,
 	}
 	b.embedSendOptions(params, opt)
 
@@ -265,6 +265,15 @@ func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 		"longitude":   fmt.Sprintf("%f", x.Lng),
 		"live_period": strconv.Itoa(x.LivePeriod),
 	}
+	if x.HorizontalAccuracy != nil {
+		params["horizontal_accuracy"] = fmt.Sprintf("%f", *x.HorizontalAccuracy)
+	}
+	if x.Heading != 0 {
+		params["heading"] = strconv.Itoa(x.Heading)
+	}
+	if x.AlertRadius != 0 {
+		params["proximity_alert_radius"] = strconv.Itoa(x.Heading)
+	}
 	b.embedSendOptions(params, opt)
 
 	data, err := b.Raw("sendLocation", params)
@@ -278,13 +287,15 @@ func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 // Send delivers media through bot b to recipient.
 func (v *Venue) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id":         to.Recipient(),
-		"latitude":        fmt.Sprintf("%f", v.Location.Lat),
-		"longitude":       fmt.Sprintf("%f", v.Location.Lng),
-		"title":           v.Title,
-		"address":         v.Address,
-		"foursquare_id":   v.FoursquareID,
-		"foursquare_type": v.FoursquareType,
+		"chat_id":           to.Recipient(),
+		"latitude":          fmt.Sprintf("%f", v.Location.Lat),
+		"longitude":         fmt.Sprintf("%f", v.Location.Lng),
+		"title":             v.Title,
+		"address":           v.Address,
+		"foursquare_id":     v.FoursquareID,
+		"foursquare_type":   v.FoursquareType,
+		"google_place_id":   v.GooglePlaceID,
+		"google_place_type": v.GooglePlaceType,
 	}
 	b.embedSendOptions(params, opt)
 
@@ -306,6 +317,7 @@ func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 		"payload":                       i.Payload,
 		"provider_token":                i.Token,
 		"currency":                      i.Currency,
+		"max_tip_amount":                strconv.Itoa(i.MaxTipAmount),
 		"need_name":                     strconv.FormatBool(i.NeedName),
 		"need_phone_number":             strconv.FormatBool(i.NeedPhoneNumber),
 		"need_email":                    strconv.FormatBool(i.NeedEmail),
@@ -331,6 +343,9 @@ func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 	if len(i.Prices) > 0 {
 		data, _ := json.Marshal(i.Prices)
 		params["prices"] = string(data)
+	}
+	if len(i.SuggestedTipAmounts) > 0 {
+		params["suggested_tip_amounts"] = "[" + strings.Join(intsToStrs(i.SuggestedTipAmounts), ",") + "]"
 	}
 	b.embedSendOptions(params, opt)
 

@@ -3,6 +3,10 @@ settings:
   parse_mode: html
   long_poller: {}
 
+commands:
+  /start: Start the bot
+  /help: How to use the bot
+
 config:
   str: string
   num: 123
@@ -22,7 +26,16 @@ buttons:
   stop:
     unique: stop
     text: Stop
-    callback_data: '{{.}}'
+    data: '{{.}}'
+
+  # Callback data
+  pay:
+    unique: pay
+    text: Pay
+    data:
+      - '{{ .UserID }}'
+      - '{{ .Amount }}'
+      - '{{ .Currency }}'
 
 markups:
   reply_shortened:
@@ -34,3 +47,12 @@ markups:
     one_time_keyboard: true
   inline:
     - [ stop ]
+
+results:
+  article:
+    type: article
+    id: '{{ .ID }}'
+    title: '{{ .Title }}'
+    description: '{{ .Description }}'
+    message_text: '{{ .Content }}'
+    thumb_url: '{{ .PreviewURL }}'

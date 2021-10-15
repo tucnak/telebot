@@ -48,7 +48,7 @@ func NewBot(pref Settings) (*Bot, error) {
 		client:      client,
 	}
 
-	if pref.offline {
+	if pref.Offline {
 		bot.Me = &User{}
 	} else {
 		user, err := bot.getMe()
@@ -113,25 +113,27 @@ type Settings struct {
 	// HTTP Client used to make requests to telegram api
 	Client *http.Client
 
-	// offline allows to create a bot without network for testing purposes.
-	offline bool
+	// Offline allows to create a bot without network for testing purposes.
+	Offline bool
 }
 
 // Update object represents an incoming update.
 type Update struct {
 	ID int `json:"update_id"`
 
-	Message            *Message            `json:"message,omitempty"`
-	EditedMessage      *Message            `json:"edited_message,omitempty"`
-	ChannelPost        *Message            `json:"channel_post,omitempty"`
-	EditedChannelPost  *Message            `json:"edited_channel_post,omitempty"`
-	Callback           *Callback           `json:"callback_query,omitempty"`
-	Query              *Query              `json:"inline_query,omitempty"`
-	ChosenInlineResult *ChosenInlineResult `json:"chosen_inline_result,omitempty"`
-	ShippingQuery      *ShippingQuery      `json:"shipping_query,omitempty"`
-	PreCheckoutQuery   *PreCheckoutQuery   `json:"pre_checkout_query,omitempty"`
-	Poll               *Poll               `json:"poll,omitempty"`
-	PollAnswer         *PollAnswer         `json:"poll_answer,omitempty"`
+	Message           *Message          `json:"message,omitempty"`
+	EditedMessage     *Message          `json:"edited_message,omitempty"`
+	ChannelPost       *Message          `json:"channel_post,omitempty"`
+	EditedChannelPost *Message          `json:"edited_channel_post,omitempty"`
+	Callback          *Callback         `json:"callback_query,omitempty"`
+	Query             *Query            `json:"inline_query,omitempty"`
+	InlineResult      *InlineResult     `json:"chosen_inline_result,omitempty"`
+	ShippingQuery     *ShippingQuery    `json:"shipping_query,omitempty"`
+	PreCheckoutQuery  *PreCheckoutQuery `json:"pre_checkout_query,omitempty"`
+	Poll              *Poll             `json:"poll,omitempty"`
+	PollAnswer        *PollAnswer       `json:"poll_answer,omitempty"`
+	MyChatMember      *ChatMemberUpdate `json:"my_chat_member,omitempty"`
+	ChatMember        *ChatMemberUpdate `json:"chat_member,omitempty"`
 }
 
 // Command represents a bot command.
@@ -194,7 +196,7 @@ func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
 
 var (
 	cmdRx   = regexp.MustCompile(`^(/\w+)(@(\w+))?(\s|$)(.+)?`)
-	cbackRx = regexp.MustCompile(`^\f(\w+)(\|(.+))?$`)
+	cbackRx = regexp.MustCompile(`^\f([-\w]+)(\|(.+))?$`)
 )
 
 // Start brings bot into motion by consuming incoming
@@ -234,15 +236,18 @@ func (b *Bot) NewMarkup() *ReplyMarkup {
 // field by the passed update.
 func (b *Bot) NewContext(upd Update) Context {
 	return &nativeContext{
-		b:                  b,
-		message:            upd.Message,
-		callback:           upd.Callback,
-		query:              upd.Query,
-		chosenInlineResult: upd.ChosenInlineResult,
-		shippingQuery:      upd.ShippingQuery,
-		preCheckoutQuery:   upd.PreCheckoutQuery,
-		poll:               upd.Poll,
-		pollAnswer:         upd.PollAnswer,
+		b:                b,
+		update:           upd,
+		message:          upd.Message,
+		callback:         upd.Callback,
+		query:            upd.Query,
+		inlineResult:     upd.InlineResult,
+		shippingQuery:    upd.ShippingQuery,
+		preCheckoutQuery: upd.PreCheckoutQuery,
+		poll:             upd.Poll,
+		pollAnswer:       upd.PollAnswer,
+		myChatMember:     upd.MyChatMember,
+		chatMember:       upd.ChatMember,
 	}
 }
 
@@ -344,9 +349,54 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			return
 		}
 
+		if m.GroupCreated {
+			b.handle(OnGroupCreated, c)
+			return
+		}
+
+		if m.SuperGroupCreated {
+			b.handle(OnSuperGroupCreated, c)
+			return
+		}
+
+		if m.ChannelCreated {
+			b.handle(OnChannelCreated, c)
+			return
+		}
+
 		if m.MigrateTo != 0 {
 			m.MigrateFrom = m.Chat.ID
 			b.handle(OnMigration, c)
+			return
+		}
+
+		if m.VoiceChatStarted != nil {
+			b.handle(OnVoiceChatStarted, c)
+			return
+		}
+
+		if m.VoiceChatEnded != nil {
+			b.handle(OnVoiceChatEnded, c)
+			return
+		}
+
+		if m.VoiceChatParticipants != nil {
+			b.handle(OnVoiceChatParticipants, c)
+			return
+		}
+
+		if m.VoiceChatScheduled != nil {
+			b.handle(OnVoiceChatScheduled, c)
+			return
+		}
+
+		if m.ProximityAlert != nil {
+			b.handle(OnProximityAlert, c)
+			return
+		}
+
+		if m.AutoDeleteTimer != nil {
+			b.handle(OnAutoDeleteTimer, c)
 			return
 		}
 	}
@@ -379,20 +429,10 @@ func (b *Bot) ProcessUpdate(upd Update) {
 
 	if upd.Callback != nil {
 		if upd.Callback.Data != "" {
-			if upd.Callback.MessageID != "" {
-				upd.Callback.Message = &Message{
-					// InlineID indicates that message
-					// is inline, so we have only its id
-					InlineID: upd.Callback.MessageID,
-				}
-			}
-
-			data := upd.Callback.Data
-			if data[0] == '\f' {
+			if data := upd.Callback.Data; data[0] == '\f' {
 				match := cbackRx.FindAllStringSubmatch(data, -1)
 				if match != nil {
 					unique, payload := match[0][1], match[0][3]
-
 					if handler, ok := b.handlers["\f"+unique]; ok {
 						c.callback.Unique = unique
 						c.callback.Data = payload
@@ -412,8 +452,8 @@ func (b *Bot) ProcessUpdate(upd Update) {
 		return
 	}
 
-	if upd.ChosenInlineResult != nil {
-		b.handle(OnChosenInlineResult, c)
+	if upd.InlineResult != nil {
+		b.handle(OnInlineResult, c)
 		return
 	}
 
@@ -434,6 +474,16 @@ func (b *Bot) ProcessUpdate(upd Update) {
 
 	if upd.PollAnswer != nil {
 		b.handle(OnPollAnswer, c)
+		return
+	}
+
+	if upd.MyChatMember != nil {
+		b.handle(OnMyChatMember, c)
+		return
+	}
+
+	if upd.ChatMember != nil {
+		b.handle(OnChatMember, c)
 		return
 	}
 }
@@ -472,6 +522,8 @@ func (b *Bot) handleMedia(c Context) bool {
 		b.handle(OnLocation, c)
 	case m.Venue != nil:
 		b.handle(OnVenue, c)
+	case m.Game != nil:
+		b.handle(OnGame, c)
 	case m.Dice != nil:
 		b.handle(OnDice, c)
 	default:
@@ -651,6 +703,32 @@ func (b *Bot) Forward(to Recipient, msg Editable, opts ...interface{}) (*Message
 	return extractMessage(data)
 }
 
+// Copy behaves just like Forward() but the copied message doesn't have a link to the original message (see Bots API).
+//
+// This function will panic upon nil Editable.
+func (b *Bot) Copy(to Recipient, msg Editable, options ...interface{}) (*Message, error) {
+	if to == nil {
+		return nil, ErrBadRecipient
+	}
+	msgID, chatID := msg.MessageSig()
+
+	params := map[string]string{
+		"chat_id":      to.Recipient(),
+		"from_chat_id": strconv.FormatInt(chatID, 10),
+		"message_id":   msgID,
+	}
+
+	sendOpts := extractOptions(options)
+	b.embedSendOptions(params, sendOpts)
+
+	data, err := b.Raw("copyMessage", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMessage(data)
+}
+
 // Edit is magic, it lets you change already sent message.
 // This function will panic upon nil Editable.
 //
@@ -664,6 +742,8 @@ func (b *Bot) Forward(to Recipient, msg Editable, opts ...interface{}) (*Message
 //     b.Edit(m, &tele.ReplyMarkup{...})
 //     b.Edit(m, &tele.Photo{File: ...})
 //     b.Edit(m, tele.Location{42.1337, 69.4242})
+//     b.Edit(c, "edit inline message from the callback")
+//     b.Edit(r, "edit message from chosen inline result")
 //
 func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Message, error) {
 	var (
@@ -683,6 +763,16 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 		method = "editMessageLiveLocation"
 		params["latitude"] = fmt.Sprintf("%f", v.Lat)
 		params["longitude"] = fmt.Sprintf("%f", v.Lng)
+
+		if v.HorizontalAccuracy != nil {
+			params["horizontal_accuracy"] = fmt.Sprintf("%f", *v.HorizontalAccuracy)
+		}
+		if v.Heading != 0 {
+			params["heading"] = strconv.Itoa(v.Heading)
+		}
+		if v.AlertRadius != 0 {
+			params["proximity_alert_radius"] = strconv.Itoa(v.AlertRadius)
+		}
 	default:
 		return nil, ErrUnsupportedWhat
 	}
@@ -869,6 +959,15 @@ func (b *Bot) EditMedia(msg Editable, media InputMedia, opts ...interface{}) (*M
 		result.Title = m.Title
 		result.Performer = m.Performer
 		thumb = m.Thumbnail
+	case *Animation:
+		result.Type = "animation"
+		result.Caption = m.Caption
+		result.Width = m.Width
+		result.Height = m.Height
+		result.Duration = m.Duration
+		result.MIME = m.MIME
+		result.FileName = m.FileName
+		thumb = m.Thumbnail
 	default:
 		return nil, errors.Errorf("telebot: media entry is not valid")
 	}
@@ -880,7 +979,7 @@ func (b *Bot) EditMedia(msg Editable, media InputMedia, opts ...interface{}) (*M
 	b.embedSendOptions(params, sendOpts)
 
 	if sendOpts != nil {
-		result.ParseMode = sendOpts.ParseMode
+		result.ParseMode = params["parse_mode"]
 	}
 	if thumb != nil {
 		result.Thumbnail = "attach://" + thumbName
@@ -1015,7 +1114,7 @@ func (b *Bot) Answer(query *Query, resp *QueryResponse) error {
 	resp.QueryID = query.ID
 
 	for _, result := range resp.Results {
-		result.Process()
+		result.Process(b)
 	}
 
 	_, err := b.Raw("answerInlineQuery", resp)
@@ -1211,7 +1310,7 @@ func (b *Bot) SetGroupTitle(chat *Chat, title string) error {
 	return err
 }
 
-// SetGroupDescription should be used to update group title.
+// SetGroupDescription should be used to update group description.
 func (b *Bot) SetGroupDescription(chat *Chat, description string) error {
 	params := map[string]string{
 		"chat_id":     chat.Recipient(),
@@ -1246,9 +1345,9 @@ func (b *Bot) SetGroupStickerSet(chat *Chat, setName string) error {
 // SetGroupPermissions sets default chat permissions for all members.
 func (b *Bot) SetGroupPermissions(chat *Chat, perms Rights) error {
 	params := map[string]interface{}{
-		"chat_id": chat.Recipient(),
+		"chat_id":     chat.Recipient(),
+		"permissions": perms,
 	}
-	embedRights(params, perms)
 
 	_, err := b.Raw("setChatPermissions", params)
 	return err
@@ -1305,13 +1404,28 @@ func (b *Bot) Pin(msg Editable, opts ...interface{}) error {
 }
 
 // Unpin unpins a message in a supergroup or a channel.
-// It supports Silent option.
-func (b *Bot) Unpin(chat *Chat) error {
+// It supports tb.Silent option.
+func (b *Bot) Unpin(chat *Chat, messageID ...int) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+	if len(messageID) > 0 {
+		params["message_id"] = strconv.Itoa(messageID[0])
+	}
+
+	_, err := b.Raw("unpinChatMessage", params)
+	return err
+}
+
+// UnpinAll unpins all messages in a supergroup or a channel.
+//
+// It supports tb.Silent option.
+func (b *Bot) UnpinAll(chat *Chat) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 	}
 
-	_, err := b.Raw("unpinChatMessage", params)
+	_, err := b.Raw("unpinAllChatMessages", params)
 	return err
 }
 
@@ -1320,9 +1434,13 @@ func (b *Bot) Unpin(chat *Chat) error {
 // Including current name of the user for one-on-one conversations,
 // current username of a user, group or channel, etc.
 //
-func (b *Bot) ChatByID(id string) (*Chat, error) {
+func (b *Bot) ChatByID(id int64) (*Chat, error) {
+	return b.ChatByUsername(strconv.FormatInt(id, 10))
+}
+
+func (b *Bot) ChatByUsername(name string) (*Chat, error) {
 	params := map[string]string{
-		"chat_id": id,
+		"chat_id": name,
 	}
 
 	data, err := b.Raw("getChat", params)
@@ -1366,7 +1484,7 @@ func (b *Bot) ProfilePhotosOf(user *User) ([]Photo, error) {
 }
 
 // ChatMemberOf returns information about a member of a chat.
-func (b *Bot) ChatMemberOf(chat *Chat, user *User) (*ChatMember, error) {
+func (b *Bot) ChatMemberOf(chat, user Recipient) (*ChatMember, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 		"user_id": user.Recipient(),
@@ -1412,4 +1530,105 @@ func (b *Bot) SetCommands(cmds []Command) error {
 
 	_, err := b.Raw("setMyCommands", params)
 	return err
+}
+
+// Logout logs out from the cloud Bot API server before launching the bot locally.
+func (b *Bot) Logout() (bool, error) {
+	data, err := b.Raw("logOut", nil)
+	if err != nil {
+		return false, err
+	}
+
+	var resp struct {
+		Result bool `json:"result"`
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return false, wrapError(err)
+	}
+
+	return resp.Result, nil
+}
+
+// Close closes the bot instance before moving it from one local server to another.
+func (b *Bot) Close() (bool, error) {
+	data, err := b.Raw("close", nil)
+	if err != nil {
+		return false, err
+	}
+
+	var resp struct {
+		Result bool `json:"result"`
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return false, wrapError(err)
+	}
+
+	return resp.Result, nil
+}
+
+// CreateInviteLink creates an additional invite link for a chat.
+func (b *Bot) CreateInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink, error) {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+	if link != nil {
+		params["expire_date"] = strconv.FormatInt(link.ExpireUnixtime, 10)
+		params["member_limit"] = strconv.Itoa(link.MemberLimit)
+	}
+
+	data, err := b.Raw("createChatInviteLink", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp ChatInviteLink
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+
+	return &resp, nil
+}
+
+// EditInviteLink edits a non-primary invite link created by the bot.
+func (b *Bot) EditInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink, error) {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+	if link != nil {
+		params["invite_link"] = link.InviteLink
+		params["expire_date"] = strconv.FormatInt(link.ExpireUnixtime, 10)
+		params["member_limit"] = strconv.Itoa(link.MemberLimit)
+	}
+
+	data, err := b.Raw("editChatInviteLink", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp ChatInviteLink
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+
+	return &resp, nil
+}
+
+// RevokeInviteLink revokes an invite link created by the bot.
+func (b *Bot) RevokeInviteLink(chat *Chat, link string) (*ChatInviteLink, error) {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+		"link":    link,
+	}
+
+	data, err := b.Raw("revokeChatInviteLink", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp ChatInviteLink
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+
+	return &resp, nil
 }

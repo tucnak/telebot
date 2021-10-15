@@ -7,16 +7,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// ChosenInlineResult represents a result of an inline query that was chosen
-// by the user and sent to their chat partner.
-type ChosenInlineResult struct {
-	Sender    *User     `json:"from"`
-	Location  *Location `json:"location,omitempty"`
-	ResultID  string    `json:"result_id"`
-	Query     string    `json:"query"`
-	MessageID string    `json:"inline_message_id"` // inline messages only!
-}
-
 // Query is an incoming inline query. When the user sends
 // an empty query, your bot could return some default or
 // trending results.
@@ -35,6 +25,9 @@ type Query struct {
 
 	// Offset of the results to be returned, can be controlled by the bot.
 	Offset string `json:"offset"`
+
+	// ChatType of the type of the chat, from which the inline query was sent.
+	ChatType string `json:"chat_type"`
 }
 
 // QueryResponse builds a response to an inline Query.
@@ -72,13 +65,29 @@ type QueryResponse struct {
 	SwitchPMParameter string `json:"switch_pm_parameter,omitempty"`
 }
 
+// InlineResult represents a result of an inline query that was chosen
+// by the user and sent to their chat partner.
+type InlineResult struct {
+	Sender    *User     `json:"from"`
+	Location  *Location `json:"location,omitempty"`
+	ResultID  string    `json:"result_id"`
+	Query     string    `json:"query"`
+	MessageID string    `json:"inline_message_id"` // inline messages only!
+}
+
+// MessageSig satisfies Editable interface.
+func (ir *InlineResult) MessageSig() (string, int64) {
+	return ir.MessageID, 0
+}
+
 // Result represents one result of an inline query.
 type Result interface {
 	ResultID() string
 	SetResultID(string)
+	SetParseMode(ParseMode)
 	SetContent(InputMessageContent)
 	SetReplyMarkup([][]InlineButton)
-	Process()
+	Process(*Bot)
 }
 
 // Results is a slice wrapper for convenient marshalling.

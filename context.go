@@ -2,6 +2,7 @@ package telebot
 
 import (
 	"strings"
+	"sync"
 
 	"github.com/pkg/errors"
 )
@@ -10,9 +11,14 @@ import (
 // used to handle actual endpoints.
 type HandlerFunc func(Context) error
 
-// Context represents a context of the current event. It stores data
-// depending on its type, whether it's a message, callback or whatever.
+// Context wraps an update and represents the context of current event.
 type Context interface {
+	// Bot returns the bot instance.
+	Bot() *Bot
+
+	// Update returns the original update.
+	Update() Update
+
 	// Message returns stored message if such presented.
 	Message() *Message
 
@@ -22,8 +28,8 @@ type Context interface {
 	// Query returns stored query if such presented.
 	Query() *Query
 
-	// ChosenInlineResult returns stored inline result if such presented.
-	ChosenInlineResult() *ChosenInlineResult
+	// InlineResult returns stored inline result if such presented.
+	InlineResult() *InlineResult
 
 	// ShippingQuery returns stored shipping query if such presented.
 	ShippingQuery() *ShippingQuery
@@ -36,6 +42,9 @@ type Context interface {
 
 	// PollAnswer returns stored poll answer if such presented.
 	PollAnswer() *PollAnswer
+
+	// ChatMember returns chat member changes.
+	ChatMember() *ChatMemberUpdate
 
 	// Migration returns both migration from and to chat IDs.
 	Migration() (int64, int64)
@@ -59,6 +68,7 @@ type Context interface {
 	Text() string
 
 	// Data returns the current data, depending on the context type.
+	// If the context contains command, returns its arguments string.
 	// If the context contains payment, returns its payload.
 	// In the case when no related data presented, returns an empty string.
 	Data() string
@@ -95,6 +105,14 @@ type Context interface {
 	// See EditCaption from bot.go.
 	EditCaption(caption string, opts ...interface{}) error
 
+	// EditOrSend edits the current message if the update is callback,
+	// otherwise the content is sent to the chat as a separate message.
+	EditOrSend(what interface{}, opts ...interface{}) error
+
+	// EditOrReply edits the current message if the update is callback,
+	// otherwise the content is replied as a separate message.
+	EditOrReply(what interface{}, opts ...interface{}) error
+
 	// Delete removes the current message.
 	// See Delete from bot.go.
 	Delete() error
@@ -118,6 +136,12 @@ type Context interface {
 	// Respond sends a response for the current callback query.
 	// See Respond from bot.go.
 	Respond(resp ...*CallbackResponse) error
+
+	// Get retrieves data from the context.
+	Get(key string) interface{}
+
+	// Set saves data in the context.
+	Set(key string, val interface{})
 }
 
 // nativeContext is a native implementation of the Context interface.
@@ -125,14 +149,28 @@ type Context interface {
 type nativeContext struct {
 	b *Bot
 
-	message            *Message
-	callback           *Callback
-	query              *Query
-	chosenInlineResult *ChosenInlineResult
-	shippingQuery      *ShippingQuery
-	preCheckoutQuery   *PreCheckoutQuery
-	poll               *Poll
-	pollAnswer         *PollAnswer
+	update           Update
+	message          *Message
+	callback         *Callback
+	query            *Query
+	inlineResult     *InlineResult
+	shippingQuery    *ShippingQuery
+	preCheckoutQuery *PreCheckoutQuery
+	poll             *Poll
+	pollAnswer       *PollAnswer
+	myChatMember     *ChatMemberUpdate
+	chatMember       *ChatMemberUpdate
+
+	lock  sync.RWMutex
+	store map[string]interface{}
+}
+
+func (c *nativeContext) Bot() *Bot {
+	return c.b
+}
+
+func (c *nativeContext) Update() Update {
+	return c.update
 }
 
 func (c *nativeContext) Message() *Message {
@@ -154,8 +192,8 @@ func (c *nativeContext) Query() *Query {
 	return c.query
 }
 
-func (c *nativeContext) ChosenInlineResult() *ChosenInlineResult {
-	return c.chosenInlineResult
+func (c *nativeContext) InlineResult() *InlineResult {
+	return c.inlineResult
 }
 
 func (c *nativeContext) ShippingQuery() *ShippingQuery {
@@ -164,6 +202,17 @@ func (c *nativeContext) ShippingQuery() *ShippingQuery {
 
 func (c *nativeContext) PreCheckoutQuery() *PreCheckoutQuery {
 	return c.preCheckoutQuery
+}
+
+func (c *nativeContext) ChatMember() *ChatMemberUpdate {
+	switch {
+	case c.chatMember != nil:
+		return c.chatMember
+	case c.myChatMember != nil:
+		return c.myChatMember
+	default:
+		return nil
+	}
 }
 
 func (c *nativeContext) Poll() *Poll {
@@ -186,8 +235,8 @@ func (c *nativeContext) Sender() *User {
 		return c.callback.Sender
 	case c.query != nil:
 		return c.query.Sender
-	case c.chosenInlineResult != nil:
-		return c.chosenInlineResult.Sender
+	case c.inlineResult != nil:
+		return c.inlineResult.Sender
 	case c.shippingQuery != nil:
 		return c.shippingQuery.Sender
 	case c.preCheckoutQuery != nil:
@@ -203,26 +252,30 @@ func (c *nativeContext) Chat() *Chat {
 	switch {
 	case c.message != nil:
 		return c.message.Chat
-	case c.callback != nil:
+	case c.callback != nil && c.callback.Message != nil:
 		return c.callback.Message.Chat
+	case c.myChatMember != nil:
+		return c.myChatMember.Chat
+	case c.chatMember != nil:
+		return c.chatMember.Chat
 	default:
 		return nil
 	}
 }
 
 func (c *nativeContext) Recipient() Recipient {
-	sender := c.Sender()
-	if sender != nil {
-		return sender
+	chat := c.Chat()
+	if chat != nil {
+		return chat
 	}
-	return c.Chat()
+	return c.Sender()
 }
 
 func (c *nativeContext) Text() string {
 	switch {
 	case c.message != nil:
 		return c.message.Text
-	case c.callback != nil:
+	case c.callback != nil && c.callback.Message != nil:
 		return c.callback.Message.Text
 	case c.query != nil:
 		return c.query.Text
@@ -233,12 +286,14 @@ func (c *nativeContext) Text() string {
 
 func (c *nativeContext) Data() string {
 	switch {
+	case c.message != nil:
+		return c.message.Payload
 	case c.callback != nil:
 		return c.callback.Data
 	case c.query != nil:
 		return c.query.Text
-	case c.chosenInlineResult != nil:
-		return c.chosenInlineResult.Query
+	case c.inlineResult != nil:
+		return c.inlineResult.Query
 	case c.shippingQuery != nil:
 		return c.shippingQuery.Payload
 	case c.preCheckoutQuery != nil:
@@ -249,11 +304,18 @@ func (c *nativeContext) Data() string {
 }
 
 func (c *nativeContext) Args() []string {
-	if c.message != nil {
-		return strings.Split(c.message.Payload, " ")
-	}
-	if c.callback != nil {
+	switch {
+	case c.message != nil:
+		payload := strings.Trim(c.message.Payload, " ")
+		if payload != "" {
+			return strings.Split(payload, " ")
+		}
+	case c.callback != nil:
 		return strings.Split(c.callback.Data, "|")
+	case c.query != nil:
+		return strings.Split(c.query.Text, " ")
+	case c.inlineResult != nil:
+		return strings.Split(c.inlineResult.Query, " ")
 	}
 	return nil
 }
@@ -292,20 +354,42 @@ func (c *nativeContext) ForwardTo(to Recipient, opts ...interface{}) error {
 }
 
 func (c *nativeContext) Edit(what interface{}, opts ...interface{}) error {
-	clb := c.callback
-	if clb == nil || clb.Message == nil {
-		return ErrBadContext
+	if c.inlineResult != nil {
+		_, err := c.b.Edit(c.inlineResult, what, opts...)
+		return err
 	}
-	_, err := c.b.Edit(clb.Message, what, opts...)
-	return err
+	if c.callback != nil {
+		_, err := c.b.Edit(c.callback, what, opts...)
+		return err
+	}
+	return ErrBadContext
 }
 
 func (c *nativeContext) EditCaption(caption string, opts ...interface{}) error {
-	clb := c.callback
-	if clb == nil || clb.Message == nil {
-		return ErrBadContext
+	if c.inlineResult != nil {
+		_, err := c.b.EditCaption(c.inlineResult, caption, opts...)
+		return err
 	}
-	_, err := c.b.EditCaption(clb.Message, caption, opts...)
+	if c.callback != nil {
+		_, err := c.b.Edit(c.callback, caption, opts...)
+		return err
+	}
+	return ErrBadContext
+}
+
+func (c *nativeContext) EditOrSend(what interface{}, opts ...interface{}) error {
+	err := c.Edit(what, opts...)
+	if err == ErrBadContext {
+		return c.Send(what, opts...)
+	}
+	return err
+}
+
+func (c *nativeContext) EditOrReply(what interface{}, opts ...interface{}) error {
+	err := c.Edit(what, opts...)
+	if err == ErrBadContext {
+		return c.Reply(what, opts...)
+	}
 	return err
 }
 
@@ -347,4 +431,20 @@ func (c *nativeContext) Respond(resp ...*CallbackResponse) error {
 		return errors.New("telebot: context callback is nil")
 	}
 	return c.b.Respond(c.callback, resp...)
+}
+
+func (c *nativeContext) Set(key string, value interface{}) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	if c.store == nil {
+		c.store = make(map[string]interface{})
+	}
+	c.store[key] = value
+}
+
+func (c *nativeContext) Get(key string) interface{} {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+	return c.store[key]
 }

@@ -3,7 +3,7 @@ package middleware
 import tele "gopkg.in/tucnak/telebot.v3"
 
 type RestrictConfig struct {
-	Chats   []tele.Recipient
+	Chats   []int64
 	In, Out tele.HandlerFunc
 }
 
@@ -17,7 +17,7 @@ func Restrict(v RestrictConfig) tele.MiddlewareFunc {
 		}
 		return func(c tele.Context) error {
 			for _, chat := range v.Chats {
-				if chat.Recipient() == c.Sender().Recipient() {
+				if chat == c.Sender().ID {
 					return v.In(c)
 				}
 			}
@@ -26,7 +26,7 @@ func Restrict(v RestrictConfig) tele.MiddlewareFunc {
 	}
 }
 
-func Whitelist(chats ...tele.Recipient) tele.MiddlewareFunc {
+func Whitelist(chats ...int64) tele.MiddlewareFunc {
 	return func(next tele.HandlerFunc) tele.HandlerFunc {
 		return Restrict(RestrictConfig{
 			Chats: chats,
@@ -36,7 +36,7 @@ func Whitelist(chats ...tele.Recipient) tele.MiddlewareFunc {
 	}
 }
 
-func Blacklist(chats ...tele.Recipient) tele.MiddlewareFunc {
+func Blacklist(chats ...int64) tele.MiddlewareFunc {
 	return func(next tele.HandlerFunc) tele.HandlerFunc {
 		return Restrict(RestrictConfig{
 			Chats: chats,

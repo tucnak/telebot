@@ -3,13 +3,12 @@ package telebot
 import (
 	"strconv"
 	"time"
+	"unicode/utf16"
 )
 
 // Message object represents a message.
 type Message struct {
 	ID int `json:"message_id"`
-
-	InlineID string `json:"-"`
 
 	// For message sent to channels, Sender will be nil
 	Sender *User `json:"from"`
@@ -19,6 +18,9 @@ type Message struct {
 
 	// Conversation the message belongs to.
 	Chat *Chat `json:"chat"`
+
+	// Sender of the message, sent on behalf of a chat.
+	SenderChat *Chat `json:"sender_chat"`
 
 	// For forwarded messages, sender of the original message.
 	OriginalSender *User `json:"forward_from"`
@@ -115,6 +117,9 @@ type Message struct {
 
 	// For a poll, information the native poll.
 	Poll *Poll `json:"poll"`
+
+	// For a game, information about it.
+	Game *Game `json:"game"`
 
 	// For a dice, information about it.
 	Dice *Dice `json:"dice"`
@@ -215,6 +220,25 @@ type Message struct {
 	// The domain name of the website on which the user has logged in.
 	ConnectedWebsite string `json:"connected_website,omitempty"`
 
+	// For a service message, a voice chat started in the chat.
+	VoiceChatStarted *VoiceChatStarted `json:"voice_chat_started,omitempty"`
+
+	// For a service message, a voice chat ended in the chat.
+	VoiceChatEnded *VoiceChatEnded `json:"voice_chat_ended,omitempty"`
+
+	// For a service message, some users were invited in the voice chat.
+	VoiceChatParticipants *VoiceChatParticipants `json:"voice_chat_participants_invited,omitempty"`
+
+	// For a service message, a voice chat schedule in the chat.
+	VoiceChatScheduled *VoiceChatScheduled `json:"voice_chat_scheduled,omitempty"`
+
+	// For a service message, represents the content of a service message,
+	// sent whenever a user in the chat triggers a proximity alert set by another user.
+	ProximityAlert *ProximityAlert `json:"proximity_alert_triggered,omitempty"`
+
+	// For a service message, represents about a change in auto-delete timer settings.
+	AutoDeleteTimer *AutoDeleteTimer `json:"message_auto_delete_timer_changed,omitempty"`
+
 	// Inline keyboard attached to the message.
 	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup"`
 }
@@ -243,11 +267,13 @@ type MessageEntity struct {
 	Language string `json:"language,omitempty"`
 }
 
+// AutoDeleteTimer represents a service message about a change in auto-delete timer settings.
+type AutoDeleteTimer struct {
+	Unixtime int `json:"message_auto_delete_time"`
+}
+
 // MessageSig satisfies Editable interface (see Editable.)
 func (m *Message) MessageSig() (string, int64) {
-	if m.InlineID != "" {
-		return m.InlineID, 0
-	}
 	return strconv.Itoa(m.ID), m.Chat.ID
 }
 
@@ -307,4 +333,26 @@ func (m *Message) IsService() bool {
 	fact = fact || (m.MigrateTo != m.MigrateFrom)
 
 	return fact
+}
+
+// EntityText returns the substring of the message identified by the
+// given MessageEntity.
+//
+// It's safer than manually slicing Text because Telegram uses
+// UTF-16 indices whereas Go string are []byte.
+//
+func (m *Message) EntityText(e MessageEntity) string {
+	text := m.Text
+	if text == "" {
+		text = m.Caption
+	}
+
+	a := utf16.Encode([]rune(text))
+	off, end := e.Offset, e.Offset+e.Length
+
+	if off < 0 || end > len(a) {
+		return ""
+	}
+
+	return string(utf16.Decode(a[off:end]))
 }

@@ -1,6 +1,7 @@
 package telebot
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -11,8 +12,7 @@ import (
 )
 
 func (b *Bot) debug(err error) {
-	err = errors.WithStack(err)
-	log.Printf("%+v\n", err)
+	log.Println(err)
 }
 
 func (b *Bot) deferDebug() {
@@ -59,27 +59,52 @@ func wrapError(err error) error {
 // In other cases it extracts API error. If error is not presented
 // in errors.go, it will be prefixed with `unknown` keyword.
 func extractOk(data []byte) error {
-	match := errorRx.FindStringSubmatch(string(data))
-	if match == nil || len(match) < 3 {
+	// Parse the error message as JSON
+	var tgramApiError struct {
+		Ok          bool                   `json:"ok"`
+		ErrorCode   int                    `json:"error_code"`
+		Description string                 `json:"description"`
+		Parameters  map[string]interface{} `json:"parameters"`
+	}
+	jdecoder := json.NewDecoder(bytes.NewReader(data))
+	jdecoder.UseNumber()
+
+	err := jdecoder.Decode(&tgramApiError)
+	if err != nil {
+		//return errors.Wrap(err, "can't parse JSON reply, the Telegram server is mibehaving")
+		// FIXME / TODO: in this case the error might be at HTTP level, or the content is not JSON (eg. image?)
 		return nil
 	}
 
-	desc := match[2]
-	err := ErrByDescription(desc)
+	if tgramApiError.Ok {
+		// No error
+		return nil
+	}
 
-	if err == nil {
-		code, _ := strconv.Atoi(match[1])
+	err = ErrByDescription(tgramApiError.Description)
+	if err != nil {
+		apierr, _ := err.(*APIError)
+		// Formally this is wrong, as the error is not created on the fly
+		// However, given the current way of handling errors, this a working
+		// workaround which doesn't break the API
+		apierr.Parameters = tgramApiError.Parameters
+		return apierr
+	}
 
-		switch code {
-		case http.StatusTooManyRequests:
-			retry, _ := strconv.Atoi(match[3])
-			err = FloodError{
-				APIError:   NewAPIError(429, desc),
-				RetryAfter: retry,
-			}
-		default:
-			err = fmt.Errorf("telegram unknown: %s (%d)", desc, code)
+	switch tgramApiError.ErrorCode {
+	case http.StatusTooManyRequests:
+		retryAfter, ok := tgramApiError.Parameters["retry_after"]
+		if !ok {
+			return NewAPIError(429, tgramApiError.Description)
 		}
+		retryAfterInt, _ := strconv.Atoi(fmt.Sprint(retryAfter))
+
+		err = FloodError{
+			APIError:   NewAPIError(429, tgramApiError.Description),
+			RetryAfter: retryAfterInt,
+		}
+	default:
+		err = fmt.Errorf("telegram unknown: %s (%d)", tgramApiError.Description, tgramApiError.ErrorCode)
 	}
 
 	return err
@@ -186,6 +211,14 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 		params["parse_mode"] = opt.ParseMode
 	}
 
+	if opt.DisableContentDetection {
+		params["disable_content_type_detection"] = "true"
+	}
+
+	if opt.AllowWithoutReply {
+		params["allow_sending_without_reply"] = "true"
+	}
+
 	if opt.ReplyMarkup != nil {
 		processButtons(opt.ReplyMarkup.InlineKeyboard)
 		replyMarkup, _ := json.Marshal(opt.ReplyMarkup)
@@ -233,4 +266,11 @@ func isUserInList(user *User, list []User) bool {
 		}
 	}
 	return false
+}
+
+func intsToStrs(ns []int) (s []string) {
+	for _, n := range ns {
+		s = append(s, strconv.Itoa(n))
+	}
+	return
 }

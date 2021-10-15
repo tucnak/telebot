@@ -2,6 +2,8 @@ package telebot
 
 import (
 	"errors"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -13,15 +15,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	photoID = "AgACAgIAAxkDAAIBV16Ybpg7l2jPgMUiiLJ3WaQOUqTrAAJorjEbh2TBSPSOinaCHfydQO_pki4AAwEAAwIAA3kAA_NQAAIYBA"
-)
-
 var (
 	// required to test send and edit methods
 	token     = os.Getenv("TELEBOT_SECRET")
 	chatID, _ = strconv.ParseInt(os.Getenv("CHAT_ID"), 10, 64)
-	userID, _ = strconv.Atoi(os.Getenv("USER_ID"))
+	userID, _ = strconv.ParseInt(os.Getenv("USER_ID"), 10, 64)
 
 	b, _ = newTestBot()      // cached bot instance to avoid getMe method flooding
 	to   = &Chat{ID: chatID} // to chat recipient for send and edit methods
@@ -49,7 +47,7 @@ func TestNewBot(t *testing.T) {
 	_, err = NewBot(pref)
 	assert.Error(t, err)
 
-	b, err := NewBot(Settings{offline: true})
+	b, err := NewBot(Settings{Offline: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +64,7 @@ func TestNewBot(t *testing.T) {
 	pref.Poller = &LongPoller{Timeout: time.Second}
 	pref.Updates = 50
 	pref.ParseMode = ModeHTML
-	pref.offline = true
+	pref.Offline = true
 
 	b, err = NewBot(pref)
 	require.NoError(t, err)
@@ -147,7 +145,7 @@ func TestBotStart(t *testing.T) {
 }
 
 func TestBotProcessUpdate(t *testing.T) {
-	b, err := NewBot(Settings{Synchronous: true, offline: true})
+	b, err := NewBot(Settings{Synchronous: true, Offline: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -276,8 +274,8 @@ func TestBotProcessUpdate(t *testing.T) {
 		assert.Equal(t, "query", c.Data())
 		return nil
 	})
-	b.Handle(OnChosenInlineResult, func(c Context) error {
-		assert.Equal(t, "result", c.ChosenInlineResult().ResultID)
+	b.Handle(OnInlineResult, func(c Context) error {
+		assert.Equal(t, "result", c.InlineResult().ResultID)
 		return nil
 	})
 	b.Handle(OnShipping, func(c Context) error {
@@ -332,7 +330,7 @@ func TestBotProcessUpdate(t *testing.T) {
 	b.ProcessUpdate(Update{Callback: &Callback{Data: "callback"}})
 	b.ProcessUpdate(Update{Callback: &Callback{Data: "\funique|callback"}})
 	b.ProcessUpdate(Update{Query: &Query{Text: "query"}})
-	b.ProcessUpdate(Update{ChosenInlineResult: &ChosenInlineResult{ResultID: "result"}})
+	b.ProcessUpdate(Update{InlineResult: &InlineResult{ResultID: "result"}})
 	b.ProcessUpdate(Update{ShippingQuery: &ShippingQuery{ID: "shipping"}})
 	b.ProcessUpdate(Update{PreCheckoutQuery: &PreCheckoutQuery{ID: "checkout"}})
 	b.ProcessUpdate(Update{Poll: &Poll{ID: "poll"}})
@@ -340,7 +338,7 @@ func TestBotProcessUpdate(t *testing.T) {
 }
 
 func TestBotOnError(t *testing.T) {
-	b, err := NewBot(Settings{Synchronous: true, offline: true})
+	b, err := NewBot(Settings{Synchronous: true, Offline: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -378,7 +376,7 @@ func TestBot(t *testing.T) {
 	assert.Equal(t, ErrBadRecipient, err)
 
 	photo := &Photo{
-		File:    File{FileID: photoID},
+		File:    FromURL("https://telegra.ph/file/65c5237b040ebf80ec278.jpg"),
 		Caption: t.Name(),
 	}
 	var msg *Message
@@ -423,7 +421,37 @@ func TestBot(t *testing.T) {
 		edited, err := b.Edit(msg, photo)
 		require.NoError(t, err)
 		assert.Equal(t, edited.Photo.UniqueID, photo.UniqueID)
+
+		resp, err := http.Get("https://telegra.ph/file/274e5eb26f348b10bd8ee.mp4")
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		file, err := ioutil.TempFile("", "")
+		require.NoError(t, err)
+
+		_, err = io.Copy(file, resp.Body)
+		require.NoError(t, err)
+
+		animation := &Animation{
+			File:     FromDisk(file.Name()),
+			Caption:  t.Name(),
+			FileName: "animation.gif",
+		}
+
+		msg, err := b.Send(msg.Chat, animation)
+		require.NoError(t, err)
+
+		if msg.Animation != nil {
+			assert.Equal(t, msg.Animation.FileID, animation.FileID)
+		} else {
+			assert.Equal(t, msg.Document.FileID, animation.FileID)
+		}
+
+		_, err = b.Edit(edited, animation)
+		require.NoError(t, err)
 	})
+
+	t.Run("Edit(what=Animation)", func(t *testing.T) {})
 
 	t.Run("Send(what=string)", func(t *testing.T) {
 		msg, err = b.Send(to, t.Name())

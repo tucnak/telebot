@@ -2,7 +2,6 @@ package telebot
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 )
 
@@ -10,6 +9,7 @@ type APIError struct {
 	Code        int
 	Description string
 	Message     string
+	Parameters  map[string]interface{}
 }
 
 type FloodError struct {
@@ -50,8 +50,6 @@ func NewAPIError(code int, msgs ...string) *APIError {
 	return err
 }
 
-var errorRx = regexp.MustCompile(`{.+"error_code":(\d+),"description":"(.+)"(?:,"parameters":{"retry_after":(\d+)})?}`)
-
 var (
 	// General errors
 	ErrUnauthorized      = NewAPIError(401, "Unauthorized")
@@ -85,6 +83,7 @@ var (
 	ErrFailedImageProcess   = NewAPIError(400, "Bad Request: IMAGE_PROCESS_FAILED", "Image process failed")
 	ErrInvalidStickerSet    = NewAPIError(400, "Bad Request: STICKERSET_INVALID", "Stickerset is invalid")
 	ErrBadPollOptions       = NewAPIError(400, "Bad Request: expected an Array of String as options")
+	ErrGroupMigrated        = NewAPIError(400, "Bad Request: group chat was upgraded to a supergroup chat")
 
 	// No rights errors
 	ErrNoRightsToRestrict     = NewAPIError(400, "Bad Request: not enough rights to restrict/unrestrict chat member")
@@ -177,6 +176,8 @@ func ErrByDescription(s string) error {
 		return ErrFailedImageProcess
 	case ErrInvalidStickerSet.ʔ():
 		return ErrInvalidStickerSet
+	case ErrGroupMigrated.ʔ():
+		return ErrGroupMigrated
 	default:
 		return nil
 	}
