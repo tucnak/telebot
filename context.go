@@ -224,6 +224,8 @@ func (c *nativeContext) Text() string {
 		return c.message.Text
 	case c.callback != nil:
 		return c.callback.Message.Text
+	case c.query != nil:
+		return c.query.Text
 	default:
 		return ""
 	}
