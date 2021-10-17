@@ -115,7 +115,7 @@ type Settings struct {
 	Offline bool
 }
 
-type Middleware func(update *Update) error
+type Middleware func(ctx *Context) error
 
 // Update object represents an incoming update.
 type Update struct {
@@ -212,10 +212,19 @@ func (b *Bot) Stop() {
 func (b *Bot) ProcessUpdate(upd Update) {
 	defer b.deferDebug()
 
+	ctx := Context{
+		Update: &upd,
+		abort:  false,
+	}
+
 	for _, middleware := range b.middlewares {
-		err := middleware(&upd)
+		err := middleware(&ctx)
 		if err != nil {
 			panic(err)
+		}
+
+		if ctx.abort {
+			return
 		}
 	}
 
@@ -1780,8 +1789,8 @@ func (b *Bot) EditInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink,
 // RevokeInviteLink revokes an invite link created by the bot.
 func (b *Bot) RevokeInviteLink(chat *Chat, link string) (*ChatInviteLink, error) {
 	params := map[string]string{
-		"chat_id": chat.Recipient(),
-		"invite_link":    link,
+		"chat_id":     chat.Recipient(),
+		"invite_link": link,
 	}
 
 	data, err := b.Raw("revokeChatInviteLink", params)
