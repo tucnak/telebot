@@ -959,6 +959,15 @@ func (b *Bot) EditMedia(msg Editable, media InputMedia, opts ...interface{}) (*M
 		result.Title = m.Title
 		result.Performer = m.Performer
 		thumb = m.Thumbnail
+	case *Animation:
+		result.Type = "animation"
+		result.Caption = m.Caption
+		result.Width = m.Width
+		result.Height = m.Height
+		result.Duration = m.Duration
+		result.MIME = m.MIME
+		result.FileName = m.FileName
+		thumb = m.Thumbnail
 	default:
 		return nil, errors.Errorf("telebot: media entry is not valid")
 	}
@@ -1425,9 +1434,13 @@ func (b *Bot) UnpinAll(chat *Chat) error {
 // Including current name of the user for one-on-one conversations,
 // current username of a user, group or channel, etc.
 //
-func (b *Bot) ChatByID(id string) (*Chat, error) {
+func (b *Bot) ChatByID(id int64) (*Chat, error) {
+	return b.ChatByUsername(strconv.FormatInt(id, 10))
+}
+
+func (b *Bot) ChatByUsername(name string) (*Chat, error) {
 	params := map[string]string{
-		"chat_id": id,
+		"chat_id": name,
 	}
 
 	data, err := b.Raw("getChat", params)
