@@ -134,6 +134,7 @@ type Update struct {
 	PollAnswer        *PollAnswer       `json:"poll_answer,omitempty"`
 	MyChatMember      *ChatMemberUpdate `json:"my_chat_member,omitempty"`
 	ChatMember        *ChatMemberUpdate `json:"chat_member,omitempty"`
+	ChatJoinRequest   *ChatJoinRequest  `json:"chat_join_request,omitempty"`
 }
 
 // Command represents a bot command.
@@ -248,6 +249,7 @@ func (b *Bot) NewContext(upd Update) Context {
 		pollAnswer:       upd.PollAnswer,
 		myChatMember:     upd.MyChatMember,
 		chatMember:       upd.ChatMember,
+		chatJoinRequest:  upd.ChatJoinRequest,
 	}
 }
 
@@ -484,6 +486,11 @@ func (b *Bot) ProcessUpdate(upd Update) {
 
 	if upd.ChatMember != nil {
 		b.handle(OnChatMember, c)
+		return
+	}
+
+	if upd.ChatJoinRequest != nil {
+		b.handle(OnChatJoinRequest, c)
 		return
 	}
 }
@@ -1572,8 +1579,16 @@ func (b *Bot) CreateInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLin
 		"chat_id": chat.Recipient(),
 	}
 	if link != nil {
-		params["expire_date"] = strconv.FormatInt(link.ExpireUnixtime, 10)
-		params["member_limit"] = strconv.Itoa(link.MemberLimit)
+		params["name"] = link.Name
+
+		if link.ExpireUnixtime != 0 {
+			params["expire_date"] = strconv.FormatInt(link.ExpireUnixtime, 10)
+		}
+		if link.MemberLimit > 0 {
+			params["member_limit"] = strconv.Itoa(link.MemberLimit)
+		} else if link.JoinRequest {
+			params["creates_join_request"] = "true"
+		}
 	}
 
 	data, err := b.Raw("createChatInviteLink", params)
@@ -1596,8 +1611,16 @@ func (b *Bot) EditInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink,
 	}
 	if link != nil {
 		params["invite_link"] = link.InviteLink
-		params["expire_date"] = strconv.FormatInt(link.ExpireUnixtime, 10)
-		params["member_limit"] = strconv.Itoa(link.MemberLimit)
+		params["name"] = link.Name
+
+		if link.ExpireUnixtime != 0 {
+			params["expire_date"] = strconv.FormatInt(link.ExpireUnixtime, 10)
+		}
+		if link.MemberLimit > 0 {
+			params["member_limit"] = strconv.Itoa(link.MemberLimit)
+		} else if link.JoinRequest {
+			params["creates_join_request"] = "true"
+		}
 	}
 
 	data, err := b.Raw("editChatInviteLink", params)
@@ -1631,4 +1654,34 @@ func (b *Bot) RevokeInviteLink(chat *Chat, link string) (*ChatInviteLink, error)
 	}
 
 	return &resp, nil
+}
+
+// ApproveChatJoinRequest approves a chat join request.
+func (b *Bot) ApproveChatJoinRequest(chat *Chat, user *User) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+		"user_id": user.Recipient(),
+	}
+
+	data, err := b.Raw("approveChatJoinRequest", params)
+	if err != nil {
+		return err
+	}
+
+	return extractOk(data)
+}
+
+// DeclineChatJoinRequest declines a chat join request.
+func (b *Bot) DeclineChatJoinRequest(chat *Chat, user *User) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+		"user_id": user.Recipient(),
+	}
+
+	data, err := b.Raw("declineChatJoinRequest", params)
+	if err != nil {
+		return err
+	}
+
+	return extractOk(data)
 }

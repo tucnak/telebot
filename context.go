@@ -46,6 +46,9 @@ type Context interface {
 	// ChatMember returns chat member changes.
 	ChatMember() *ChatMemberUpdate
 
+	// ChatJoinRequest returns cha
+	ChatJoinRequest() *ChatJoinRequest
+
 	// Migration returns both migration from and to chat IDs.
 	Migration() (int64, int64)
 
@@ -160,6 +163,7 @@ type nativeContext struct {
 	pollAnswer       *PollAnswer
 	myChatMember     *ChatMemberUpdate
 	chatMember       *ChatMemberUpdate
+	chatJoinRequest  *ChatJoinRequest
 
 	lock  sync.RWMutex
 	store map[string]interface{}
@@ -213,6 +217,10 @@ func (c *nativeContext) ChatMember() *ChatMemberUpdate {
 	default:
 		return nil
 	}
+}
+
+func (c *nativeContext) ChatJoinRequest() *ChatJoinRequest {
+	return c.chatJoinRequest
 }
 
 func (c *nativeContext) Poll() *Poll {

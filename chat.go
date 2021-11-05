@@ -1,6 +1,9 @@
 package telebot
 
-import "strconv"
+import (
+	"strconv"
+	"time"
+)
 
 // User object represents a Telegram user, bot.
 type User struct {
@@ -116,4 +119,28 @@ type ChatID int64
 // Recipient returns chat ID (see Recipient interface).
 func (i ChatID) Recipient() string {
 	return strconv.FormatInt(int64(i), 10)
+}
+
+// ChatJoinRequest represents a join request sent to a chat.
+type ChatJoinRequest struct {
+	// Chat to which the request was sent.
+	Chat *Chat `json:"chat"`
+
+	// Sender is the user that sent the join request.
+	Sender *User `json:"user"`
+
+	// Unixtime, use ChatJoinRequest.Time() to get time.Time.
+	Unixtime int64 `json:"date"`
+
+	// Bio of the user, optional.
+	Bio string `json:"bio"`
+
+	// InviteLink is the chat invite link that was used by
+	//the user to send the join request, optional.
+	InviteLink *ChatInviteLink `json:"invite_link"`
+}
+
+// Time returns the moment of chat join request sending in local time.
+func (r ChatJoinRequest) Time() time.Time {
+	return time.Unix(r.Unixtime, 0)
 }

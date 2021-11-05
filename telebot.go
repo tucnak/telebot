@@ -111,6 +111,9 @@ const (
 	// Will fire on chat member's changes.
 	OnChatMember = "\achat_member"
 
+	// Will fire on chat join request.
+	OnChatJoinRequest = "\achat_join_request"
+
 	// Will fire on the start of a voice chat.
 	OnVoiceChatStarted = "\avoice_chat_started"
 
@@ -144,6 +147,7 @@ const (
 	RecordingAudio    ChatAction = "record_audio"
 	RecordingVNote    ChatAction = "record_video_note"
 	FindingLocation   ChatAction = "find_location"
+	ChoosingSticker   ChatAction = "choose_sticker"
 )
 
 // ParseMode determines the way client applications treat the text of the message
