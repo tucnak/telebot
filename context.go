@@ -251,6 +251,8 @@ func (c *nativeContext) Sender() *User {
 		return c.preCheckoutQuery.Sender
 	case c.pollAnswer != nil:
 		return c.pollAnswer.Sender
+	case c.chatJoinRequest != nil:
+		return c.chatJoinRequest.Sender
 	default:
 		return nil
 	}
@@ -266,6 +268,8 @@ func (c *nativeContext) Chat() *Chat {
 		return c.myChatMember.Chat
 	case c.chatMember != nil:
 		return c.chatMember.Chat
+	case c.chatJoinRequest != nil:
+		return c.chatJoinRequest.Chat
 	default:
 		return nil
 	}
