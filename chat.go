@@ -127,7 +127,7 @@ type ChatJoinRequest struct {
 	Chat *Chat `json:"chat"`
 
 	// Sender is the user that sent the join request.
-	Sender *User `json:"user"`
+	Sender *User `json:"from"`
 
 	// Unixtime, use ChatJoinRequest.Time() to get time.Time.
 	Unixtime int64 `json:"date"`
