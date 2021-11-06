@@ -1574,7 +1574,7 @@ func (b *Bot) Close() (bool, error) {
 }
 
 // CreateInviteLink creates an additional invite link for a chat.
-func (b *Bot) CreateInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink, error) {
+func (b *Bot) CreateInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 	}
@@ -1605,7 +1605,7 @@ func (b *Bot) CreateInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLin
 }
 
 // EditInviteLink edits a non-primary invite link created by the bot.
-func (b *Bot) EditInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink, error) {
+func (b *Bot) EditInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 	}
@@ -1637,7 +1637,7 @@ func (b *Bot) EditInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink,
 }
 
 // RevokeInviteLink revokes an invite link created by the bot.
-func (b *Bot) RevokeInviteLink(chat *Chat, link string) (*ChatInviteLink, error) {
+func (b *Bot) RevokeInviteLink(chat Recipient, link string) (*ChatInviteLink, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 		"link":    link,
@@ -1657,7 +1657,7 @@ func (b *Bot) RevokeInviteLink(chat *Chat, link string) (*ChatInviteLink, error)
 }
 
 // ApproveChatJoinRequest approves a chat join request.
-func (b *Bot) ApproveChatJoinRequest(chat *Chat, user *User) error {
+func (b *Bot) ApproveChatJoinRequest(chat Recipient, user *User) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 		"user_id": user.Recipient(),
@@ -1672,7 +1672,7 @@ func (b *Bot) ApproveChatJoinRequest(chat *Chat, user *User) error {
 }
 
 // DeclineChatJoinRequest declines a chat join request.
-func (b *Bot) DeclineChatJoinRequest(chat *Chat, user *User) error {
+func (b *Bot) DeclineChatJoinRequest(chat Recipient, user *User) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 		"user_id": user.Recipient(),
