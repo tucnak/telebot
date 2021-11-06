@@ -217,7 +217,9 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 	}
 
 	if len(opt.Entities) > 0 {
+		delete(params, "parse_mode")
 		entities, _ := json.Marshal(opt.Entities)
+
 		if params["caption"] != "" {
 			params["caption_entities"] = string(entities)
 		} else {
