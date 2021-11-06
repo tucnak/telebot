@@ -240,7 +240,7 @@ type Message struct {
 	AutoDeleteTimer *AutoDeleteTimer `json:"message_auto_delete_timer_changed,omitempty"`
 
 	// Inline keyboard attached to the message.
-	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup"`
+	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 }
 
 // MessageEntity object represents "special" parts of text messages,
