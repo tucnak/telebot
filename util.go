@@ -178,6 +178,11 @@ func extractOptions(how []interface{}) *SendOptions {
 				opts = &SendOptions{}
 			}
 			opts.ParseMode = opt
+		case Entities:
+			if opts == nil {
+				opts = &SendOptions{}
+			}
+			opts.Entities = opt
 		default:
 			panic("telebot: unsupported send-option")
 		}
@@ -209,6 +214,15 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 
 	if opt.ParseMode != ModeDefault {
 		params["parse_mode"] = opt.ParseMode
+	}
+
+	if len(opt.Entities) > 0 {
+		entities, _ := json.Marshal(opt.Entities)
+		if params["caption"] != "" {
+			params["caption_entities"] = string(entities)
+		} else {
+			params["entities"] = string(entities)
+		}
 	}
 
 	if opt.DisableContentDetection {

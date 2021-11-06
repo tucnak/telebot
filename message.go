@@ -267,6 +267,9 @@ type MessageEntity struct {
 	Language string `json:"language,omitempty"`
 }
 
+// Entities is used to set message's text entities as a send option.
+type Entities []MessageEntity
+
 // AutoDeleteTimer represents a service message about a change in auto-delete timer settings.
 type AutoDeleteTimer struct {
 	Unixtime int `json:"message_auto_delete_time"`
