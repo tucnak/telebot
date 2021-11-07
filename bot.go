@@ -619,7 +619,12 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 
 		im := x.InputMedia()
 		im.Media = repr
-		im.ParseMode = sendOpts.ParseMode
+
+		if len(sendOpts.Entities) > 0 {
+			im.Entities = sendOpts.Entities
+		} else {
+			im.ParseMode = sendOpts.ParseMode
+		}
 
 		data, _ = json.Marshal(im)
 		media[i] = string(data)
@@ -915,7 +920,12 @@ func (b *Bot) EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*M
 
 	im := media.InputMedia()
 	im.Media = repr
-	im.ParseMode = sendOpts.ParseMode
+
+	if len(sendOpts.Entities) > 0 {
+		im.Entities = sendOpts.Entities
+	} else {
+		im.ParseMode = sendOpts.ParseMode
+	}
 
 	if thumb != nil {
 		im.Thumbnail = "attach://" + thumbName
