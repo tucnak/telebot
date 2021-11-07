@@ -22,6 +22,9 @@ type Context interface {
 	// Message returns stored message if such presented.
 	Message() *Message
 
+	// Media returns message media if such presented.
+	Media() Media
+
 	// Callback returns stored callback if such presented.
 	Callback() *Callback
 
@@ -188,6 +191,29 @@ func (c *nativeContext) Message() *Message {
 	}
 }
 
+func (c *nativeContext) Media() Media {
+	m := c.Message()
+
+	switch {
+	case m.Photo != nil:
+		return m.Photo
+	case m.Voice != nil:
+		return m.Voice
+	case m.Audio != nil:
+		return m.Audio
+	case m.Animation != nil:
+		return m.Animation
+	case m.Document != nil:
+		return m.Document
+	case m.Video != nil:
+		return m.Video
+	case m.VideoNote != nil:
+		return m.VideoNote
+	default:
+		return nil
+	}
+}
+
 func (c *nativeContext) Callback() *Callback {
 	return c.callback
 }
@@ -284,14 +310,22 @@ func (c *nativeContext) Recipient() Recipient {
 }
 
 func (c *nativeContext) Text() string {
+	var m *Message
+
 	switch {
 	case c.message != nil:
-		return c.message.Text
+		m = c.message
 	case c.callback != nil && c.callback.Message != nil:
-		return c.callback.Message.Text
+		m = c.callback.Message
 	default:
 		return ""
 	}
+
+	if m.Caption != "" {
+		return m.Caption
+	}
+
+	return m.Text
 }
 
 func (c *nativeContext) Data() string {
