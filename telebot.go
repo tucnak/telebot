@@ -59,13 +59,13 @@ const (
 	OnContact    = "\acontact"
 	OnLocation   = "\alocation"
 	OnVenue      = "\avenue"
-	OnPinned     = "\apinned"
 	OnDice       = "\adice"
 	OnInvoice    = "\ainvoice"
 	OnPayment    = "\apayment"
 	OnGame       = "\agame"
 	OnPoll       = "\apoll"
 	OnPollAnswer = "\apoll_answer"
+	OnPinned     = "\apinned"
 
 	// Will fire on channel posts.
 	OnChannelPost       = "\achannel_post"
@@ -89,6 +89,9 @@ const (
 	// your internal references to this chat
 	// upon switching as its ID will change.
 	OnMigration = "\amigration"
+
+	// Will fire on any unhandled media.
+	OnMedia = "\amedia"
 
 	// Will fire on callback requests.
 	OnCallback = "\acallback"

@@ -504,38 +504,46 @@ func (b *Bot) handle(end string, c Context) bool {
 }
 
 func (b *Bot) handleMedia(c Context) bool {
-	m := c.Message()
+	var (
+		m     = c.Message()
+		fired = true
+	)
 
 	switch {
 	case m.Photo != nil:
-		b.handle(OnPhoto, c)
+		fired = b.handle(OnPhoto, c)
 	case m.Voice != nil:
-		b.handle(OnVoice, c)
+		fired = b.handle(OnVoice, c)
 	case m.Audio != nil:
-		b.handle(OnAudio, c)
+		fired = b.handle(OnAudio, c)
 	case m.Animation != nil:
-		b.handle(OnAnimation, c)
+		fired = b.handle(OnAnimation, c)
 	case m.Document != nil:
-		b.handle(OnDocument, c)
+		fired = b.handle(OnDocument, c)
 	case m.Sticker != nil:
-		b.handle(OnSticker, c)
+		fired = b.handle(OnSticker, c)
 	case m.Video != nil:
-		b.handle(OnVideo, c)
+		fired = b.handle(OnVideo, c)
 	case m.VideoNote != nil:
-		b.handle(OnVideoNote, c)
+		fired = b.handle(OnVideoNote, c)
 	case m.Contact != nil:
-		b.handle(OnContact, c)
+		fired = b.handle(OnContact, c)
 	case m.Location != nil:
-		b.handle(OnLocation, c)
+		fired = b.handle(OnLocation, c)
 	case m.Venue != nil:
-		b.handle(OnVenue, c)
+		fired = b.handle(OnVenue, c)
 	case m.Game != nil:
-		b.handle(OnGame, c)
+		fired = b.handle(OnGame, c)
 	case m.Dice != nil:
-		b.handle(OnDice, c)
+		fired = b.handle(OnDice, c)
 	default:
 		return false
 	}
+
+	if !fired {
+		return b.handle(OnMedia, c)
+	}
+
 	return true
 }
 

@@ -150,6 +150,12 @@ func TestBotProcessUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	b.Handle(OnMedia, func(c Context) error {
+		assert.NotNil(t, c.Message().Photo)
+		return nil
+	})
+	b.ProcessUpdate(Update{Message: &Message{Photo: &Photo{}}})
+
 	b.Handle("/start", func(c Context) error {
 		assert.Equal(t, "/start", c.Text())
 		return nil
@@ -208,6 +214,10 @@ func TestBotProcessUpdate(t *testing.T) {
 	})
 	b.Handle(OnVenue, func(c Context) error {
 		assert.NotNil(t, c.Message().Venue)
+		return nil
+	})
+	b.Handle(OnDice, func(c Context) error {
+		assert.NotNil(t, c.Message().Dice)
 		return nil
 	})
 	b.Handle(OnInvoice, func(c Context) error {
@@ -508,7 +518,7 @@ func TestBot(t *testing.T) {
 
 		edited, err = b.EditReplyMarkup(edited, nil)
 		require.NoError(t, err)
-		assert.Nil(t, edited.ReplyMarkup.InlineKeyboard)
+		assert.Nil(t, edited.ReplyMarkup)
 
 		_, err = b.Edit(edited, bad)
 		assert.Equal(t, ErrButtonDataInvalid, err)
