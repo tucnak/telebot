@@ -139,7 +139,7 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	if v.Height != 0 {
 		params["height"] = strconv.Itoa(v.Height)
 	}
-	if v.SupportsStreaming {
+	if v.Streaming {
 		params["supports_streaming"] = "true"
 	}
 

@@ -18,15 +18,16 @@ type Media interface {
 type InputMedia struct {
 	Type      string   `json:"type"`
 	Media     string   `json:"media"`
+	Caption   string   `json:"caption"`
 	Thumbnail string   `json:"thumb,omitempty"`
 	ParseMode string   `json:"parse_mode,omitempty"`
 	Entities  Entities `json:"caption_entities,omitempty"`
-
-	*Photo
-	*Audio
-	*Video
-	*Document
-	*Animation
+	Width     int      `json:"width,omitempty"`
+	Height    int      `json:"height,omitempty"`
+	Duration  int      `json:"duration,omitempty"`
+	Title     string   `json:"title,omitempty"`
+	Performer string   `json:"performer,omitempty"`
+	Streaming bool     `json:"supports_streaming,omitempty"`
 }
 
 // Inputtable is a generic type for all kinds of media you
@@ -69,8 +70,8 @@ func (p *Photo) MediaFile() *File {
 
 func (p *Photo) InputMedia() InputMedia {
 	return InputMedia{
-		Type:  p.MediaType(),
-		Photo: p,
+		Type:    p.MediaType(),
+		Caption: p.Caption,
 	}
 }
 
@@ -128,8 +129,11 @@ func (a *Audio) MediaFile() *File {
 
 func (a *Audio) InputMedia() InputMedia {
 	return InputMedia{
-		Type:  a.MediaType(),
-		Audio: a,
+		Type:      a.MediaType(),
+		Caption:   a.Caption,
+		Duration:  a.Duration,
+		Title:     a.Title,
+		Performer: a.Performer,
 	}
 }
 
@@ -156,8 +160,8 @@ func (d *Document) MediaFile() *File {
 
 func (d *Document) InputMedia() InputMedia {
 	return InputMedia{
-		Type:     d.MediaType(),
-		Document: d,
+		Type:    d.MediaType(),
+		Caption: d.Caption,
 	}
 }
 
@@ -170,11 +174,11 @@ type Video struct {
 	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
-	Caption           string `json:"caption,omitempty"`
-	Thumbnail         *Photo `json:"thumb,omitempty"`
-	SupportsStreaming bool   `json:"supports_streaming,omitempty"`
-	MIME              string `json:"mime_type,omitempty"`
-	FileName          string `json:"file_name,omitempty"`
+	Caption   string `json:"caption,omitempty"`
+	Thumbnail *Photo `json:"thumb,omitempty"`
+	Streaming bool   `json:"supports_streaming,omitempty"`
+	MIME      string `json:"mime_type,omitempty"`
+	FileName  string `json:"file_name,omitempty"`
 }
 
 func (v *Video) MediaType() string {
@@ -188,8 +192,12 @@ func (v *Video) MediaFile() *File {
 
 func (v *Video) InputMedia() InputMedia {
 	return InputMedia{
-		Type:  v.MediaType(),
-		Video: v,
+		Type:      v.MediaType(),
+		Caption:   v.Caption,
+		Width:     v.Width,
+		Height:    v.Height,
+		Duration:  v.Duration,
+		Streaming: v.Streaming,
 	}
 }
 
@@ -219,8 +227,11 @@ func (a *Animation) MediaFile() *File {
 
 func (a *Animation) InputMedia() InputMedia {
 	return InputMedia{
-		Type:      a.MediaType(),
-		Animation: a,
+		Type:     a.MediaType(),
+		Caption:  a.Caption,
+		Width:    a.Width,
+		Height:   a.Height,
+		Duration: a.Duration,
 	}
 }
 
