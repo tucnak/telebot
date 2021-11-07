@@ -270,6 +270,14 @@ type MessageEntity struct {
 // Entities is used to set message's text entities as a send option.
 type Entities []MessageEntity
 
+// ProximityAlert sent whenever a user in the chat triggers
+// a proximity alert set by another user.
+type ProximityAlert struct {
+	Traveler *User `json:"traveler,omitempty"`
+	Watcher  *User `json:"watcher,omitempty"`
+	Distance int   `json:"distance"`
+}
+
 // AutoDeleteTimer represents a service message about a change in auto-delete timer settings.
 type AutoDeleteTimer struct {
 	Unixtime int `json:"message_auto_delete_time"`

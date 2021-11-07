@@ -405,7 +405,10 @@ func TestBot(t *testing.T) {
 		_, err = b.SendAlbum(to, nil)
 		assert.Error(t, err)
 
-		msgs, err := b.SendAlbum(to, Album{photo, photo})
+		photo2 := *photo
+		photo2.Caption = ""
+
+		msgs, err := b.SendAlbum(to, Album{photo, &photo2}, ModeHTML)
 		require.NoError(t, err)
 		assert.Len(t, msgs, 2)
 		assert.NotEmpty(t, msgs[0].AlbumID)
@@ -427,7 +430,7 @@ func TestBot(t *testing.T) {
 		b.parseMode = ModeDefault
 	})
 
-	t.Run("Edit(what=InputMedia)", func(t *testing.T) {
+	t.Run("Edit(what=Media)", func(t *testing.T) {
 		edited, err := b.Edit(msg, photo)
 		require.NoError(t, err)
 		assert.Equal(t, edited.Photo.UniqueID, photo.UniqueID)
@@ -536,7 +539,7 @@ func TestBot(t *testing.T) {
 		assert.NotNil(t, edited.Location)
 	})
 
-	// should be the last
+	// Should be after the Edit tests.
 	t.Run("Delete()", func(t *testing.T) {
 		require.NoError(t, b.Delete(msg))
 	})

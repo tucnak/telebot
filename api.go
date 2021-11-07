@@ -83,11 +83,12 @@ func (b *Bot) sendFiles(method string, files map[string]File, params map[string]
 
 	pipeReader, pipeWriter := io.Pipe()
 	writer := multipart.NewWriter(pipeWriter)
+
 	go func() {
 		defer pipeWriter.Close()
 
 		for field, file := range rawFiles {
-			if err := addFileToWriter(writer, params["file_name"], field, file); err != nil {
+			if err := addFileToWriter(writer, files[field].fileName, field, file); err != nil {
 				pipeWriter.CloseWithError(err)
 				return
 			}
@@ -139,7 +140,7 @@ func addFileToWriter(writer *multipart.Writer, filename, field string, file inte
 		defer f.Close()
 		reader = f
 	} else {
-		return errors.Errorf("telebot: file for field %v should be an io.ReadCloser or string", field)
+		return errors.Errorf("telebot: file for field %v should be io.ReadCloser or string", field)
 	}
 
 	part, err := writer.CreateFormFile(field, filename)

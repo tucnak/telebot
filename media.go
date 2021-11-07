@@ -4,28 +4,50 @@ import (
 	"encoding/json"
 )
 
-// Album lets you group multiple media (so-called InputMedia)
-// into a single message.
-type Album []InputMedia
+// Media is a generic type for all kinds of media that includes File.
+type Media interface {
+	// MediaType returns string-represented media type.
+	MediaType() string
 
-// InputMedia is a generic type for all kinds of media you
-// can put into an album.
-type InputMedia interface {
-	// As some files must be uploaded (instead of referencing)
-	// outer layers of Telebot require it.
+	// MediaFile returns a pointer to the media file.
 	MediaFile() *File
 }
+
+// InputMedia represents a composite InputMedia struct that is
+// used by Telebot in sending and editing media methods.
+type InputMedia struct {
+	Type      string `json:"type"`
+	Media     string `json:"media"`
+	ParseMode string `json:"parse_mode"`
+	Thumbnail string `json:"thumb"`
+
+	*Photo
+	*Audio
+	*Video
+	*Document
+	*Animation
+}
+
+// Inputtable is a generic type for all kinds of media you
+// can put into an album.
+type Inputtable interface {
+	Media
+
+	// InputMedia returns already marshalled InputMedia type
+	// ready to be used in sending and editing media methods.
+	InputMedia() InputMedia
+}
+
+// Album lets you group multiple media into a single message.
+type Album []Inputtable
 
 // Photo object represents a single photo file.
 type Photo struct {
 	File
 
-	Width  int `json:"width"`
-	Height int `json:"height"`
-
-	// (Optional)
-	Caption   string    `json:"caption,omitempty"`
-	ParseMode ParseMode `json:"parse_mode,omitempty"`
+	Width   int    `json:"width"`
+	Height  int    `json:"height"`
+	Caption string `json:"caption,omitempty"`
 }
 
 type photoSize struct {
@@ -36,9 +58,19 @@ type photoSize struct {
 	Caption string `json:"caption,omitempty"`
 }
 
-// MediaFile returns &Photo.File
+func (p *Photo) MediaType() string {
+	return "photo"
+}
+
 func (p *Photo) MediaFile() *File {
 	return &p.File
+}
+
+func (p *Photo) InputMedia() InputMedia {
+	return InputMedia{
+		Type:  p.MediaType(),
+		Photo: p,
+	}
 }
 
 // UnmarshalJSON is custom unmarshaller required to abstract
@@ -46,17 +78,16 @@ func (p *Photo) MediaFile() *File {
 // Instead, Telebot chooses the hi-res one and just sticks to it.
 //
 // I really do find it a beautiful solution.
-func (p *Photo) UnmarshalJSON(jsonStr []byte) error {
+func (p *Photo) UnmarshalJSON(data []byte) error {
 	var hq photoSize
 
-	if jsonStr[0] == '{' {
-		if err := json.Unmarshal(jsonStr, &hq); err != nil {
+	if data[0] == '{' {
+		if err := json.Unmarshal(data, &hq); err != nil {
 			return err
 		}
 	} else {
 		var sizes []photoSize
-
-		if err := json.Unmarshal(jsonStr, &sizes); err != nil {
+		if err := json.Unmarshal(data, &sizes); err != nil {
 			return err
 		}
 
@@ -85,9 +116,20 @@ type Audio struct {
 	FileName  string `json:"file_name,omitempty"`
 }
 
-// MediaFile returns &Audio.File
+func (a *Audio) MediaType() string {
+	return "audio"
+}
+
 func (a *Audio) MediaFile() *File {
+	a.fileName = a.FileName
 	return &a.File
+}
+
+func (a *Audio) InputMedia() InputMedia {
+	return InputMedia{
+		Type:  a.MediaType(),
+		Audio: a,
+	}
 }
 
 // Document object represents a general file (as opposed to Photo or Audio).
@@ -102,9 +144,20 @@ type Document struct {
 	FileName  string `json:"file_name,omitempty"`
 }
 
-// MediaFile returns &Document.File
+func (d *Document) MediaType() string {
+	return "document"
+}
+
 func (d *Document) MediaFile() *File {
+	d.fileName = d.FileName
 	return &d.File
+}
+
+func (d *Document) InputMedia() InputMedia {
+	return InputMedia{
+		Type:     d.MediaType(),
+		Document: d,
+	}
 }
 
 // Video object represents a video file.
@@ -123,9 +176,20 @@ type Video struct {
 	FileName          string `json:"file_name,omitempty"`
 }
 
-// MediaFile returns &Video.File
+func (v *Video) MediaType() string {
+	return "video"
+}
+
 func (v *Video) MediaFile() *File {
+	v.fileName = v.FileName
 	return &v.File
+}
+
+func (v *Video) InputMedia() InputMedia {
+	return InputMedia{
+		Type:  v.MediaType(),
+		Video: v,
+	}
 }
 
 // Animation object represents a animation file.
@@ -143,9 +207,20 @@ type Animation struct {
 	FileName  string `json:"file_name,omitempty"`
 }
 
-// MediaFile returns &Animation.File
+func (a *Animation) MediaType() string {
+	return "animation"
+}
+
 func (a *Animation) MediaFile() *File {
+	a.fileName = a.FileName
 	return &a.File
+}
+
+func (a *Animation) InputMedia() InputMedia {
+	return InputMedia{
+		Type:      a.MediaType(),
+		Animation: a,
+	}
 }
 
 // Voice object represents a voice note.
@@ -159,10 +234,18 @@ type Voice struct {
 	MIME    string `json:"mime_type,omitempty"`
 }
 
-// VideoNote represents a video message (available in Telegram apps
-// as of v.4.0).
+func (v *Voice) MediaType() string {
+	return "voice"
+}
+
+func (v *Voice) MediaFile() *File {
+	return &v.File
+}
+
+// VideoNote represents a video message.
 type VideoNote struct {
 	File
+
 	Duration int `json:"duration"`
 
 	// (Optional)
@@ -170,7 +253,15 @@ type VideoNote struct {
 	Length    int    `json:"length,omitempty"`
 }
 
-// Contact object represents a contact to Telegram user
+func (v *VideoNote) MediaType() string {
+	return "video_note"
+}
+
+func (v *VideoNote) MediaFile() *File {
+	return &v.File
+}
+
+// Contact object represents a contact to Telegram user.
 type Contact struct {
 	PhoneNumber string `json:"phone_number"`
 	FirstName   string `json:"first_name"`
@@ -191,14 +282,6 @@ type Location struct {
 	// Period in seconds for which the location will be updated
 	// (see Live Locations, should be between 60 and 86400.)
 	LivePeriod int `json:"live_period,omitempty"`
-}
-
-// ProximityAlert sent whenever
-// a user in the chat triggers a proximity alert set by another user.
-type ProximityAlert struct {
-	Traveler *User `json:"traveler,omitempty"`
-	Watcher  *User `json:"watcher,omitempty"`
-	Distance int   `json:"distance"`
 }
 
 // Venue object represents a venue location with name, address and

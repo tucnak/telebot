@@ -132,24 +132,17 @@ func extractMessage(data []byte) (*Message, error) {
 }
 
 func extractOptions(how []interface{}) *SendOptions {
-	var opts *SendOptions
+	opts := &SendOptions{}
 
 	for _, prop := range how {
 		switch opt := prop.(type) {
 		case *SendOptions:
 			opts = opt.copy()
 		case *ReplyMarkup:
-			if opts == nil {
-				opts = &SendOptions{}
-			}
 			if opt != nil {
 				opts.ReplyMarkup = opt.copy()
 			}
 		case Option:
-			if opts == nil {
-				opts = &SendOptions{}
-			}
-
 			switch opt {
 			case NoPreview:
 				opts.DisableWebPagePreview = true
@@ -174,14 +167,8 @@ func extractOptions(how []interface{}) *SendOptions {
 				panic("telebot: unsupported flag-option")
 			}
 		case ParseMode:
-			if opts == nil {
-				opts = &SendOptions{}
-			}
 			opts.ParseMode = opt
 		case Entities:
-			if opts == nil {
-				opts = &SendOptions{}
-			}
 			opts.Entities = opt
 		default:
 			panic("telebot: unsupported send-option")
