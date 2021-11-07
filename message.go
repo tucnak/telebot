@@ -73,14 +73,14 @@ type Message struct {
 
 	// For text messages, special entities like usernames, URLs, bot commands,
 	// etc. that appear in the text.
-	Entities []MessageEntity `json:"entities,omitempty"`
+	Entities Entities `json:"entities,omitempty"`
 
 	// Some messages containing media, may as well have a caption.
 	Caption string `json:"caption,omitempty"`
 
 	// For messages with a caption, special entities like usernames, URLs,
 	// bot commands, etc. that appear in the caption.
-	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	CaptionEntities Entities `json:"caption_entities,omitempty"`
 
 	// For an audio recording, information about it.
 	Audio *Audio `json:"audio"`
