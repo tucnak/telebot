@@ -167,19 +167,20 @@ func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, e
 	return extractMessage(data)
 }
 
-func (b *Bot) sendObject(f *File, what string, params map[string]string, files map[string]File) (*Message, error) {
-	sendWhat := "send" + strings.Title(what)
+func (b *Bot) sendMedia(media Media, params map[string]string, files map[string]File) (*Message, error) {
+	kind := media.MediaType()
+	what := "send" + strings.Title(kind)
 
-	if what == "videoNote" {
-		what = "video_note"
+	if kind == "videoNote" {
+		kind = "video_note"
 	}
 
-	sendFiles := map[string]File{what: *f}
+	sendFiles := map[string]File{kind: *media.MediaFile()}
 	for k, v := range files {
 		sendFiles[k] = v
 	}
 
-	data, err := b.sendFiles(sendWhat, sendFiles, params)
+	data, err := b.sendFiles(what, sendFiles, params)
 	if err != nil {
 		return nil, err
 	}

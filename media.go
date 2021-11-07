@@ -254,7 +254,7 @@ type VideoNote struct {
 }
 
 func (v *VideoNote) MediaType() string {
-	return "video_note"
+	return "videoNote"
 }
 
 func (v *VideoNote) MediaFile() *File {
