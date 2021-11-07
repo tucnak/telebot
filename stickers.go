@@ -5,18 +5,6 @@ import (
 	"strconv"
 )
 
-// Sticker object represents a WebP image, so-called sticker.
-type Sticker struct {
-	File
-	Width        int           `json:"width"`
-	Height       int           `json:"height"`
-	Animated     bool          `json:"is_animated"`
-	Thumbnail    *Photo        `json:"thumb"`
-	Emoji        string        `json:"emoji"`
-	SetName      string        `json:"set_name"`
-	MaskPosition *MaskPosition `json:"mask_position"`
-}
-
 // StickerSet represents a sticker set.
 type StickerSet struct {
 	Name          string        `json:"name"`
