@@ -415,7 +415,7 @@ func (c *nativeContext) EditCaption(caption string, opts ...interface{}) error {
 		return err
 	}
 	if c.callback != nil {
-		_, err := c.b.Edit(c.callback, caption, opts...)
+		_, err := c.b.EditCaption(c.callback, caption, opts...)
 		return err
 	}
 	return ErrBadContext
