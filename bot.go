@@ -297,6 +297,21 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			return
 		}
 
+		if m.GroupCreated {
+			b.handle(OnGroupCreated, m)
+			return
+		}
+
+		if m.SuperGroupCreated {
+			b.handle(OnSuperGroupCreated, m)
+			return
+		}
+
+		if m.ChannelCreated {
+			b.handle(OnChannelCreated, m)
+			return
+		}
+
 		if m.MigrateTo != 0 {
 			if handler, ok := b.handlers[OnMigration]; ok {
 				handler, ok := handler.(func(int64, int64))
@@ -600,6 +615,8 @@ func (b *Bot) handleMedia(m *Message) bool {
 		b.handle(OnVenue, m)
 	case m.Dice != nil:
 		b.handle(OnDice, m)
+	case m.Game != nil:
+		b.handle(OnGame, m)
 	default:
 		return false
 	}
@@ -1742,8 +1759,8 @@ func (b *Bot) EditInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink,
 // RevokeInviteLink revokes an invite link created by the bot.
 func (b *Bot) RevokeInviteLink(chat *Chat, link string) (*ChatInviteLink, error) {
 	params := map[string]string{
-		"chat_id": chat.Recipient(),
-		"invite_link":    link,
+		"chat_id":     chat.Recipient(),
+		"invite_link": link,
 	}
 
 	data, err := b.Raw("revokeChatInviteLink", params)
