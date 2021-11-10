@@ -11,11 +11,10 @@ import (
 )
 
 func (b *Bot) debug(err error) {
-	err = errors.WithStack(err)
 	if b.reporter != nil {
 		b.reporter(err)
 	} else {
-		log.Printf("%+v\n", err)
+		log.Println(err)
 	}
 }
 
