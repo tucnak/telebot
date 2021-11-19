@@ -1787,6 +1787,6 @@ func (b *Bot) Lock() {
 }
 
 // Unlock unlocks b.
-func (b *Bot) UnLock() {
+func (b *Bot) Unlock() {
 	b.mutex.Unlock()
 }
