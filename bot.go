@@ -75,7 +75,7 @@ type Bot struct {
 	reporter    func(error)
 	stop        chan struct{}
 	client      *http.Client
-	sync        sync.Mutex
+	mutex       sync.Mutex
 }
 
 // Settings represents a utility struct for passing certain
