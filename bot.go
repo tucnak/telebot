@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/pkg/errors"
 )
@@ -43,6 +44,7 @@ func NewBot(pref Settings) (*Bot, error) {
 		stop:        make(chan struct{}),
 		reporter:    pref.Reporter,
 		client:      client,
+		mutex:       sync.Mutex{},
 	}
 
 	if pref.Offline {
@@ -73,6 +75,7 @@ type Bot struct {
 	reporter    func(error)
 	stop        chan struct{}
 	client      *http.Client
+	sync        sync.Mutex
 }
 
 // Settings represents a utility struct for passing certain
@@ -1776,4 +1779,14 @@ func (b *Bot) RevokeInviteLink(chat *Chat, link string) (*ChatInviteLink, error)
 	}
 
 	return &resp.Result, nil
+}
+
+// Lock locks b.
+func (b *Bot) Lock() {
+	b.mutex.Lock()
+}
+
+// Unlock unlocks b.
+func (b *Bot) UnLock() {
+	b.mutex.Unlock()
 }
