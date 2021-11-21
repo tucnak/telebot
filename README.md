@@ -102,7 +102,7 @@ b.Handle(tb.OnQuery, func (q *tb.Query) {
 })
 ```
 
-There's dozens of supported endpoints (see package consts). Let me know
+There are dozens of supported endpoints (see package consts). Let me know
 if you'd like to see some endpoint or endpoint idea implemented. This system
 is completely extensible, so I can introduce them without breaking
 backwards-compatibility.
