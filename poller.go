@@ -20,50 +20,6 @@ type Poller interface {
 	Poll(b *Bot, updates chan Update, stop chan struct{})
 }
 
-// MiddlewarePoller is a special kind of poller that acts
-// like a filter for updates. It could be used for spam
-// handling, banning or whatever.
-//
-// For heavy middleware, use increased capacity.
-//
-type MiddlewarePoller struct {
-	Capacity int // Default: 1
-	Poller   Poller
-	Filter   func(*Update) bool
-}
-
-// NewMiddlewarePoller wait for it... constructs a new middleware poller.
-func NewMiddlewarePoller(original Poller, filter func(*Update) bool) *MiddlewarePoller {
-	return &MiddlewarePoller{
-		Poller: original,
-		Filter: filter,
-	}
-}
-
-// Poll sieves updates through middleware filter.
-func (p *MiddlewarePoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
-	if p.Capacity < 1 {
-		p.Capacity = 1
-	}
-
-	middle := make(chan Update, p.Capacity)
-	stopPoller := make(chan struct{})
-
-	go p.Poller.Poll(b, middle, stopPoller)
-
-	for {
-		select {
-		case <-stop:
-			close(stopPoller)
-			return
-		case upd := <-middle:
-			if p.Filter(&upd) {
-				dest <- upd
-			}
-		}
-	}
-}
-
 // LongPoller is a classic LongPoller with timeout.
 type LongPoller struct {
 	Limit        int
