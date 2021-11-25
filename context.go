@@ -277,6 +277,10 @@ func (c *nativeContext) Sender() *User {
 		return c.preCheckoutQuery.Sender
 	case c.pollAnswer != nil:
 		return c.pollAnswer.Sender
+	case c.myChatMember != nil:
+		return c.myChatMember.Sender
+	case c.chatMember != nil:
+		return c.chatMember.Sender
 	case c.chatJoinRequest != nil:
 		return c.chatJoinRequest.Sender
 	default:
