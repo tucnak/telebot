@@ -650,12 +650,18 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 
 	for attachName := range files {
 		i, _ := strconv.Atoi(attachName)
+		r := resp.Result[i]
 
 		var newID string
-		if resp.Result[i].Photo != nil {
-			newID = resp.Result[i].Photo.FileID
-		} else {
-			newID = resp.Result[i].Video.FileID
+		switch {
+		case r.Photo != nil:
+			newID = r.Photo.FileID
+		case r.Video != nil:
+			newID = r.Video.FileID
+		case r.Audio != nil:
+			newID = r.Audio.FileID
+		case r.Document != nil:
+			newID = r.Document.FileID
 		}
 
 		a[i].MediaFile().FileID = newID
