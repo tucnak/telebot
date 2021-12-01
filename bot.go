@@ -10,8 +10,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 // NewBot does try to build a Bot with token `token`, which
@@ -682,7 +680,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 			repr = "attach://" + strconv.Itoa(i)
 			files[strconv.Itoa(i)] = *file
 		default:
-			return nil, errors.Errorf("telebot: album entry #%d does not exist", i)
+			return nil, fmt.Errorf("telebot: album entry #%d does not exist", i)
 		}
 
 		switch y := x.(type) {
@@ -749,7 +747,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, options ...interface{}) ([]Messag
 				ParseMode: sendOpts.ParseMode,
 			})
 		default:
-			return nil, errors.Errorf("telebot: album entry #%d is not valid", i)
+			return nil, fmt.Errorf("telebot: album entry #%d is not valid", i)
 		}
 
 		media[i] = string(data)
@@ -1030,7 +1028,7 @@ func (b *Bot) EditMedia(msg Editable, media InputMedia, options ...interface{}) 
 		repr = "attach://" + s
 		files[s] = *file
 	default:
-		return nil, errors.Errorf("telebot: can't edit media, it does not exist")
+		return nil, fmt.Errorf("telebot: can't edit media, it does not exist")
 	}
 
 	type FileJSON struct {
@@ -1090,7 +1088,7 @@ func (b *Bot) EditMedia(msg Editable, media InputMedia, options ...interface{}) 
 		result.Performer = m.Performer
 		thumb = m.Thumbnail
 	default:
-		return nil, errors.Errorf("telebot: media entry is not valid")
+		return nil, fmt.Errorf("telebot: media entry is not valid")
 	}
 
 	msgID, chatID := msg.MessageSig()
@@ -1334,7 +1332,7 @@ func (b *Bot) GetFile(file *File) (io.ReadCloser, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		resp.Body.Close()
-		return nil, errors.Errorf("telebot: expected status 200 but got %s", resp.Status)
+		return nil, fmt.Errorf("telebot: expected status 200 but got %s", resp.Status)
 	}
 
 	return resp.Body, nil

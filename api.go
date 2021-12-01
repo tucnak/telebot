@@ -3,6 +3,7 @@ package telebot
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -12,8 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/pkg/errors"
 )
 
 // Raw lets you call any method of Bot API manually.
@@ -73,7 +72,7 @@ func (b *Bot) sendFiles(method string, files map[string]File, params map[string]
 		case f.FileReader != nil:
 			rawFiles[name] = f.FileReader
 		default:
-			return nil, errors.Errorf("telebot: File for field %s doesn't exist", name)
+			return nil, fmt.Errorf("telebot: File for field %s doesn't exist", name)
 		}
 	}
 
@@ -140,7 +139,7 @@ func addFileToWriter(writer *multipart.Writer, filename, field string, file inte
 		defer f.Close()
 		reader = f
 	} else {
-		return errors.Errorf("telebot: File for field %v should be an io.ReadCloser or string", field)
+		return fmt.Errorf("telebot: File for field %v should be an io.ReadCloser or string", field)
 	}
 
 	part, err := writer.CreateFormFile(field, filename)
