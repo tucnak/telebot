@@ -13,14 +13,14 @@ import (
 )
 
 const (
-	photoID = "AgACAgIAAxkDAAIBV16Ybpg7l2jPgMUiiLJ3WaQOUqTrAAJorjEbh2TBSPSOinaCHfydQO_pki4AAwEAAwIAA3kAA_NQAAIYBA"
+	photoURL = "https://telegra.ph/file/4e477a2abc5f53c0bb4aa.jpg"
 )
 
 var (
 	// required to test send and edit methods
 	token     = os.Getenv("TELEBOT_SECRET")
 	chatID, _ = strconv.ParseInt(os.Getenv("CHAT_ID"), 10, 64)
-	userID, _ = strconv.Atoi(os.Getenv("USER_ID"))
+	userID, _ = strconv.ParseInt(os.Getenv("USER_ID"), 10, 64)
 
 	b, _ = newTestBot()      // cached bot instance to avoid getMe method flooding
 	to   = &Chat{ID: chatID} // to chat recipient for send and edit methods
@@ -313,7 +313,7 @@ func TestBot(t *testing.T) {
 	assert.Equal(t, ErrBadRecipient, err)
 
 	photo := &Photo{
-		File:    File{FileID: photoID},
+		File:    File{FileURL: photoURL},
 		Caption: t.Name(),
 	}
 	var msg *Message
