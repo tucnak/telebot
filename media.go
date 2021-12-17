@@ -300,7 +300,7 @@ type Contact struct {
 
 	// (Optional)
 	LastName string `json:"last_name"`
-	UserID   int    `json:"user_id,omitempty"`
+	UserID   int64  `json:"user_id,omitempty"`
 }
 
 // Location object represents geographic position.
