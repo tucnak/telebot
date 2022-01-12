@@ -22,6 +22,9 @@ type Context interface {
 	// Message returns stored message if such presented.
 	Message() *Message
 
+	// Media returns message media if such presented.
+	Media() Media
+
 	// Callback returns stored callback if such presented.
 	Callback() *Callback
 
@@ -45,6 +48,9 @@ type Context interface {
 
 	// ChatMember returns chat member changes.
 	ChatMember() *ChatMemberUpdate
+
+	// ChatJoinRequest returns cha
+	ChatJoinRequest() *ChatJoinRequest
 
 	// Migration returns both migration from and to chat IDs.
 	Migration() (int64, int64)
@@ -160,6 +166,7 @@ type nativeContext struct {
 	pollAnswer       *PollAnswer
 	myChatMember     *ChatMemberUpdate
 	chatMember       *ChatMemberUpdate
+	chatJoinRequest  *ChatJoinRequest
 
 	lock  sync.RWMutex
 	store map[string]interface{}
@@ -179,6 +186,29 @@ func (c *nativeContext) Message() *Message {
 		return c.message
 	case c.callback != nil:
 		return c.callback.Message
+	default:
+		return nil
+	}
+}
+
+func (c *nativeContext) Media() Media {
+	m := c.Message()
+
+	switch {
+	case m.Photo != nil:
+		return m.Photo
+	case m.Voice != nil:
+		return m.Voice
+	case m.Audio != nil:
+		return m.Audio
+	case m.Animation != nil:
+		return m.Animation
+	case m.Document != nil:
+		return m.Document
+	case m.Video != nil:
+		return m.Video
+	case m.VideoNote != nil:
+		return m.VideoNote
 	default:
 		return nil
 	}
@@ -215,6 +245,10 @@ func (c *nativeContext) ChatMember() *ChatMemberUpdate {
 	}
 }
 
+func (c *nativeContext) ChatJoinRequest() *ChatJoinRequest {
+	return c.chatJoinRequest
+}
+
 func (c *nativeContext) Poll() *Poll {
 	return c.poll
 }
@@ -243,6 +277,12 @@ func (c *nativeContext) Sender() *User {
 		return c.preCheckoutQuery.Sender
 	case c.pollAnswer != nil:
 		return c.pollAnswer.Sender
+	case c.myChatMember != nil:
+		return c.myChatMember.Sender
+	case c.chatMember != nil:
+		return c.chatMember.Sender
+	case c.chatJoinRequest != nil:
+		return c.chatJoinRequest.Sender
 	default:
 		return nil
 	}
@@ -258,6 +298,8 @@ func (c *nativeContext) Chat() *Chat {
 		return c.myChatMember.Chat
 	case c.chatMember != nil:
 		return c.chatMember.Chat
+	case c.chatJoinRequest != nil:
+		return c.chatJoinRequest.Chat
 	default:
 		return nil
 	}
@@ -272,16 +314,22 @@ func (c *nativeContext) Recipient() Recipient {
 }
 
 func (c *nativeContext) Text() string {
+	var m *Message
+
 	switch {
 	case c.message != nil:
-		return c.message.Text
+		m = c.message
 	case c.callback != nil && c.callback.Message != nil:
-		return c.callback.Message.Text
-	case c.query != nil:
-		return c.query.Text
+		m = c.callback.Message
 	default:
 		return ""
 	}
+
+	if m.Caption != "" {
+		return m.Caption
+	}
+
+	return m.Text
 }
 
 func (c *nativeContext) Data() string {
@@ -371,7 +419,7 @@ func (c *nativeContext) EditCaption(caption string, opts ...interface{}) error {
 		return err
 	}
 	if c.callback != nil {
-		_, err := c.b.Edit(c.callback, caption, opts...)
+		_, err := c.b.EditCaption(c.callback, caption, opts...)
 		return err
 	}
 	return ErrBadContext

@@ -11,6 +11,9 @@ type ChatInviteLink struct {
 	// The invite link.
 	InviteLink string `json:"invite_link"`
 
+	// Invite link name.
+	Name string `json:"name"`
+
 	// The creator of the link.
 	Creator *User `json:"creator"`
 
@@ -21,12 +24,19 @@ type ChatInviteLink struct {
 	IsRevoked bool `json:"is_revoked"`
 
 	// (Optional) Point in time when the link will expire,
-	// use ExpireDate() to get time.Time
+	// use ExpireDate() to get time.Time.
 	ExpireUnixtime int64 `json:"expire_date,omitempty"`
 
 	// (Optional) Maximum number of users that can be members of
 	// the chat simultaneously.
 	MemberLimit int `json:"member_limit,omitempty"`
+
+	// (Optional) True, if users joining the chat via the link need to
+	// be approved by chat administrators. If True, member_limit can't be specified.
+	JoinRequest bool `json:"creates_join_request"`
+
+	// (Optional) Number of pending join requests created using this link.
+	PendingCount int `json:"pending_join_request_count"`
 }
 
 // ExpireDate returns the moment of the link expiration in local time.
@@ -42,7 +52,7 @@ type ChatMemberUpdate struct {
 	// Sender which user the action was triggered.
 	Sender *User `json:"from"`
 
-	// Unixtime, use Date() to get time.Time
+	// Unixtime, use Date() to get time.Time.
 	Unixtime int64 `json:"date"`
 
 	// Previous information about the chat member.
