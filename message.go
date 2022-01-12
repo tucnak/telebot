@@ -73,14 +73,14 @@ type Message struct {
 
 	// For text messages, special entities like usernames, URLs, bot commands,
 	// etc. that appear in the text.
-	Entities []MessageEntity `json:"entities,omitempty"`
+	Entities Entities `json:"entities,omitempty"`
 
 	// Some messages containing media, may as well have a caption.
 	Caption string `json:"caption,omitempty"`
 
 	// For messages with a caption, special entities like usernames, URLs,
 	// bot commands, etc. that appear in the caption.
-	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	CaptionEntities Entities `json:"caption_entities,omitempty"`
 
 	// For an audio recording, information about it.
 	Audio *Audio `json:"audio"`
@@ -240,7 +240,7 @@ type Message struct {
 	AutoDeleteTimer *AutoDeleteTimer `json:"message_auto_delete_timer_changed,omitempty"`
 
 	// Inline keyboard attached to the message.
-	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup"`
+	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 }
 
 // MessageEntity object represents "special" parts of text messages,
@@ -265,6 +265,17 @@ type MessageEntity struct {
 
 	// (Optional) For EntityCodeBlock entity type only.
 	Language string `json:"language,omitempty"`
+}
+
+// Entities is used to set message's text entities as a send option.
+type Entities []MessageEntity
+
+// ProximityAlert sent whenever a user in the chat triggers
+// a proximity alert set by another user.
+type ProximityAlert struct {
+	Traveler *User `json:"traveler,omitempty"`
+	Watcher  *User `json:"watcher,omitempty"`
+	Distance int   `json:"distance"`
 }
 
 // AutoDeleteTimer represents a service message about a change in auto-delete timer settings.
