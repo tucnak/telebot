@@ -338,8 +338,8 @@ func main() {
 
 	var (
 		// Universal markup builders.
-		menu     = &ReplyMarkup{ResizeReplyKeyboard: true}
-		selector = &ReplyMarkup{}
+		menu     = &tele.ReplyMarkup{ResizeKeyboard: true}
+		selector = &tele.ReplyMarkup{}
 
 		// Reply buttons.
 		btnHelp     = menu.Text("ℹ Help")
@@ -390,7 +390,7 @@ func main() {
 
 You can use markup constructor for every type of possible buttons:
 ```go
-r := &ReplyMarkup{}
+r := &tele.ReplyMarkup{}
 
 // Reply buttons:
 r.Text("Hello!")
