@@ -1,6 +1,6 @@
 package middleware
 
-import tele "gopkg.in/tucnak/telebot.v3"
+import tele "gopkg.in/telebot.v3"
 
 func AutoRespond() tele.MiddlewareFunc {
 	return func(next tele.HandlerFunc) tele.HandlerFunc {

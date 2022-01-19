@@ -1,7 +1,7 @@
 package layout
 
 import (
-	tele "gopkg.in/tucnak/telebot.v3"
+	tele "gopkg.in/telebot.v3"
 )
 
 // LocaleFunc is the function used to fetch the locale of the recipient.

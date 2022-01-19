@@ -10,7 +10,7 @@ import (
 	"text/template"
 
 	"github.com/goccy/go-yaml"
-	tele "gopkg.in/tucnak/telebot.v3"
+	tele "gopkg.in/telebot.v3"
 )
 
 type (
