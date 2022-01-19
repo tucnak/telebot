@@ -2,16 +2,17 @@
 >"I never knew creating Telegram bots could be so _sexy_!"
 
 [![GoDoc](https://godoc.org/gopkg.in/tucnak/telebot.v3?status.svg)](https://godoc.org/gopkg.in/tucnak/telebot.v3)
-[![Travis](https://travis-ci.org/tucnak/telebot.svg?branch=v3)](https://travis-ci.org/tucnak/telebot)
-[![codecov.io](https://codecov.io/gh/tucnak/telebot/coverage.svg?branch=develop)](https://codecov.io/gh/tucnak/telebot)
+[![codecov.io](https://codecov.io/gh/tucnak/telebot/coverage.svg?branch=v3)](https://codecov.io/gh/tucnak/telebot)
 [![Discuss on Telegram](https://img.shields.io/badge/telegram-discuss-0088cc.svg)](https://t.me/go_telebot)
 
 ```bash
-go get -u gopkg.in/tucnak/telebot.v3
+go get -u gopkg.in/telebot.v3
 ```
 
 * [Overview](#overview)
 * [Getting Started](#getting-started)
+	- [Context](#context)
+	- [Middleware](#middleware)
 	- [Poller](#poller)
 	- [Commands](#commands)
 	- [Files](#files)
@@ -27,7 +28,7 @@ go get -u gopkg.in/tucnak/telebot.v3
 Telebot is a bot framework for [Telegram Bot API](https://core.telegram.org/bots/api).
 This package provides the best of its kind API for command routing, inline query requests and keyboards, as well
 as callbacks. Actually, I went a couple steps further, so instead of making a 1:1 API wrapper I chose to focus on
-the beauty of API and performance. Some of the strong sides of telebot are:
+the beauty of API and performance. Some strong sides of Telebot are:
 
 * Real concise API
 * Command routing
@@ -35,39 +36,38 @@ the beauty of API and performance. Some of the strong sides of telebot are:
 * Transparent File API
 * Effortless bot callbacks
 
-All the methods of telebot API are _extremely_ easy to memorize and get used to. Also, consider Telebot a
+All the methods of Telebot API are _extremely_ easy to memorize and get used to. Also, consider Telebot a
 highload-ready solution. I'll test and benchmark the most popular actions and if necessary, optimize
 against them without sacrificing API quality.
 
 # Getting Started
-Let's take a look at the minimal telebot setup:
+Let's take a look at the minimal Telebot setup:
+
 ```go
 package main
 
 import (
 	"log"
+	"os"
 	"time"
 
-	tele "gopkg.in/tucnak/telebot.v3"
+	tele "gopkg.in/telebot.v3"
 )
 
 func main() {
-	b, err := tele.NewBot(tele.Settings{
-		// You can also set custom API URL.
-		// If field is empty it equals to "https://api.telegram.org".
-		URL: "http://195.129.111.17:8012",
-
-		Token:  "TOKEN_HERE",
+	pref := tele.Settings{
+		Token:  os.Getenv("TOKEN"),
 		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
-	})
+	}
 
+	b, err := tele.NewBot(pref)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	b.Handle("/hello", func(m tele.Context) error {
-		return m.Send("Hello")
+	b.Handle("/hello", func(c tele.Context) error {
+		return c.Send("Hello!")
 	})
 
 	b.Start()
@@ -77,40 +77,97 @@ func main() {
 
 Simple, innit? Telebot's routing system takes care of delivering updates
 to their endpoints, so in order to get to handle any meaningful event,
-all you got to do is just plug your function to one of the Telebot-provided
+all you got to do is just plug your function into one of the Telebot-provided
 endpoints. You can find the full list
 [here](https://godoc.org/gopkg.in/tucnak/telebot.v3#pkg-constants).
 
+There are dozens of supported endpoints (see package consts). Let me know
+if you'd like to see some endpoint or endpoint ideas implemented. This system
+is completely extensible, so I can introduce them without breaking
+backwards compatibility.
+
+## Context
+Context is a special type that wraps a huge update structure and represents
+the context of the current event. It provides several helpers, which allow
+getting, for example, the chat that this update had been sent in, no matter
+what kind of update this is.
+
 ```go
-b, _ := tele.NewBot(settings)
+b.Handle(tele.OnText, func(c tele.Context) error {
+	// All the text messages that weren't
+	// captured by existing handlers.
 
-b.Handle(tele.OnText, func(m *tele.Message) {
-	// all the text messages that weren't
-	// captured by existing handlers
+	var (
+		user = c.Sender()
+		text = c.Text()
+	)
+
+	// Use full-fledged bot's functions
+	// only if you need a result:
+	msg, err := b.Send(user, text)
+	if err != nil {
+		return err
+	}
+
+	// Instead, prefer a context short-hand:
+	return c.Send(text)
 })
 
-b.Handle(tele.OnPhoto, func(m *tele.Message) {
-	// photos only
+b.Handle(tele.OnChannelPost, func(c tele.Context) error {
+	// Channel posts only.
+	msg := c.Message()
 })
 
-b.Handle(tele.OnChannelPost, func (m *tele.Message) {
-	// channel posts only
+b.Handle(tele.OnPhoto, func(c tele.Context) error {
+	// Photos only.
+	photo := c.Message().Photo
 })
 
-b.Handle(tele.OnQuery, func (q *tele.Query) {
-	// incoming inline queries
+b.Handle(tele.OnQuery, func(c tele.Context) error {
+	// Incoming inline queries.
+	return c.Answer(...)
 })
 ```
 
-There's dozens of supported endpoints (see package consts). Let me know
-if you'd like to see some endpoint or endpoint idea implemented. This system
-is completely extensible, so I can introduce them without breaking
-backwards-compatibility.
+## Middleware
+Telebot has a simple and recognizable way to set up middleware — chained functions with access to `Context`, called before the handler execution.
+
+Import a `middleware` package to get some basic out-of-box middleware
+implementations:
+```go
+import "gopkg.in/telebot.v3/middleware"
+```
+
+```go
+// Global-scoped middleware:
+b.Use(middleware.Logger())
+b.Use(middleware.AutoRespond())
+
+// Group-scoped middleware:
+adminOnly := b.Group(middleware.Whitelist(adminIDs...))
+adminOnly.Handle("/ban", onBan)
+adminOnly.Handle("/kick", onKick)
+
+// Handler-scoped middleware:
+b.Handle(tele.OnText, onText, middleware.IgnoreVia())
+```
+
+Custom middleware example:
+```go
+// AutoResponder automatically responds to every callback update.
+func AutoResponder(next tele.HandlerFunc) tele.HandlerFunc {
+	return func(c tele.Context) error {
+		if c.Callback() != nil {
+			defer c.Respond()
+		}
+		return next(c) // continue execution chain
+	}
+}
+```
 
 ## Poller
 Telebot doesn't really care how you provide it with incoming updates, as long
-as you set it up with a Poller, or call ProcessUpdate for each update (see
-[examples/awslambdaechobot](examples/awslambdaechobot)):
+as you set it up with a Poller, or call ProcessUpdate for each update:
 
 ```go
 // Poller is a provider of Updates.
@@ -129,59 +186,35 @@ type Poller interface {
 }
 ```
 
-Telegram Bot API supports long polling and webhook integration. Poller means you
-can plug telebot into whatever existing bot infrastructure (load balancers?) you
-need, if you need to. Another great thing about pollers is that you can chain
-them, making some sort of middleware:
-```go
-poller := &tele.LongPoller{Timeout: 15 * time.Second}
-spamProtected := tele.NewMiddlewarePoller(poller, func(upd *tele.Update) bool {
-	if upd.Message == nil {
-		return true
-	}
-
-	if strings.Contains(upd.Message.Text, "spam") {
-		return false
-	}
-
-	return true
-})
-
-bot, _ := tele.NewBot(tele.Settings{
-	// ...
-	Poller: spamProtected,
-})
-
-// graceful shutdown
-time.AfterFunc(N * time.Second, b.Stop)
-
-// blocks until shutdown
-bot.Start()
-
-fmt.Println(poller.LastUpdateID) // 134237
-```
-
 ## Commands
 When handling commands, Telebot supports both direct (`/command`) and group-like
 syntax (`/command@botname`) and will never deliver messages addressed to some
 other bot, even if [privacy mode](https://core.telegram.org/bots#privacy-mode) is off.
-For simplified deep-linking, telebot also extracts payload:
+
+For simplified deep-linking, Telebot also extracts payload:
 ```go
 // Command: /start <PAYLOAD>
-b.Handle("/start", func(m *tele.Message) {
-	if !m.Private() {
-		return
-	}
+b.Handle("/start", func(c tele.Context) error {
+	fmt.Println(c.Message().Payload) // <PAYLOAD>
+})
+```
 
-	fmt.Println(m.Payload) // <PAYLOAD>
+For multiple arguments use:
+```go
+// Command: /tags <tag1> <tag2> <...>
+b.Handle("/tags", func(c tele.Context) error {
+	tags := c.Args() // list of arguments splitted by a space
+	for _, tag := range tags {
+		// iterate through passed arguments
+	}
 })
 ```
 
 ## Files
->Telegram allows files up to 20 MB in size.
+>Telegram allows files up to 50 MB in size.
 
-Telebot allows to both upload (from disk / by URL) and download (from Telegram)
-and files in bot's scope. Also, sending any kind of media with a File created
+Telebot allows to both upload (from disk or by URL) and download (from Telegram)
+files in bot's scope. Also, sending any kind of media with a File created
 from disk will upload the file to Telegram automatically:
 ```go
 a := &tele.Audio{File: tele.FromDisk("file.ogg")}
@@ -189,16 +222,16 @@ a := &tele.Audio{File: tele.FromDisk("file.ogg")}
 fmt.Println(a.OnDisk()) // true
 fmt.Println(a.InCloud()) // false
 
-// Will upload the file from disk and send it to recipient
-bot.Send(recipient, a)
+// Will upload the file from disk and send it to the recipient
+b.Send(recipient, a)
 
 // Next time you'll be sending this very *Audio, Telebot won't
 // re-upload the same file but rather utilize its Telegram FileID
-bot.Send(otherRecipient, a)
+b.Send(otherRecipient, a)
 
 fmt.Println(a.OnDisk()) // true
 fmt.Println(a.InCloud()) // true
-fmt.Println(a.FileID) // <telegram file id: ABC-DEF1234ghIkl-zyx57W2v1u123ew11>
+fmt.Println(a.FileID) // <Telegram file ID>
 ```
 
 You might want to save certain `File`s in order to avoid re-uploading. Feel free
@@ -208,7 +241,7 @@ data will ever be lost.
 ## Sendable
 Send is undoubtedly the most important method in Telebot. `Send()` accepts a
 `Recipient` (could be user, group or a channel) and a `Sendable`. Other types other than
-the telebot-provided media types (`Photo`, `Audio`, `Video`, etc.) are `Sendable`.
+the Telebot-provided media types (`Photo`, `Audio`, `Video`, etc.) are `Sendable`.
 If you create composite types of your own, and they satisfy the `Sendable` interface,
 Telebot will be able to send them out.
 
@@ -257,12 +290,12 @@ b.Send(user, "text", tele.Silent, tele.NoPreview)
 ```
 
 Full list of supported option-flags you can find
-[here](https://github.com/tucnak/telebot/blob/v3/options.go#L9).
+[here](https://pkg.go.dev/gopkg.in/tucnak/telebot.v3#Option).
 
 ## Editable
 If you want to edit some existing message, you don't really need to store the
 original `*Message` object. In fact, upon edit, Telegram only requires `chat_id`
-and `message_id`. So you don't really need the Message as the whole. Also you
+and `message_id`. So you don't really need the Message as a whole. Also, you
 might want to store references to certain messages in the database, so I thought
 it made sense for *any* Go struct to be editable as a Telegram message, to implement
 `Editable`:
@@ -285,7 +318,7 @@ type Editable interface {
 ```
 
 For example, `Message` type is Editable. Here is the implementation of `StoredMessage`
-type, provided by telebot:
+type, provided by Telebot:
 ```go
 // StoredMessage is an example struct suitable for being
 // stored in the database as-is or being embedded into
@@ -327,70 +360,56 @@ bot.EditCaption(m, "new caption")
 
 ## Keyboards
 Telebot supports both kinds of keyboards Telegram provides: reply and inline
-keyboards. Any button can also act as an endpoints for `Handle()`.
-
-In `v2.2` we're introducing a little more convenient way in building keyboards.
-The main goal is to avoid a lot of boilerplate and to make code clearer.
+keyboards. Any button can also act as endpoints for `Handle()`.
 
 ```go
-func main() {
-	b, _ := tele.NewBot(tele.Settings{...})
+var (
+	// Universal markup builders.
+	menu     = &tele.ReplyMarkup{ResizeKeyboard: true}
+	selector = &tele.ReplyMarkup{}
 
-	var (
-		// Universal markup builders.
-		menu     = &tele.ReplyMarkup{ResizeKeyboard: true}
-		selector = &tele.ReplyMarkup{}
+	// Reply buttons.
+	btnHelp     = menu.Text("ℹ Help")
+	btnSettings = menu.Text("⚙ Settings")
 
-		// Reply buttons.
-		btnHelp     = menu.Text("ℹ Help")
-		btnSettings = menu.Text("⚙ Settings")
+	// Inline buttons.
+	//
+	// Pressing it will cause the client to
+	// send the bot a callback.
+	//
+	// Make sure Unique stays unique as per button kind
+	// since it's required for callback routing to work.
+	//
+	btnPrev = selector.Data("⬅", "prev", ...)
+	btnNext = selector.Data("➡", "next", ...)
+)
 
-		// Inline buttons.
-		//
-		// Pressing it will cause the client to
-		// send the bot a callback.
-		//
-		// Make sure Unique stays unique as per button kind,
-		// as it has to be for callback routing to work.
-		//
-		btnPrev = selector.Data("⬅", "prev", ...)
-		btnNext = selector.Data("➡", "next", ...)
-	)
+menu.Reply(
+	menu.Row(btnHelp),
+	menu.Row(btnSettings),
+)
+selector.Inline(
+	selector.Row(btnPrev, btnNext),
+)
 
-	menu.Reply(
-		menu.Row(btnHelp),
-		menu.Row(btnSettings),
-	)
-	selector.Inline(
-		selector.Row(btnPrev, btnNext),
-	)
+b.Handle("/start", func(c tele.Context) error {
+	return c.Send("Hello!", menu)
+})
 
-	// Command: /start <PAYLOAD>
-	b.Handle("/start", func(m *tele.Message) {
-		if !m.Private() {
-			return
-		}
+// On reply button pressed (message)
+b.Handle(&btnHelp, func(c tele.Context) error {
+	return c.Edit("Here is some help: ...")
+})
 
-		b.Send(m.Sender, "Hello!", menu)
-	})
-
-	// On reply button pressed (message)
-	b.Handle(&btnHelp, func(m *tele.Message) {...})
-
-	// On inline button pressed (callback)
-	b.Handle(&btnPrev, func(c *tele.Callback) {
-		// ...
-		// Always respond!
-		b.Respond(c, &tele.CallbackResponse{...})
-	})
-
-	b.Start()
-}
+// On inline button pressed (callback)
+b.Handle(&btnPrev, func(c tele.Context) error {
+	return c.Respond()
+})
 ```
 
-You can use markup constructor for every type of possible buttons:
+You can use markup constructor for every type of possible button:
 ```go
-r := &tele.ReplyMarkup{}
+r := b.NewMarkup()
 
 // Reply buttons:
 r.Text("Hello!")
@@ -410,11 +429,11 @@ r.Login("Login", &tele.Login{...})
 ## Inline mode
 So if you want to handle incoming inline queries you better plug the `tele.OnQuery`
 endpoint and then use the `Answer()` method to send a list of inline queries
-back. I think at the time of writing, telebot supports all of the provided result
-types (but not the cached ones). This is how it looks like:
+back. I think at the time of writing, Telebot supports all of the provided result
+types (but not the cached ones). This is what it looks like:
 
 ```go
-b.Handle(tele.OnQuery, func(q *tele.Query) {
+b.Handle(tele.OnQuery, func(c tele.Context) error {
 	urls := []string{
 		"http://photo.jpg",
 		"http://photo2.jpg",
@@ -423,10 +442,8 @@ b.Handle(tele.OnQuery, func(q *tele.Query) {
 	results := make(tele.Results, len(urls)) // []tele.Result
 	for i, url := range urls {
 		result := &tele.PhotoResult{
-			URL: url,
-
-			// required for photos
-			ThumbURL: url,
+			URL:      url,
+			ThumbURL: url, // required for photos
 		}
 
 		results[i] = result
@@ -434,14 +451,10 @@ b.Handle(tele.OnQuery, func(q *tele.Query) {
 		results[i].SetResultID(strconv.Itoa(i))
 	}
 
-	err := b.Answer(q, &tele.QueryResponse{
+	return c.Answer(&tele.QueryResponse{
 		Results:   results,
 		CacheTime: 60, // a minute
 	})
-
-	if err != nil {
-		log.Println(err)
-	}
 })
 ```
 
@@ -452,16 +465,16 @@ of `QueryResponse`.
 # Contributing
 
 1. Fork it
-2. Clone develop: `git clone -b develop https://github.com/tucnak/telebot`
-3. Create your feature branch: `git checkout -b new-feature`
+2. Clone v3: `git clone -b v3 https://github.com/tucnak/telebot`
+3. Create your feature branch: `git checkout -b v3-feature`
 4. Make changes and add them: `git add .`
-5. Commit: `git commit -m "Add some feature"`
-6. Push: `git push origin new-feature`
+5. Commit: `git commit -m "add some feature"`
+6. Push: `git push origin v3-feature`
 7. Pull request
 
 # Donate
 
-I do coding for fun but I also try to search for interesting solutions and
+I do coding for fun, but I also try to search for interesting solutions and
 optimize them as much as possible.
 If you feel like it's a good piece of software, I wouldn't mind a tip!
 
