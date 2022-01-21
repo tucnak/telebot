@@ -86,7 +86,7 @@ type Result interface {
 	SetResultID(string)
 	SetParseMode(ParseMode)
 	SetContent(InputMessageContent)
-	SetReplyMarkup([][]InlineButton)
+	SetReplyMarkup(*ReplyMarkup)
 	Process(*Bot)
 }
 

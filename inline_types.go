@@ -17,7 +17,7 @@ type ResultBase struct {
 	Content InputMessageContent `json:"input_message_content,omitempty"`
 
 	// Optional. Inline keyboard attached to the message.
-	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
+	ReplyMarkup *ReplyMarkup `json:"reply_markup,omitempty"`
 }
 
 // ResultID returns ResultBase.ID.
@@ -41,8 +41,8 @@ func (r *ResultBase) SetContent(content InputMessageContent) {
 }
 
 // SetReplyMarkup sets ResultBase.ReplyMarkup.
-func (r *ResultBase) SetReplyMarkup(keyboard [][]InlineButton) {
-	r.ReplyMarkup = &InlineKeyboardMarkup{InlineKeyboard: keyboard}
+func (r *ResultBase) SetReplyMarkup(markup *ReplyMarkup) {
+	r.ReplyMarkup = markup
 }
 
 func (r *ResultBase) Process(b *Bot) {

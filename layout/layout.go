@@ -500,7 +500,7 @@ func (lt *Layout) ResultLocale(locale, k string, args ...interface{}) tele.Resul
 		if markup == nil {
 			log.Printf("telebot/layout: markup with name %s was not found\n", result.Markup)
 		} else {
-			r.SetReplyMarkup(markup.InlineKeyboard)
+			r.SetReplyMarkup(markup)
 		}
 	}
 

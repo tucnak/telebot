@@ -168,14 +168,6 @@ type ReplyButton struct {
 	Poll     PollType `json:"request_poll,omitempty"`
 }
 
-// InlineKeyboardMarkup represents an inline keyboard that appears
-// right next to the message it belongs to.
-type InlineKeyboardMarkup struct {
-	// Array of button rows, each represented by
-	// an Array of KeyboardButton objects.
-	InlineKeyboard [][]InlineButton `json:"inline_keyboard,omitempty"`
-}
-
 // MarshalJSON implements json.Marshaler. It allows to pass
 // PollType as keyboard's poll type instead of KeyboardButtonPollType object.
 func (pt PollType) MarshalJSON() ([]byte, error) {
