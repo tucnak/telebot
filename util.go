@@ -11,6 +11,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+var defaultOnError = func(err error, c Context) {
+	log.Println(c.Update().ID, err)
+}
+
 func (b *Bot) debug(err error) {
 	log.Println(err)
 }
@@ -29,11 +33,7 @@ func (b *Bot) runHandler(h HandlerFunc, c Context) {
 	f := func() {
 		defer b.deferDebug()
 		if err := h(c); err != nil {
-			if b.OnError != nil {
-				b.OnError(err, c)
-			} else {
-				log.Println(err)
-			}
+			b.OnError(err, c)
 		}
 	}
 	if b.synchronous {

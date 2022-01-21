@@ -31,6 +31,9 @@ func NewBot(pref Settings) (*Bot, error) {
 	if pref.Poller == nil {
 		pref.Poller = &LongPoller{}
 	}
+	if pref.OnError == nil {
+		pref.OnError = defaultOnError
+	}
 
 	bot := &Bot{
 		Token:   pref.Token,
