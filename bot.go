@@ -235,31 +235,20 @@ func (b *Bot) NewMarkup() *ReplyMarkup {
 
 // NewContext returns a new native context object,
 // field by the passed update.
-func (b *Bot) NewContext(upd Update) Context {
+func (b *Bot) NewContext(u Update) Context {
 	return &nativeContext{
-		b:                b,
-		update:           upd,
-		message:          upd.Message,
-		callback:         upd.Callback,
-		query:            upd.Query,
-		inlineResult:     upd.InlineResult,
-		shippingQuery:    upd.ShippingQuery,
-		preCheckoutQuery: upd.PreCheckoutQuery,
-		poll:             upd.Poll,
-		pollAnswer:       upd.PollAnswer,
-		myChatMember:     upd.MyChatMember,
-		chatMember:       upd.ChatMember,
-		chatJoinRequest:  upd.ChatJoinRequest,
+		b: b,
+		u: u,
 	}
 }
 
 // ProcessUpdate processes a single incoming update.
 // A started bot calls this function automatically.
-func (b *Bot) ProcessUpdate(upd Update) {
-	c := b.NewContext(upd).(*nativeContext)
+func (b *Bot) ProcessUpdate(u Update) {
+	c := b.NewContext(u)
 
-	if upd.Message != nil {
-		m := upd.Message
+	if u.Message != nil {
+		m := u.Message
 
 		if m.PinnedMessage != nil {
 			b.handle(OnPinned, c)
@@ -422,44 +411,38 @@ func (b *Bot) ProcessUpdate(upd Update) {
 		}
 	}
 
-	if upd.EditedMessage != nil {
-		c.message = upd.EditedMessage
+	if u.EditedMessage != nil {
 		b.handle(OnEdited, c)
 		return
 	}
 
-	if upd.ChannelPost != nil {
-		m := upd.ChannelPost
+	if u.ChannelPost != nil {
+		m := u.ChannelPost
 
 		if m.PinnedMessage != nil {
-			c.message = m.PinnedMessage
 			b.handle(OnPinned, c)
 			return
 		}
 
-		c.message = upd.ChannelPost
 		b.handle(OnChannelPost, c)
 		return
 	}
 
-	if upd.EditedChannelPost != nil {
-		c.message = upd.EditedChannelPost
+	if u.EditedChannelPost != nil {
 		b.handle(OnEditedChannelPost, c)
 		return
 	}
 
-	if upd.Callback != nil {
-		if upd.Callback.Data != "" {
-			if data := upd.Callback.Data; data[0] == '\f' {
-				match := cbackRx.FindAllStringSubmatch(data, -1)
-				if match != nil {
-					unique, payload := match[0][1], match[0][3]
-					if handler, ok := b.handlers["\f"+unique]; ok {
-						c.callback.Unique = unique
-						c.callback.Data = payload
-						b.runHandler(handler, c)
-						return
-					}
+	if u.Callback != nil {
+		if data := u.Callback.Data; data != "" && data[0] == '\f' {
+			match := cbackRx.FindAllStringSubmatch(data, -1)
+			if match != nil {
+				unique, payload := match[0][1], match[0][3]
+				if handler, ok := b.handlers["\f"+unique]; ok {
+					u.Callback.Unique = unique
+					u.Callback.Data = payload
+					b.runHandler(handler, c)
+					return
 				}
 			}
 		}
@@ -468,47 +451,47 @@ func (b *Bot) ProcessUpdate(upd Update) {
 		return
 	}
 
-	if upd.Query != nil {
+	if u.Query != nil {
 		b.handle(OnQuery, c)
 		return
 	}
 
-	if upd.InlineResult != nil {
+	if u.InlineResult != nil {
 		b.handle(OnInlineResult, c)
 		return
 	}
 
-	if upd.ShippingQuery != nil {
+	if u.ShippingQuery != nil {
 		b.handle(OnShipping, c)
 		return
 	}
 
-	if upd.PreCheckoutQuery != nil {
+	if u.PreCheckoutQuery != nil {
 		b.handle(OnCheckout, c)
 		return
 	}
 
-	if upd.Poll != nil {
+	if u.Poll != nil {
 		b.handle(OnPoll, c)
 		return
 	}
 
-	if upd.PollAnswer != nil {
+	if u.PollAnswer != nil {
 		b.handle(OnPollAnswer, c)
 		return
 	}
 
-	if upd.MyChatMember != nil {
+	if u.MyChatMember != nil {
 		b.handle(OnMyChatMember, c)
 		return
 	}
 
-	if upd.ChatMember != nil {
+	if u.ChatMember != nil {
 		b.handle(OnChatMember, c)
 		return
 	}
 
-	if upd.ChatJoinRequest != nil {
+	if u.ChatJoinRequest != nil {
 		b.handle(OnChatJoinRequest, c)
 		return
 	}
