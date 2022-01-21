@@ -3,6 +3,7 @@ package telebot
 import (
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -122,6 +123,11 @@ type Context interface {
 	// Delete removes the current message.
 	// See Delete from bot.go.
 	Delete() error
+
+	// DeleteAfter waits for the duration to elapse and then removes the
+	// message. It handles an error automatically using b.OnError callback.
+	// It returns a Timer that can be used to cancel the call using its Stop method.
+	DeleteAfter(d time.Duration) *time.Timer
 
 	// Notify updates the chat action for the current recipient.
 	// See Notify from bot.go.
@@ -443,6 +449,14 @@ func (c *nativeContext) Delete() error {
 		return ErrBadContext
 	}
 	return c.b.Delete(msg)
+}
+
+func (c *nativeContext) DeleteAfter(d time.Duration) *time.Timer {
+	return time.AfterFunc(d, func() {
+		if err := c.Delete(); err != nil {
+			c.b.OnError(err, c)
+		}
+	})
 }
 
 func (c *nativeContext) Notify(action ChatAction) error {
