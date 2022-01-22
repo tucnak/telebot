@@ -7,8 +7,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-
-	"github.com/pkg/errors"
 )
 
 var defaultOnError = func(err error, c Context) {
@@ -24,7 +22,7 @@ func (b *Bot) deferDebug() {
 		if err, ok := r.(error); ok {
 			b.debug(err)
 		} else if str, ok := r.(string); ok {
-			b.debug(errors.Errorf("%s", str))
+			b.debug(fmt.Errorf("%s", str))
 		}
 	}
 }
@@ -52,7 +50,7 @@ func applyMiddleware(h HandlerFunc, middleware ...MiddlewareFunc) HandlerFunc {
 
 // wrapError returns new wrapped telebot-related error.
 func wrapError(err error) error {
-	return errors.Wrap(err, "telebot")
+	return fmt.Errorf("telebot: %w", err)
 }
 
 // extractOk checks given result for error. If result is ok returns nil.

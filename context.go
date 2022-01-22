@@ -1,11 +1,10 @@
 package telebot
 
 import (
+	"errors"
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/pkg/errors"
 )
 
 // HandlerFunc represents a handler function, which is

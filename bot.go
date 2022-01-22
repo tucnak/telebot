@@ -9,8 +9,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 // NewBot does try to build a Bot with token `token`, which
@@ -600,7 +598,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 			repr = "attach://" + strconv.Itoa(i)
 			files[strconv.Itoa(i)] = *file
 		default:
-			return nil, errors.Errorf("telebot: album entry #%d does not exist", i)
+			return nil, fmt.Errorf("telebot: album entry #%d does not exist", i)
 		}
 
 		im := x.InputMedia()
@@ -890,7 +888,7 @@ func (b *Bot) EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*M
 		repr = "attach://" + s
 		files[s] = *file
 	default:
-		return nil, errors.Errorf("telebot: cannot edit media, it does not exist")
+		return nil, fmt.Errorf("telebot: cannot edit media, it does not exist")
 	}
 
 	switch m := media.(type) {
@@ -1152,7 +1150,7 @@ func (b *Bot) File(file *File) (io.ReadCloser, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		resp.Body.Close()
-		return nil, errors.Errorf("telebot: expected status 200 but got %s", resp.Status)
+		return nil, fmt.Errorf("telebot: expected status 200 but got %s", resp.Status)
 	}
 
 	return resp.Body, nil
