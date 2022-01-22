@@ -22,9 +22,6 @@ type Context interface {
 	// Message returns stored message if such presented.
 	Message() *Message
 
-	// Media returns message media if such presented.
-	Media() Media
-
 	// Callback returns stored callback if such presented.
 	Callback() *Callback
 
@@ -187,29 +184,6 @@ func (c *nativeContext) Message() *Message {
 		return c.u.ChannelPost
 	case c.u.EditedChannelPost != nil:
 		return c.u.EditedChannelPost
-	default:
-		return nil
-	}
-}
-
-func (c *nativeContext) Media() Media {
-	m := c.Message()
-
-	switch {
-	case m.Photo != nil:
-		return m.Photo
-	case m.Voice != nil:
-		return m.Voice
-	case m.Audio != nil:
-		return m.Audio
-	case m.Animation != nil:
-		return m.Animation
-	case m.Document != nil:
-		return m.Document
-	case m.Video != nil:
-		return m.Video
-	case m.VideoNote != nil:
-		return m.VideoNote
 	default:
 		return nil
 	}
