@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -23,7 +22,7 @@ func (b *Bot) deferDebug() {
 		if err, ok := r.(error); ok {
 			b.debug(err)
 		} else if str, ok := r.(string); ok {
-			b.debug(errors.Errorf("%s", str))
+			b.debug(fmt.Errorf("%s", str))
 		}
 	}
 }
@@ -42,7 +41,7 @@ func (b *Bot) runHandler(handler func()) {
 
 // wrapError returns new wrapped telebot-related error.
 func wrapError(err error) error {
-	return errors.Wrap(err, "telebot")
+	return fmt.Errorf("telebot: %w", err)
 }
 
 // extractOk checks given result for error. If result is ok returns nil.

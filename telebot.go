@@ -28,7 +28,7 @@
 //
 package telebot
 
-import "github.com/pkg/errors"
+import "errors"
 
 var (
 	ErrBadRecipient    = errors.New("telebot: recipient is nil")
