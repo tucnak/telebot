@@ -265,10 +265,10 @@ func (c *nativeContext) Migration() (int64, int64) {
 
 func (c *nativeContext) Sender() *User {
 	switch {
-	case c.u.Message != nil:
-		return c.u.Message.Sender
 	case c.u.Callback != nil:
 		return c.u.Callback.Sender
+	case c.Message() != nil:
+		return c.Message().Sender
 	case c.u.Query != nil:
 		return c.u.Query.Sender
 	case c.u.InlineResult != nil:
@@ -292,10 +292,8 @@ func (c *nativeContext) Sender() *User {
 
 func (c *nativeContext) Chat() *Chat {
 	switch {
-	case c.u.Message != nil:
-		return c.u.Message.Chat
-	case c.u.Callback != nil && c.u.Callback.Message != nil:
-		return c.u.Callback.Message.Chat
+	case c.Message() != nil:
+		return c.Message().Chat
 	case c.u.MyChatMember != nil:
 		return c.u.MyChatMember.Chat
 	case c.u.ChatMember != nil:
@@ -316,21 +314,13 @@ func (c *nativeContext) Recipient() Recipient {
 }
 
 func (c *nativeContext) Text() string {
-	var m *Message
-
-	switch {
-	case c.u.Message != nil:
-		m = c.u.Message
-	case c.u.Callback != nil && c.u.Callback.Message != nil:
-		m = c.u.Callback.Message
-	default:
+	m := c.Message()
+	if m == nil {
 		return ""
 	}
-
 	if m.Caption != "" {
 		return m.Caption
 	}
-
 	return m.Text
 }
 
