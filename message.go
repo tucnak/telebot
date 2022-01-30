@@ -3,6 +3,7 @@ package telebot
 import (
 	"strconv"
 	"time"
+	"unicode/utf16"
 )
 
 // Message object represents a message.
@@ -72,14 +73,14 @@ type Message struct {
 
 	// For text messages, special entities like usernames, URLs, bot commands,
 	// etc. that appear in the text.
-	Entities []MessageEntity `json:"entities,omitempty"`
+	Entities Entities `json:"entities,omitempty"`
 
 	// Some messages containing media, may as well have a caption.
 	Caption string `json:"caption,omitempty"`
 
 	// For messages with a caption, special entities like usernames, URLs,
 	// bot commands, etc. that appear in the caption.
-	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	CaptionEntities Entities `json:"caption_entities,omitempty"`
 
 	// For an audio recording, information about it.
 	Audio *Audio `json:"audio"`
@@ -239,7 +240,7 @@ type Message struct {
 	AutoDeleteTimer *AutoDeleteTimer `json:"message_auto_delete_timer_changed,omitempty"`
 
 	// Inline keyboard attached to the message.
-	ReplyMarkup InlineKeyboardMarkup `json:"reply_markup"`
+	ReplyMarkup *ReplyMarkup `json:"reply_markup,omitempty"`
 }
 
 // MessageEntity object represents "special" parts of text messages,
@@ -264,6 +265,17 @@ type MessageEntity struct {
 
 	// (Optional) For EntityCodeBlock entity type only.
 	Language string `json:"language,omitempty"`
+}
+
+// Entities is used to set message's text entities as a send option.
+type Entities []MessageEntity
+
+// ProximityAlert sent whenever a user in the chat triggers
+// a proximity alert set by another user.
+type ProximityAlert struct {
+	Traveler *User `json:"traveler,omitempty"`
+	Watcher  *User `json:"watcher,omitempty"`
+	Distance int   `json:"distance"`
 }
 
 // AutoDeleteTimer represents a service message about a change in auto-delete timer settings.
@@ -332,4 +344,49 @@ func (m *Message) IsService() bool {
 	fact = fact || (m.MigrateTo != m.MigrateFrom)
 
 	return fact
+}
+
+// EntityText returns the substring of the message identified by the
+// given MessageEntity.
+//
+// It's safer than manually slicing Text because Telegram uses
+// UTF-16 indices whereas Go string are []byte.
+//
+func (m *Message) EntityText(e MessageEntity) string {
+	text := m.Text
+	if text == "" {
+		text = m.Caption
+	}
+
+	a := utf16.Encode([]rune(text))
+	off, end := e.Offset, e.Offset+e.Length
+
+	if off < 0 || end > len(a) {
+		return ""
+	}
+
+	return string(utf16.Decode(a[off:end]))
+}
+
+// Media returns the message's media if it contains either photo,
+// voice, audio, animation, document, video or video note.
+func (m *Message) Media() Media {
+	switch {
+	case m.Photo != nil:
+		return m.Photo
+	case m.Voice != nil:
+		return m.Voice
+	case m.Audio != nil:
+		return m.Audio
+	case m.Animation != nil:
+		return m.Animation
+	case m.Document != nil:
+		return m.Document
+	case m.Video != nil:
+		return m.Video
+	case m.VideoNote != nil:
+		return m.VideoNote
+	default:
+		return nil
+	}
 }

@@ -1,6 +1,10 @@
 package telebot
 
-import "strconv"
+import (
+	"encoding/json"
+	"strconv"
+	"time"
+)
 
 // User object represents a Telegram user, bot.
 type User struct {
@@ -73,9 +77,6 @@ type ChatPhoto struct {
 
 // Recipient returns chat ID (see Recipient interface).
 func (c *Chat) Recipient() string {
-	if c.Type == ChatChannel && c.Username != "" {
-		return c.Username
-	}
 	return strconv.FormatInt(c.ID, 10)
 }
 
@@ -119,4 +120,147 @@ type ChatID int64
 // Recipient returns chat ID (see Recipient interface).
 func (i ChatID) Recipient() string {
 	return strconv.FormatInt(int64(i), 10)
+}
+
+// ChatJoinRequest represents a join request sent to a chat.
+type ChatJoinRequest struct {
+	// Chat to which the request was sent.
+	Chat *Chat `json:"chat"`
+
+	// Sender is the user that sent the join request.
+	Sender *User `json:"from"`
+
+	// Unixtime, use ChatJoinRequest.Time() to get time.Time.
+	Unixtime int64 `json:"date"`
+
+	// Bio of the user, optional.
+	Bio string `json:"bio"`
+
+	// InviteLink is the chat invite link that was used by
+	//the user to send the join request, optional.
+	InviteLink *ChatInviteLink `json:"invite_link"`
+}
+
+// Time returns the moment of chat join request sending in local time.
+func (r ChatJoinRequest) Time() time.Time {
+	return time.Unix(r.Unixtime, 0)
+}
+
+// CreateInviteLink creates an additional invite link for a chat.
+func (b *Bot) CreateInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error) {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+	if link != nil {
+		params["name"] = link.Name
+
+		if link.ExpireUnixtime != 0 {
+			params["expire_date"] = strconv.FormatInt(link.ExpireUnixtime, 10)
+		}
+		if link.MemberLimit > 0 {
+			params["member_limit"] = strconv.Itoa(link.MemberLimit)
+		} else if link.JoinRequest {
+			params["creates_join_request"] = "true"
+		}
+	}
+
+	data, err := b.Raw("createChatInviteLink", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result ChatInviteLink `json:"result"`
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+
+	return &resp.Result, nil
+}
+
+// EditInviteLink edits a non-primary invite link created by the bot.
+func (b *Bot) EditInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error) {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+	if link != nil {
+		params["invite_link"] = link.InviteLink
+		params["name"] = link.Name
+
+		if link.ExpireUnixtime != 0 {
+			params["expire_date"] = strconv.FormatInt(link.ExpireUnixtime, 10)
+		}
+		if link.MemberLimit > 0 {
+			params["member_limit"] = strconv.Itoa(link.MemberLimit)
+		} else if link.JoinRequest {
+			params["creates_join_request"] = "true"
+		}
+	}
+
+	data, err := b.Raw("editChatInviteLink", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result ChatInviteLink `json:"result"`
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+
+	return &resp.Result, nil
+}
+
+// RevokeInviteLink revokes an invite link created by the bot.
+func (b *Bot) RevokeInviteLink(chat Recipient, link string) (*ChatInviteLink, error) {
+	params := map[string]string{
+		"chat_id":     chat.Recipient(),
+		"invite_link": link,
+	}
+
+	data, err := b.Raw("revokeChatInviteLink", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result ChatInviteLink `json:"result"`
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+
+	return &resp.Result, nil
+}
+
+// ApproveChatJoinRequest approves a chat join request.
+func (b *Bot) ApproveChatJoinRequest(chat Recipient, user *User) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+		"user_id": user.Recipient(),
+	}
+
+	data, err := b.Raw("approveChatJoinRequest", params)
+	if err != nil {
+		return err
+	}
+
+	return extractOk(data)
+}
+
+// DeclineChatJoinRequest declines a chat join request.
+func (b *Bot) DeclineChatJoinRequest(chat Recipient, user *User) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+		"user_id": user.Recipient(),
+	}
+
+	data, err := b.Raw("declineChatJoinRequest", params)
+	if err != nil {
+		return err
+	}
+
+	return extractOk(data)
 }

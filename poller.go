@@ -86,7 +86,7 @@ type LongPoller struct {
 	// 		poll
 	// 		poll_answer
 	//
-	AllowedUpdates []string
+	AllowedUpdates []string `yaml:"allowed_updates"`
 }
 
 // Poll does long polling.

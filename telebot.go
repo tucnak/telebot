@@ -27,7 +27,7 @@
 //
 package telebot
 
-import "github.com/pkg/errors"
+import "errors"
 
 var (
 	ErrBadRecipient    = errors.New("telebot: recipient is nil")
@@ -59,13 +59,13 @@ const (
 	OnContact    = "\acontact"
 	OnLocation   = "\alocation"
 	OnVenue      = "\avenue"
-	OnPinned     = "\apinned"
 	OnDice       = "\adice"
 	OnInvoice    = "\ainvoice"
 	OnPayment    = "\apayment"
 	OnGame       = "\agame"
 	OnPoll       = "\apoll"
 	OnPollAnswer = "\apoll_answer"
+	OnPinned     = "\apinned"
 
 	// Will fire on channel posts.
 	OnChannelPost       = "\achannel_post"
@@ -90,6 +90,9 @@ const (
 	// upon switching as its ID will change.
 	OnMigration = "\amigration"
 
+	// Will fire on any unhandled media.
+	OnMedia = "\amedia"
+
 	// Will fire on callback requests.
 	OnCallback = "\acallback"
 
@@ -110,6 +113,9 @@ const (
 
 	// Will fire on chat member's changes.
 	OnChatMember = "\achat_member"
+
+	// Will fire on chat join request.
+	OnChatJoinRequest = "\achat_join_request"
 
 	// Will fire on the start of a voice chat.
 	OnVoiceChatStarted = "\avoice_chat_started"
@@ -144,6 +150,7 @@ const (
 	RecordingAudio    ChatAction = "record_audio"
 	RecordingVNote    ChatAction = "record_video_note"
 	FindingLocation   ChatAction = "find_location"
+	ChoosingSticker   ChatAction = "choose_sticker"
 )
 
 // ParseMode determines the way client applications treat the text of the message

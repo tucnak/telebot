@@ -1,7 +1,7 @@
 package layout
 
 import (
-	tele "gopkg.in/tucnak/telebot.v3"
+	tele "gopkg.in/telebot.v3"
 )
 
 // DefaultLayout is a simplified layout instance with pre-defined locale by default.

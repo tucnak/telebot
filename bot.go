@@ -9,8 +9,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 // NewBot does try to build a Bot with token `token`, which
@@ -30,6 +28,9 @@ func NewBot(pref Settings) (*Bot, error) {
 	}
 	if pref.Poller == nil {
 		pref.Poller = &LongPoller{}
+	}
+	if pref.OnError == nil {
+		pref.OnError = defaultOnError
 	}
 
 	bot := &Bot{
@@ -134,6 +135,7 @@ type Update struct {
 	PollAnswer        *PollAnswer       `json:"poll_answer,omitempty"`
 	MyChatMember      *ChatMemberUpdate `json:"my_chat_member,omitempty"`
 	ChatMember        *ChatMemberUpdate `json:"chat_member,omitempty"`
+	ChatJoinRequest   *ChatJoinRequest  `json:"chat_join_request,omitempty"`
 }
 
 // Command represents a bot command.
@@ -234,30 +236,20 @@ func (b *Bot) NewMarkup() *ReplyMarkup {
 
 // NewContext returns a new native context object,
 // field by the passed update.
-func (b *Bot) NewContext(upd Update) Context {
+func (b *Bot) NewContext(u Update) Context {
 	return &nativeContext{
-		b:                b,
-		update:           upd,
-		message:          upd.Message,
-		callback:         upd.Callback,
-		query:            upd.Query,
-		inlineResult:     upd.InlineResult,
-		shippingQuery:    upd.ShippingQuery,
-		preCheckoutQuery: upd.PreCheckoutQuery,
-		poll:             upd.Poll,
-		pollAnswer:       upd.PollAnswer,
-		myChatMember:     upd.MyChatMember,
-		chatMember:       upd.ChatMember,
+		b: b,
+		u: u,
 	}
 }
 
 // ProcessUpdate processes a single incoming update.
 // A started bot calls this function automatically.
-func (b *Bot) ProcessUpdate(upd Update) {
-	c := b.NewContext(upd).(*nativeContext)
+func (b *Bot) ProcessUpdate(u Update) {
+	c := b.NewContext(u)
 
-	if upd.Message != nil {
-		m := upd.Message
+	if u.Message != nil {
+		m := u.Message
 
 		if m.PinnedMessage != nil {
 			b.handle(OnPinned, c)
@@ -274,8 +266,8 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			match := cmdRx.FindAllStringSubmatch(m.Text, -1)
 			if match != nil {
 				// Syntax: "</command>@<bot> <payload>"
-
 				command, botName := match[0][1], match[0][3]
+
 				if botName != "" && !strings.EqualFold(b.Me.Username, botName) {
 					return
 				}
@@ -299,11 +291,30 @@ func (b *Bot) ProcessUpdate(upd Update) {
 			return
 		}
 
+		if m.Contact != nil {
+			b.handle(OnContact, c)
+			return
+		}
+		if m.Location != nil {
+			b.handle(OnLocation, c)
+			return
+		}
+		if m.Venue != nil {
+			b.handle(OnVenue, c)
+			return
+		}
+		if m.Game != nil {
+			b.handle(OnGame, c)
+			return
+		}
+		if m.Dice != nil {
+			b.handle(OnDice, c)
+			return
+		}
 		if m.Invoice != nil {
 			b.handle(OnInvoice, c)
 			return
 		}
-
 		if m.Payment != nil {
 			b.handle(OnPayment, c)
 			return
@@ -401,44 +412,38 @@ func (b *Bot) ProcessUpdate(upd Update) {
 		}
 	}
 
-	if upd.EditedMessage != nil {
-		c.message = upd.EditedMessage
+	if u.EditedMessage != nil {
 		b.handle(OnEdited, c)
 		return
 	}
 
-	if upd.ChannelPost != nil {
-		m := upd.ChannelPost
+	if u.ChannelPost != nil {
+		m := u.ChannelPost
 
 		if m.PinnedMessage != nil {
-			c.message = m.PinnedMessage
 			b.handle(OnPinned, c)
 			return
 		}
 
-		c.message = upd.ChannelPost
 		b.handle(OnChannelPost, c)
 		return
 	}
 
-	if upd.EditedChannelPost != nil {
-		c.message = upd.EditedChannelPost
+	if u.EditedChannelPost != nil {
 		b.handle(OnEditedChannelPost, c)
 		return
 	}
 
-	if upd.Callback != nil {
-		if upd.Callback.Data != "" {
-			if data := upd.Callback.Data; data[0] == '\f' {
-				match := cbackRx.FindAllStringSubmatch(data, -1)
-				if match != nil {
-					unique, payload := match[0][1], match[0][3]
-					if handler, ok := b.handlers["\f"+unique]; ok {
-						c.callback.Unique = unique
-						c.callback.Data = payload
-						b.runHandler(handler, c)
-						return
-					}
+	if u.Callback != nil {
+		if data := u.Callback.Data; data != "" && data[0] == '\f' {
+			match := cbackRx.FindAllStringSubmatch(data, -1)
+			if match != nil {
+				unique, payload := match[0][1], match[0][3]
+				if handler, ok := b.handlers["\f"+unique]; ok {
+					u.Callback.Unique = unique
+					u.Callback.Data = payload
+					b.runHandler(handler, c)
+					return
 				}
 			}
 		}
@@ -447,43 +452,48 @@ func (b *Bot) ProcessUpdate(upd Update) {
 		return
 	}
 
-	if upd.Query != nil {
+	if u.Query != nil {
 		b.handle(OnQuery, c)
 		return
 	}
 
-	if upd.InlineResult != nil {
+	if u.InlineResult != nil {
 		b.handle(OnInlineResult, c)
 		return
 	}
 
-	if upd.ShippingQuery != nil {
+	if u.ShippingQuery != nil {
 		b.handle(OnShipping, c)
 		return
 	}
 
-	if upd.PreCheckoutQuery != nil {
+	if u.PreCheckoutQuery != nil {
 		b.handle(OnCheckout, c)
 		return
 	}
 
-	if upd.Poll != nil {
+	if u.Poll != nil {
 		b.handle(OnPoll, c)
 		return
 	}
 
-	if upd.PollAnswer != nil {
+	if u.PollAnswer != nil {
 		b.handle(OnPollAnswer, c)
 		return
 	}
 
-	if upd.MyChatMember != nil {
+	if u.MyChatMember != nil {
 		b.handle(OnMyChatMember, c)
 		return
 	}
 
-	if upd.ChatMember != nil {
+	if u.ChatMember != nil {
 		b.handle(OnChatMember, c)
+		return
+	}
+
+	if u.ChatJoinRequest != nil {
+		b.handle(OnChatJoinRequest, c)
 		return
 	}
 }
@@ -497,38 +507,36 @@ func (b *Bot) handle(end string, c Context) bool {
 }
 
 func (b *Bot) handleMedia(c Context) bool {
-	m := c.Message()
+	var (
+		m     = c.Message()
+		fired = true
+	)
 
 	switch {
 	case m.Photo != nil:
-		b.handle(OnPhoto, c)
+		fired = b.handle(OnPhoto, c)
 	case m.Voice != nil:
-		b.handle(OnVoice, c)
+		fired = b.handle(OnVoice, c)
 	case m.Audio != nil:
-		b.handle(OnAudio, c)
+		fired = b.handle(OnAudio, c)
 	case m.Animation != nil:
-		b.handle(OnAnimation, c)
+		fired = b.handle(OnAnimation, c)
 	case m.Document != nil:
-		b.handle(OnDocument, c)
+		fired = b.handle(OnDocument, c)
 	case m.Sticker != nil:
-		b.handle(OnSticker, c)
+		fired = b.handle(OnSticker, c)
 	case m.Video != nil:
-		b.handle(OnVideo, c)
+		fired = b.handle(OnVideo, c)
 	case m.VideoNote != nil:
-		b.handle(OnVideoNote, c)
-	case m.Contact != nil:
-		b.handle(OnContact, c)
-	case m.Location != nil:
-		b.handle(OnLocation, c)
-	case m.Venue != nil:
-		b.handle(OnVenue, c)
-	case m.Game != nil:
-		b.handle(OnGame, c)
-	case m.Dice != nil:
-		b.handle(OnDice, c)
+		fired = b.handle(OnVideoNote, c)
 	default:
 		return false
 	}
+
+	if !fired {
+		return b.handle(OnMedia, c)
+	}
+
 	return true
 }
 
@@ -570,6 +578,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 		return nil, ErrBadRecipient
 	}
 
+	sendOpts := extractOptions(opts)
 	media := make([]string, len(a))
 	files := make(map[string]File)
 
@@ -589,44 +598,19 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 			repr = "attach://" + strconv.Itoa(i)
 			files[strconv.Itoa(i)] = *file
 		default:
-			return nil, errors.Errorf("telebot: album entry #%d does not exist", i)
+			return nil, fmt.Errorf("telebot: album entry #%d does not exist", i)
 		}
 
-		switch y := x.(type) {
-		case *Photo:
-			data, _ = json.Marshal(struct {
-				Type      string    `json:"type"`
-				Media     string    `json:"media"`
-				Caption   string    `json:"caption,omitempty"`
-				ParseMode ParseMode `json:"parse_mode,omitempty"`
-			}{
-				Type:      "photo",
-				Media:     repr,
-				Caption:   y.Caption,
-				ParseMode: y.ParseMode,
-			})
-		case *Video:
-			data, _ = json.Marshal(struct {
-				Type              string `json:"type"`
-				Caption           string `json:"caption"`
-				Media             string `json:"media"`
-				Width             int    `json:"width,omitempty"`
-				Height            int    `json:"height,omitempty"`
-				Duration          int    `json:"duration,omitempty"`
-				SupportsStreaming bool   `json:"supports_streaming,omitempty"`
-			}{
-				Type:              "video",
-				Caption:           y.Caption,
-				Media:             repr,
-				Width:             y.Width,
-				Height:            y.Height,
-				Duration:          y.Duration,
-				SupportsStreaming: y.SupportsStreaming,
-			})
-		default:
-			return nil, errors.Errorf("telebot: album entry #%d is not valid", i)
+		im := x.InputMedia()
+		im.Media = repr
+
+		if len(sendOpts.Entities) > 0 {
+			im.Entities = sendOpts.Entities
+		} else {
+			im.ParseMode = sendOpts.ParseMode
 		}
 
+		data, _ = json.Marshal(im)
 		media[i] = string(data)
 	}
 
@@ -634,8 +618,6 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 		"chat_id": to.Recipient(),
 		"media":   "[" + strings.Join(media, ",") + "]",
 	}
-
-	sendOpts := extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.sendFiles("sendMediaGroup", files, params)
@@ -652,12 +634,18 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 
 	for attachName := range files {
 		i, _ := strconv.Atoi(attachName)
+		r := resp.Result[i]
 
 		var newID string
-		if resp.Result[i].Photo != nil {
-			newID = resp.Result[i].Photo.FileID
-		} else {
-			newID = resp.Result[i].Video.FileID
+		switch {
+		case r.Photo != nil:
+			newID = r.Photo.FileID
+		case r.Video != nil:
+			newID = r.Video.FileID
+		case r.Audio != nil:
+			newID = r.Audio.FileID
+		case r.Document != nil:
+			newID = r.Document.FileID
 		}
 
 		a[i].MediaFile().FileID = newID
@@ -754,7 +742,7 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 	switch v := what.(type) {
 	case *ReplyMarkup:
 		return b.EditReplyMarkup(msg, v)
-	case InputMedia:
+	case Inputtable:
 		return b.EditMedia(msg, v, opts...)
 	case string:
 		method = "editMessageText"
@@ -874,14 +862,14 @@ func (b *Bot) EditCaption(msg Editable, caption string, opts ...interface{}) (*M
 //     b.EditMedia(m, &tele.Photo{File: tele.FromDisk("chicken.jpg")})
 //     b.EditMedia(m, &tele.Video{File: tele.FromURL("http://video.mp4")})
 //
-func (b *Bot) EditMedia(msg Editable, media InputMedia, opts ...interface{}) (*Message, error) {
+func (b *Bot) EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*Message, error) {
 	var (
 		repr  string
-		thumb *Photo
+		file  = media.MediaFile()
+		files = make(map[string]File)
 
+		thumb     *Photo
 		thumbName = "thumb"
-		file      = media.MediaFile()
-		files     = make(map[string]File)
 	)
 
 	switch {
@@ -900,76 +888,18 @@ func (b *Bot) EditMedia(msg Editable, media InputMedia, opts ...interface{}) (*M
 		repr = "attach://" + s
 		files[s] = *file
 	default:
-		return nil, errors.Errorf("telebot: can't edit media, it does not exist")
+		return nil, fmt.Errorf("telebot: cannot edit media, it does not exist")
 	}
-
-	type FileJSON struct {
-		// All types.
-		Type      string    `json:"type"`
-		Caption   string    `json:"caption"`
-		Media     string    `json:"media"`
-		ParseMode ParseMode `json:"parse_mode,omitempty"`
-
-		// Video.
-		Width             int  `json:"width,omitempty"`
-		Height            int  `json:"height,omitempty"`
-		SupportsStreaming bool `json:"supports_streaming,omitempty"`
-
-		// Video and audio.
-		Duration int `json:"duration,omitempty"`
-
-		// Document.
-		FileName string `json:"file_name"`
-
-		// Document, video and audio.
-		Thumbnail string `json:"thumb,omitempty"`
-		MIME      string `json:"mime_type,omitempty"`
-
-		// Audio.
-		Title     string `json:"title,omitempty"`
-		Performer string `json:"performer,omitempty"`
-	}
-
-	result := &FileJSON{Media: repr}
 
 	switch m := media.(type) {
-	case *Photo:
-		result.Type = "photo"
-		result.Caption = m.Caption
 	case *Video:
-		result.Type = "video"
-		result.Caption = m.Caption
-		result.Width = m.Width
-		result.Height = m.Height
-		result.Duration = m.Duration
-		result.SupportsStreaming = m.SupportsStreaming
-		result.MIME = m.MIME
-		thumb = m.Thumbnail
-	case *Document:
-		result.Type = "document"
-		result.Caption = m.Caption
-		result.FileName = m.FileName
-		result.MIME = m.MIME
 		thumb = m.Thumbnail
 	case *Audio:
-		result.Type = "audio"
-		result.Caption = m.Caption
-		result.Duration = m.Duration
-		result.MIME = m.MIME
-		result.Title = m.Title
-		result.Performer = m.Performer
+		thumb = m.Thumbnail
+	case *Document:
 		thumb = m.Thumbnail
 	case *Animation:
-		result.Type = "animation"
-		result.Caption = m.Caption
-		result.Width = m.Width
-		result.Height = m.Height
-		result.Duration = m.Duration
-		result.MIME = m.MIME
-		result.FileName = m.FileName
 		thumb = m.Thumbnail
-	default:
-		return nil, errors.Errorf("telebot: media entry is not valid")
 	}
 
 	msgID, chatID := msg.MessageSig()
@@ -978,15 +908,21 @@ func (b *Bot) EditMedia(msg Editable, media InputMedia, opts ...interface{}) (*M
 	sendOpts := extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
-	if sendOpts != nil {
-		result.ParseMode = params["parse_mode"]
+	im := media.InputMedia()
+	im.Media = repr
+
+	if len(sendOpts.Entities) > 0 {
+		im.Entities = sendOpts.Entities
+	} else {
+		im.ParseMode = sendOpts.ParseMode
 	}
+
 	if thumb != nil {
-		result.Thumbnail = "attach://" + thumbName
+		im.Thumbnail = "attach://" + thumbName
 		files[thumbName] = *thumb.MediaFile()
 	}
 
-	data, _ := json.Marshal(result)
+	data, _ := json.Marshal(im)
 	params["media"] = string(data)
 
 	if chatID == 0 { // if inline message
@@ -1214,7 +1150,7 @@ func (b *Bot) File(file *File) (io.ReadCloser, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		resp.Body.Close()
-		return nil, errors.Errorf("telebot: expected status 200 but got %s", resp.Status)
+		return nil, fmt.Errorf("telebot: expected status 200 but got %s", resp.Status)
 	}
 
 	return resp.Body, nil
@@ -1435,8 +1371,12 @@ func (b *Bot) UnpinAll(chat *Chat) error {
 // current username of a user, group or channel, etc.
 //
 func (b *Bot) ChatByID(id int64) (*Chat, error) {
+	return b.ChatByUsername(strconv.FormatInt(id, 10))
+}
+
+func (b *Bot) ChatByUsername(name string) (*Chat, error) {
 	params := map[string]string{
-		"chat_id": strconv.FormatInt(id, 10),
+		"chat_id": name,
 	}
 
 	data, err := b.Raw("getChat", params)
@@ -1573,71 +1513,4 @@ func (b *Bot) Close() (bool, error) {
 	}
 
 	return resp.Result, nil
-}
-
-// CreateInviteLink creates an additional invite link for a chat.
-func (b *Bot) CreateInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink, error) {
-	params := map[string]string{
-		"chat_id": chat.Recipient(),
-	}
-	if link != nil {
-		params["expire_date"] = strconv.FormatInt(link.ExpireUnixtime, 10)
-		params["member_limit"] = strconv.Itoa(link.MemberLimit)
-	}
-
-	data, err := b.Raw("createChatInviteLink", params)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp ChatInviteLink
-	if err := json.Unmarshal(data, &resp); err != nil {
-		return nil, wrapError(err)
-	}
-
-	return &resp, nil
-}
-
-// EditInviteLink edits a non-primary invite link created by the bot.
-func (b *Bot) EditInviteLink(chat *Chat, link *ChatInviteLink) (*ChatInviteLink, error) {
-	params := map[string]string{
-		"chat_id": chat.Recipient(),
-	}
-	if link != nil {
-		params["invite_link"] = link.InviteLink
-		params["expire_date"] = strconv.FormatInt(link.ExpireUnixtime, 10)
-		params["member_limit"] = strconv.Itoa(link.MemberLimit)
-	}
-
-	data, err := b.Raw("editChatInviteLink", params)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp ChatInviteLink
-	if err := json.Unmarshal(data, &resp); err != nil {
-		return nil, wrapError(err)
-	}
-
-	return &resp, nil
-}
-
-// RevokeInviteLink revokes an invite link created by the bot.
-func (b *Bot) RevokeInviteLink(chat *Chat, link string) (*ChatInviteLink, error) {
-	params := map[string]string{
-		"chat_id": chat.Recipient(),
-		"link":    link,
-	}
-
-	data, err := b.Raw("revokeChatInviteLink", params)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp ChatInviteLink
-	if err := json.Unmarshal(data, &resp); err != nil {
-		return nil, wrapError(err)
-	}
-
-	return &resp, nil
 }

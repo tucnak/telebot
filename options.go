@@ -66,6 +66,9 @@ type SendOptions struct {
 	// ParseMode controls how client apps render your message.
 	ParseMode ParseMode
 
+	// Entities is a list of special entities that appear in message text, which can be specified instead of parse_mode.
+	Entities Entities
+
 	// DisableContentDetection abilities to disable server-side file content type detection.
 	DisableContentDetection bool
 
@@ -163,14 +166,6 @@ type ReplyButton struct {
 	Contact  bool     `json:"request_contact,omitempty"`
 	Location bool     `json:"request_location,omitempty"`
 	Poll     PollType `json:"request_poll,omitempty"`
-}
-
-// InlineKeyboardMarkup represents an inline keyboard that appears
-// right next to the message it belongs to.
-type InlineKeyboardMarkup struct {
-	// Array of button rows, each represented by
-	// an Array of KeyboardButton objects.
-	InlineKeyboard [][]InlineButton `json:"inline_keyboard,omitempty"`
 }
 
 // MarshalJSON implements json.Marshaler. It allows to pass

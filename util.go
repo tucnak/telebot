@@ -7,9 +7,11 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-
-	"github.com/pkg/errors"
 )
+
+var defaultOnError = func(err error, c Context) {
+	log.Println(c.Update().ID, err)
+}
 
 func (b *Bot) debug(err error) {
 	log.Println(err)
@@ -20,7 +22,7 @@ func (b *Bot) deferDebug() {
 		if err, ok := r.(error); ok {
 			b.debug(err)
 		} else if str, ok := r.(string); ok {
-			b.debug(errors.Errorf("%s", str))
+			b.debug(fmt.Errorf("%s", str))
 		}
 	}
 }
@@ -29,11 +31,7 @@ func (b *Bot) runHandler(h HandlerFunc, c Context) {
 	f := func() {
 		defer b.deferDebug()
 		if err := h(c); err != nil {
-			if b.OnError != nil {
-				b.OnError(err, c)
-			} else {
-				log.Println(err)
-			}
+			b.OnError(err, c)
 		}
 	}
 	if b.synchronous {
@@ -52,59 +50,56 @@ func applyMiddleware(h HandlerFunc, middleware ...MiddlewareFunc) HandlerFunc {
 
 // wrapError returns new wrapped telebot-related error.
 func wrapError(err error) error {
-	return errors.Wrap(err, "telebot")
+	return fmt.Errorf("telebot: %w", err)
 }
 
 // extractOk checks given result for error. If result is ok returns nil.
 // In other cases it extracts API error. If error is not presented
 // in errors.go, it will be prefixed with `unknown` keyword.
 func extractOk(data []byte) error {
-	// Parse the error message as JSON
-	var tgramApiError struct {
+	var e struct {
 		Ok          bool                   `json:"ok"`
-		ErrorCode   int                    `json:"error_code"`
+		Code        int                    `json:"error_code"`
 		Description string                 `json:"description"`
 		Parameters  map[string]interface{} `json:"parameters"`
 	}
-	jdecoder := json.NewDecoder(bytes.NewReader(data))
-	jdecoder.UseNumber()
-
-	err := jdecoder.Decode(&tgramApiError)
-	if err != nil {
-		//return errors.Wrap(err, "can't parse JSON reply, the Telegram server is mibehaving")
-		// FIXME / TODO: in this case the error might be at HTTP level, or the content is not JSON (eg. image?)
+	if json.NewDecoder(bytes.NewReader(data)).Decode(&e) != nil {
+		return nil // FIXME
+	}
+	if e.Ok {
 		return nil
 	}
 
-	if tgramApiError.Ok {
-		// No error
-		return nil
-	}
-
-	err = ErrByDescription(tgramApiError.Description)
-	if err != nil {
-		apierr, _ := err.(*APIError)
-		// Formally this is wrong, as the error is not created on the fly
-		// However, given the current way of handling errors, this a working
-		// workaround which doesn't break the API
-		apierr.Parameters = tgramApiError.Parameters
-		return apierr
-	}
-
-	switch tgramApiError.ErrorCode {
-	case http.StatusTooManyRequests:
-		retryAfter, ok := tgramApiError.Parameters["retry_after"]
+	err := Err(e.Description)
+	switch err {
+	case nil:
+	case ErrGroupMigrated:
+		migratedTo, ok := e.Parameters["migrate_to_chat_id"]
 		if !ok {
-			return NewAPIError(429, tgramApiError.Description)
+			return NewError(e.Code, e.Description)
 		}
-		retryAfterInt, _ := strconv.Atoi(fmt.Sprint(retryAfter))
 
-		err = FloodError{
-			APIError:   NewAPIError(429, tgramApiError.Description),
-			RetryAfter: retryAfterInt,
+		return GroupError{
+			err:        err.(*Error),
+			MigratedTo: int64(migratedTo.(float64)),
 		}
 	default:
-		err = fmt.Errorf("telegram unknown: %s (%d)", tgramApiError.Description, tgramApiError.ErrorCode)
+		return err
+	}
+
+	switch e.Code {
+	case http.StatusTooManyRequests:
+		retryAfter, ok := e.Parameters["retry_after"]
+		if !ok {
+			return NewError(e.Code, e.Description)
+		}
+
+		err = FloodError{
+			err:        NewError(e.Code, e.Description),
+			RetryAfter: int(retryAfter.(float64)),
+		}
+	default:
+		err = fmt.Errorf("telegram: %s (%d)", e.Description, e.Code)
 	}
 
 	return err
@@ -132,24 +127,17 @@ func extractMessage(data []byte) (*Message, error) {
 }
 
 func extractOptions(how []interface{}) *SendOptions {
-	var opts *SendOptions
+	opts := &SendOptions{}
 
 	for _, prop := range how {
 		switch opt := prop.(type) {
 		case *SendOptions:
 			opts = opt.copy()
 		case *ReplyMarkup:
-			if opts == nil {
-				opts = &SendOptions{}
-			}
 			if opt != nil {
 				opts.ReplyMarkup = opt.copy()
 			}
 		case Option:
-			if opts == nil {
-				opts = &SendOptions{}
-			}
-
 			switch opt {
 			case NoPreview:
 				opts.DisableWebPagePreview = true
@@ -174,10 +162,9 @@ func extractOptions(how []interface{}) *SendOptions {
 				panic("telebot: unsupported flag-option")
 			}
 		case ParseMode:
-			if opts == nil {
-				opts = &SendOptions{}
-			}
 			opts.ParseMode = opt
+		case Entities:
+			opts.Entities = opt
 		default:
 			panic("telebot: unsupported send-option")
 		}
@@ -209,6 +196,17 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 
 	if opt.ParseMode != ModeDefault {
 		params["parse_mode"] = opt.ParseMode
+	}
+
+	if len(opt.Entities) > 0 {
+		delete(params, "parse_mode")
+		entities, _ := json.Marshal(opt.Entities)
+
+		if params["caption"] != "" {
+			params["caption_entities"] = string(entities)
+		} else {
+			params["entities"] = string(entities)
+		}
 	}
 
 	if opt.DisableContentDetection {

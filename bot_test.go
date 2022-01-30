@@ -2,6 +2,8 @@ package telebot
 
 import (
 	"errors"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -11,10 +13,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-)
-
-const (
-	photoID = "AgACAgIAAxkDAAIBV16Ybpg7l2jPgMUiiLJ3WaQOUqTrAAJorjEbh2TBSPSOinaCHfydQO_pki4AAwEAAwIAA3kAA_NQAAIYBA"
 )
 
 var (
@@ -152,6 +150,12 @@ func TestBotProcessUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	b.Handle(OnMedia, func(c Context) error {
+		assert.NotNil(t, c.Message().Photo)
+		return nil
+	})
+	b.ProcessUpdate(Update{Message: &Message{Photo: &Photo{}}})
+
 	b.Handle("/start", func(c Context) error {
 		assert.Equal(t, "/start", c.Text())
 		return nil
@@ -210,6 +214,10 @@ func TestBotProcessUpdate(t *testing.T) {
 	})
 	b.Handle(OnVenue, func(c Context) error {
 		assert.NotNil(t, c.Message().Venue)
+		return nil
+	})
+	b.Handle(OnDice, func(c Context) error {
+		assert.NotNil(t, c.Message().Dice)
 		return nil
 	})
 	b.Handle(OnInvoice, func(c Context) error {
@@ -378,7 +386,7 @@ func TestBot(t *testing.T) {
 	assert.Equal(t, ErrBadRecipient, err)
 
 	photo := &Photo{
-		File:    File{FileID: photoID},
+		File:    FromURL("https://telegra.ph/file/65c5237b040ebf80ec278.jpg"),
 		Caption: t.Name(),
 	}
 	var msg *Message
@@ -397,7 +405,10 @@ func TestBot(t *testing.T) {
 		_, err = b.SendAlbum(to, nil)
 		assert.Error(t, err)
 
-		msgs, err := b.SendAlbum(to, Album{photo, photo})
+		photo2 := *photo
+		photo2.Caption = ""
+
+		msgs, err := b.SendAlbum(to, Album{photo, &photo2}, ModeHTML)
 		require.NoError(t, err)
 		assert.Len(t, msgs, 2)
 		assert.NotEmpty(t, msgs[0].AlbumID)
@@ -419,11 +430,41 @@ func TestBot(t *testing.T) {
 		b.parseMode = ModeDefault
 	})
 
-	t.Run("Edit(what=InputMedia)", func(t *testing.T) {
+	t.Run("Edit(what=Media)", func(t *testing.T) {
 		edited, err := b.Edit(msg, photo)
 		require.NoError(t, err)
 		assert.Equal(t, edited.Photo.UniqueID, photo.UniqueID)
+
+		resp, err := http.Get("https://telegra.ph/file/274e5eb26f348b10bd8ee.mp4")
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		file, err := ioutil.TempFile("", "")
+		require.NoError(t, err)
+
+		_, err = io.Copy(file, resp.Body)
+		require.NoError(t, err)
+
+		animation := &Animation{
+			File:     FromDisk(file.Name()),
+			Caption:  t.Name(),
+			FileName: "animation.gif",
+		}
+
+		msg, err := b.Send(msg.Chat, animation)
+		require.NoError(t, err)
+
+		if msg.Animation != nil {
+			assert.Equal(t, msg.Animation.FileID, animation.FileID)
+		} else {
+			assert.Equal(t, msg.Document.FileID, animation.FileID)
+		}
+
+		_, err = b.Edit(edited, animation)
+		require.NoError(t, err)
 	})
+
+	t.Run("Edit(what=Animation)", func(t *testing.T) {})
 
 	t.Run("Send(what=string)", func(t *testing.T) {
 		msg, err = b.Send(to, t.Name())
@@ -444,7 +485,7 @@ func TestBot(t *testing.T) {
 
 		fwd.ID += 1 // nonexistent message
 		_, err = b.Forward(to, fwd)
-		assert.Equal(t, ErrToForwardNotFound, err)
+		assert.Equal(t, ErrNotFoundToForward, err)
 	})
 
 	t.Run("Edit(what=string)", func(t *testing.T) {
@@ -480,10 +521,10 @@ func TestBot(t *testing.T) {
 
 		edited, err = b.EditReplyMarkup(edited, nil)
 		require.NoError(t, err)
-		assert.Nil(t, edited.ReplyMarkup.InlineKeyboard)
+		assert.Nil(t, edited.ReplyMarkup)
 
 		_, err = b.Edit(edited, bad)
-		assert.Equal(t, ErrButtonDataInvalid, err)
+		assert.Equal(t, ErrBadButtonData, err)
 	})
 
 	t.Run("Edit(what=Location)", func(t *testing.T) {
@@ -498,7 +539,7 @@ func TestBot(t *testing.T) {
 		assert.NotNil(t, edited.Location)
 	})
 
-	// should be the last
+	// Should be after the Edit tests.
 	t.Run("Delete()", func(t *testing.T) {
 		require.NoError(t, b.Delete(msg))
 	})
@@ -555,5 +596,31 @@ func TestBot(t *testing.T) {
 		cmds, err = b.Commands(BotCommandScope{Type: BotCommandScopeChat, ChatID: chatID}, "en")
 		require.NoError(t, err)
 		assert.Equal(t, orig2, cmds)
+	})
+
+	t.Run("CreateInviteLink", func(t *testing.T) {
+		inviteLink, err := b.CreateInviteLink(&Chat{ID: chatID}, nil)
+		assert.Nil(t, err)
+		assert.True(t, len(inviteLink.InviteLink) > 0)
+	})
+
+	t.Run("EditInviteLink", func(t *testing.T) {
+		inviteLink, err := b.CreateInviteLink(&Chat{ID: chatID}, nil)
+		assert.Nil(t, err)
+		assert.True(t, len(inviteLink.InviteLink) > 0)
+
+		response, err := b.EditInviteLink(&Chat{ID: chatID}, &ChatInviteLink{InviteLink: inviteLink.InviteLink})
+		assert.Nil(t, err)
+		assert.True(t, len(response.InviteLink) > 0)
+	})
+
+	t.Run("RevokeInviteLink", func(t *testing.T) {
+		inviteLink, err := b.CreateInviteLink(&Chat{ID: chatID}, nil)
+		assert.Nil(t, err)
+		assert.True(t, len(inviteLink.InviteLink) > 0)
+
+		response, err := b.RevokeInviteLink(&Chat{ID: chatID}, inviteLink.InviteLink)
+		assert.Nil(t, err)
+		assert.True(t, len(response.InviteLink) > 0)
 	})
 }

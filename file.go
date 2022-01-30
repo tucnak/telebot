@@ -9,20 +9,21 @@ import (
 type File struct {
 	FileID   string `json:"file_id"`
 	UniqueID string `json:"file_unique_id"`
-	FileName string `json:"file_name"`
 	FileSize int    `json:"file_size"`
 
-	// file on telegram server https://core.telegram.org/bots/api#file
+	// FilePath is used for files on Telegram server.
 	FilePath string `json:"file_path"`
 
-	// file on local file system.
+	// FileLocal uis ed for files on local file system.
 	FileLocal string `json:"file_local"`
 
-	// file on the internet
+	// FileURL is used for file on the internet.
 	FileURL string `json:"file_url"`
 
-	// file backed with io.Reader
+	// FileReader is used for file backed with io.Reader.
 	FileReader io.Reader `json:"-"`
+
+	fileName string
 }
 
 // FromDisk constructs a new local (on-disk) file object.

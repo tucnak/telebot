@@ -3,8 +3,6 @@ package telebot
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/pkg/errors"
 )
 
 // Query is an incoming inline query. When the user sends
@@ -86,7 +84,7 @@ type Result interface {
 	SetResultID(string)
 	SetParseMode(ParseMode)
 	SetContent(InputMessageContent)
-	SetReplyMarkup([][]InlineButton)
+	SetReplyMarkup(*ReplyMarkup)
 	Process(*Bot)
 }
 
@@ -134,7 +132,7 @@ func inferIQR(result Result) error {
 	case *StickerResult:
 		r.Type = "sticker"
 	default:
-		return errors.Errorf("telebot: result %v is not supported", result)
+		return fmt.Errorf("telebot: result %v is not supported", result)
 	}
 
 	return nil
