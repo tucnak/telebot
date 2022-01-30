@@ -587,13 +587,13 @@ func TestBot(t *testing.T) {
 			Text:        "test_2",
 			Description: "test command 2",
 		}}
-		require.NoError(t, b.SetCommands(orig2, BotCommandScope{Type: BotCommandScopeChat, ChatID: chatID}, "en"))
+		require.NoError(t, b.SetCommands(orig2, CommandScope{Type: CommandScopeChat, ChatID: chatID}, "en"))
 
 		cmds, err = b.Commands()
 		require.NoError(t, err)
 		assert.Equal(t, orig, cmds)
 
-		cmds, err = b.Commands(BotCommandScope{Type: BotCommandScopeChat, ChatID: chatID}, "en")
+		cmds, err = b.Commands(CommandScope{Type: CommandScopeChat, ChatID: chatID}, "en")
 		require.NoError(t, err)
 		assert.Equal(t, orig2, cmds)
 	})
