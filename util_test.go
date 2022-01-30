@@ -8,20 +8,37 @@ import (
 )
 
 func TestExtractOk(t *testing.T) {
-	data := []byte(`{"ok":true,"result":{"foo":"bar"}}`)
+	data := []byte(`{"ok": true, "result": {}}`)
 	require.NoError(t, extractOk(data))
 
-	data = []byte(`{"ok":false,"error_code":400,"description":"Bad Request: reply message not found"}`)
+	data = []byte(`{
+		"ok": false,
+		"error_code": 400,
+		"description": "Bad Request: reply message not found"
+	}`)
 	assert.EqualError(t, extractOk(data), ErrToReplyNotFound.Error())
 
-	data = []byte(`{"ok":false,"error_code":429,"description":"Too Many Requests: retry after 8","parameters":{"retry_after":8}}`)
+	data = []byte(`{
+		"ok": false,
+		"error_code": 429,
+		"description": "Too Many Requests: retry after 8",
+		"parameters": {"retry_after": 8}
+	}`)
 	assert.Equal(t, FloodError{
-		APIError:   NewAPIError(429, "Too Many Requests: retry after 8"),
+		err:        NewError(429, "Too Many Requests: retry after 8"),
 		RetryAfter: 8,
 	}, extractOk(data))
 
-	data = []byte(`{"ok":false,"error_code":400,"description":"Bad Request: group chat was upgraded to a supergroup chat","parameters":{"migrate_to_chat_id": -1234}}`)
-	assert.EqualError(t, extractOk(data), ErrGroupMigrated.Error())
+	data = []byte(`{
+		"ok": false,
+		"error_code": 400,
+		"description": "Bad Request: group chat was upgraded to a supergroup chat",
+		"parameters": {"migrate_to_chat_id": -100123456789}
+	}`)
+	assert.Equal(t, GroupError{
+		err:        ErrGroupMigrated,
+		MigratedTo: -100123456789,
+	}, extractOk(data))
 }
 
 func TestExtractMessage(t *testing.T) {

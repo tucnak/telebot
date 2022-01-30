@@ -57,52 +57,49 @@ func wrapError(err error) error {
 // In other cases it extracts API error. If error is not presented
 // in errors.go, it will be prefixed with `unknown` keyword.
 func extractOk(data []byte) error {
-	// Parse the error message as JSON
-	var tgramApiError struct {
+	var e struct {
 		Ok          bool                   `json:"ok"`
-		ErrorCode   int                    `json:"error_code"`
+		Code        int                    `json:"error_code"`
 		Description string                 `json:"description"`
 		Parameters  map[string]interface{} `json:"parameters"`
 	}
-	jdecoder := json.NewDecoder(bytes.NewReader(data))
-	jdecoder.UseNumber()
-
-	err := jdecoder.Decode(&tgramApiError)
-	if err != nil {
-		//return errors.Wrap(err, "can't parse JSON reply, the Telegram server is mibehaving")
-		// FIXME / TODO: in this case the error might be at HTTP level, or the content is not JSON (eg. image?)
+	if json.NewDecoder(bytes.NewReader(data)).Decode(&e) != nil {
+		return nil // FIXME
+	}
+	if e.Ok {
 		return nil
 	}
 
-	if tgramApiError.Ok {
-		// No error
-		return nil
-	}
-
-	err = ErrByDescription(tgramApiError.Description)
-	if err != nil {
-		apierr, _ := err.(*APIError)
-		// Formally this is wrong, as the error is not created on the fly
-		// However, given the current way of handling errors, this a working
-		// workaround which doesn't break the API
-		apierr.Parameters = tgramApiError.Parameters
-		return apierr
-	}
-
-	switch tgramApiError.ErrorCode {
-	case http.StatusTooManyRequests:
-		retryAfter, ok := tgramApiError.Parameters["retry_after"]
+	err := Err(e.Description)
+	switch err {
+	case nil:
+	case ErrGroupMigrated:
+		migratedTo, ok := e.Parameters["migrate_to_chat_id"]
 		if !ok {
-			return NewAPIError(429, tgramApiError.Description)
+			return NewError(e.Code, e.Description)
 		}
-		retryAfterInt, _ := strconv.Atoi(fmt.Sprint(retryAfter))
 
-		err = FloodError{
-			APIError:   NewAPIError(429, tgramApiError.Description),
-			RetryAfter: retryAfterInt,
+		return GroupError{
+			err:        err.(*Error),
+			MigratedTo: int64(migratedTo.(float64)),
 		}
 	default:
-		err = fmt.Errorf("telegram unknown: %s (%d)", tgramApiError.Description, tgramApiError.ErrorCode)
+		return err
+	}
+
+	switch e.Code {
+	case http.StatusTooManyRequests:
+		retryAfter, ok := e.Parameters["retry_after"]
+		if !ok {
+			return NewError(e.Code, e.Description)
+		}
+
+		err = FloodError{
+			err:        NewError(e.Code, e.Description),
+			RetryAfter: int(retryAfter.(float64)),
+		}
+	default:
+		err = fmt.Errorf("telegram: %s (%d)", e.Description, e.Code)
 	}
 
 	return err
