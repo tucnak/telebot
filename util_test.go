@@ -16,7 +16,7 @@ func TestExtractOk(t *testing.T) {
 		"error_code": 400,
 		"description": "Bad Request: reply message not found"
 	}`)
-	assert.EqualError(t, extractOk(data), ErrToReplyNotFound.Error())
+	assert.EqualError(t, extractOk(data), ErrNotFoundToReply.Error())
 
 	data = []byte(`{
 		"ok": false,

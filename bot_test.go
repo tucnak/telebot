@@ -485,7 +485,7 @@ func TestBot(t *testing.T) {
 
 		fwd.ID += 1 // nonexistent message
 		_, err = b.Forward(to, fwd)
-		assert.Equal(t, ErrToForwardNotFound, err)
+		assert.Equal(t, ErrNotFoundToForward, err)
 	})
 
 	t.Run("Edit(what=string)", func(t *testing.T) {
@@ -524,7 +524,7 @@ func TestBot(t *testing.T) {
 		assert.Nil(t, edited.ReplyMarkup)
 
 		_, err = b.Edit(edited, bad)
-		assert.Equal(t, ErrButtonDataInvalid, err)
+		assert.Equal(t, ErrBadButtonData, err)
 	})
 
 	t.Run("Edit(what=Location)", func(t *testing.T) {
