@@ -143,6 +143,8 @@ func extractOptions(how []interface{}) *SendOptions {
 				opts.DisableWebPagePreview = true
 			case Silent:
 				opts.DisableNotification = true
+			case AllowWithoutReply:
+				opts.AllowWithoutReply = true
 			case ForceReply:
 				if opts.ReplyMarkup == nil {
 					opts.ReplyMarkup = &ReplyMarkup{}

@@ -22,6 +22,9 @@ const (
 	// Silent = SendOptions.DisableNotification
 	Silent
 
+	// AllowWithoutReply = SendOptions.AllowWithoutReply
+	AllowWithoutReply
+
 	// ForceReply = ReplyMarkup.ForceReply
 	ForceReply
 
