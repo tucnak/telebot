@@ -41,7 +41,7 @@ func NewBot(pref Settings) (*Bot, error) {
 
 		Updates:  make(chan Update, pref.Updates),
 		handlers: make(map[string]HandlerFunc),
-		stop:     make(chan struct{}),
+		stop:     make(chan chan struct{}),
 
 		synchronous: pref.Synchronous,
 		verbose:     pref.Verbose,
@@ -77,7 +77,7 @@ type Bot struct {
 	synchronous bool
 	verbose     bool
 	parseMode   ParseMode
-	stop        chan struct{}
+	stop        chan chan struct{}
 	client      *http.Client
 }
 
@@ -209,16 +209,23 @@ func (b *Bot) Start() {
 	}
 
 	stop := make(chan struct{})
-	go b.Poller.Poll(b, b.Updates, stop)
+	stopConfirm := make(chan struct{})
+
+	go func() {
+		b.Poller.Poll(b, b.Updates, stop)
+		close(stopConfirm)
+	}()
 
 	for {
 		select {
 		// handle incoming updates
 		case upd := <-b.Updates:
 			b.ProcessUpdate(upd)
-		// call to stop polling
-		case <-b.stop:
+			// call to stop polling
+		case confirm := <-b.stop:
 			close(stop)
+			<-stopConfirm
+			close(confirm)
 			return
 		}
 	}
@@ -226,7 +233,9 @@ func (b *Bot) Start() {
 
 // Stop gracefully shuts the poller down.
 func (b *Bot) Stop() {
-	b.stop <- struct{}{}
+	confirm := make(chan struct{})
+	b.stop <- confirm
+	<-confirm
 }
 
 // NewMarkup simply returns newly created markup instance.

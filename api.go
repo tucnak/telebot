@@ -200,7 +200,6 @@ func (b *Bot) getMe() (*User, error) {
 		return nil, wrapError(err)
 	}
 	return resp.Result, nil
-
 }
 
 func (b *Bot) getUpdates(offset, limit int, timeout time.Duration, allowed []string) ([]Update, error) {

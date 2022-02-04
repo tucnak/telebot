@@ -48,13 +48,18 @@ func (p *MiddlewarePoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 
 	middle := make(chan Update, p.Capacity)
 	stopPoller := make(chan struct{})
+	stopConfirm := make(chan struct{})
 
-	go p.Poller.Poll(b, middle, stopPoller)
+	go func() {
+		p.Poller.Poll(b, middle, stopPoller)
+		close(stopConfirm)
+	}()
 
 	for {
 		select {
 		case <-stop:
 			close(stopPoller)
+			<-stopConfirm
 			return
 		case upd := <-middle:
 			if p.Filter(&upd) {
