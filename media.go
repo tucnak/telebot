@@ -16,18 +16,19 @@ type Media interface {
 // InputMedia represents a composite InputMedia struct that is
 // used by Telebot in sending and editing media methods.
 type InputMedia struct {
-	Type      string   `json:"type"`
-	Media     string   `json:"media"`
-	Caption   string   `json:"caption"`
-	Thumbnail string   `json:"thumb,omitempty"`
-	ParseMode string   `json:"parse_mode,omitempty"`
-	Entities  Entities `json:"caption_entities,omitempty"`
-	Width     int      `json:"width,omitempty"`
-	Height    int      `json:"height,omitempty"`
-	Duration  int      `json:"duration,omitempty"`
-	Title     string   `json:"title,omitempty"`
-	Performer string   `json:"performer,omitempty"`
-	Streaming bool     `json:"supports_streaming,omitempty"`
+	Type                 string   `json:"type"`
+	Media                string   `json:"media"`
+	Caption              string   `json:"caption"`
+	Thumbnail            string   `json:"thumb,omitempty"`
+	ParseMode            string   `json:"parse_mode,omitempty"`
+	Entities             Entities `json:"caption_entities,omitempty"`
+	Width                int      `json:"width,omitempty"`
+	Height               int      `json:"height,omitempty"`
+	Duration             int      `json:"duration,omitempty"`
+	Title                string   `json:"title,omitempty"`
+	Performer            string   `json:"performer,omitempty"`
+	Streaming            bool     `json:"supports_streaming,omitempty"`
+	DisableTypeDetection bool     `json:"disable_content_type_detection,omitempty"`
 }
 
 // Inputtable is a generic type for all kinds of media you
@@ -143,10 +144,11 @@ type Document struct {
 	File
 
 	// (Optional)
-	Thumbnail *Photo `json:"thumb,omitempty"`
-	Caption   string `json:"caption,omitempty"`
-	MIME      string `json:"mime_type"`
-	FileName  string `json:"file_name,omitempty"`
+	Thumbnail            *Photo `json:"thumb,omitempty"`
+	Caption              string `json:"caption,omitempty"`
+	MIME                 string `json:"mime_type"`
+	FileName             string `json:"file_name,omitempty"`
+	DisableTypeDetection bool   `json:"disable_content_type_detection,omitempty"`
 }
 
 func (d *Document) MediaType() string {
@@ -160,8 +162,9 @@ func (d *Document) MediaFile() *File {
 
 func (d *Document) InputMedia() InputMedia {
 	return InputMedia{
-		Type:    d.MediaType(),
-		Caption: d.Caption,
+		Type:                 d.MediaType(),
+		Caption:              d.Caption,
+		DisableTypeDetection: d.DisableTypeDetection,
 	}
 }
 

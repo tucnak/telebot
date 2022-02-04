@@ -209,10 +209,6 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 		}
 	}
 
-	if opt.DisableContentDetection {
-		params["disable_content_type_detection"] = "true"
-	}
-
 	if opt.AllowWithoutReply {
 		params["allow_sending_without_reply"] = "true"
 	}

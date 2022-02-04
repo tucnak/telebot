@@ -69,9 +69,6 @@ type SendOptions struct {
 	// Entities is a list of special entities that appear in message text, which can be specified instead of parse_mode.
 	Entities Entities
 
-	// DisableContentDetection abilities to disable server-side file content type detection.
-	DisableContentDetection bool
-
 	// AllowWithoutReply allows sending messages not a as reply if the replied-to message has already been deleted.
 	AllowWithoutReply bool
 }

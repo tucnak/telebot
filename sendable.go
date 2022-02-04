@@ -90,6 +90,9 @@ func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 	if d.FileSize != 0 {
 		params["file_size"] = strconv.Itoa(d.FileSize)
 	}
+	if d.DisableTypeDetection {
+		params["disable_content_type_detection"] = "true"
+	}
 
 	msg, err := b.sendMedia(d, params, thumbnailToFilemap(d.Thumbnail))
 	if err != nil {
