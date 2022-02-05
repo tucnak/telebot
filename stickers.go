@@ -10,10 +10,12 @@ type StickerSet struct {
 	Name          string        `json:"name"`
 	Title         string        `json:"title"`
 	Animated      bool          `json:"is_animated"`
+	Video         bool          `json:"is_video"`
 	Stickers      []Sticker     `json:"stickers"`
 	Thumbnail     *Photo        `json:"thumb"`
 	PNG           *File         `json:"png_sticker"`
 	TGS           *File         `json:"tgs_sticker"`
+	WebM          *File         `json:"webm_sticker"`
 	Emojis        string        `json:"emojis"`
 	ContainsMasks bool          `json:"contains_masks"`
 	MaskPosition  *MaskPosition `json:"mask_position"`
@@ -76,6 +78,9 @@ func (b *Bot) CreateStickerSet(to Recipient, s StickerSet) error {
 	if s.TGS != nil {
 		files["tgs_sticker"] = *s.TGS
 	}
+	if s.WebM != nil {
+		files["webm_sticker"] = *s.WebM
+	}
 
 	params := map[string]string{
 		"user_id":        to.Recipient(),
@@ -101,6 +106,8 @@ func (b *Bot) AddSticker(to Recipient, s StickerSet) error {
 		files["png_sticker"] = *s.PNG
 	} else if s.TGS != nil {
 		files["tgs_sticker"] = *s.TGS
+	} else if s.WebM != nil {
+		files["webm_sticker"] = *s.WebM
 	}
 
 	params := map[string]string{

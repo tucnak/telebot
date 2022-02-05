@@ -282,6 +282,7 @@ type Sticker struct {
 	Width        int           `json:"width"`
 	Height       int           `json:"height"`
 	Animated     bool          `json:"is_animated"`
+	Video        bool          `json:"is_video"`
 	Thumbnail    *Photo        `json:"thumb"`
 	Emoji        string        `json:"emoji"`
 	SetName      string        `json:"set_name"`
