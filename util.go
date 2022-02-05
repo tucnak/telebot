@@ -220,6 +220,10 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 		replyMarkup, _ := json.Marshal(opt.ReplyMarkup)
 		params["reply_markup"] = string(replyMarkup)
 	}
+
+	if opt.Protected {
+		params["protect_content"] = "true"
+	}
 }
 
 func processButtons(keys [][]InlineButton) {

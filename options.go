@@ -74,6 +74,9 @@ type SendOptions struct {
 
 	// AllowWithoutReply allows sending messages not a as reply if the replied-to message has already been deleted.
 	AllowWithoutReply bool
+
+	// Protects the contents of the sent message from forwarding and saving
+	Protected bool
 }
 
 func (og *SendOptions) copy() *SendOptions {

@@ -182,6 +182,7 @@ const (
 	EntityCode          EntityType = "code"
 	EntityCodeBlock     EntityType = "pre"
 	EntityTextLink      EntityType = "text_link"
+	EntitySpoiler       EntityType = "spoiler"
 )
 
 // ChatType represents one of the possible chat types.
