@@ -160,6 +160,8 @@ func extractOptions(how []interface{}) *SendOptions {
 					opts.ReplyMarkup = &ReplyMarkup{}
 				}
 				opts.ReplyMarkup.RemoveKeyboard = true
+			case Protected:
+				opts.Protected = true
 			default:
 				panic("telebot: unsupported flag-option")
 			}
@@ -219,6 +221,10 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 		processButtons(opt.ReplyMarkup.InlineKeyboard)
 		replyMarkup, _ := json.Marshal(opt.ReplyMarkup)
 		params["reply_markup"] = string(replyMarkup)
+	}
+
+	if opt.Protected {
+		params["protect_content"] = "true"
 	}
 }
 
