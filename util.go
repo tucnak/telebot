@@ -270,3 +270,18 @@ func intsToStrs(ns []int) (s []string) {
 	}
 	return
 }
+
+// extractCommandsParams extracts parameters for commands-related methods from the given options.
+func extractCommandsParams(opts ...interface{}) (params CommandParams) {
+	for _, opt := range opts {
+		switch value := opt.(type) {
+		case []Command:
+			params.Commands = value
+		case string:
+			params.LanguageCode = value
+		case CommandScope:
+			params.Scope = &value
+		}
+	}
+	return
+}

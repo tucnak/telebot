@@ -1440,9 +1440,10 @@ func (b *Bot) ChatMemberOf(chat, user Recipient) (*ChatMember, error) {
 	return resp.Result, nil
 }
 
-// Commands returns the current list of the bot's commands.
-func (b *Bot) Commands() ([]Command, error) {
-	data, err := b.Raw("getMyCommands", nil)
+// Commands returns the current list of the bot's commands for the given scope and user language.
+func (b *Bot) Commands(opts ...interface{}) ([]Command, error) {
+	params := extractCommandsParams(opts...)
+	data, err := b.Raw("getMyCommands", params)
 	if err != nil {
 		return nil, err
 	}
@@ -1457,15 +1458,27 @@ func (b *Bot) Commands() ([]Command, error) {
 }
 
 // SetCommands changes the list of the bot's commands.
-func (b *Bot) SetCommands(cmds []Command) error {
-	data, _ := json.Marshal(cmds)
-
-	params := map[string]string{
-		"commands": string(data),
-	}
-
+func (b *Bot) SetCommands(opts ...interface{}) error {
+	params := extractCommandsParams(opts...)
 	_, err := b.Raw("setMyCommands", params)
 	return err
+}
+
+// DeleteCommands deletes the list of the bot's commands for the given scope and user language.
+func (b *Bot) DeleteCommands(opts ...interface{}) ([]Command, error) {
+	params := extractCommandsParams(opts...)
+	data, err := b.Raw("deleteMyCommands", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result []Command
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return resp.Result, nil
 }
 
 // Logout logs out from the cloud Bot API server before launching the bot locally.

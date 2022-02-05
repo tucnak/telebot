@@ -582,6 +582,20 @@ func TestBot(t *testing.T) {
 		cmds, err := b.Commands()
 		require.NoError(t, err)
 		assert.Equal(t, orig, cmds)
+
+		orig2 := []Command{{
+			Text:        "test_2",
+			Description: "test command 2",
+		}}
+		require.NoError(t, b.SetCommands(orig2, CommandScope{Type: CommandScopeChat, ChatID: chatID}, "en"))
+
+		cmds, err = b.Commands()
+		require.NoError(t, err)
+		assert.Equal(t, orig, cmds)
+
+		cmds, err = b.Commands(CommandScope{Type: CommandScopeChat, ChatID: chatID}, "en")
+		require.NoError(t, err)
+		assert.Equal(t, orig2, cmds)
 	})
 
 	t.Run("CreateInviteLink", func(t *testing.T) {
