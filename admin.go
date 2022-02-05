@@ -285,3 +285,28 @@ func (b *Bot) SetAdminTitle(chat *Chat, user *User, title string) error {
 	_, err := b.Raw("setChatAdministratorCustomTitle", params)
 	return err
 }
+
+// BanSenderChat will use this method to ban a channel chat in a supergroup or a channel.
+// Until the chat is unbanned, the owner of the banned chat won't be able
+// to send messages on behalf of any of their channels.
+func (b *Bot) BanSenderChat(chat *Chat, sender Recipient) error {
+	params := map[string]string{
+		"chat_id":        chat.Recipient(),
+		"sender_chat_id": sender.Recipient(),
+	}
+
+	_, err := b.Raw("banChatSenderChat", params)
+	return err
+}
+
+// UnbanSenderChat will use this method to unban a previously banned channel chat in a supergroup or channel.
+// The bot must be an administrator for this to work and must have the appropriate administrator rights.
+func (b *Bot) UnbanSenderChat(chat *Chat, sender Recipient) error {
+	params := map[string]string{
+		"chat_id":        chat.Recipient(),
+		"sender_chat_id": sender.Recipient(),
+	}
+
+	_, err := b.Raw("unbanChatSenderChat", params)
+	return err
+}
