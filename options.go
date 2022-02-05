@@ -25,6 +25,9 @@ const (
 	// AllowWithoutReply = SendOptions.AllowWithoutReply
 	AllowWithoutReply
 
+	// Protected = SendOptions.Protected
+	Protected
+
 	// ForceReply = ReplyMarkup.ForceReply
 	ForceReply
 

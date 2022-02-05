@@ -160,6 +160,8 @@ func extractOptions(how []interface{}) *SendOptions {
 					opts.ReplyMarkup = &ReplyMarkup{}
 				}
 				opts.ReplyMarkup.RemoveKeyboard = true
+			case Protected:
+				opts.Protected = true
 			default:
 				panic("telebot: unsupported flag-option")
 			}
