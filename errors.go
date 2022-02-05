@@ -116,6 +116,7 @@ var (
 	ErrWrongFileIDSymbol      = NewError(400, "Bad Request: wrong remote file id specified: can't unserialize it. Wrong last symbol")
 	ErrWrongTypeOfContent     = NewError(400, "Bad Request: wrong type of the web page content")
 	ErrWrongURL               = NewError(400, "Bad Request: wrong HTTP URL specified")
+	ErrForwardMessage         = NewError(400, "Bad Request: administrators of the chat restricted message forwarding")
 )
 
 // Forbidden errors
@@ -228,6 +229,8 @@ func Err(s string) error {
 		return ErrNotStartedByUser
 	case ErrUserIsDeactivated.ʔ():
 		return ErrUserIsDeactivated
+	case ErrForwardMessage.ʔ():
+		return ErrForwardMessage
 	default:
 		return nil
 	}
