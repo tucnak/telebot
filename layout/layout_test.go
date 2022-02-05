@@ -22,7 +22,7 @@ func TestLayout(t *testing.T) {
 	assert.Equal(t, "html", pref.ParseMode)
 	assert.Equal(t, &tele.LongPoller{}, pref.Poller)
 
-	assert.Equal(t, []tele.Command{{
+	assert.ElementsMatch(t, []tele.Command{{
 		Text:        "start",
 		Description: "Start the bot",
 	}, {
