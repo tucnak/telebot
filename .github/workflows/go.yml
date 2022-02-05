@@ -1,0 +1,17 @@
+name: Go
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
+
+    - name: Test
+      run: export TELEBOT_SECRET=${{ secrets.TELEBOT_SECRET }} && export CHAT_ID=${{ secrets.CHAT_ID }} && export USER_ID=${{ secrets.USER_ID }} && go test -v ./...
