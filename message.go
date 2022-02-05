@@ -43,6 +43,9 @@ type Message struct {
 	// For forwarded messages, unixtime of the original message.
 	OriginalUnixtime int `json:"forward_date"`
 
+	// Message is a channel post that was automatically forwarded to the connected discussion group
+	IsAutomaticForward bool `json:"is_automatic_forward"`
+
 	// For replies, ReplyTo represents the original message.
 	//
 	// Note that the Message object in this field will not
@@ -55,6 +58,9 @@ type Message struct {
 
 	// (Optional) Time of last edit in Unix
 	LastEdit int64 `json:"edit_date"`
+
+	// (Optional) Message can't be forwarded
+	HasProtectedContent bool `json:"has_protected_content,omitempty"`
 
 	// AlbumID is the unique identifier of a media message group
 	// this message belongs to.

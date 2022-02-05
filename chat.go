@@ -46,17 +46,19 @@ type Chat struct {
 	Still bool `json:"is_member,omitempty"`
 
 	// Returns only in getChat
-	Bio              string        `json:"bio,omitempty"`
-	Photo            *ChatPhoto    `json:"photo,omitempty"`
-	Description      string        `json:"description,omitempty"`
-	InviteLink       string        `json:"invite_link,omitempty"`
-	PinnedMessage    *Message      `json:"pinned_message,omitempty"`
-	Permissions      *Rights       `json:"permissions,omitempty"`
-	SlowMode         int           `json:"slow_mode_delay,omitempty"`
-	StickerSet       string        `json:"sticker_set_name,omitempty"`
-	CanSetStickerSet bool          `json:"can_set_sticker_set,omitempty"`
-	LinkedChatID     int64         `json:"linked_chat_id,omitempty"`
-	ChatLocation     *ChatLocation `json:"location,omitempty"`
+	Bio                 string        `json:"bio,omitempty"`
+	Photo               *ChatPhoto    `json:"photo,omitempty"`
+	HasPrivateForwards  bool          `json:"has_private_forwards,omitempty"`
+	Description         string        `json:"description,omitempty"`
+	InviteLink          string        `json:"invite_link,omitempty"`
+	PinnedMessage       *Message      `json:"pinned_message,omitempty"`
+	Permissions         *Rights       `json:"permissions,omitempty"`
+	SlowMode            int           `json:"slow_mode_delay,omitempty"`
+	HasProtectedContent bool          `json:"has_protected_content,omitempty"`
+	StickerSet          string        `json:"sticker_set_name,omitempty"`
+	CanSetStickerSet    bool          `json:"can_set_sticker_set,omitempty"`
+	LinkedChatID        int64         `json:"linked_chat_id,omitempty"`
+	ChatLocation        *ChatLocation `json:"location,omitempty"`
 }
 
 type ChatLocation struct {
