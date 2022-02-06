@@ -9,6 +9,9 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
+
+	"go.uber.org/ratelimit"
 )
 
 // NewBot does try to build a Bot with token `token`, which
@@ -16,6 +19,9 @@ import (
 func NewBot(pref Settings) (*Bot, error) {
 	if pref.Updates == 0 {
 		pref.Updates = 100
+	}
+	if pref.PerSeconds == 0 {
+		pref.PerSeconds = -1
 	}
 
 	client := pref.Client
@@ -47,7 +53,28 @@ func NewBot(pref Settings) (*Bot, error) {
 		verbose:     pref.Verbose,
 		parseMode:   pref.ParseMode,
 		client:      client,
+
+		ratelimit: false,
 	}
+
+	wait := make(chan struct{})
+	if pref.PerSeconds != -1 {
+		bot.ratelimit = true
+		go func(b *Bot) {
+			rl := ratelimit.New(pref.PerSeconds)
+			bot.raws = make(chan *sync.Cond, pref.PerBufferSize)
+			wait <- struct{}{}
+			for raw := range bot.raws {
+				rl.Take()
+				raw.Broadcast()
+			}
+		}(bot)
+	} else {
+		go func() {
+			wait <- struct{}{}
+		}()
+	}
+	<-wait
 
 	if pref.Offline {
 		bot.Me = &User{}
@@ -79,6 +106,8 @@ type Bot struct {
 	parseMode   ParseMode
 	stop        chan chan struct{}
 	client      *http.Client
+	raws        chan *sync.Cond
+	ratelimit   bool
 }
 
 // Settings represents a utility struct for passing certain
@@ -116,6 +145,15 @@ type Settings struct {
 
 	// Offline allows to create a bot without network for testing purposes.
 	Offline bool
+
+	// PerSeconds limits the number of requests per second executed
+	// by the client for Raw function. Default per in seconds is -1.
+	// To enable the queue, set the value greater than zero.
+	PerSeconds int
+
+	// PerBufferSize sets the size of the queue that is waiting for the signal to be sent.
+	// By default, the buffer is infinite and has a value equal to zero.
+	PerBufferSize int
 }
 
 // Update object represents an incoming update.

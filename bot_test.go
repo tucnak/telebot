@@ -27,7 +27,7 @@ var (
 )
 
 func defaultSettings() Settings {
-	return Settings{Token: token}
+	return Settings{Token: token, PerSeconds: -1}
 }
 
 func newTestBot() (*Bot, error) {
@@ -65,6 +65,7 @@ func TestNewBot(t *testing.T) {
 	pref.Updates = 50
 	pref.ParseMode = ModeHTML
 	pref.Offline = true
+	pref.PerSeconds = -1
 
 	b, err = NewBot(pref)
 	require.NoError(t, err)
