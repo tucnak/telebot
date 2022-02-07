@@ -458,6 +458,7 @@ b.Handle(tele.OnQuery, func(c tele.Context) error {
 		CacheTime: 60, // a minute
 	})
 })
+```
 
 ## Rate limiter
 In order not to catch the anti-flood, an implementation has been made that allows you to limit the number of outgoing requests by n times per second.
@@ -472,9 +473,6 @@ pref := tele.Settings{
 	// By default, the buffer is infinite and has a value equal to zero.
 	PerBufferSize: 0,
 }
-```
-
-
 ```
 
 There's not much to talk about really. It also supports some form of authentication
