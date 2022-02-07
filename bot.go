@@ -174,8 +174,7 @@ func (b *Bot) Use(middleware ...MiddlewareFunc) {
 //
 // Middleware usage:
 //
-//		protected := telemw.Whitelist(ids...)
-//		b.Handle("/ban", onBan, protected)
+//		b.Handle("/ban", onBan, middleware.Whitelist(ids...))
 //
 func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
 	if len(b.group.middleware) > 0 {
