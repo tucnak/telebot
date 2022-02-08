@@ -145,7 +145,8 @@ b.Use(middleware.Logger())
 b.Use(middleware.AutoRespond())
 
 // Group-scoped middleware:
-adminOnly := b.Group(middleware.Whitelist(adminIDs...))
+adminOnly := b.Group()
+adminOnly.Use(middleware.Whitelist(adminIDs...))
 adminOnly.Handle("/ban", onBan)
 adminOnly.Handle("/kick", onKick)
 
