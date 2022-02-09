@@ -17,7 +17,7 @@ func Restrict(v RestrictConfig) tele.MiddlewareFunc {
 		}
 		return func(c tele.Context) error {
 			for _, chat := range v.Chats {
-				if chat == c.Sender().ID {
+				if c.Sender() != nil && chat == c.Sender().ID || chat == c.Chat().ID {
 					return v.In(c)
 				}
 			}
