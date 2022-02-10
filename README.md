@@ -80,7 +80,7 @@ Simple, innit? Telebot's routing system takes care of delivering updates
 to their endpoints, so in order to get to handle any meaningful event,
 all you got to do is just plug your function into one of the Telebot-provided
 endpoints. You can find the full list
-[here](https://godoc.org/gopkg.in/tucnak/telebot.v3#pkg-constants).
+[here](https://godoc.org/gopkg.in/telebot.v3#pkg-constants).
 
 There are dozens of supported endpoints (see package consts). Let me know
 if you'd like to see some endpoint or endpoint ideas implemented. This system
@@ -292,7 +292,7 @@ b.Send(user, "text", tele.Silent, tele.NoPreview)
 ```
 
 Full list of supported option-flags you can find
-[here](https://pkg.go.dev/gopkg.in/tucnak/telebot.v3#Option).
+[here](https://pkg.go.dev/gopkg.in/telebot.v3#Option).
 
 ## Editable
 If you want to edit some existing message, you don't really need to store the
