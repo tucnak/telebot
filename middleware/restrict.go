@@ -1,6 +1,10 @@
 package middleware
 
-import tele "gopkg.in/telebot.v3"
+import (
+	"strconv"
+
+	tele "gopkg.in/telebot.v3"
+)
 
 type RestrictConfig struct {
 	Chats   []int64
@@ -17,7 +21,7 @@ func Restrict(v RestrictConfig) tele.MiddlewareFunc {
 		}
 		return func(c tele.Context) error {
 			for _, chat := range v.Chats {
-				if c.Sender() != nil && chat == c.Sender().ID || chat == c.Chat().ID {
+				if strconv.Itoa(int(chat)) == c.Recipient().Recipient() {
 					return v.In(c)
 				}
 			}
