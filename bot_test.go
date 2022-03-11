@@ -2,6 +2,7 @@ package telebot
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -142,6 +143,54 @@ func TestBotStart(t *testing.T) {
 	b.Stop()
 
 	assert.True(t, ok)
+}
+
+func TestBotHandleData(t *testing.T) {
+	b, err := NewBot(Settings{Offline: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	go func() {
+		t.Log("start handlePad")
+		handlePad(t, b)
+	}()
+
+	done := make(chan int, 100)
+	for i := 0; i < 100; i++ {
+		num := i
+		go func() {
+			t.Logf("process: %d", num)
+			b.ProcessUpdate(Update{Callback: &Callback{Data: fmt.Sprintf("\f%d|callback", num)}})
+			done <- 1
+		}()
+		time.Sleep(time.Millisecond * 1)
+	}
+
+	for i := 0; i < cap(done); i++ {
+		<-done
+	}
+	t.Log("=====done=======")
+}
+
+func handlePad(t *testing.T, b *Bot) error {
+	selector := &ReplyMarkup{}
+	var btns []Btn
+	for i := 0; i < 100; i++ {
+		btn := selector.Data(fmt.Sprintf("%d", i), fmt.Sprintf("%d", i))
+		num := i
+		b.Handle(&btn, func(c Context) error {
+			t.Logf("handlePad %d", num)
+			return handlePad(t, c.Bot())
+		})
+		btns = append(btns, btn)
+		time.Sleep(time.Millisecond * 1)
+	}
+	var rows []Row
+	for i := 1; i < len(btns); i++ {
+		rows = append(rows, Row{btns[i]})
+	}
+	selector.Inline(rows...)
+	return nil
 }
 
 func TestBotProcessUpdate(t *testing.T) {
