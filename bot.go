@@ -188,6 +188,10 @@ func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
 	switch end := endpoint.(type) {
 	case string:
 		b.handlers[end] = handler
+	case []string:
+		for _, e := range end {
+			b.handlers[e] = handler
+		}
 	case CallbackEndpoint:
 		b.handlers[end.CallbackUnique()] = handler
 	default:
