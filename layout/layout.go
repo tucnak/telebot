@@ -381,7 +381,7 @@ func (lt *Layout) MarkupLocale(locale, k string, args ...interface{}) *tele.Repl
 //		func onQuery(c tele.Context) error {
 //			results := make(tele.Results, len(articles))
 //			for i, article := range articles {
-//				results[i] = lt.Result(c, "article", article)
+//				results[i] = lt.Result(c, "results", article)
 //			}
 //			return c.Answer(&tele.QueryResponse{
 //				Results:   results,
