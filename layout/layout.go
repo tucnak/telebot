@@ -370,12 +370,13 @@ func (lt *Layout) MarkupLocale(locale, k string, args ...interface{}) *tele.Repl
 // The given optional argument will be passed to the template engine.
 //
 //		results:
-//		  type: article
-//		  id: '{{ .ID }}'
-//		  title: '{{ .Title }}'
-//		  description: '{{ .Description }}'
-//		  message_text: '{{ .Content }}'
-//		  thumb_url: '{{ .PreviewURL }}'
+//		  article:
+//		    type: article
+//		    id: '{{ .ID }}'
+//		    title: '{{ .Title }}'
+//		    description: '{{ .Description }}'
+//		    message_text: '{{ .Content }}'
+//		    thumb_url: '{{ .PreviewURL }}'
 //
 // Usage:
 //		func onQuery(c tele.Context) error {
