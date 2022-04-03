@@ -161,6 +161,35 @@ func (h *Webhook) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.dest <- update
 }
 
+func NewWebhookHandler(webhook *Webhook) *WebhookHandler {
+	return &WebhookHandler{webhook: webhook}
+}
+
+// WebhookHandler is a simplified version of Webhook that has no separate runtime.
+//
+// It allows you to embed webhook into an existing router.
+type WebhookHandler struct {
+	webhook *Webhook
+}
+
+func (h *WebhookHandler) Poll(b *Bot, dest chan Update, stop chan struct{}) {
+	if err := b.SetWebhook(h.webhook); err != nil {
+		b.debug(err)
+		close(stop)
+		return
+	}
+
+	// store the variables so the HTTP-handler can use 'em
+	h.webhook.dest = dest
+	h.webhook.bot = b
+}
+
+// The handler simply reads the update from the body of the requests
+// and writes them to the update channel.
+func (h *WebhookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	h.webhook.ServeHTTP(w, r)
+}
+
 // Webhook returns the current webhook status.
 func (b *Bot) Webhook() (*Webhook, error) {
 	data, err := b.Raw("getWebhookInfo", nil)
