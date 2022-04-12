@@ -44,6 +44,7 @@ func NewBot(pref Settings) (*Bot, error) {
 		stop:     make(chan chan struct{}),
 
 		synchronous: pref.Synchronous,
+		noRecover:   pref.NoRecover,
 		verbose:     pref.Verbose,
 		parseMode:   pref.ParseMode,
 		client:      client,
@@ -75,6 +76,7 @@ type Bot struct {
 	group       *Group
 	handlers    map[string]HandlerFunc
 	synchronous bool
+	noRecover   bool
 	verbose     bool
 	parseMode   ParseMode
 	stop        chan chan struct{}
@@ -96,6 +98,10 @@ type Settings struct {
 	// Synchronous prevents handlers from running in parallel.
 	// It makes ProcessUpdate return after the handler is finished.
 	Synchronous bool
+
+	// Do not recover from panicking in handlers.
+	// Use for debugging purposes only.
+	NoRecover bool
 
 	// Verbose forces bot to log all upcoming requests.
 	// Use for debugging purposes only.

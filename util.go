@@ -29,7 +29,9 @@ func (b *Bot) deferDebug() {
 
 func (b *Bot) runHandler(h HandlerFunc, c Context) {
 	f := func() {
-		defer b.deferDebug()
+		if !b.noRecover {
+			defer b.deferDebug()
+		}
 		if err := h(c); err != nil {
 			b.OnError(err, c)
 		}
