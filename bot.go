@@ -409,6 +409,10 @@ func (b *Bot) ProcessUpdate(u Update) {
 			return
 		}
 
+		if m.WebAppData != nil {
+			b.handle(OnWebApp, c)
+		}
+
 		if m.ProximityAlert != nil {
 			b.handle(OnProximityAlert, c)
 			return
@@ -1085,6 +1089,29 @@ func (b *Bot) Respond(c *Callback, resp ...*CallbackResponse) error {
 	r.CallbackID = c.ID
 	_, err := b.Raw("answerCallbackQuery", r)
 	return err
+}
+
+// AnswerWebApp sends a response for a query from Web App and returns
+// information about an inline message sent by a Web App on behalf of a user
+func (b *Bot) AnswerWebApp(query *Query, resp *WebAppQueryResponse) (SentWebAppMessage, error) {
+	resp.WebAppQueryID = query.ID
+	resp.Result.Process(b)
+
+	data, err := b.Raw("answerWebAppQuery", resp)
+
+	if err != nil {
+		return SentWebAppMessage{}, err
+	}
+
+	var response struct {
+		Result SentWebAppMessage
+	}
+
+	if err := json.Unmarshal(data, &response); err != nil {
+		return SentWebAppMessage{}, wrapError(err)
+	}
+
+	return response.Result, err
 }
 
 // FileByID returns full file object including File.FilePath, allowing you to

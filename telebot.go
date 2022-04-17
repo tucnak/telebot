@@ -134,6 +134,9 @@ const (
 
 	// Will fire on auto delete timer set.
 	OnAutoDeleteTimer = "\amessage_auto_delete_timer_changed"
+
+	// Will fire on the web app data.
+	OnWebApp = "\aweb_app"
 )
 
 // ChatAction is a client-side status indicating bot activity.
