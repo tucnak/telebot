@@ -4,9 +4,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/goccy/go-yaml"
+	tele "github.com/TGeniusFamily/GOFSMtelebot"
 	"github.com/spf13/cast"
-	tele "gopkg.in/telebot.v3"
 )
 
 // Config represents typed map interface related to the "config" section in layout.

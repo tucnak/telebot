@@ -8,8 +8,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/goccy/go-yaml"
-	tele "gopkg.in/telebot.v3"
+	tele "github.com/TGeniusFamily/GOFSMtelebot"
 )
 
 type Settings struct {
