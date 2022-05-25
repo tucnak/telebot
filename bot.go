@@ -72,8 +72,10 @@ type Bot struct {
 	Poller  Poller
 	OnError func(error, Context)
 
-	group       *Group
-	handlers    map[string]HandlerFunc
+	group         *Group
+	statesStorage map[int64]State
+	handlers      map[string]HandlerFunc
+
 	synchronous bool
 	verbose     bool
 	parseMode   ParseMode
@@ -176,7 +178,8 @@ func (b *Bot) Use(middleware ...MiddlewareFunc) {
 //
 //		b.Handle("/ban", onBan, middleware.Whitelist(ids...))
 //
-func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
+func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, s State, m ...MiddlewareFunc) {
+
 	if len(b.group.middleware) > 0 {
 		m = append(b.group.middleware, m...)
 	}
@@ -187,9 +190,9 @@ func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
 
 	switch end := endpoint.(type) {
 	case string:
-		b.handlers[end] = handler
+		b.handlers[end+"_"+strconv.Itoa(int(s))] = handler
 	case CallbackEndpoint:
-		b.handlers[end.CallbackUnique()] = handler
+		b.handlers[end.CallbackUnique()+"_"+strconv.Itoa(int(s))] = handler
 	default:
 		panic("telebot: unsupported endpoint")
 	}

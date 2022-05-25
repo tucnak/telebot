@@ -11,6 +11,9 @@ import (
 // used to handle actual endpoints.
 type HandlerFunc func(Context) error
 
+//	State current state of user
+type State uint
+
 // Context wraps an update and represents the context of current event.
 type Context interface {
 	// Bot returns the bot instance.
@@ -55,6 +58,18 @@ type Context interface {
 	// Sender returns the current recipient, depending on the context type.
 	// Returns nil if user is not presented.
 	Sender() *User
+
+	// SetState set state instance to user.
+	// Void.
+	SetState(state State)
+
+	// SetState set state instance to user current state + 1.
+	// Void.
+	nextState()
+
+	// SetState set state instance to user 0.
+	// Void.
+	finishState()
 
 	// Chat returns the current chat, depending on the context type.
 	// Returns nil if chat is not presented.
@@ -159,6 +174,24 @@ type nativeContext struct {
 	u     Update
 	lock  sync.RWMutex
 	store map[string]interface{}
+}
+
+func (c *nativeContext) SetState(state State) {
+	userId := c.Sender().ID
+	storage := c.Bot().statesStorage
+	storage[userId] = state
+}
+
+func (c *nativeContext) nextState() {
+	userId := c.Sender().ID
+	storage := c.Bot().statesStorage
+	storage[userId]++
+}
+
+func (c *nativeContext) finishState() {
+	userId := c.Sender().ID
+	storage := c.Bot().statesStorage
+	storage[userId] = 0
 }
 
 func (c *nativeContext) Bot() *Bot {
