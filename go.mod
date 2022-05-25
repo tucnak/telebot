@@ -1,4 +1,4 @@
-module gopkg.in/telebot.v3
+module github.com/TGeniusFamily/GOFSMtelebot
 
 go 1.13
 
