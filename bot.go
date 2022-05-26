@@ -76,8 +76,7 @@ type Bot struct {
 	group         *Group
 	statesStorage map[int64]State
 
-	handlers map[handlerKey]HandlerFunc
-
+	handlers    map[handlerKey]HandlerFunc
 	synchronous bool
 	verbose     bool
 	parseMode   ParseMode
@@ -455,6 +454,7 @@ func (b *Bot) ProcessUpdate(u Update) {
 			if match != nil {
 				unique, payload := match[0][1], match[0][3]
 				strName := "\f" + unique + "_" + strconv.Itoa(int(b.statesStorage[c.Sender().ID]))
+
 				if handler, ok := b.handlers[strName]; ok {
 					u.Callback.Unique = unique
 					u.Callback.Data = payload
