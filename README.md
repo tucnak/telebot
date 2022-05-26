@@ -69,12 +69,13 @@ func main() {
 
 	b.Handle("/hello", func(c tele.Context) error {
 		return c.Send("Hello!")
-	})
+	}, tele.States.Zero() ) // always use state
 
 	b.Start()
 }
 
 ```
+
 
 Simple, innit? Telebot's routing system takes care of delivering updates
 to their endpoints, so in order to get to handle any meaningful event,
@@ -86,6 +87,41 @@ There are dozens of supported endpoints (see package consts). Let me know
 if you'd like to see some endpoint or endpoint ideas implemented. This system
 is completely extensible, so I can introduce them without breaking
 backwards compatibility.
+
+## States
+In-memory based states storage.
+States - the very important thing, that help you with logistic. But you may to know, that you will lost all states after restarting.
+
+```go
+type run struct {
+	Phone tb.State
+	Mail  tb.State
+	
+}
+
+var Run = run{
+	Phone: tb.States.Auto(), // use autonumeric, like Enum.auto() 
+	Mail:  tb.States.Auto(), // in another languages (for example Python)
+}
+// Handler 1
+b.Handle(tb.OnText, func(context tb.Context) error {
+	context.SetState(Run.Phone) // setting state Phone
+	return context.Reply("Out of state")
+}, tb.States.Zero()) // State must be 0 (default)
+
+// Handler 2
+b.Handle(tb.OnText, func(context tb.Context) error {
+	context.FinishState() // Finish state (setting for 0)
+	return context.Reply("In state")
+	
+}, Run.Phone) // handling text, but only when user have state Phone
+```
+if you will write to the bot message, at the first time you will receive "Out of state",
+then **FSM (Finite state machine)** will change the player state to Run.Phone. The
+second time, when you will send to bot message - you wil receive "In state",
+because Handler 1 have state Zero, and it's **Zero != Run.Phone**. After context.FinishState()
+state will set for 0, and the next time you will be treated by **handler 1** 
+
 
 ## Context
 Context is a special type that wraps a huge update structure and represents
@@ -112,22 +148,22 @@ b.Handle(tele.OnText, func(c tele.Context) error {
 
 	// Instead, prefer a context short-hand:
 	return c.Send(text)
-})
+}, tele.States.Zero())
 
 b.Handle(tele.OnChannelPost, func(c tele.Context) error {
 	// Channel posts only.
 	msg := c.Message()
-})
+}, tele.States.Zero())
 
 b.Handle(tele.OnPhoto, func(c tele.Context) error {
 	// Photos only.
 	photo := c.Message().Photo
-})
+}, tele.States.Zero())
 
 b.Handle(tele.OnQuery, func(c tele.Context) error {
 	// Incoming inline queries.
 	return c.Answer(...)
-})
+}, tele.States.Zero())
 ```
 
 ## Middleware
@@ -151,7 +187,7 @@ adminOnly.Handle("/ban", onBan)
 adminOnly.Handle("/kick", onKick)
 
 // Handler-scoped middleware:
-b.Handle(tele.OnText, onText, middleware.IgnoreVia())
+b.Handle(tele.OnText, onText, tele.States.Zero(), middleware.IgnoreVia())
 ```
 
 Custom middleware example:
@@ -198,7 +234,7 @@ For simplified deep-linking, Telebot also extracts payload:
 // Command: /start <PAYLOAD>
 b.Handle("/start", func(c tele.Context) error {
 	fmt.Println(c.Message().Payload) // <PAYLOAD>
-})
+}, tele.States.Zero())
 ```
 
 For multiple arguments use:
@@ -209,7 +245,7 @@ b.Handle("/tags", func(c tele.Context) error {
 	for _, tag := range tags {
 		// iterate through passed arguments
 	}
-})
+}, tele.States.Zero())
 ```
 
 ## Files
@@ -396,17 +432,17 @@ selector.Inline(
 
 b.Handle("/start", func(c tele.Context) error {
 	return c.Send("Hello!", menu)
-})
+}, tele.States.Zero())
 
 // On reply button pressed (message)
 b.Handle(&btnHelp, func(c tele.Context) error {
 	return c.Edit("Here is some help: ...")
-})
+}, tele.States.Zero())
 
 // On inline button pressed (callback)
 b.Handle(&btnPrev, func(c tele.Context) error {
 	return c.Respond()
-})
+}, tele.States.Zero())
 ```
 
 You can use markup constructor for every type of possible button:
@@ -457,7 +493,7 @@ b.Handle(tele.OnQuery, func(c tele.Context) error {
 		Results:   results,
 		CacheTime: 60, // a minute
 	})
-})
+}, tele.States.Zero())
 ```
 
 There's not much to talk about really. It also supports some form of authentication

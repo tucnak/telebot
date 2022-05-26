@@ -39,9 +39,10 @@ func NewBot(pref Settings) (*Bot, error) {
 		Poller:  pref.Poller,
 		OnError: pref.OnError,
 
-		Updates:  make(chan Update, pref.Updates),
-		handlers: make(map[string]HandlerFunc),
-		stop:     make(chan chan struct{}),
+		Updates:       make(chan Update, pref.Updates),
+		handlers:      make(map[handlerKey]HandlerFunc),
+		statesStorage: make(map[int64]State),
+		stop:          make(chan chan struct{}),
 
 		synchronous: pref.Synchronous,
 		verbose:     pref.Verbose,
@@ -74,7 +75,8 @@ type Bot struct {
 
 	group         *Group
 	statesStorage map[int64]State
-	handlers      map[string]HandlerFunc
+
+	handlers map[handlerKey]HandlerFunc
 
 	synchronous bool
 	verbose     bool
@@ -178,6 +180,8 @@ func (b *Bot) Use(middleware ...MiddlewareFunc) {
 //
 //		b.Handle("/ban", onBan, middleware.Whitelist(ids...))
 //
+type handlerKey = string
+
 func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, s State, m ...MiddlewareFunc) {
 
 	if len(b.group.middleware) > 0 {
@@ -450,7 +454,8 @@ func (b *Bot) ProcessUpdate(u Update) {
 			match := cbackRx.FindAllStringSubmatch(data, -1)
 			if match != nil {
 				unique, payload := match[0][1], match[0][3]
-				if handler, ok := b.handlers["\f"+unique]; ok {
+				strName := "\f" + unique + "_" + strconv.Itoa(int(b.statesStorage[c.Sender().ID]))
+				if handler, ok := b.handlers[strName]; ok {
 					u.Callback.Unique = unique
 					u.Callback.Data = payload
 					b.runHandler(handler, c)
@@ -510,7 +515,10 @@ func (b *Bot) ProcessUpdate(u Update) {
 }
 
 func (b *Bot) handle(end string, c Context) bool {
-	if handler, ok := b.handlers[end]; ok {
+	userState := b.statesStorage[c.Sender().ID]
+
+	strName := end + "_" + strconv.Itoa(int(userState))
+	if handler, ok := b.handlers[strName]; ok {
 		b.runHandler(handler, c)
 		return true
 	}

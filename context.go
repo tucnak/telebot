@@ -65,11 +65,11 @@ type Context interface {
 
 	// SetState set state instance to user current state + 1.
 	// Void.
-	nextState()
+	NextState()
 
 	// SetState set state instance to user 0.
 	// Void.
-	finishState()
+	FinishState()
 
 	// Chat returns the current chat, depending on the context type.
 	// Returns nil if chat is not presented.
@@ -182,13 +182,13 @@ func (c *nativeContext) SetState(state State) {
 	storage[userId] = state
 }
 
-func (c *nativeContext) nextState() {
+func (c *nativeContext) NextState() {
 	userId := c.Sender().ID
 	storage := c.Bot().statesStorage
 	storage[userId]++
 }
 
-func (c *nativeContext) finishState() {
+func (c *nativeContext) FinishState() {
 	userId := c.Sender().ID
 	storage := c.Bot().statesStorage
 	storage[userId] = 0
