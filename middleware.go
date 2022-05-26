@@ -16,6 +16,7 @@ func (g *Group) Use(middleware ...MiddlewareFunc) {
 }
 
 // Handle adds endpoint handler to the bot, combining group's middleware
+// For remove state set it at 0
 // with the optional given middleware.
 func (g *Group) Handle(endpoint interface{}, h HandlerFunc, s State, m ...MiddlewareFunc) {
 	g.b.Handle(endpoint, h, s, append(g.middleware, m...)...)
