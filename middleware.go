@@ -17,6 +17,6 @@ func (g *Group) Use(middleware ...MiddlewareFunc) {
 
 // Handle adds endpoint handler to the bot, combining group's middleware
 // with the optional given middleware.
-func (g *Group) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
-	g.b.Handle(endpoint, h, append(g.middleware, m...)...)
+func (g *Group) Handle(endpoint interface{}, h HandlerFunc, s State, m ...MiddlewareFunc) {
+	g.b.Handle(endpoint, h, s, append(g.middleware, m...)...)
 }
