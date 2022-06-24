@@ -14,7 +14,9 @@ var defaultOnError = func(err error, c Context) {
 }
 
 func (b *Bot) debug(err error) {
-	log.Println(err)
+	if b.verbose {
+		log.Println(err)
+	}
 }
 
 func (b *Bot) deferDebug() {
