@@ -2,6 +2,7 @@ package telebot
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -26,7 +27,28 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 		return nil, err
 	}
 
-	resp, err := b.client.Post(url, "application/json", &buf)
+	// Cancel the request immediately without waiting for the timeout  when bot is about to stop.
+	// This may become important if doing long polling with long timeout.
+	exit := make(chan struct{})
+	defer close(exit)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go func() {
+		select {
+		case <-b.stopClient:
+			cancel()
+		case <-exit:
+		}
+	}()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, &buf)
+	if err != nil {
+		return nil, wrapError(err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := b.client.Do(req)
 	if err != nil {
 		return nil, wrapError(err)
 	}
