@@ -240,7 +240,9 @@ func (b *Bot) Start() {
 
 // Stop gracefully shuts the poller down.
 func (b *Bot) Stop() {
-	close(b.stopClient)
+	if b.stopClient != nil {
+		close(b.stopClient)
+	}
 	confirm := make(chan struct{})
 	b.stop <- confirm
 	<-confirm
