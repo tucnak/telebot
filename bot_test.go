@@ -596,6 +596,10 @@ func TestBot(t *testing.T) {
 		cmds, err = b.Commands(CommandScope{Type: CommandScopeChat, ChatID: chatID}, "en")
 		require.NoError(t, err)
 		assert.Equal(t, orig2, cmds)
+
+		require.NoError(t, b.DeleteCommands(CommandScope{Type: CommandScopeChat, ChatID: chatID}, "en"))
+
+		require.NoError(t, b.DeleteCommands())
 	})
 
 	t.Run("CreateInviteLink", func(t *testing.T) {

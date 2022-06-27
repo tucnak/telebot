@@ -1473,20 +1473,10 @@ func (b *Bot) SetCommands(opts ...interface{}) error {
 }
 
 // DeleteCommands deletes the list of the bot's commands for the given scope and user language.
-func (b *Bot) DeleteCommands(opts ...interface{}) ([]Command, error) {
+func (b *Bot) DeleteCommands(opts ...interface{}) error {
 	params := extractCommandsParams(opts...)
-	data, err := b.Raw("deleteMyCommands", params)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		Result []Command
-	}
-	if err := json.Unmarshal(data, &resp); err != nil {
-		return nil, wrapError(err)
-	}
-	return resp.Result, nil
+	_, err := b.Raw("deleteMyCommands", params)
+	return err
 }
 
 // Logout logs out from the cloud Bot API server before launching the bot locally.
