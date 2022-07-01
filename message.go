@@ -375,7 +375,7 @@ func (m *Message) EntityText(e MessageEntity) string {
 }
 
 // Media returns the message's media if it contains either photo,
-// voice, audio, animation, document, video or video note.
+// voice, audio, animation, sticker, document, video or video note.
 func (m *Message) Media() Media {
 	switch {
 	case m.Photo != nil:
@@ -386,6 +386,8 @@ func (m *Message) Media() Media {
 		return m.Audio
 	case m.Animation != nil:
 		return m.Animation
+	case m.Sticker != nil:
+		return m.Sticker
 	case m.Document != nil:
 		return m.Document
 	case m.Video != nil:
