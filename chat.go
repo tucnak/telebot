@@ -41,10 +41,6 @@ type Chat struct {
 	LastName  string `json:"last_name"`
 	Username  string `json:"username"`
 
-	// Still shows whether the user is a member
-	// of the chat at the moment of the request.
-	Still bool `json:"is_member,omitempty"`
-
 	// Returns only in getChat
 	Bio              string        `json:"bio,omitempty"`
 	Photo            *ChatPhoto    `json:"photo,omitempty"`
