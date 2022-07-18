@@ -99,9 +99,16 @@ func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 		return nil, err
 	}
 
-	msg.Document.File.stealRef(&d.File)
-	*d = *msg.Document
-	d.Caption = msg.Caption
+	if doc := msg.Document; doc != nil {
+		doc.File.stealRef(&d.File)
+		*d = *doc
+		d.Caption = msg.Caption
+	} else if vid := msg.Video; vid != nil {
+		vid.File.stealRef(&d.File)
+		d.Caption = vid.Caption
+		d.MIME = vid.MIME
+		d.Thumbnail = vid.Thumbnail
+	}
 
 	return msg, nil
 }
