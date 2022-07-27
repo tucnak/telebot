@@ -15,6 +15,7 @@ type User struct {
 	Username     string `json:"username"`
 	LanguageCode string `json:"language_code"`
 	IsBot        bool   `json:"is_bot"`
+	IsPremium    bool   `json:"is_premium"`
 
 	// Returns only in getMe
 	CanJoinGroups   bool `json:"can_join_groups"`
