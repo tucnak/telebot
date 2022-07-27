@@ -79,6 +79,7 @@ type Bot struct {
 	parseMode   ParseMode
 	stop        chan chan struct{}
 	client      *http.Client
+	stopClient  chan struct{}
 }
 
 // Settings represents a utility struct for passing certain
@@ -207,6 +208,12 @@ func (b *Bot) Start() {
 		panic("telebot: can't start without a poller")
 	}
 
+	// do nothing if called twice
+	if b.stopClient != nil {
+		return
+	}
+	b.stopClient = make(chan struct{})
+
 	stop := make(chan struct{})
 	stopConfirm := make(chan struct{})
 
@@ -225,6 +232,7 @@ func (b *Bot) Start() {
 			close(stop)
 			<-stopConfirm
 			close(confirm)
+			b.stopClient = nil
 			return
 		}
 	}
@@ -232,6 +240,9 @@ func (b *Bot) Start() {
 
 // Stop gracefully shuts the poller down.
 func (b *Bot) Stop() {
+	if b.stopClient != nil {
+		close(b.stopClient)
+	}
 	confirm := make(chan struct{})
 	b.stop <- confirm
 	<-confirm
