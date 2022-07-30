@@ -1,9 +1,12 @@
 package telebot
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"golang.org/x/net/proxy"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"regexp"
@@ -21,6 +24,14 @@ func NewBot(pref Settings) (*Bot, error) {
 	client := pref.Client
 	if client == nil {
 		client = http.DefaultClient
+	}
+
+	if pref.Proxy != nil {
+		transport, err := dialProxy(pref.Proxy)
+		if err != nil {
+			return nil, err
+		}
+		client.Transport = transport
 	}
 
 	if pref.URL == "" {
@@ -117,6 +128,16 @@ type Settings struct {
 
 	// Offline allows to create a bot without network for testing purposes.
 	Offline bool
+
+	// Proxy telegram API can be connected via proxy using socks5
+	Proxy *Proxy
+}
+
+// Proxy get proxy configuration for dial via proxy to telegram api server, you can use tor proxy for example
+type Proxy struct {
+	Address  string
+	UserName string
+	Password string
 }
 
 // Update object represents an incoming update.
@@ -1522,4 +1543,23 @@ func (b *Bot) Close() (bool, error) {
 	}
 
 	return resp.Result, nil
+}
+
+func dialProxy(prx *Proxy) (*http.Transport, error) {
+	var (
+		dialer proxy.Dialer
+		err    error
+	)
+	if len(prx.UserName) != 0 && len(prx.Password) != 0 {
+		dialer, err = proxy.SOCKS5("tcp", prx.Address, &proxy.Auth{User: prx.UserName, Password: prx.Password}, proxy.Direct)
+	} else {
+		dialer, err = proxy.SOCKS5("tcp", prx.Address, nil, proxy.Direct)
+	}
+	if err != nil {
+		return nil, err
+	}
+	dialerCtx := func(ctx context.Context, network, address string) (net.Conn, error) {
+		return dialer.Dial(network, address)
+	}
+	return &http.Transport{DialContext: dialerCtx, DisableKeepAlives: true}, nil
 }
