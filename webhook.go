@@ -44,6 +44,7 @@ type Webhook struct {
 	AllowedUpdates []string `json:"allowed_updates"`
 	IP             string   `json:"ip_address"`
 	DropUpdates    bool     `json:"drop_pending_updates"`
+	SecretToken    string   `json:"secret_token"`
 
 	// (WebhookInfo)
 	HasCustomCert  bool   `json:"has_custom_certificate"`
@@ -95,6 +96,9 @@ func (h *Webhook) getParams() map[string]string {
 	}
 	if h.DropUpdates {
 		params["drop_pending_updates"] = strconv.FormatBool(h.DropUpdates)
+	}
+	if h.SecretToken != "" {
+		params["secret_token"] = h.SecretToken
 	}
 
 	if h.TLS != nil {
@@ -153,6 +157,11 @@ func (h *Webhook) waitForStop(stop chan struct{}) {
 // The handler simply reads the update from the body of the requests
 // and writes them to the update channel.
 func (h *Webhook) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if h.SecretToken != "" && r.Header.Get("X-Telegram-Bot-Api-Secret-Token") != h.SecretToken {
+		h.bot.debug(fmt.Errorf("invalid secret token in request"))
+		return
+	}
+
 	var update Update
 	if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
 		h.bot.debug(fmt.Errorf("cannot decode update: %v", err))
