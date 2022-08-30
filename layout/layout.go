@@ -174,6 +174,49 @@ func (lt *Layout) Commands() (cmds []tele.Command) {
 	return
 }
 
+// CommandsLocale returns a list of telebot commands and localized description, which can be
+// used in b.SetCommands later.
+//
+// Example of bot.yml:
+//	commands:
+//	  /start: '{{ text "cmdStart" }}'
+//
+// en.yml:
+//	cmdStart: Start the bot
+//
+// ru.yml:
+//	cmdStart: Запуск бота
+//
+// Usage:
+//	b.SetCommands(lt.CommandsLocale("en"), "en")
+//	b.SetCommands(lt.CommandsLocale("ru"), "ru")
+func (lt *Layout) CommandsLocale(locale string, args ...interface{}) (cmds []tele.Command) {
+	var arg interface{}
+	if len(args) > 0 {
+		arg = args[0]
+	}
+
+	for k, v := range lt.commands {
+		tmpl, err := lt.template(template.New(k).Funcs(lt.funcs), locale).Parse(v)
+		if err != nil {
+			log.Println("telebot/layout:", err)
+			return nil
+		}
+
+		var buf bytes.Buffer
+		if err := tmpl.Execute(&buf, arg); err != nil {
+			log.Println("telebot/layout:", err)
+			return nil
+		}
+
+		cmds = append(cmds, tele.Command{
+			Text:        strings.TrimLeft(k, "/"),
+			Description: buf.String(),
+		})
+	}
+	return
+}
+
 // Text returns a text, which locale is dependent on the context.
 // The given optional argument will be passed to the template engine.
 //
