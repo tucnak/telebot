@@ -174,6 +174,15 @@ func addFileToWriter(writer *multipart.Writer, filename, field string, file inte
 }
 
 func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, error) {
+	if opt.ParseMode == ModeMarkdown || opt.ParseMode == ModeMarkdownV2 {
+		text = strings.NewReplacer(
+			"(", "\\(",
+			")", "\\)",
+			"_", "\\_",
+			".", "\\.",
+			"-", "\\-",
+		).Replace(text)
+	}
 	params := map[string]string{
 		"chat_id": to.Recipient(),
 		"text":    text,
