@@ -422,10 +422,19 @@ func TestBot(t *testing.T) {
 		assert.Equal(t, "new caption with html", edited.Caption)
 		assert.Equal(t, EntityBold, edited.CaptionEntities[0].Type)
 
+		sleep()
+
 		edited, err = b.EditCaption(msg, "*new caption with markdown*", ModeMarkdown)
 		require.NoError(t, err)
 		assert.Equal(t, "new caption with markdown", edited.Caption)
 		assert.Equal(t, EntityBold, edited.CaptionEntities[0].Type)
+
+		sleep()
+
+		edited, err = b.EditCaption(msg, "_new caption with markdown \\(V2\\)_", ModeMarkdownV2)
+		require.NoError(t, err)
+		assert.Equal(t, "new caption with markdown (V2)", edited.Caption)
+		assert.Equal(t, EntityItalic, edited.CaptionEntities[0].Type)
 
 		b.parseMode = ModeDefault
 	})
@@ -602,29 +611,37 @@ func TestBot(t *testing.T) {
 		require.NoError(t, b.DeleteCommands())
 	})
 
-	t.Run("CreateInviteLink", func(t *testing.T) {
+	t.Run("InviteLink", func(t *testing.T) {
 		inviteLink, err := b.CreateInviteLink(&Chat{ID: chatID}, nil)
-		assert.Nil(t, err)
+		require.NoError(t, err)
 		assert.True(t, len(inviteLink.InviteLink) > 0)
-	})
 
-	t.Run("EditInviteLink", func(t *testing.T) {
-		inviteLink, err := b.CreateInviteLink(&Chat{ID: chatID}, nil)
-		assert.Nil(t, err)
+		sleep()
+
+		inviteLink, err = b.CreateInviteLink(&Chat{ID: chatID}, nil)
+		require.NoError(t, err)
 		assert.True(t, len(inviteLink.InviteLink) > 0)
+
+		sleep()
 
 		response, err := b.EditInviteLink(&Chat{ID: chatID}, &ChatInviteLink{InviteLink: inviteLink.InviteLink})
-		assert.Nil(t, err)
+		require.NoError(t, err)
 		assert.True(t, len(response.InviteLink) > 0)
-	})
 
-	t.Run("RevokeInviteLink", func(t *testing.T) {
-		inviteLink, err := b.CreateInviteLink(&Chat{ID: chatID}, nil)
-		assert.Nil(t, err)
+		sleep()
+
+		inviteLink, err = b.CreateInviteLink(&Chat{ID: chatID}, nil)
+		require.Nil(t, err)
 		assert.True(t, len(inviteLink.InviteLink) > 0)
 
-		response, err := b.RevokeInviteLink(&Chat{ID: chatID}, inviteLink.InviteLink)
-		assert.Nil(t, err)
+		sleep()
+
+		response, err = b.RevokeInviteLink(&Chat{ID: chatID}, inviteLink.InviteLink)
+		require.Nil(t, err)
 		assert.True(t, len(response.InviteLink) > 0)
 	})
+}
+
+func sleep() {
+	time.Sleep(time.Second)
 }
