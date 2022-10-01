@@ -37,7 +37,7 @@ func NewBot(pref Settings) (*Bot, error) {
 		Token:   pref.Token,
 		URL:     pref.URL,
 		Poller:  pref.Poller,
-		OnError: pref.OnError,
+		onError: pref.OnError,
 
 		Updates:  make(chan Update, pref.Updates),
 		handlers: make(map[string]HandlerFunc),
@@ -70,7 +70,7 @@ type Bot struct {
 	URL     string
 	Updates chan Update
 	Poller  Poller
-	OnError func(error, Context)
+	onError func(error, Context)
 
 	group       *Group
 	handlers    map[string]HandlerFunc
@@ -147,6 +147,10 @@ type Command struct {
 
 	// Description of the command, 3-256 characters.
 	Description string `json:"description"`
+}
+
+func (b *Bot) OnError(err error, c Context) {
+	b.onError(err, c)
 }
 
 // Group returns a new group.

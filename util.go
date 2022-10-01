@@ -10,28 +10,21 @@ import (
 )
 
 var defaultOnError = func(err error, c Context) {
-	log.Println(c.Update().ID, err)
-}
-
-func (b *Bot) debug(err error) {
-	if b.verbose {
+	if c != nil {
+		log.Println(c.Update().ID, err)
+	} else {
 		log.Println(err)
 	}
 }
 
-func (b *Bot) deferDebug() {
-	if r := recover(); r != nil {
-		if err, ok := r.(error); ok {
-			b.debug(err)
-		} else if str, ok := r.(string); ok {
-			b.debug(fmt.Errorf("%s", str))
-		}
+func (b *Bot) debug(err error) {
+	if b.verbose {
+		b.OnError(err, nil)
 	}
 }
 
 func (b *Bot) runHandler(h HandlerFunc, c Context) {
 	f := func() {
-		defer b.deferDebug()
 		if err := h(c); err != nil {
 			b.OnError(err, c)
 		}
@@ -43,9 +36,9 @@ func (b *Bot) runHandler(h HandlerFunc, c Context) {
 	}
 }
 
-func applyMiddleware(h HandlerFunc, middleware ...MiddlewareFunc) HandlerFunc {
-	for i := len(middleware) - 1; i >= 0; i-- {
-		h = middleware[i](h)
+func applyMiddleware(h HandlerFunc, m ...MiddlewareFunc) HandlerFunc {
+	for i := len(m) - 1; i >= 0; i-- {
+		h = m[i](h)
 	}
 	return h
 }

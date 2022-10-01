@@ -7,6 +7,8 @@ import (
 	tele "gopkg.in/telebot.v3"
 )
 
+// Logger returns a middleware that logs incoming updates.
+// If no custom logger provided, log.Default() will be used.
 func Logger(logger ...*log.Logger) tele.MiddlewareFunc {
 	var l *log.Logger
 	if len(logger) > 0 {

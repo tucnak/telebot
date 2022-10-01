@@ -354,7 +354,7 @@ func TestBotOnError(t *testing.T) {
 	}
 
 	var ok bool
-	b.OnError = func(err error, c Context) {
+	b.onError = func(err error, c Context) {
 		assert.Equal(t, b, c.(*nativeContext).b)
 		assert.NotNil(t, err)
 		ok = true
