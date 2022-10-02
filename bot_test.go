@@ -618,21 +618,9 @@ func TestBot(t *testing.T) {
 
 		sleep()
 
-		inviteLink, err = b.CreateInviteLink(&Chat{ID: chatID}, nil)
-		require.NoError(t, err)
-		assert.True(t, len(inviteLink.InviteLink) > 0)
-
-		sleep()
-
 		response, err := b.EditInviteLink(&Chat{ID: chatID}, &ChatInviteLink{InviteLink: inviteLink.InviteLink})
 		require.NoError(t, err)
 		assert.True(t, len(response.InviteLink) > 0)
-
-		sleep()
-
-		inviteLink, err = b.CreateInviteLink(&Chat{ID: chatID}, nil)
-		require.Nil(t, err)
-		assert.True(t, len(inviteLink.InviteLink) > 0)
 
 		sleep()
 
