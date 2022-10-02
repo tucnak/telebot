@@ -28,7 +28,7 @@ type (
 		results  map[string]Result
 		locales  map[string]*template.Template
 
-		*Config
+		Config
 	}
 
 	// Button is a shortcut for tele.Btn.

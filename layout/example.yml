@@ -10,7 +10,18 @@ commands:
 config:
   str: string
   num: 123
-  dur: 10m
+  strs:
+    - abc
+    - def
+  nums:
+    - 123
+    - 456
+  obj: &obj
+    dur: 10m
+  arr:
+    - <<: *obj
+    - <<: *obj
+
 
 buttons:
   # Shortened reply buttons

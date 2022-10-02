@@ -34,7 +34,26 @@ func TestLayout(t *testing.T) {
 	assert.Equal(t, 123, lt.Int("num"))
 	assert.Equal(t, int64(123), lt.Int64("num"))
 	assert.Equal(t, float64(123), lt.Float("num"))
-	assert.Equal(t, 10*time.Minute, lt.Duration("dur"))
+	assert.Equal(t, tele.ChatID(123), lt.ChatID("num"))
+
+	assert.Equal(t, []string{"abc", "def"}, lt.Strings("strs"))
+	assert.Equal(t, []int{123, 456}, lt.Ints("nums"))
+	assert.Equal(t, []int64{123, 456}, lt.Int64s("nums"))
+	assert.Equal(t, []float64{123, 456}, lt.Floats("nums"))
+
+	obj := lt.Get("obj")
+	assert.NotNil(t, obj)
+
+	const dur = 10 * time.Minute
+	assert.Equal(t, dur, obj.Duration("dur"))
+	assert.True(t, lt.Duration("obj.dur") == obj.Duration("dur"))
+
+	arr := lt.Slice("arr")
+	assert.Len(t, arr, 2)
+
+	for _, v := range arr {
+		assert.Equal(t, dur, v.Duration("dur"))
+	}
 
 	assert.Equal(t, &tele.Btn{
 		Unique: "pay",

@@ -8,7 +8,8 @@ import (
 type DefaultLayout struct {
 	locale string
 	lt     *Layout
-	*Config
+
+	Config
 }
 
 // Settings returns layout settings.

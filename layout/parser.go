@@ -9,6 +9,7 @@ import (
 	"text/template"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/viper"
 	tele "gopkg.in/telebot.v3"
 )
 
@@ -39,7 +40,12 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 		return err
 	}
 
-	lt.Config = &Config{v: aux.Config}
+	v := viper.New()
+	if err := v.MergeConfigMap(aux.Config); err != nil {
+		return err
+	}
+
+	lt.Config = Config{v: v}
 	lt.commands = aux.Commands
 
 	if pref := aux.Settings; pref != nil {
