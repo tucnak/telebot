@@ -405,23 +405,23 @@ func (b *Bot) ProcessUpdate(u Update) {
 			return
 		}
 
-		if m.VoiceChatStarted != nil {
-			b.handle(OnVoiceChatStarted, c)
+		if m.VideoChatStarted != nil {
+			b.handle(OnVideoChatStarted, c)
 			return
 		}
 
-		if m.VoiceChatEnded != nil {
-			b.handle(OnVoiceChatEnded, c)
+		if m.VideoChatEnded != nil {
+			b.handle(OnVideoChatEnded, c)
 			return
 		}
 
-		if m.VoiceChatParticipants != nil {
-			b.handle(OnVoiceChatParticipants, c)
+		if m.VideoChatParticipants != nil {
+			b.handle(OnVideoChatParticipants, c)
 			return
 		}
 
-		if m.VoiceChatScheduled != nil {
-			b.handle(OnVoiceChatScheduled, c)
+		if m.VideoChatScheduled != nil {
+			b.handle(OnVideoChatScheduled, c)
 			return
 		}
 

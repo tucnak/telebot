@@ -226,17 +226,17 @@ type Message struct {
 	// The domain name of the website on which the user has logged in.
 	ConnectedWebsite string `json:"connected_website,omitempty"`
 
-	// For a service message, a voice chat started in the chat.
-	VoiceChatStarted *VoiceChatStarted `json:"voice_chat_started,omitempty"`
+	// For a service message, a video chat started in the chat.
+	VideoChatStarted *VideoChatStarted `json:"video_chat_started,omitempty"`
 
-	// For a service message, a voice chat ended in the chat.
-	VoiceChatEnded *VoiceChatEnded `json:"voice_chat_ended,omitempty"`
+	// For a service message, a video chat ended in the chat.
+	VideoChatEnded *VideoChatEnded `json:"video_chat_ended,omitempty"`
 
-	// For a service message, some users were invited in the voice chat.
-	VoiceChatParticipants *VoiceChatParticipants `json:"voice_chat_participants_invited,omitempty"`
+	// For a service message, some users were invited in the video chat.
+	VideoChatParticipants *VideoChatParticipants `json:"video_chat_participants_invited,omitempty"`
 
-	// For a service message, a voice chat schedule in the chat.
-	VoiceChatScheduled *VoiceChatScheduled `json:"voice_chat_scheduled,omitempty"`
+	// For a service message, a video chat schedule in the chat.
+	VideoChatScheduled *VideoChatScheduled `json:"video_chat_scheduled,omitempty"`
 
 	// For a data sent by a Web App.
 	WebAppData *WebAppData `json:"web_app_data,omitempty"`

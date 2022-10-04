@@ -117,17 +117,17 @@ const (
 	// Will fire on chat join request.
 	OnChatJoinRequest = "\achat_join_request"
 
-	// Will fire on the start of a voice chat.
-	OnVoiceChatStarted = "\avoice_chat_started"
+	// Will fire on the start of a video chat.
+	OnVideoChatStarted = "\avideo_chat_started"
 
-	// Will fire on the end of a voice chat.
-	OnVoiceChatEnded = "\avoice_chat_ended"
+	// Will fire on the end of a video chat.
+	OnVideoChatEnded = "\avideo_chat_ended"
 
-	// Will fire on invited participants to the voice chat.
-	OnVoiceChatParticipants = "\avoice_chat_participants_invited"
+	// Will fire on invited participants to the video chat.
+	OnVideoChatParticipants = "\avideo_chat_participants_invited"
 
-	// Will fire on scheduling a voice chat.
-	OnVoiceChatScheduled = "\avoice_chat_scheduled"
+	// Will fire on scheduling a video chat.
+	OnVideoChatScheduled = "\avideo_chat_scheduled"
 
 	// Will fire on a proximity alert.
 	OnProximityAlert = "\aproximity_alert_triggered"

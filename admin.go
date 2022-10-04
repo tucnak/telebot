@@ -87,7 +87,7 @@ type Rights struct {
 	CanSendPolls        bool `json:"can_send_polls"`
 	CanSendOther        bool `json:"can_send_other_messages"`
 	CanAddPreviews      bool `json:"can_add_web_page_previews"`
-	CanManageVoiceChats bool `json:"can_manage_video_chats"` // TODO(v4): CanManageVideoChats
+	CanManageVideoChats bool `json:"can_manage_video_chats"`
 	CanManageChat       bool `json:"can_manage_chat"`
 }
 
@@ -116,7 +116,7 @@ func NoRestrictions() Rights {
 		CanSendPolls:        true,
 		CanSendOther:        true,
 		CanAddPreviews:      true,
-		CanManageVoiceChats: false,
+		CanManageVideoChats: false,
 		CanManageChat:       false,
 	}
 }
@@ -138,7 +138,7 @@ func AdminRights() Rights {
 		CanSendPolls:        true,
 		CanSendOther:        true,
 		CanAddPreviews:      true,
-		CanManageVoiceChats: true,
+		CanManageVideoChats: true,
 		CanManageChat:       true,
 	}
 }
