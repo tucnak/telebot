@@ -336,18 +336,36 @@ type CommandParams struct {
 
 // CommandScope object represents a scope to which bot commands are applied.
 type CommandScope struct {
-	Type   string `json:"type"`
-	ChatID int64  `json:"chat_id,omitempty"`
-	UserID int64  `json:"user_id,omitempty"`
+	Type   CommandScopeType `json:"type"`
+	ChatID int64            `json:"chat_id,omitempty"`
+	UserID int64            `json:"user_id,omitempty"`
 }
 
-// CommandScope types
+type CommandScopeType = string
+
+// CommandScope types.
 const (
-	CommandScopeDefault         = "default"
-	CommandScopeAllPrivateChats = "all_private_chats"
-	CommandScopeAllGroupChats   = "all_group_chats"
-	CommandScopeAllChatAdmin    = "all_chat_administrators"
-	CommandScopeChat            = "chat"
-	CommandScopeChatAdmin       = "chat_administrators"
-	CommandScopeChatMember      = "chat_member"
+	CommandScopeDefault         CommandScopeType = "default"
+	CommandScopeAllPrivateChats CommandScopeType = "all_private_chats"
+	CommandScopeAllGroupChats   CommandScopeType = "all_group_chats"
+	CommandScopeAllChatAdmin    CommandScopeType = "all_chat_administrators"
+	CommandScopeChat            CommandScopeType = "chat"
+	CommandScopeChatAdmin       CommandScopeType = "chat_administrators"
+	CommandScopeChatMember      CommandScopeType = "chat_member"
+)
+
+// MenuButton describes the bot's menu button in a private chat.
+type MenuButton struct {
+	Type   MenuButtonType `json:"type"`
+	Text   string         `json:"text,omitempty"`
+	WebApp *WebApp        `json:"web_app,omitempty"`
+}
+
+type MenuButtonType = string
+
+// MenuButton types.
+const (
+	MenuButtonDefault  MenuButtonType = "default"
+	MenuButtonCommands MenuButtonType = "commands"
+	MenuButtonWebApp   MenuButtonType = "web_app"
 )

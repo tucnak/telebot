@@ -971,13 +971,13 @@ func (b *Bot) EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*M
 // Delete removes the message, including service messages.
 // This function will panic upon nil Editable.
 //
-//     * A message can only be deleted if it was sent less than 48 hours ago.
-//     * A dice message in a private chat can only be deleted if it was sent more than 24 hours ago.
-//     * Bots can delete outgoing messages in private chats, groups, and supergroups.
-//     * Bots can delete incoming messages in private chats.
-//     * Bots granted can_post_messages permissions can delete outgoing messages in channels.
-//     * If the bot is an administrator of a group, it can delete any message there.
-//     * If the bot has can_delete_messages permission in a supergroup or a
+//     - A message can only be deleted if it was sent less than 48 hours ago.
+//     - A dice message in a private chat can only be deleted if it was sent more than 24 hours ago.
+//     - Bots can delete outgoing messages in private chats, groups, and supergroups.
+//     - Bots can delete incoming messages in private chats.
+//     - Bots granted can_post_messages permissions can delete outgoing messages in channels.
+//     - If the bot is an administrator of a group, it can delete any message there.
+//     - If the bot has can_delete_messages permission in a supergroup or a
 //       channel, it can delete any message there.
 //
 func (b *Bot) Delete(msg Editable) error {
@@ -1522,6 +1522,51 @@ func (b *Bot) SetCommands(opts ...interface{}) error {
 func (b *Bot) DeleteCommands(opts ...interface{}) error {
 	params := extractCommandsParams(opts...)
 	_, err := b.Raw("deleteMyCommands", params)
+	return err
+}
+
+// MenuButton returns the current value of the bot's menu button in a private chat,
+// or the default menu button.
+func (b *Bot) MenuButton(chat *User) (*MenuButton, error) {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+
+	data, err := b.Raw("getChatMenuButton", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result *MenuButton
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return resp.Result, nil
+}
+
+// SetMenuButton changes the bot's menu button in a private chat,
+// or the default menu button.
+//
+// It accepts two kinds of menu button arguments:
+//
+//     - MenuButtonType for simple menu buttons (default, commands)
+//     - MenuButton complete structure for web_app menu button type
+//
+func (b *Bot) SetMenuButton(chat *User, mb interface{}) error {
+	params := map[string]interface{}{
+		"chat_id": chat.Recipient(),
+	}
+
+	switch v := mb.(type) {
+	case MenuButtonType:
+		params["menu_button"] = MenuButton{Type: v}
+	case *MenuButton:
+		params["menu_button"] = v
+	}
+
+	_, err := b.Raw("setChatMenuButton", params)
 	return err
 }
 
