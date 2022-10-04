@@ -47,10 +47,11 @@ type Webhook struct {
 	SecretToken    string   `json:"secret_token"`
 
 	// (WebhookInfo)
-	HasCustomCert  bool   `json:"has_custom_certificate"`
-	PendingUpdates int    `json:"pending_update_count"`
-	ErrorUnixtime  int64  `json:"last_error_date"`
-	ErrorMessage   string `json:"last_error_message"`
+	HasCustomCert     bool   `json:"has_custom_certificate"`
+	PendingUpdates    int    `json:"pending_update_count"`
+	ErrorUnixtime     int64  `json:"last_error_date"`
+	ErrorMessage      string `json:"last_error_message"`
+	SyncErrorUnixtime int64  `json:"last_synchronization_error_date"`
 
 	TLS      *WebhookTLS
 	Endpoint *WebhookEndpoint
