@@ -54,8 +54,8 @@ func TestNewBot(t *testing.T) {
 
 	assert.NotNil(t, b.Me)
 	assert.Equal(t, DefaultApiURL, b.URL)
-	assert.Equal(t, http.DefaultClient, b.client)
 	assert.Equal(t, 100, cap(b.Updates))
+	assert.NotZero(t, b.client.Timeout)
 
 	pref = defaultSettings()
 	client := &http.Client{Timeout: time.Minute}

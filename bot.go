@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // NewBot does try to build a Bot with token `token`, which
@@ -20,7 +21,7 @@ func NewBot(pref Settings) (*Bot, error) {
 
 	client := pref.Client
 	if client == nil {
-		client = http.DefaultClient
+		client = &http.Client{Timeout: time.Minute}
 	}
 
 	if pref.URL == "" {
