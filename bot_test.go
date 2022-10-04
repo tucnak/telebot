@@ -588,32 +588,40 @@ func TestBot(t *testing.T) {
 	})
 
 	t.Run("Commands", func(t *testing.T) {
-		orig := []Command{{
-			Text:        "test",
-			Description: "test command",
-		}}
-		require.NoError(t, b.SetCommands(orig))
+		var (
+			set1 = []Command{{
+				Text:        "test1",
+				Description: "test command 1",
+			}}
+			set2 = []Command{{
+				Text:        "test2",
+				Description: "test command 2",
+			}}
+			scope = CommandScope{
+				Type:   CommandScopeChat,
+				ChatID: chatID,
+			}
+		)
+
+		err := b.SetCommands(set1)
+		require.NoError(t, err)
 
 		cmds, err := b.Commands()
 		require.NoError(t, err)
-		assert.Equal(t, orig, cmds)
+		assert.Equal(t, set1, cmds)
 
-		orig2 := []Command{{
-			Text:        "test_2",
-			Description: "test command 2",
-		}}
-		require.NoError(t, b.SetCommands(orig2, CommandScope{Type: CommandScopeChat, ChatID: chatID}, "en"))
+		err = b.SetCommands(set2, "en", scope)
+		require.NoError(t, err)
 
 		cmds, err = b.Commands()
 		require.NoError(t, err)
-		assert.Equal(t, orig, cmds)
+		assert.Equal(t, set1, cmds)
 
-		cmds, err = b.Commands(CommandScope{Type: CommandScopeChat, ChatID: chatID}, "en")
+		cmds, err = b.Commands("en", scope)
 		require.NoError(t, err)
-		assert.Equal(t, orig2, cmds)
+		assert.Equal(t, set2, cmds)
 
-		require.NoError(t, b.DeleteCommands(CommandScope{Type: CommandScopeChat, ChatID: chatID}, "en"))
-
+		require.NoError(t, b.DeleteCommands("en", scope))
 		require.NoError(t, b.DeleteCommands())
 	})
 
