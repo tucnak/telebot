@@ -87,7 +87,7 @@ type Rights struct {
 	CanSendPolls        bool `json:"can_send_polls"`
 	CanSendOther        bool `json:"can_send_other_messages"`
 	CanAddPreviews      bool `json:"can_add_web_page_previews"`
-	CanManageVoiceChats bool `json:"can_manage_voice_chats"`
+	CanManageVoiceChats bool `json:"can_manage_video_chats"` // TODO(v4): CanManageVideoChats
 	CanManageChat       bool `json:"can_manage_chat"`
 }
 
