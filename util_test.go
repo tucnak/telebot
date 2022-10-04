@@ -60,6 +60,7 @@ func TestEmbedRights(t *testing.T) {
 	embedRights(params, rights)
 
 	expected := map[string]interface{}{
+		"is_anonymous":              false,
 		"chat_id":                   "1",
 		"user_id":                   "2",
 		"can_be_edited":             true,

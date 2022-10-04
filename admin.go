@@ -73,14 +73,17 @@ func (c *ChatMemberUpdate) Time() time.Time {
 
 // Rights is a list of privileges available to chat members.
 type Rights struct {
+	// Anonymous is true, if the user's presence in the chat is hidden.
+	Anonymous bool `json:"is_anonymous"`
+
 	CanBeEdited         bool `json:"can_be_edited"`
 	CanChangeInfo       bool `json:"can_change_info"`
 	CanPostMessages     bool `json:"can_post_messages"`
 	CanEditMessages     bool `json:"can_edit_messages"`
 	CanDeleteMessages   bool `json:"can_delete_messages"`
+	CanPinMessages      bool `json:"can_pin_messages"`
 	CanInviteUsers      bool `json:"can_invite_users"`
 	CanRestrictMembers  bool `json:"can_restrict_members"`
-	CanPinMessages      bool `json:"can_pin_messages"`
 	CanPromoteMembers   bool `json:"can_promote_members"`
 	CanSendMessages     bool `json:"can_send_messages"`
 	CanSendMedia        bool `json:"can_send_media_messages"`
@@ -308,5 +311,37 @@ func (b *Bot) UnbanSenderChat(chat *Chat, sender Recipient) error {
 	}
 
 	_, err := b.Raw("unbanChatSenderChat", params)
+	return err
+}
+
+// DefaultRights returns the current default administrator rights of the bot.
+func (b *Bot) DefaultRights(forChannels bool) (*Rights, error) {
+	params := map[string]bool{
+		"for_channels": forChannels,
+	}
+
+	data, err := b.Raw("getMyDefaultAdministratorRights", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result *Rights
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return resp.Result, nil
+}
+
+// SetDefaultRights changes the default administrator rights requested by the bot
+// when it's added as an administrator to groups or channels.
+func (b *Bot) SetDefaultRights(rights Rights, forChannels bool) error {
+	params := map[string]interface{}{
+		"rights":       rights,
+		"for_channels": forChannels,
+	}
+
+	_, err := b.Raw("setMyDefaultAdministratorRights", params)
 	return err
 }

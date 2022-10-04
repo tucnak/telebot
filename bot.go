@@ -1031,9 +1031,9 @@ func (b *Bot) Ship(query *ShippingQuery, what ...interface{}) error {
 	}
 
 	if len(what) == 0 {
-		params["ok"] = "True"
+		params["ok"] = "true"
 	} else if s, ok := what[0].(string); ok {
-		params["ok"] = "False"
+		params["ok"] = "false"
 		params["error_message"] = s
 	} else {
 		var opts []ShippingOption
@@ -1045,7 +1045,7 @@ func (b *Bot) Ship(query *ShippingQuery, what ...interface{}) error {
 			opts = append(opts, opt)
 		}
 
-		params["ok"] = "True"
+		params["ok"] = "true"
 		data, _ := json.Marshal(opts)
 		params["shipping_options"] = string(data)
 	}
@@ -1061,7 +1061,7 @@ func (b *Bot) Accept(query *PreCheckoutQuery, errorMessage ...string) error {
 	}
 
 	if len(errorMessage) == 0 {
-		params["ok"] = "True"
+		params["ok"] = "true"
 	} else {
 		params["ok"] = "False"
 		params["error_message"] = errorMessage[0]
