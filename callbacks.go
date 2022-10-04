@@ -80,12 +80,13 @@ type InlineButton struct {
 	// It will be used as a callback endpoint.
 	Unique string `json:"unique,omitempty"`
 
-	Text            string `json:"text"`
-	URL             string `json:"url,omitempty"`
-	Data            string `json:"callback_data,omitempty"`
-	InlineQuery     string `json:"switch_inline_query,omitempty"`
-	InlineQueryChat string `json:"switch_inline_query_current_chat"`
-	Login           *Login `json:"login_url,omitempty"`
+	Text            string      `json:"text"`
+	URL             string      `json:"url,omitempty"`
+	Data            string      `json:"callback_data,omitempty"`
+	InlineQuery     string      `json:"switch_inline_query,omitempty"`
+	InlineQueryChat string      `json:"switch_inline_query_current_chat"`
+	WebApp          *WebAppInfo `json:"web_app,omitempty"`
+	Login           *Login      `json:"login_url,omitempty"`
 }
 
 // With returns a copy of the button with data.
@@ -127,6 +128,12 @@ type Login struct {
 	Text        string `json:"forward_text,omitempty"`
 	Username    string `json:"bot_username,omitempty"`
 	WriteAccess bool   `json:"request_write_access,omitempty"`
+}
+
+// WebAppInfo represents a parameter of the inline keyboard button
+// or the keyboard button used to launch Web App.
+type WebAppInfo struct {
+	URL string `json:"url"`
 }
 
 // MarshalJSON implements json.Marshaler interface.

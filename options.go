@@ -169,9 +169,10 @@ func (r *ReplyMarkup) copy() *ReplyMarkup {
 type ReplyButton struct {
 	Text string `json:"text"`
 
-	Contact  bool     `json:"request_contact,omitempty"`
-	Location bool     `json:"request_location,omitempty"`
-	Poll     PollType `json:"request_poll,omitempty"`
+	Contact  bool       `json:"request_contact,omitempty"`
+	Location bool       `json:"request_location,omitempty"`
+	Poll     PollType   `json:"request_poll,omitempty"`
+	WebApp   WebAppInfo `json:"request_web_app,omitempty"`
 }
 
 // MarshalJSON implements json.Marshaler. It allows to pass

@@ -145,6 +145,10 @@ type Context interface {
 	// See Respond from bot.go.
 	Respond(resp ...*CallbackResponse) error
 
+	// AnswerWebApp sends a response to the Web App query.
+	// See AnswerWebApp from bot.go.
+	AnswerWebApp(resp *WebAppQueryResponse) error
+
 	// Get retrieves data from the context.
 	Get(key string) interface{}
 
@@ -452,6 +456,14 @@ func (c *nativeContext) Respond(resp ...*CallbackResponse) error {
 		return errors.New("telebot: context callback is nil")
 	}
 	return c.b.Respond(c.u.Callback, resp...)
+}
+
+func (c *nativeContext) AnswerWebApp(resp *WebAppQueryResponse) error {
+	if c.u.Query == nil {
+		return errors.New("telebot: context inline query is nil")
+	}
+	_, err := c.b.AnswerWebApp(c.u.Query, resp)
+	return err
 }
 
 func (c *nativeContext) Set(key string, value interface{}) {

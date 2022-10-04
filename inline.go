@@ -137,3 +137,15 @@ func inferIQR(result Result) error {
 
 	return nil
 }
+
+// WebAppQueryResponse builds a response to an web app query.
+type WebAppQueryResponse struct {
+	// (Required) Unique identifier for the query to be answered
+	WebAppQueryID string `json:"web_app_query_id"`
+	// (Required) A object describing the message to be sent
+	Result Result `json:"result"`
+}
+
+type SentWebAppMessage struct {
+	InlineMessageID string `json:"inline_message_id"`
+}

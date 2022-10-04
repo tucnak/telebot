@@ -305,6 +305,11 @@ func TestBotProcessUpdate(t *testing.T) {
 		return nil
 	})
 
+	b.Handle(OnWebApp, func(c Context) error {
+		assert.Equal(t, "webapp", c.Message().WebAppData.Data)
+		return nil
+	})
+
 	b.ProcessUpdate(Update{Message: &Message{Text: "/start"}})
 	b.ProcessUpdate(Update{Message: &Message{Text: "/start@other_bot"}})
 	b.ProcessUpdate(Update{Message: &Message{Text: "hello"}})
@@ -345,6 +350,7 @@ func TestBotProcessUpdate(t *testing.T) {
 	b.ProcessUpdate(Update{PreCheckoutQuery: &PreCheckoutQuery{ID: "checkout"}})
 	b.ProcessUpdate(Update{Poll: &Poll{ID: "poll"}})
 	b.ProcessUpdate(Update{PollAnswer: &PollAnswer{PollID: "poll"}})
+	b.ProcessUpdate(Update{Message: &Message{WebAppData: &WebAppData{Data: "webapp"}}})
 }
 
 func TestBotOnError(t *testing.T) {
