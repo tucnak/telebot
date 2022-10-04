@@ -80,13 +80,30 @@ type InlineButton struct {
 	// It will be used as a callback endpoint.
 	Unique string `json:"unique,omitempty"`
 
-	Text            string      `json:"text"`
-	URL             string      `json:"url,omitempty"`
-	Data            string      `json:"callback_data,omitempty"`
-	InlineQuery     string      `json:"switch_inline_query,omitempty"`
-	InlineQueryChat string      `json:"switch_inline_query_current_chat"`
-	WebApp          *WebAppInfo `json:"web_app,omitempty"`
-	Login           *Login      `json:"login_url,omitempty"`
+	Text            string  `json:"text"`
+	URL             string  `json:"url,omitempty"`
+	Data            string  `json:"callback_data,omitempty"`
+	InlineQuery     string  `json:"switch_inline_query,omitempty"`
+	InlineQueryChat string  `json:"switch_inline_query_current_chat"`
+	WebApp          *WebApp `json:"web_app,omitempty"`
+	Login           *Login  `json:"login_url,omitempty"`
+}
+
+// MarshalJSON implements json.Marshaler interface.
+// It needed to avoid InlineQueryChat and Login fields conflict.
+// If you have Login field in your button, InlineQueryChat must be skipped.
+func (t *InlineButton) MarshalJSON() ([]byte, error) {
+	type IB InlineButton
+
+	if t.Login != nil {
+		return json.Marshal(struct {
+			IB
+			InlineQueryChat string `json:"switch_inline_query_current_chat,omitempty"`
+		}{
+			IB: IB(*t),
+		})
+	}
+	return json.Marshal(IB(*t))
 }
 
 // With returns a copy of the button with data.
@@ -128,27 +145,4 @@ type Login struct {
 	Text        string `json:"forward_text,omitempty"`
 	Username    string `json:"bot_username,omitempty"`
 	WriteAccess bool   `json:"request_write_access,omitempty"`
-}
-
-// WebAppInfo represents a parameter of the inline keyboard button
-// or the keyboard button used to launch Web App.
-type WebAppInfo struct {
-	URL string `json:"url"`
-}
-
-// MarshalJSON implements json.Marshaler interface.
-// It needed to avoid InlineQueryChat and Login fields conflict.
-// If you have Login field in your button, InlineQueryChat must be skipped.
-func (t *InlineButton) MarshalJSON() ([]byte, error) {
-	type InlineButtonJSON InlineButton
-
-	if t.Login != nil {
-		return json.Marshal(struct {
-			InlineButtonJSON
-			InlineQueryChat string `json:"switch_inline_query_current_chat,omitempty"`
-		}{
-			InlineButtonJSON: InlineButtonJSON(*t),
-		})
-	}
-	return json.Marshal(InlineButtonJSON(*t))
 }

@@ -238,7 +238,7 @@ type Message struct {
 	// For a service message, a voice chat schedule in the chat.
 	VoiceChatScheduled *VoiceChatScheduled `json:"voice_chat_scheduled,omitempty"`
 
-	// For a data sent by a Web App
+	// For a data sent by a Web App.
 	WebAppData *WebAppData `json:"web_app_data,omitempty"`
 
 	// For a service message, represents the content of a service message,

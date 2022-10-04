@@ -334,12 +334,6 @@ type Venue struct {
 	GooglePlaceType string `json:"google_place_type,omitempty"`
 }
 
-// WebAppData object represents a data sent from a Web App to the bot
-type WebAppData struct {
-	Data       string `json:"data"`
-	ButtonText string `json:"button_text"`
-}
-
 // Dice object represents a dice with a random value
 // from 1 to 6 for currently supported base emoji.
 type Dice struct {

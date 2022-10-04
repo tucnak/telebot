@@ -145,9 +145,9 @@ type Context interface {
 	// See Respond from bot.go.
 	Respond(resp ...*CallbackResponse) error
 
-	// AnswerWebApp sends a response to the Web App query.
+	// AnswerWebApp sends a response to web app query.
 	// See AnswerWebApp from bot.go.
-	AnswerWebApp(resp *WebAppQueryResponse) error
+	AnswerWebApp(result Result) error
 
 	// Get retrieves data from the context.
 	Get(key string) interface{}
@@ -444,13 +444,6 @@ func (c *nativeContext) Accept(errorMessage ...string) error {
 	return c.b.Accept(c.u.PreCheckoutQuery, errorMessage...)
 }
 
-func (c *nativeContext) Answer(resp *QueryResponse) error {
-	if c.u.Query == nil {
-		return errors.New("telebot: context inline query is nil")
-	}
-	return c.b.Answer(c.u.Query, resp)
-}
-
 func (c *nativeContext) Respond(resp ...*CallbackResponse) error {
 	if c.u.Callback == nil {
 		return errors.New("telebot: context callback is nil")
@@ -458,11 +451,18 @@ func (c *nativeContext) Respond(resp ...*CallbackResponse) error {
 	return c.b.Respond(c.u.Callback, resp...)
 }
 
-func (c *nativeContext) AnswerWebApp(resp *WebAppQueryResponse) error {
+func (c *nativeContext) Answer(resp *QueryResponse) error {
 	if c.u.Query == nil {
 		return errors.New("telebot: context inline query is nil")
 	}
-	_, err := c.b.AnswerWebApp(c.u.Query, resp)
+	return c.b.Answer(c.u.Query, resp)
+}
+
+func (c *nativeContext) AnswerWebApp(result Result) error {
+	if c.u.Message == nil || c.u.Message.WebAppData == nil {
+		return errors.New("telebot: context web app is nil")
+	}
+	_, err := c.b.AnswerWebApp(c.u.Query, result)
 	return err
 }
 

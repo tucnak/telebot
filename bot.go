@@ -1071,20 +1071,6 @@ func (b *Bot) Accept(query *PreCheckoutQuery, errorMessage ...string) error {
 	return err
 }
 
-// Answer sends a response for a given inline query. A query can only
-// be responded to once, subsequent attempts to respond to the same query
-// will result in an error.
-func (b *Bot) Answer(query *Query, resp *QueryResponse) error {
-	resp.QueryID = query.ID
-
-	for _, result := range resp.Results {
-		result.Process(b)
-	}
-
-	_, err := b.Raw("answerInlineQuery", resp)
-	return err
-}
-
 // Respond sends a response for a given callback query. A callback can
 // only be responded to once, subsequent attempts to respond to the same callback
 // will result in an error.
@@ -1107,27 +1093,43 @@ func (b *Bot) Respond(c *Callback, resp ...*CallbackResponse) error {
 	return err
 }
 
+// Answer sends a response for a given inline query. A query can only
+// be responded to once, subsequent attempts to respond to the same query
+// will result in an error.
+func (b *Bot) Answer(query *Query, resp *QueryResponse) error {
+	resp.QueryID = query.ID
+
+	for _, result := range resp.Results {
+		result.Process(b)
+	}
+
+	_, err := b.Raw("answerInlineQuery", resp)
+	return err
+}
+
 // AnswerWebApp sends a response for a query from Web App and returns
 // information about an inline message sent by a Web App on behalf of a user
-func (b *Bot) AnswerWebApp(query *Query, resp *WebAppQueryResponse) (SentWebAppMessage, error) {
-	resp.WebAppQueryID = query.ID
-	resp.Result.Process(b)
+func (b *Bot) AnswerWebApp(query *Query, r Result) (*WebAppMessage, error) {
+	r.Process(b)
 
-	data, err := b.Raw("answerWebAppQuery", resp)
+	params := map[string]interface{}{
+		"web_app_query_id": query.ID,
+		"result":           r,
+	}
 
+	data, err := b.Raw("answerWebAppQuery", params)
 	if err != nil {
-		return SentWebAppMessage{}, err
+		return nil, err
 	}
 
-	var response struct {
-		Result SentWebAppMessage
+	var resp struct {
+		Result *WebAppMessage
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
 	}
 
-	if err := json.Unmarshal(data, &response); err != nil {
-		return SentWebAppMessage{}, wrapError(err)
-	}
-
-	return response.Result, err
+	return resp.Result, err
 }
 
 // FileByID returns full file object including File.FilePath, allowing you to
@@ -1425,6 +1427,7 @@ func (b *Bot) ChatByID(id int64) (*Chat, error) {
 	return b.ChatByUsername(strconv.FormatInt(id, 10))
 }
 
+// ChatByUsername fetches chat info by its username.
 func (b *Bot) ChatByUsername(name string) (*Chat, error) {
 	params := map[string]string{
 		"chat_id": name,

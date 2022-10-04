@@ -18,7 +18,7 @@
 //				return
 //			}
 //
-//			b.Handle(tele.OnText, func(c tele.Context) error {
+//			b.Handle("/start", func(c tele.Context) error {
 //				return c.Send("Hello world!")
 //			})
 //
