@@ -23,6 +23,24 @@ func (b *Bot) debug(err error) {
 	}
 }
 
+func verbose(method string, payload interface{}, data []byte) {
+	body, _ := json.Marshal(payload)
+	body = bytes.ReplaceAll(body, []byte(`\"`), []byte(`"`))
+	body = bytes.ReplaceAll(body, []byte(`"{`), []byte(`{`))
+	body = bytes.ReplaceAll(body, []byte(`}"`), []byte(`}`))
+
+	indent := func(b []byte) string {
+		var buf bytes.Buffer
+		json.Indent(&buf, b, "", "  ")
+		return buf.String()
+	}
+
+	log.Printf(
+		"[verbose] telebot: sent request\nMethod: %v\nParams: %v\nResponse: %v",
+		method, indent(body), indent(data),
+	)
+}
+
 func (b *Bot) runHandler(h HandlerFunc, c Context) {
 	f := func() {
 		if err := h(c); err != nil {
@@ -172,6 +190,21 @@ func extractOptions(how []interface{}) *SendOptions {
 	return opts
 }
 
+// extractCommandsParams extracts parameters for commands-related methods from the given options.
+func extractCommandsParams(opts ...interface{}) (params CommandParams) {
+	for _, opt := range opts {
+		switch value := opt.(type) {
+		case []Command:
+			params.Commands = value
+		case string:
+			params.LanguageCode = value
+		case CommandScope:
+			params.Scope = &value
+		}
+	}
+	return
+}
+
 func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 	if b.parseMode != ModeDefault {
 		params["parse_mode"] = b.parseMode
@@ -268,21 +301,6 @@ func isUserInList(user *User, list []User) bool {
 func intsToStrs(ns []int) (s []string) {
 	for _, n := range ns {
 		s = append(s, strconv.Itoa(n))
-	}
-	return
-}
-
-// extractCommandsParams extracts parameters for commands-related methods from the given options.
-func extractCommandsParams(opts ...interface{}) (params CommandParams) {
-	for _, opt := range opts {
-		switch value := opt.(type) {
-		case []Command:
-			params.Commands = value
-		case string:
-			params.LanguageCode = value
-		case CommandScope:
-			params.Scope = &value
-		}
 	}
 	return
 }
