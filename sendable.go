@@ -87,7 +87,7 @@ func (d *Document) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 	b.embedSendOptions(params, opt)
 
 	if d.FileSize != 0 {
-		params["file_size"] = strconv.Itoa(d.FileSize)
+		params["file_size"] = strconv.FormatInt(d.FileSize, 10)
 	}
 	if d.DisableTypeDetection {
 		params["disable_content_type_detection"] = "true"

@@ -9,7 +9,7 @@ import (
 type File struct {
 	FileID   string `json:"file_id"`
 	UniqueID string `json:"file_unique_id"`
-	FileSize int    `json:"file_size"`
+	FileSize int64  `json:"file_size"`
 
 	// FilePath is used for files on Telegram server.
 	FilePath string `json:"file_path"`
