@@ -274,6 +274,9 @@ type MessageEntity struct {
 
 	// (Optional) For EntityCodeBlock entity type only.
 	Language string `json:"language,omitempty"`
+
+	// (Optional) For EntityCustomEmoji entity type only.
+	CustomEmoji string `json:"custom_emoji_id"`
 }
 
 // Entities is used to set message's text entities as a send option.
