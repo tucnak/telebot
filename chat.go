@@ -97,6 +97,9 @@ type ChatMember struct {
 	// Use tele.Forever().
 	//
 	RestrictedUntil int64 `json:"until_date,omitempty"`
+
+	JoinToSend    string `json:"join_to_send_messages"`
+	JoinByRequest string `json:"join_by_request"`
 }
 
 // ChatID represents a chat or an user integer ID, which can be used
