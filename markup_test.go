@@ -22,6 +22,7 @@ func TestBtn(t *testing.T) {
 	assert.Equal(t, &InlineButton{Text: "T", InlineQuery: "q"}, r.Query("T", "q").Inline())
 	assert.Equal(t, &InlineButton{Text: "T", InlineQueryChat: "q"}, r.QueryChat("T", "q").Inline())
 	assert.Equal(t, &InlineButton{Text: "T", Login: &Login{Text: "T"}}, r.Login("T", &Login{Text: "T"}).Inline())
+	assert.Equal(t, &InlineButton{Text: "T", WebApp: &WebApp{URL: "url"}}, r.WebApp("T", &WebApp{URL: "url"}).Inline())
 }
 
 func TestOptions(t *testing.T) {

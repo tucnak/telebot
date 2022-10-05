@@ -89,6 +89,7 @@ type Btn struct {
 	Location        bool     `json:"request_location,omitempty"`
 	Poll            PollType `json:"request_poll,omitempty"`
 	Login           *Login   `json:"login_url,omitempty"`
+	WebApp          *WebApp  `json:"web_app,omitempty"`
 }
 
 // Row represents an array of buttons, a row.
@@ -193,6 +194,10 @@ func (r *ReplyMarkup) Login(text string, login *Login) Btn {
 	return Btn{Login: login, Text: text}
 }
 
+func (r *ReplyMarkup) WebApp(text string, app *WebApp) Btn {
+	return Btn{Text: text, WebApp: app}
+}
+
 // ReplyButton represents a button displayed in reply-keyboard.
 //
 // Set either Contact or Location to true in order to request
@@ -230,8 +235,8 @@ type InlineButton struct {
 	Data            string  `json:"callback_data,omitempty"`
 	InlineQuery     string  `json:"switch_inline_query,omitempty"`
 	InlineQueryChat string  `json:"switch_inline_query_current_chat"`
-	WebApp          *WebApp `json:"web_app,omitempty"`
 	Login           *Login  `json:"login_url,omitempty"`
+	WebApp          *WebApp `json:"web_app,omitempty"`
 }
 
 // MarshalJSON implements json.Marshaler interface.
@@ -274,6 +279,7 @@ func (b Btn) Reply() *ReplyButton {
 		Contact:  b.Contact,
 		Location: b.Location,
 		Poll:     b.Poll,
+		WebApp:   b.WebApp,
 	}
 }
 
@@ -286,6 +292,7 @@ func (b Btn) Inline() *InlineButton {
 		InlineQuery:     b.InlineQuery,
 		InlineQueryChat: b.InlineQueryChat,
 		Login:           b.Login,
+		WebApp:          b.WebApp,
 	}
 }
 
