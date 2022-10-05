@@ -240,12 +240,12 @@ type InlineButton struct {
 }
 
 // MarshalJSON implements json.Marshaler interface.
-// It needed to avoid InlineQueryChat and Login fields conflict.
-// If you have Login field in your button, InlineQueryChat must be skipped.
+// It needed to avoid InlineQueryChat and Login or WebApp fields conflict.
+// If you have Login or WebApp field in your button, InlineQueryChat must be skipped.
 func (t *InlineButton) MarshalJSON() ([]byte, error) {
 	type IB InlineButton
 
-	if t.Login != nil {
+	if t.Login != nil || t.WebApp != nil {
 		return json.Marshal(struct {
 			IB
 			InlineQueryChat string `json:"switch_inline_query_current_chat,omitempty"`
