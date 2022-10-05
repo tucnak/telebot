@@ -57,6 +57,7 @@ type Chat struct {
 	ChatLocation     *ChatLocation `json:"location,omitempty"`
 	Private          bool          `json:"has_private_forwards,omitempty"`
 	Protected        bool          `json:"has_protected_content,omitempty"`
+	NoVoiceAndVideo  bool          `json:"has_restricted_voice_and_video_messages"`
 }
 
 type ChatLocation struct {
