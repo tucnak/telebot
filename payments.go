@@ -3,6 +3,8 @@ package telebot
 import (
 	"encoding/json"
 	"math"
+	"strconv"
+	"strings"
 )
 
 // ShippingQuery contains information about an incoming shipping query.
@@ -91,6 +93,48 @@ type Invoice struct {
 	SendPhoneNumber     bool `json:"send_phone_number_to_provider"`
 	SendEmail           bool `json:"send_email_to_provider"`
 	Flexible            bool `json:"is_flexible"`
+}
+
+func (i Invoice) params() map[string]string {
+	params := map[string]string{
+		"title":                         i.Title,
+		"description":                   i.Description,
+		"start_parameter":               i.Start,
+		"payload":                       i.Payload,
+		"provider_token":                i.Token,
+		"provider_data":                 i.Data,
+		"currency":                      i.Currency,
+		"max_tip_amount":                strconv.Itoa(i.MaxTipAmount),
+		"need_name":                     strconv.FormatBool(i.NeedName),
+		"need_phone_number":             strconv.FormatBool(i.NeedPhoneNumber),
+		"need_email":                    strconv.FormatBool(i.NeedEmail),
+		"need_shipping_address":         strconv.FormatBool(i.NeedShippingAddress),
+		"send_phone_number_to_provider": strconv.FormatBool(i.SendPhoneNumber),
+		"send_email_to_provider":        strconv.FormatBool(i.SendEmail),
+		"is_flexible":                   strconv.FormatBool(i.Flexible),
+	}
+	if i.Photo != nil {
+		if i.Photo.FileURL != "" {
+			params["photo_url"] = i.Photo.FileURL
+		}
+		if i.PhotoSize > 0 {
+			params["photo_size"] = strconv.Itoa(i.PhotoSize)
+		}
+		if i.Photo.Width > 0 {
+			params["photo_width"] = strconv.Itoa(i.Photo.Width)
+		}
+		if i.Photo.Height > 0 {
+			params["photo_height"] = strconv.Itoa(i.Photo.Height)
+		}
+	}
+	if len(i.Prices) > 0 {
+		data, _ := json.Marshal(i.Prices)
+		params["prices"] = string(data)
+	}
+	if len(i.SuggestedTipAmounts) > 0 {
+		params["suggested_tip_amounts"] = "[" + strings.Join(intsToStrs(i.SuggestedTipAmounts), ",") + "]"
+	}
+	return params
 }
 
 // Price represents a portion of the price for goods or services.

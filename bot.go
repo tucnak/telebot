@@ -1268,6 +1268,21 @@ func (b *Bot) StopPoll(msg Editable, opts ...interface{}) (*Poll, error) {
 	return resp.Result, nil
 }
 
+func (b *Bot) CreateInvoice(i Invoice) (string, error) {
+	data, err := b.Raw("createInvoiceLink", i.params())
+	if err != nil {
+		return "", err
+	}
+
+	var resp struct {
+		Result string
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return "", wrapError(err)
+	}
+	return resp.Result, nil
+}
+
 // InviteLink should be used to export chat's invite link.
 func (b *Bot) InviteLink(chat *Chat) (string, error) {
 	params := map[string]string{
