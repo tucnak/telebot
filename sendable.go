@@ -399,3 +399,10 @@ func (g *Game) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 
 	return extractMessage(data)
 }
+
+func thumbnailToFilemap(thumb *Photo) map[string]File {
+	if thumb != nil {
+		return map[string]File{"thumb": thumb.File}
+	}
+	return nil
+}

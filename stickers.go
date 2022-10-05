@@ -7,7 +7,6 @@ import (
 
 type StickerSetType = string
 
-// StickerSet types.
 const (
 	StickerRegular     = "regular"
 	StickerMask        = "mask"
@@ -39,6 +38,16 @@ type MaskPosition struct {
 	YShift  float32     `json:"y_shift"`
 	Scale   float32     `json:"scale"`
 }
+
+// MaskFeature defines sticker mask position.
+type MaskFeature string
+
+const (
+	FeatureForehead MaskFeature = "forehead"
+	FeatureEyes     MaskFeature = "eyes"
+	FeatureMouth    MaskFeature = "mouth"
+	FeatureChin     MaskFeature = "chin"
+)
 
 // UploadSticker uploads a PNG file with a sticker for later use.
 func (b *Bot) UploadSticker(to Recipient, png *File) (*File, error) {

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"math"
 	"strconv"
-	"strings"
 )
 
 // ShippingQuery contains information about an incoming shipping query.
@@ -132,7 +131,13 @@ func (i Invoice) params() map[string]string {
 		params["prices"] = string(data)
 	}
 	if len(i.SuggestedTipAmounts) > 0 {
-		params["suggested_tip_amounts"] = "[" + strings.Join(intsToStrs(i.SuggestedTipAmounts), ",") + "]"
+		var amounts []string
+		for _, n := range i.SuggestedTipAmounts {
+			amounts = append(amounts, strconv.Itoa(n))
+		}
+
+		data, _ := json.Marshal(amounts)
+		params["suggested_tip_amounts"] = string(data)
 	}
 	return params
 }
@@ -166,11 +171,18 @@ func (c Currency) ToTotal(total float64) int {
 	return int(total) * int(math.Pow(10, float64(c.Exp)))
 }
 
-var SupportedCurrencies = make(map[string]Currency)
-
-func init() {
-	err := json.Unmarshal([]byte(dataCurrencies), &SupportedCurrencies)
+// CreateInvoiceLink creates a link for a payment invoice.
+func (b *Bot) CreateInvoiceLink(i Invoice) (string, error) {
+	data, err := b.Raw("createInvoiceLink", i.params())
 	if err != nil {
-		panic(err)
+		return "", err
 	}
+
+	var resp struct {
+		Result string
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return "", wrapError(err)
+	}
+	return resp.Result, nil
 }

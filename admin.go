@@ -6,71 +6,6 @@ import (
 	"time"
 )
 
-// ChatInviteLink object represents an invite for a chat.
-type ChatInviteLink struct {
-	// The invite link.
-	InviteLink string `json:"invite_link"`
-
-	// Invite link name.
-	Name string `json:"name"`
-
-	// The creator of the link.
-	Creator *User `json:"creator"`
-
-	// If the link is primary.
-	IsPrimary bool `json:"is_primary"`
-
-	// If the link is revoked.
-	IsRevoked bool `json:"is_revoked"`
-
-	// (Optional) Point in time when the link will expire,
-	// use ExpireDate() to get time.Time.
-	ExpireUnixtime int64 `json:"expire_date,omitempty"`
-
-	// (Optional) Maximum number of users that can be members of
-	// the chat simultaneously.
-	MemberLimit int `json:"member_limit,omitempty"`
-
-	// (Optional) True, if users joining the chat via the link need to
-	// be approved by chat administrators. If True, member_limit can't be specified.
-	JoinRequest bool `json:"creates_join_request"`
-
-	// (Optional) Number of pending join requests created using this link.
-	PendingCount int `json:"pending_join_request_count"`
-}
-
-// ExpireDate returns the moment of the link expiration in local time.
-func (c *ChatInviteLink) ExpireDate() time.Time {
-	return time.Unix(c.ExpireUnixtime, 0)
-}
-
-// ChatMemberUpdate object represents changes in the status of a chat member.
-type ChatMemberUpdate struct {
-	// Chat where the user belongs to.
-	Chat *Chat `json:"chat"`
-
-	// Sender which user the action was triggered.
-	Sender *User `json:"from"`
-
-	// Unixtime, use Date() to get time.Time.
-	Unixtime int64 `json:"date"`
-
-	// Previous information about the chat member.
-	OldChatMember *ChatMember `json:"old_chat_member"`
-
-	// New information about the chat member.
-	NewChatMember *ChatMember `json:"new_chat_member"`
-
-	// (Optional) InviteLink which was used by the user to
-	// join the chat; for joining by invite link events only.
-	InviteLink *ChatInviteLink `json:"invite_link"`
-}
-
-// Time returns the moment of the change in local time.
-func (c *ChatMemberUpdate) Time() time.Time {
-	return time.Unix(c.Unixtime, 0)
-}
-
 // Rights is a list of privileges available to chat members.
 type Rights struct {
 	// Anonymous is true, if the user's presence in the chat is hidden.
@@ -344,4 +279,9 @@ func (b *Bot) SetDefaultRights(rights Rights, forChannels bool) error {
 
 	_, err := b.Raw("setMyDefaultAdministratorRights", params)
 	return err
+}
+
+func embedRights(p map[string]interface{}, rights Rights) {
+	data, _ := json.Marshal(rights)
+	_ = json.Unmarshal(data, &p)
 }

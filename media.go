@@ -341,3 +341,15 @@ type Dice struct {
 	Type  DiceType `json:"emoji"`
 	Value int      `json:"value"`
 }
+
+// DiceType defines dice types.
+type DiceType string
+
+var (
+	Cube = &Dice{Type: "🎲"}
+	Dart = &Dice{Type: "🎯"}
+	Ball = &Dice{Type: "🏀"}
+	Goal = &Dice{Type: "⚽"}
+	Slot = &Dice{Type: "🎰"}
+	Bowl = &Dice{Type: "🎳"}
+)
