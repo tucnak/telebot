@@ -32,7 +32,11 @@ type (
 	}
 
 	// Button is a shortcut for tele.Btn.
-	Button = tele.Btn
+	Button struct {
+		tele.Btn `yaml:",inline"`
+		Data     interface{} `yaml:"data"`
+		IsReply  bool        `yaml:"reply"`
+	}
 
 	// Markup represents layout-specific markup to be parsed.
 	Markup struct {
@@ -342,7 +346,7 @@ func (lt *Layout) ButtonLocale(locale, k string, args ...interface{}) *tele.Btn 
 		return nil
 	}
 
-	return &btn
+	return &btn.Btn
 }
 
 // Markup returns a markup, which locale is dependent on the context.

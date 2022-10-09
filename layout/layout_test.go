@@ -84,8 +84,23 @@ func TestLayout(t *testing.T) {
 	}, lt.MarkupLocale("en", "reply_extended"))
 
 	assert.Equal(t, &tele.ReplyMarkup{
-		InlineKeyboard: [][]tele.InlineButton{{{Unique: "stop", Text: "Stop", Data: "1"}}},
+		InlineKeyboard: [][]tele.InlineButton{{
+			{
+				Unique: "stop",
+				Text:   "Stop",
+				Data:   "1",
+			},
+		}},
 	}, lt.MarkupLocale("en", "inline", 1))
+
+	assert.Equal(t, &tele.ReplyMarkup{
+		InlineKeyboard: [][]tele.InlineButton{{
+			{
+				Text:   "This is a web app",
+				WebApp: &tele.WebApp{URL: "https://google.com"},
+			},
+		}},
+	}, lt.MarkupLocale("en", "web_app"))
 
 	assert.Equal(t, &tele.ArticleResult{
 		ResultBase: tele.ResultBase{
