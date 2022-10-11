@@ -48,6 +48,7 @@ func NewBot(pref Settings) (*Bot, error) {
 		synchronous: pref.Synchronous,
 		verbose:     pref.Verbose,
 		parseMode:   pref.ParseMode,
+		useTestEnv:  pref.UseTestEnv,
 		client:      client,
 	}
 
@@ -79,6 +80,7 @@ type Bot struct {
 	synchronous bool
 	verbose     bool
 	parseMode   ParseMode
+	useTestEnv  bool
 	stop        chan chan struct{}
 	client      *http.Client
 	stopClient  chan struct{}
@@ -119,6 +121,10 @@ type Settings struct {
 
 	// Offline allows to create a bot without network for testing purposes.
 	Offline bool
+
+	// UseTestEnv is used to create a bot on Telegram test environment
+	// https://core.telegram.org/bots/webapps#using-bots-in-the-test-environment
+	UseTestEnv bool
 }
 
 var defaultOnError = func(err error, c Context) {
