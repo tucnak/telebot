@@ -48,9 +48,10 @@ type Album []Inputtable
 type Photo struct {
 	File
 
-	Width   int    `json:"width"`
-	Height  int    `json:"height"`
-	Caption string `json:"caption,omitempty"`
+	Width           int      `json:"width"`
+	Height          int      `json:"height"`
+	Caption         string   `json:"caption,omitempty"`
+	CaptionEntities Entities `json:"caption_entities,omitempty"`
 }
 
 type photoSize struct {
