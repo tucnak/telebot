@@ -25,9 +25,14 @@ type Sendable interface {
 
 // Send delivers media through bot b to recipient.
 func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
+	
+	byteJson, _ := json.Marshal(p.CaptionEntities)
+	stringedEntities := string(byteJson)
+	
 	params := map[string]string{
 		"chat_id": to.Recipient(),
 		"caption": p.Caption,
+		"caption_entities": stringedEntities,
 	}
 	b.embedSendOptions(params, opt)
 
