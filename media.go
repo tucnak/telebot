@@ -77,6 +77,7 @@ func (p *Photo) InputMedia() InputMedia {
 	}
 }
 
+
 // UnmarshalJSON is custom unmarshaller required to abstract
 // away the hassle of treating different thumbnail sizes.
 // Instead, Telebot chooses the hi-res one and just sticks to it.
