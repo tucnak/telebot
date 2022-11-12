@@ -943,7 +943,7 @@ func (b *Bot) StopPoll(msg Editable, opts ...interface{}) (*Poll, error) {
 }
 
 // Leave makes bot leave a group, supergroup or channel.
-func (b *Bot) Leave(chat *Chat) error {
+func (b *Bot) Leave(chat Recipient) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 	}
@@ -973,7 +973,7 @@ func (b *Bot) Pin(msg Editable, opts ...interface{}) error {
 
 // Unpin unpins a message in a supergroup or a channel.
 // It supports tb.Silent option.
-func (b *Bot) Unpin(chat *Chat, messageID ...int) error {
+func (b *Bot) Unpin(chat Recipient, messageID ...int) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 	}
@@ -987,7 +987,7 @@ func (b *Bot) Unpin(chat *Chat, messageID ...int) error {
 
 // UnpinAll unpins all messages in a supergroup or a channel.
 // It supports tb.Silent option.
-func (b *Bot) UnpinAll(chat *Chat) error {
+func (b *Bot) UnpinAll(chat Recipient) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 	}
