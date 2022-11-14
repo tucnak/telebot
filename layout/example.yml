@@ -72,5 +72,5 @@ results:
     id: '{{ .ID }}'
     title: '{{ .Title }}'
     description: '{{ .Description }}'
-    message_text: '{{ .Content }}'
     thumb_url: '{{ .PreviewURL }}'
+    message_text: '{{ text `article_message` }}'

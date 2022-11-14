@@ -109,19 +109,17 @@ func TestLayout(t *testing.T) {
 		},
 		Title:       "Some title",
 		Description: "Some description",
-		Text:        "The text of the article",
 		ThumbURL:    "https://preview.picture",
+		Text:        "This is an article.",
 	}, lt.ResultLocale("en", "article", struct {
 		ID          int
 		Title       string
 		Description string
-		Content     string
 		PreviewURL  string
 	}{
 		ID:          1853,
 		Title:       "Some title",
 		Description: "Some description",
-		Content:     "The text of the article",
 		PreviewURL:  "https://preview.picture",
 	}))
 }
