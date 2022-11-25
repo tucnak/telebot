@@ -118,7 +118,10 @@ var (
 	ErrWrongURL               = NewError(400, "Bad Request: wrong HTTP URL specified")
 	ErrForwardMessage         = NewError(400, "Bad Request: administrators of the chat restricted message forwarding")
 	ErrAlreadyParticipant     = NewError(400, "Bad Request: USER_ALREADY_PARTICIPANT", "User is already a participant")
-	ErrJoinedChannelsLimit    = NewError(400, "Bad Request: CHANNELS_TOO_MUCH", "User reached joined channels limit")
+	ErrChannelsTooMuch        = NewError(400, "Bad Request: CHANNELS_TOO_MUCH")
+	ErrUserChannelsTooMuch    = NewError(400, "Bad Request: USER_CHANNELS_TOO_MUCH")
+	ErrHideRequesterMissing   = NewError(400, "Bad Request: HIDE_REQUESTER_MISSING")
+	ErrUserIDInvalid          = NewError(400, "Bad Request: USER_ID_INVALID")
 )
 
 // Forbidden errors
