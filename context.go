@@ -354,7 +354,7 @@ func (c *nativeContext) Send(what interface{}, opts ...interface{}) error {
 }
 
 func (c *nativeContext) SendAlbum(a Album, opts ...interface{}) error {
-	_, err := c.b.SendAlbum(c.Recipient(), a, opts...)
+	_, err := c.b.SendAlbum(c.Recipient(), a, "", opts...)
 	return err
 }
 

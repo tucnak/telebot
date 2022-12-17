@@ -285,7 +285,7 @@ func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Messag
 
 // SendAlbum sends multiple instances of media as a single message.
 // From all existing options, it only supports tele.Silent.
-func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, error) {
+func (b *Bot) SendAlbum(to Recipient, a Album, caption string, opts ...interface{}) ([]Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
 	}
@@ -315,7 +315,9 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 
 		im := x.InputMedia()
 		im.Media = repr
-
+		if i == 0 && len(caption) > 0 {
+			im.Caption = caption
+		}
 		if len(sendOpts.Entities) > 0 {
 			im.Entities = sendOpts.Entities
 		} else {

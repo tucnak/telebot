@@ -405,16 +405,16 @@ func TestBot(t *testing.T) {
 	})
 
 	t.Run("SendAlbum()", func(t *testing.T) {
-		_, err = b.SendAlbum(nil, nil)
+		_, err = b.SendAlbum(nil, nil, "")
 		assert.Equal(t, ErrBadRecipient, err)
 
-		_, err = b.SendAlbum(to, nil)
+		_, err = b.SendAlbum(to, nil, "")
 		assert.Error(t, err)
 
 		photo2 := *photo
 		photo2.Caption = ""
 
-		msgs, err := b.SendAlbum(to, Album{photo, &photo2}, ModeHTML)
+		msgs, err := b.SendAlbum(to, Album{photo, &photo2}, "Caption", ModeHTML)
 		require.NoError(t, err)
 		assert.Len(t, msgs, 2)
 		assert.NotEmpty(t, msgs[0].AlbumID)
