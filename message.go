@@ -88,6 +88,9 @@ type Message struct {
 	// bot commands, etc. that appear in the caption.
 	CaptionEntities Entities `json:"caption_entities,omitempty"`
 
+	// Message media is covered by a spoiler animation.
+	HasMediaSpoiler bool `json:"has_media_spoiler,omitempty"`
+
 	// For an audio recording, information about it.
 	Audio *Audio `json:"audio"`
 
@@ -365,7 +368,6 @@ func (m *Message) FromChannel() bool {
 // Service messages are automatically sent messages, which
 // typically occur on some global action. For instance, when
 // anyone leaves the chat or chat title changes.
-//
 func (m *Message) IsService() bool {
 	fact := false
 
@@ -386,7 +388,6 @@ func (m *Message) IsService() bool {
 //
 // It's safer than manually slicing Text because Telegram uses
 // UTF-16 indices whereas Go string are []byte.
-//
 func (m *Message) EntityText(e MessageEntity) string {
 	text := m.Text
 	if text == "" {

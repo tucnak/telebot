@@ -18,7 +18,6 @@ type Recipient interface {
 // This is pretty cool, since it lets bots implement
 // custom Sendables for complex kind of media or
 // chat objects spanning across multiple messages.
-//
 type Sendable interface {
 	Send(*Bot, Recipient, *SendOptions) (*Message, error)
 }
@@ -31,6 +30,10 @@ func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	}
 	b.embedSendOptions(params, opt)
 
+	if p.HasSpoiler {
+		params["has_spoiler"] = "true"
+	}
+
 	msg, err := b.sendMedia(p, params, nil)
 	if err != nil {
 		return nil, err
@@ -39,6 +42,7 @@ func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	msg.Photo.File.stealRef(&p.File)
 	*p = *msg.Photo
 	p.Caption = msg.Caption
+	p.HasSpoiler = msg.HasMediaSpoiler
 
 	return msg, nil
 }
@@ -151,6 +155,9 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	if v.Streaming {
 		params["supports_streaming"] = "true"
 	}
+	if v.HasSpoiler {
+		params["has_spoiler"] = "true"
+	}
 
 	msg, err := b.sendMedia(v, params, thumbnailToFilemap(v.Thumbnail))
 	if err != nil {
@@ -169,6 +176,7 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		v.MIME = doc.MIME
 		v.Thumbnail = doc.Thumbnail
 	}
+	v.HasSpoiler = msg.HasMediaSpoiler
 
 	return msg, nil
 }
@@ -190,6 +198,9 @@ func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 	}
 	if a.Height != 0 {
 		params["height"] = strconv.Itoa(a.Height)
+	}
+	if a.HasSpoiler {
+		params["has_spoiler"] = "true"
 	}
 
 	// file_name is required, without it animation sends as a document
@@ -213,8 +224,9 @@ func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 			FileName:  doc.FileName,
 		}
 	}
-
 	a.Caption = msg.Caption
+	a.HasSpoiler = msg.HasMediaSpoiler
+
 	return msg, nil
 }
 
