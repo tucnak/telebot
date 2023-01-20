@@ -392,8 +392,9 @@ func TestBot(t *testing.T) {
 	assert.Equal(t, ErrBadRecipient, err)
 
 	photo := &Photo{
-		File:    FromURL("https://telegra.ph/file/65c5237b040ebf80ec278.jpg"),
-		Caption: t.Name(),
+		File:       FromURL("https://telegra.ph/file/65c5237b040ebf80ec278.jpg"),
+		Caption:    t.Name(),
+		HasSpoiler: true,
 	}
 	var msg *Message
 
@@ -413,6 +414,7 @@ func TestBot(t *testing.T) {
 
 		photo2 := *photo
 		photo2.Caption = ""
+		photo2.HasSpoiler = false
 
 		msgs, err := b.SendAlbum(to, Album{photo, &photo2}, ModeHTML)
 		require.NoError(t, err)
@@ -461,9 +463,10 @@ func TestBot(t *testing.T) {
 		require.NoError(t, err)
 
 		animation := &Animation{
-			File:     FromDisk(file.Name()),
-			Caption:  t.Name(),
-			FileName: "animation.gif",
+			File:       FromDisk(file.Name()),
+			Caption:    t.Name(),
+			FileName:   "animation.gif",
+			HasSpoiler: true,
 		}
 
 		msg, err := b.Send(msg.Chat, animation)

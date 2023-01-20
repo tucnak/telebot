@@ -29,6 +29,7 @@ type InputMedia struct {
 	Performer            string   `json:"performer,omitempty"`
 	Streaming            bool     `json:"supports_streaming,omitempty"`
 	DisableTypeDetection bool     `json:"disable_content_type_detection,omitempty"`
+	HasSpoiler           bool     `json:"has_spoiler,omitempty"`
 }
 
 // Inputtable is a generic type for all kinds of media you
@@ -48,9 +49,10 @@ type Album []Inputtable
 type Photo struct {
 	File
 
-	Width   int    `json:"width"`
-	Height  int    `json:"height"`
-	Caption string `json:"caption,omitempty"`
+	Width      int    `json:"width"`
+	Height     int    `json:"height"`
+	Caption    string `json:"caption,omitempty"`
+	HasSpoiler bool   `json:"has_spoiler,omitempty"`
 }
 
 type photoSize struct {
@@ -71,8 +73,9 @@ func (p *Photo) MediaFile() *File {
 
 func (p *Photo) InputMedia() InputMedia {
 	return InputMedia{
-		Type:    p.MediaType(),
-		Caption: p.Caption,
+		Type:       p.MediaType(),
+		Caption:    p.Caption,
+		HasSpoiler: p.HasSpoiler,
 	}
 }
 
@@ -177,11 +180,12 @@ type Video struct {
 	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
-	Caption   string `json:"caption,omitempty"`
-	Thumbnail *Photo `json:"thumb,omitempty"`
-	Streaming bool   `json:"supports_streaming,omitempty"`
-	MIME      string `json:"mime_type,omitempty"`
-	FileName  string `json:"file_name,omitempty"`
+	Caption    string `json:"caption,omitempty"`
+	Thumbnail  *Photo `json:"thumb,omitempty"`
+	Streaming  bool   `json:"supports_streaming,omitempty"`
+	MIME       string `json:"mime_type,omitempty"`
+	FileName   string `json:"file_name,omitempty"`
+	HasSpoiler bool   `json:"has_spoiler,omitempty"`
 }
 
 func (v *Video) MediaType() string {
@@ -195,12 +199,13 @@ func (v *Video) MediaFile() *File {
 
 func (v *Video) InputMedia() InputMedia {
 	return InputMedia{
-		Type:      v.MediaType(),
-		Caption:   v.Caption,
-		Width:     v.Width,
-		Height:    v.Height,
-		Duration:  v.Duration,
-		Streaming: v.Streaming,
+		Type:       v.MediaType(),
+		Caption:    v.Caption,
+		Width:      v.Width,
+		Height:     v.Height,
+		Duration:   v.Duration,
+		Streaming:  v.Streaming,
+		HasSpoiler: v.HasSpoiler,
 	}
 }
 
@@ -213,10 +218,11 @@ type Animation struct {
 	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
-	Caption   string `json:"caption,omitempty"`
-	Thumbnail *Photo `json:"thumb,omitempty"`
-	MIME      string `json:"mime_type,omitempty"`
-	FileName  string `json:"file_name,omitempty"`
+	Caption    string `json:"caption,omitempty"`
+	Thumbnail  *Photo `json:"thumb,omitempty"`
+	MIME       string `json:"mime_type,omitempty"`
+	FileName   string `json:"file_name,omitempty"`
+	HasSpoiler bool   `json:"has_spoiler,omitempty"`
 }
 
 func (a *Animation) MediaType() string {
@@ -230,11 +236,12 @@ func (a *Animation) MediaFile() *File {
 
 func (a *Animation) InputMedia() InputMedia {
 	return InputMedia{
-		Type:     a.MediaType(),
-		Caption:  a.Caption,
-		Width:    a.Width,
-		Height:   a.Height,
-		Duration: a.Duration,
+		Type:       a.MediaType(),
+		Caption:    a.Caption,
+		Width:      a.Width,
+		Height:     a.Height,
+		Duration:   a.Duration,
+		HasSpoiler: a.HasSpoiler,
 	}
 }
 
