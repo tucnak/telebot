@@ -173,12 +173,15 @@ var (
 //		b.Handle("/ban", onBan, middleware.Whitelist(ids...))
 //
 func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
+	mw := m
 	if len(b.group.middleware) > 0 {
-		m = append(b.group.middleware, m...)
+		mw = make([]MiddlewareFunc, 0, len(b.group.middleware)+len(m))
+		mw = append(mw, b.group.middleware...)
+		mw = append(mw, m...)
 	}
 
 	handler := func(c Context) error {
-		return applyMiddleware(h, m...)(c)
+		return applyMiddleware(h, mw...)(c)
 	}
 
 	switch end := endpoint.(type) {
