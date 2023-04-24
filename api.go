@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -55,7 +54,7 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 	resp.Close = true
 	defer resp.Body.Close()
 
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, wrapError(err)
 	}
@@ -128,7 +127,7 @@ func (b *Bot) sendFiles(method string, files map[string]File, params map[string]
 		return nil, ErrInternal
 	}
 
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, wrapError(err)
 	}
