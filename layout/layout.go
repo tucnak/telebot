@@ -184,7 +184,7 @@ func (lt *Layout) Commands() (cmds []tele.Command) {
 //
 // Example of bot.yml:
 //	commands:
-//	  /start: '{{ text "cmdStart" }}'
+//	  /start: '{{ text `cmdStart` }}'
 //
 // en.yml:
 //	cmdStart: Start the bot
