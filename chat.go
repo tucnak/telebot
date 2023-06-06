@@ -10,13 +10,16 @@ import (
 type User struct {
 	ID int64 `json:"id"`
 
-	FirstName    string `json:"first_name"`
-	LastName     string `json:"last_name"`
-	Username     string `json:"username"`
-	LanguageCode string `json:"language_code"`
-	IsBot        bool   `json:"is_bot"`
-	IsPremium    bool   `json:"is_premium"`
-	AddedToMenu  bool   `json:"added_to_attachment_menu"`
+	FirstName                string   `json:"first_name"`
+	LastName                 string   `json:"last_name"`
+	IsForum                  bool     `json:"is_forum"`
+	Username                 string   `json:"username"`
+	LanguageCode             string   `json:"language_code"`
+	IsBot                    bool     `json:"is_bot"`
+	IsPremium                bool     `json:"is_premium"`
+	AddedToMenu              bool     `json:"added_to_attachment_menu"`
+	Usernames                []string `json:"active_usernames"`
+	EmojiStatusCustomEmojiID string   `json:"emoji_status_custom_emoji_id"`
 
 	// Returns only in getMe
 	CanJoinGroups   bool `json:"can_join_groups"`
@@ -162,14 +165,13 @@ func (c *ChatMemberUpdate) Time() time.Time {
 //
 // Example:
 //
-//		group := tele.ChatID(-100756389456)
-//		b.Send(group, "Hello!")
+//	group := tele.ChatID(-100756389456)
+//	b.Send(group, "Hello!")
 //
-//		type Config struct {
-//			AdminGroup tele.ChatID `json:"admin_group"`
-//		}
-//		b.Send(conf.AdminGroup, "Hello!")
-//
+//	type Config struct {
+//		AdminGroup tele.ChatID `json:"admin_group"`
+//	}
+//	b.Send(conf.AdminGroup, "Hello!")
 type ChatID int64
 
 // Recipient returns chat ID (see Recipient interface).
