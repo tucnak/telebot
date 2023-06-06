@@ -98,6 +98,18 @@ func (b *Bot) ProcessUpdate(u Update) {
 			b.handle(OnPayment, c)
 			return
 		}
+		if m.TopicClosed != nil {
+			b.handle(OnTopicCreated, c)
+			return
+		}
+		if m.TopicReopened != nil {
+			b.handle(OnTopicReopened, c)
+			return
+		}
+		if m.TopicClosed != nil {
+			b.handle(OnTopicClosed, c)
+			return
+		}
 
 		wasAdded := (m.UserJoined != nil && m.UserJoined.ID == b.Me.ID) ||
 			(m.UsersJoined != nil && isUserInList(b.Me, m.UsersJoined))

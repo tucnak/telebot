@@ -11,7 +11,6 @@ import (
 // flags instead.
 //
 // Supported options are defined as iota-constants.
-//
 type Option int
 
 const (
@@ -54,7 +53,6 @@ func Placeholder(text string) *SendOptions {
 // Despite its power, SendOptions is rather inconvenient to use all
 // the way through bot logic, so you might want to consider storing
 // and re-using it somewhere or be using Option flags instead.
-//
 type SendOptions struct {
 	// If the message is a reply, original message.
 	ReplyTo *Message
@@ -79,6 +77,9 @@ type SendOptions struct {
 
 	// Protected protects the contents of the sent message from forwarding and saving
 	Protected bool
+
+	// MessageThreadID supports sending messages to a thread.
+	MessageThreadID int
 }
 
 func (og *SendOptions) copy() *SendOptions {
@@ -188,6 +189,10 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 
 	if opt.Protected {
 		params["protect_content"] = "true"
+	}
+
+	if opt.MessageThreadID != 0 {
+		params["message_thread_id"] = strconv.Itoa(opt.MessageThreadID)
 	}
 }
 

@@ -2,29 +2,28 @@
 //
 // Example:
 //
-//		package main
+//	package main
 //
-//		import (
-//			"time"
-//			tele "gopkg.in/telebot.v3"
-//		)
+//	import (
+//		"time"
+//		tele "gopkg.in/telebot.v3"
+//	)
 //
-//		func main() {
-//			b, err := tele.NewBot(tele.Settings{
-//				Token:  "...",
-//				Poller: &tele.LongPoller{Timeout: 10 * time.Second},
-//			})
-//			if err != nil {
-//				return
-//			}
-//
-//			b.Handle("/start", func(c tele.Context) error {
-//				return c.Send("Hello world!")
-//			})
-//
-//			b.Start()
+//	func main() {
+//		b, err := tele.NewBot(tele.Settings{
+//			Token:  "...",
+//			Poller: &tele.LongPoller{Timeout: 10 * time.Second},
+//		})
+//		if err != nil {
+//			return
 //		}
 //
+//		b.Handle("/start", func(c tele.Context) error {
+//			return c.Send("Hello world!")
+//		})
+//
+//		b.Start()
+//	}
 package telebot
 
 import "errors"
@@ -43,7 +42,6 @@ const DefaultApiURL = "https://api.telegram.org"
 //
 // For convenience, all Telebot-provided endpoints start with
 // an "alert" character \a.
-//
 const (
 	// Basic message handlers.
 	OnText              = "\atext"
@@ -68,6 +66,9 @@ const (
 	OnPinned            = "\apinned"
 	OnChannelPost       = "\achannel_post"
 	OnEditedChannelPost = "\aedited_channel_post"
+	OnTopicCreated      = "\atopic_created"
+	OnTopicReopened     = "\atopic_reopened"
+	OnTopicClosed       = "\atopic_closed"
 
 	OnAddedToGroup      = "\aadded_to_group"
 	OnUserJoined        = "\auser_joined"
