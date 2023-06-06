@@ -27,6 +27,7 @@ type Rights struct {
 	CanAddPreviews      bool `json:"can_add_web_page_previews"`
 	CanManageVideoChats bool `json:"can_manage_video_chats"`
 	CanManageChat       bool `json:"can_manage_chat"`
+	CanManageTopics     bool `json:"can_manage_topics"`
 }
 
 // NoRights is the default Rights{}.
@@ -35,9 +36,8 @@ func NoRights() Rights { return Rights{} }
 // NoRestrictions should be used when un-restricting or
 // un-promoting user.
 //
-//		member.Rights = tele.NoRestrictions()
-//		b.Restrict(chat, member)
-//
+//	member.Rights = tele.NoRestrictions()
+//	b.Restrict(chat, member)
 func NoRestrictions() Rights {
 	return Rights{
 		CanBeEdited:         true,
@@ -56,6 +56,7 @@ func NoRestrictions() Rights {
 		CanAddPreviews:      true,
 		CanManageVideoChats: false,
 		CanManageChat:       false,
+		CanManageTopics:     false,
 	}
 }
 
@@ -78,6 +79,7 @@ func AdminRights() Rights {
 		CanAddPreviews:      true,
 		CanManageVideoChats: true,
 		CanManageChat:       true,
+		CanManageTopics:     true,
 	}
 }
 
@@ -120,11 +122,10 @@ func (b *Bot) Unban(chat *Chat, user *User, forBanned ...bool) error {
 // Restrict lets you restrict a subset of member's rights until
 // member.RestrictedUntil, such as:
 //
-//     * can send messages
-//     * can send media
-//     * can send other
-//     * can add web page previews
-//
+//   - can send messages
+//   - can send media
+//   - can send other
+//   - can add web page previews
 func (b *Bot) Restrict(chat *Chat, member *ChatMember) error {
 	prv, until := member.Rights, member.RestrictedUntil
 
@@ -141,15 +142,14 @@ func (b *Bot) Restrict(chat *Chat, member *ChatMember) error {
 
 // Promote lets you update member's admin rights, such as:
 //
-//     * can change info
-//     * can post messages
-//     * can edit messages
-//     * can delete messages
-//     * can invite users
-//     * can restrict members
-//     * can pin messages
-//     * can promote members
-//
+//   - can change info
+//   - can post messages
+//   - can edit messages
+//   - can delete messages
+//   - can invite users
+//   - can restrict members
+//   - can pin messages
+//   - can promote members
 func (b *Bot) Promote(chat *Chat, member *ChatMember) error {
 	prv := member.Rights
 
@@ -171,7 +171,6 @@ func (b *Bot) Promote(chat *Chat, member *ChatMember) error {
 //
 // If the chat is a group or a supergroup and
 // no administrators were appointed, only the creator will be returned.
-//
 func (b *Bot) AdminsOf(chat *Chat) ([]ChatMember, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
