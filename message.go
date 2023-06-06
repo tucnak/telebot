@@ -62,8 +62,8 @@ type Message struct {
 	// (Optional) Time of last edit in Unix.
 	LastEdit int64 `json:"edit_date"`
 
-	// (Optional True, if the message is sent to a forum topic
-	TopicMessage bool `json:"is_topic_message"`
+	// (Optional) True, if the message is sent to a forum topic.
+	IsTopicMessage bool `json:"is_topic_message"`
 
 	// (Optional) Message can't be forwarded.
 	Protected bool `json:"has_protected_content,omitempty"`
