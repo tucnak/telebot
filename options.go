@@ -75,11 +75,11 @@ type SendOptions struct {
 	// AllowWithoutReply allows sending messages not a as reply if the replied-to message has already been deleted.
 	AllowWithoutReply bool
 
-	// Protected protects the contents of the sent message from forwarding and saving
+	// Protected protects the contents of sent message from forwarding and saving.
 	Protected bool
 
-	// MessageThreadID supports sending messages to a thread.
-	MessageThreadID int
+	// ThreadID supports sending messages to a thread.
+	ThreadID int
 }
 
 func (og *SendOptions) copy() *SendOptions {
@@ -191,8 +191,8 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 		params["protect_content"] = "true"
 	}
 
-	if opt.MessageThreadID != 0 {
-		params["message_thread_id"] = strconv.Itoa(opt.MessageThreadID)
+	if opt.ThreadID != 0 {
+		params["message_thread_id"] = strconv.Itoa(opt.ThreadID)
 	}
 }
 

@@ -10,16 +10,16 @@ import (
 type User struct {
 	ID int64 `json:"id"`
 
-	FirstName                string   `json:"first_name"`
-	LastName                 string   `json:"last_name"`
-	IsForum                  bool     `json:"is_forum"`
-	Username                 string   `json:"username"`
-	LanguageCode             string   `json:"language_code"`
-	IsBot                    bool     `json:"is_bot"`
-	IsPremium                bool     `json:"is_premium"`
-	AddedToMenu              bool     `json:"added_to_attachment_menu"`
-	Usernames                []string `json:"active_usernames"`
-	EmojiStatusCustomEmojiID string   `json:"emoji_status_custom_emoji_id"`
+	FirstName           string   `json:"first_name"`
+	LastName            string   `json:"last_name"`
+	IsForum             bool     `json:"is_forum"`
+	Username            string   `json:"username"`
+	LanguageCode        string   `json:"language_code"`
+	IsBot               bool     `json:"is_bot"`
+	IsPremium           bool     `json:"is_premium"`
+	AddedToMenu         bool     `json:"added_to_attachment_menu"`
+	Usernames           []string `json:"active_usernames"`
+	CustomEmojiStatusID string   `json:"emoji_status_custom_emoji_id"`
 
 	// Returns only in getMe
 	CanJoinGroups   bool `json:"can_join_groups"`

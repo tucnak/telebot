@@ -9,23 +9,15 @@ type Topic struct {
 	Name              string `json:"name"`
 	IconColor         int    `json:"icon_color"`
 	IconCustomEmojiID string `json:"icon_custom_emoji_id"`
-	MessageThreadID   int    `json:"message_thread_id"`
+	ThreadID          int    `json:"message_thread_id"`
 }
 
-type TopicCreated struct {
-	Topic
-}
-
-type TopicClosed struct{}
-
-type TopicDeleted struct {
-	Name              string `json:"name"`
-	IconCustomEmojiID string `json:"icon_custom_emoji_id"`
-}
-
-type TopicReopened struct {
-	Topic
-}
+type (
+	TopicCreated  struct{ Topic }
+	TopicClosed   struct{}
+	TopicDeleted  struct{ Topic }
+	TopicReopened struct{ Topic }
+)
 
 // CreateTopic creates a topic in a forum supergroup chat.
 func (b *Bot) CreateTopic(chat *Chat, forum *Topic) error {
@@ -49,7 +41,7 @@ func (b *Bot) CreateTopic(chat *Chat, forum *Topic) error {
 func (b *Bot) EditTopic(chat *Chat, forum *Topic) error {
 	params := map[string]interface{}{
 		"chat_id":           chat.Recipient(),
-		"message_thread_id": forum.MessageThreadID,
+		"message_thread_id": forum.ThreadID,
 	}
 
 	if forum.Name != "" {
@@ -67,7 +59,7 @@ func (b *Bot) EditTopic(chat *Chat, forum *Topic) error {
 func (b *Bot) CloseTopic(chat *Chat, forum *Topic) error {
 	params := map[string]interface{}{
 		"chat_id":           chat.Recipient(),
-		"message_thread_id": forum.MessageThreadID,
+		"message_thread_id": forum.ThreadID,
 	}
 
 	_, err := b.Raw("closeForumTopic", params)
@@ -78,7 +70,7 @@ func (b *Bot) CloseTopic(chat *Chat, forum *Topic) error {
 func (b *Bot) ReopenTopic(chat *Chat, forum *Topic) error {
 	params := map[string]interface{}{
 		"chat_id":           chat.Recipient(),
-		"message_thread_id": forum.MessageThreadID,
+		"message_thread_id": forum.ThreadID,
 	}
 
 	_, err := b.Raw("reopenForumTopic", params)
@@ -89,7 +81,7 @@ func (b *Bot) ReopenTopic(chat *Chat, forum *Topic) error {
 func (b *Bot) DeleteTopic(chat *Chat, forum *Topic) error {
 	params := map[string]interface{}{
 		"chat_id":           chat.Recipient(),
-		"message_thread_id": forum.MessageThreadID,
+		"message_thread_id": forum.ThreadID,
 	}
 
 	_, err := b.Raw("deleteForumTopic", params)
@@ -100,7 +92,7 @@ func (b *Bot) DeleteTopic(chat *Chat, forum *Topic) error {
 func (b *Bot) UnpinAllTopicMessages(chat *Chat, forum *Topic) error {
 	params := map[string]interface{}{
 		"chat_id":           chat.Recipient(),
-		"message_thread_id": forum.MessageThreadID,
+		"message_thread_id": forum.ThreadID,
 	}
 
 	_, err := b.Raw("unpinAllForumTopicMessages", params)
