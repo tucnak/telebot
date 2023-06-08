@@ -265,6 +265,21 @@ type Message struct {
 
 	// Service message: forum topic reopened
 	TopicReopened *TopicReopened `json:"forum_topic_reopened,omitempty"`
+
+	// Service message: forum topic deleted
+	TopicEdited *TopicEdited `json:"forum_topic_edited,omitempty"`
+
+	// Service message: general forum topic hidden
+	GeneralTopicHidden *GeneralTopicHidden `json:"general_topic_hidden,omitempty"`
+
+	// Service message: general forum topic unhidden
+	GeneralTopicUnhidden *GeneralTopicUnhidden `json:"general_topic_unhidden,omitempty"`
+
+	// Service message: represents spoiler information about the message.
+	HasMediaSpoiler bool `json:"has_media_spoiler,omitempty"`
+
+	// Service message: the user allowed the bot added to the attachment menu to write messages
+	WriteAccessAllowed *WriteAccessAllowed `json:"write_access_allowed,omitempty"`
 }
 
 // MessageEntity object represents "special" parts of text messages,

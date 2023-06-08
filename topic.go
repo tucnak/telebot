@@ -13,10 +13,13 @@ type Topic struct {
 }
 
 type (
-	TopicCreated  struct{ Topic }
-	TopicClosed   struct{}
-	TopicDeleted  struct{ Topic }
-	TopicReopened struct{ Topic }
+	TopicCreated         struct{ Topic }
+	TopicClosed          struct{}
+	TopicDeleted         struct{ Topic }
+	TopicReopened        struct{ Topic }
+	TopicEdited          struct{ Topic }
+	GeneralTopicHidden   struct{}
+	GeneralTopicUnhidden struct{}
 )
 
 // CreateTopic creates a topic in a forum supergroup chat.
@@ -99,7 +102,7 @@ func (b *Bot) UnpinAllTopicMessages(chat *Chat, forum *Topic) error {
 	return err
 }
 
-// TopicIconStickers gets custom emoji stickers, which can be used as a forum topic icon by any user
+// TopicIconStickers gets custom emoji stickers, which can be used as a forum topic icon by any user.
 func (b *Bot) TopicIconStickers() ([]Sticker, error) {
 	params := map[string]string{}
 
@@ -115,4 +118,55 @@ func (b *Bot) TopicIconStickers() ([]Sticker, error) {
 		return nil, wrapError(err)
 	}
 	return resp.Result, nil
+}
+
+// EditGeneralTopic edits name of the 'General' topic in a forum supergroup chat.
+func (b *Bot) EditGeneralTopic(chat *Chat, forum *Topic) error {
+	params := map[string]interface{}{
+		"chat_id": chat.Recipient(),
+		"name":    forum.Name,
+	}
+
+	_, err := b.Raw("editGeneralForumTopic", params)
+	return err
+}
+
+// CloseGeneralTopic closes an open 'General' topic in a forum supergroup chat.
+func (b *Bot) CloseGeneralTopic(chat *Chat, forum *Topic) error {
+	params := map[string]interface{}{
+		"chat_id": chat.Recipient(),
+	}
+
+	_, err := b.Raw("closeGeneralForumTopic", params)
+	return err
+}
+
+// ReopenGeneralTopic reopens a closed 'General' topic in a forum supergroup chat.
+func (b *Bot) ReopenGeneralTopic(chat *Chat, forum *Topic) error {
+	params := map[string]interface{}{
+		"chat_id": chat.Recipient(),
+	}
+
+	_, err := b.Raw("reopenGeneralForumTopic", params)
+	return err
+}
+
+// HideGeneralTopic hides the 'General' topic in a forum supergroup chat.
+func (b *Bot) HideGeneralTopic(chat *Chat, forum *Topic) error {
+	params := map[string]interface{}{
+		"chat_id": chat.Recipient(),
+	}
+
+	_, err := b.Raw("hideGeneralForumTopic", params)
+	return err
+}
+
+// UnhideGeneralTopic unhides the 'General' topic in a forum supergroup chat.
+func (b *Bot) UnhideGeneralTopic(chat *Chat, forum *Topic) error {
+	params := map[string]interface{}{
+		"chat_id": chat.Recipient(),
+	}
+
+	_, err := b.Raw("unhideGeneralForumTopic", params)
+	return err
 }
