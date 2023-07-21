@@ -114,7 +114,7 @@ func NewDefault(path, locale string, funcs ...template.FuncMap) (*DefaultLayout,
 	return ReadDefault(f, locale, funcs...)
 }
 
-// NewDefault parses the given layout file without localization features.
+// ReadDefault parses the given layout file without localization features.
 // See Layout.Default for more details.
 func ReadDefault(r io.Reader, locale string, funcs ...template.FuncMap) (*DefaultLayout, error) {
 	lt, err := FromReader(r, funcs...)
