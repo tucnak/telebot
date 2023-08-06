@@ -214,6 +214,7 @@ b.Handle("/tags", func(c tele.Context) error {
 
 ## Files
 >Telegram allows files up to 50 MB in size.
+>Check [tdlib/telegram-bot-api](https://github.com/tdlib/telegram-bot-api) to send files up to 2 GB. 
 
 Telebot allows to both upload (from disk or by URL) and download (from Telegram)
 files in bot's scope. Also, sending any kind of media with a File created

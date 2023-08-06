@@ -78,6 +78,7 @@ type Bot struct {
 	handlers    map[string]HandlerFunc
 	synchronous bool
 	verbose     bool
+	local       bool
 	parseMode   ParseMode
 	stop        chan chan struct{}
 	client      *http.Client
@@ -103,6 +104,10 @@ type Settings struct {
 	// Verbose forces bot to log all upcoming requests.
 	// Use for debugging purposes only.
 	Verbose bool
+
+	// Local flags the bot, it's on the same machine as telegram-bot-api,
+	// learn more about it: https://github.com/tdlib/telegram-bot-api
+	Local bool
 
 	// ParseMode used to set default parse mode of all sent messages.
 	// It attaches to every send, edit or whatever method. You also
@@ -843,6 +848,7 @@ func (b *Bot) FileByID(fileID string) (File, error) {
 
 // Download saves the file from Telegram servers locally.
 // Maximum file size to download is 20 MB.
+// To increase the limit up to 2 GB use local Telegram Bot API.
 func (b *Bot) Download(file *File, localFilename string) error {
 	reader, err := b.File(file)
 	if err != nil {
@@ -867,6 +873,21 @@ func (b *Bot) Download(file *File, localFilename string) error {
 
 // File gets a file from Telegram servers.
 func (b *Bot) File(file *File) (io.ReadCloser, error) {
+		if b.local {
+		localPath := file.FilePath
+		if file.FilePath == "" {
+			f, err := b.FileByID(file.FileID)
+			if err != nil {
+				return nil, err
+			}
+			// FilePath is updated, allowing user to delete the file from the local server's cache
+			localPath = f.FilePath
+			file.FilePath = localPath
+		}
+
+		return os.Open(localPath)
+	}
+
 	f, err := b.FileByID(file.FileID)
 	if err != nil {
 		return nil, err
