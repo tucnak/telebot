@@ -66,7 +66,7 @@ func NewError(code int, msgs ...string) *Error {
 	return err
 }
 
-// General errors
+// General errors.
 var (
 	ErrTooLarge     = NewError(400, "Request Entity Too Large")
 	ErrUnauthorized = NewError(401, "Unauthorized")
@@ -74,7 +74,7 @@ var (
 	ErrInternal     = NewError(500, "Internal Server Error")
 )
 
-// Bad request errors
+// Bad request errors.
 var (
 	ErrBadButtonData          = NewError(400, "Bad Request: BUTTON_DATA_INVALID")
 	ErrBadPollOptions         = NewError(400, "Bad Request: expected an Array of String as options")
@@ -119,7 +119,7 @@ var (
 	ErrForwardMessage         = NewError(400, "Bad Request: administrators of the chat restricted message forwarding")
 )
 
-// Forbidden errors
+// Forbidden errors.
 var (
 	ErrBlockedByUser        = NewError(403, "Forbidden: bot was blocked by the user")
 	ErrKickedFromGroup      = NewError(403, "Forbidden: bot was kicked from the group chat")

@@ -160,7 +160,6 @@ func (b *Bot) SetStickerPosition(sticker string, position int) error {
 func (b *Bot) DeleteSticker(sticker string) error {
 	_, err := b.Raw("deleteStickerFromSet", map[string]string{"sticker": sticker})
 	return err
-
 }
 
 // SetStickerSetThumb sets a thumbnail of the sticker set.
@@ -171,7 +170,6 @@ func (b *Bot) DeleteSticker(sticker string) error {
 // up to 32 kilobytes in size.
 //
 // Animated sticker set thumbnail can't be uploaded via HTTP URL.
-//
 func (b *Bot) SetStickerSetThumb(to Recipient, s StickerSet) error {
 	files := make(map[string]File)
 	if s.PNG != nil {

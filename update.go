@@ -99,6 +99,10 @@ func (b *Bot) ProcessUpdate(u Update) {
 			return
 		}
 
+		if m.ConnectedWebsite != "" {
+			b.handle(OnConnectedWebsite, c)
+		}
+
 		wasAdded := (m.UserJoined != nil && m.UserJoined.ID == b.Me.ID) ||
 			(m.UsersJoined != nil && isUserInList(b.Me, m.UsersJoined))
 		if m.GroupCreated || m.SuperGroupCreated || wasAdded {

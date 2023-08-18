@@ -11,7 +11,7 @@ type WebAppMessage struct {
 	InlineMessageID string `json:"inline_message_id"`
 }
 
-// WebAppData object represents a data sent from a Web App to the bot
+// WebAppData object represents a data sent from a Web App to the bot.
 type WebAppData struct {
 	Data string `json:"data"`
 	Text string `json:"button_text"`

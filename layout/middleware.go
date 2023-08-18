@@ -11,11 +11,11 @@ type LocaleFunc func(tele.Recipient) string
 // Middleware builds a telebot middleware to make localization work.
 //
 // Usage:
-//		b.Use(lt.Middleware("en", func(r tele.Recipient) string {
-//			loc, _ := db.UserLocale(r.Recipient())
-//			return loc
-//		}))
 //
+//	b.Use(lt.Middleware("en", func(r tele.Recipient) string {
+//		loc, _ := db.UserLocale(r.Recipient())
+//		return loc
+//	}))
 func (lt *Layout) Middleware(defaultLocale string, localeFunc ...LocaleFunc) tele.MiddlewareFunc {
 	var f LocaleFunc
 	if len(localeFunc) > 0 {

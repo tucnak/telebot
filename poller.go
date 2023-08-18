@@ -7,7 +7,6 @@ import "time"
 // All pollers must implement Poll(), which accepts bot
 // pointer and subscription channel and start polling
 // synchronously straight away.
-//
 type Poller interface {
 	// Poll is supposed to take the bot object
 	// subscription channel and start polling
@@ -70,7 +69,6 @@ func (p *LongPoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 // handling, banning or whatever.
 //
 // For heavy middleware, use increased capacity.
-//
 type MiddlewarePoller struct {
 	Capacity int // Default: 1
 	Poller   Poller

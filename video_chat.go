@@ -13,7 +13,7 @@ type VideoChatEnded struct {
 }
 
 // VideoChatParticipants represents a service message about new
-// members invited to a video chat
+// members invited to a video chat.
 type VideoChatParticipants struct {
 	Users []User `json:"users"`
 }

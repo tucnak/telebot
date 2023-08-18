@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	// required to test send and edit methods
+	// required to test send and edit methods.
 	token     = os.Getenv("TELEBOT_SECRET")
 	chatID, _ = strconv.ParseInt(os.Getenv("CHAT_ID"), 10, 64)
 	userID, _ = strconv.ParseInt(os.Getenv("USER_ID"), 10, 64)
