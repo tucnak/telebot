@@ -34,12 +34,16 @@ func NewBot(pref Settings) (*Bot, error) {
 	if pref.OnError == nil {
 		pref.OnError = defaultOnError
 	}
+	if pref.URLBuilder == nil {
+		pref.URLBuilder = defaultURLBuilder
+	}
 
 	bot := &Bot{
-		Token:   pref.Token,
-		URL:     pref.URL,
-		Poller:  pref.Poller,
-		onError: pref.OnError,
+		Token:      pref.Token,
+		URL:        pref.URL,
+		URLBuilder: pref.URLBuilder,
+		Poller:     pref.Poller,
+		onError:    pref.OnError,
 
 		Updates:  make(chan Update, pref.Updates),
 		handlers: make(map[string]HandlerFunc),
@@ -67,12 +71,13 @@ func NewBot(pref Settings) (*Bot, error) {
 
 // Bot represents a separate Telegram bot instance.
 type Bot struct {
-	Me      *User
-	Token   string
-	URL     string
-	Updates chan Update
-	Poller  Poller
-	onError func(error, Context)
+	Me         *User
+	Token      string
+	URL        string
+	URLBuilder func(string, string, string) string
+	Updates    chan Update
+	Poller     Poller
+	onError    func(error, Context)
 
 	group       *Group
 	handlers    map[string]HandlerFunc
@@ -119,6 +124,11 @@ type Settings struct {
 
 	// Offline allows to create a bot without network for testing purposes.
 	Offline bool
+
+	// URL builder function to create API calls. It receives 3 strings
+	// URL, token and method. Can be used to modify API server or
+	// add /test suffix.
+	URLBuilder func(string, string, string) string
 }
 
 var defaultOnError = func(err error, c Context) {
@@ -127,6 +137,10 @@ var defaultOnError = func(err error, c Context) {
 	} else {
 		log.Println(err)
 	}
+}
+
+var defaultURLBuilder = func(URL string, token string, method string) string {
+	return URL + "/bot" + token + "/" + method
 }
 
 func (b *Bot) OnError(err error, c Context) {

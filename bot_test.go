@@ -47,6 +47,12 @@ func TestNewBot(t *testing.T) {
 	_, err = NewBot(pref)
 	assert.Error(t, err)
 
+	pref.URLBuilder = func(URL string, token string, method string) string {
+		return "BAD URL BUILDER"
+	}
+	_, err = NewBot(pref)
+	assert.Error(t, err)
+
 	b, err := NewBot(Settings{Offline: true})
 	if err != nil {
 		t.Fatal(err)

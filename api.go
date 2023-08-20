@@ -20,7 +20,7 @@ import (
 // It also handles API errors, so you only need to unwrap
 // result field from json data.
 func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
-	url := b.URL + "/bot" + b.Token + "/" + method
+	url := b.URLBuilder(b.URL, b.Token, method)
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(payload); err != nil {
@@ -113,7 +113,7 @@ func (b *Bot) sendFiles(method string, files map[string]File, params map[string]
 		}
 	}()
 
-	url := b.URL + "/bot" + b.Token + "/" + method
+	url := b.URLBuilder(b.URL, b.Token, method)
 
 	resp, err := b.client.Post(url, writer.FormDataContentType(), pipeReader)
 	if err != nil {
