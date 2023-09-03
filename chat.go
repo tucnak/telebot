@@ -106,6 +106,7 @@ type ChatMember struct {
 	Role      MemberStatus `json:"status"`
 	Title     string       `json:"custom_title"`
 	Anonymous bool         `json:"is_anonymous"`
+	Member    bool         `json:"is_member,omitempty"`
 
 	// Date when restrictions will be lifted for the user, unix time.
 	//
