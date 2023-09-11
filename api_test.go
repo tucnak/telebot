@@ -26,7 +26,7 @@ func testRawServer(w http.ResponseWriter, r *http.Request) {
 	switch {
 	// causes EOF error on ioutil.ReadAll
 	case strings.HasSuffix(r.URL.Path, "/testReadError"):
-		// tells the body is 1 byte length but actually it's 0
+		// tells the body is 1 byte length, but actually it's 0
 		w.Header().Set("Content-Length", "1")
 
 	// returns unknown telegram error

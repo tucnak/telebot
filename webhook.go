@@ -27,7 +27,7 @@ type WebhookEndpoint struct {
 
 // A Webhook configures the poller for webhooks. It opens a port on the given
 // listen address. If TLS is filled, the listener will use the key and cert to open
-// a secure port. Otherwise it will use plain HTTP.
+// a secure port. Otherwise, it will use plain HTTP.
 //
 // If you have a loadbalancer ore other infrastructure in front of your service, you
 // must fill the Endpoint structure so this poller will send this data to telegram. If
@@ -37,7 +37,6 @@ type WebhookEndpoint struct {
 //
 // You can also leave the Listen field empty. In this case it is up to the caller to
 // add the Webhook to a http-mux.
-//
 type Webhook struct {
 	Listen         string   `json:"url"`
 	MaxConnections int      `json:"max_connections"`

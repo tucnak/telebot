@@ -1,9 +1,9 @@
 package telebot
 
 import (
+	"context"
 	"errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -117,7 +117,7 @@ func TestBotStart(t *testing.T) {
 	// remove webhook to be sure that bot can poll
 	require.NoError(t, b.RemoveWebhook())
 
-	go b.Start()
+	go b.Start(context.Background())
 	b.Stop()
 
 	tp := newTestPoller()
@@ -137,7 +137,7 @@ func TestBotStart(t *testing.T) {
 		return nil
 	})
 
-	go b.Start()
+	go b.Start(context.Background())
 	<-tp.done
 	b.Stop()
 
@@ -154,7 +154,7 @@ func TestBotProcessUpdate(t *testing.T) {
 		assert.NotNil(t, c.Message().Photo)
 		return nil
 	})
-	b.ProcessUpdate(Update{Message: &Message{Photo: &Photo{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Photo: &Photo{}}})
 
 	b.Handle("/start", func(c Context) error {
 		assert.Equal(t, "/start", c.Text())
@@ -310,47 +310,47 @@ func TestBotProcessUpdate(t *testing.T) {
 		return nil
 	})
 
-	b.ProcessUpdate(Update{Message: &Message{Text: "/start"}})
-	b.ProcessUpdate(Update{Message: &Message{Text: "/start@other_bot"}})
-	b.ProcessUpdate(Update{Message: &Message{Text: "hello"}})
-	b.ProcessUpdate(Update{Message: &Message{Text: "text"}})
-	b.ProcessUpdate(Update{Message: &Message{PinnedMessage: &Message{}}})
-	b.ProcessUpdate(Update{Message: &Message{Photo: &Photo{}}})
-	b.ProcessUpdate(Update{Message: &Message{Voice: &Voice{}}})
-	b.ProcessUpdate(Update{Message: &Message{Audio: &Audio{}}})
-	b.ProcessUpdate(Update{Message: &Message{Animation: &Animation{}}})
-	b.ProcessUpdate(Update{Message: &Message{Document: &Document{}}})
-	b.ProcessUpdate(Update{Message: &Message{Sticker: &Sticker{}}})
-	b.ProcessUpdate(Update{Message: &Message{Video: &Video{}}})
-	b.ProcessUpdate(Update{Message: &Message{VideoNote: &VideoNote{}}})
-	b.ProcessUpdate(Update{Message: &Message{Contact: &Contact{}}})
-	b.ProcessUpdate(Update{Message: &Message{Location: &Location{}}})
-	b.ProcessUpdate(Update{Message: &Message{Venue: &Venue{}}})
-	b.ProcessUpdate(Update{Message: &Message{Invoice: &Invoice{}}})
-	b.ProcessUpdate(Update{Message: &Message{Payment: &Payment{}}})
-	b.ProcessUpdate(Update{Message: &Message{Dice: &Dice{}}})
-	b.ProcessUpdate(Update{Message: &Message{GroupCreated: true}})
-	b.ProcessUpdate(Update{Message: &Message{UserJoined: &User{ID: 1}}})
-	b.ProcessUpdate(Update{Message: &Message{UsersJoined: []User{{ID: 1}}}})
-	b.ProcessUpdate(Update{Message: &Message{UserLeft: &User{}}})
-	b.ProcessUpdate(Update{Message: &Message{NewGroupTitle: "title"}})
-	b.ProcessUpdate(Update{Message: &Message{NewGroupPhoto: &Photo{}}})
-	b.ProcessUpdate(Update{Message: &Message{GroupPhotoDeleted: true}})
-	b.ProcessUpdate(Update{Message: &Message{Chat: &Chat{ID: 1}, MigrateTo: 2}})
-	b.ProcessUpdate(Update{EditedMessage: &Message{Text: "edited"}})
-	b.ProcessUpdate(Update{ChannelPost: &Message{Text: "post"}})
-	b.ProcessUpdate(Update{ChannelPost: &Message{PinnedMessage: &Message{}}})
-	b.ProcessUpdate(Update{EditedChannelPost: &Message{Text: "edited post"}})
-	b.ProcessUpdate(Update{Callback: &Callback{MessageID: "inline", Data: "callback"}})
-	b.ProcessUpdate(Update{Callback: &Callback{Data: "callback"}})
-	b.ProcessUpdate(Update{Callback: &Callback{Data: "\funique|callback"}})
-	b.ProcessUpdate(Update{Query: &Query{Text: "query"}})
-	b.ProcessUpdate(Update{InlineResult: &InlineResult{ResultID: "result"}})
-	b.ProcessUpdate(Update{ShippingQuery: &ShippingQuery{ID: "shipping"}})
-	b.ProcessUpdate(Update{PreCheckoutQuery: &PreCheckoutQuery{ID: "checkout"}})
-	b.ProcessUpdate(Update{Poll: &Poll{ID: "poll"}})
-	b.ProcessUpdate(Update{PollAnswer: &PollAnswer{PollID: "poll"}})
-	b.ProcessUpdate(Update{Message: &Message{WebAppData: &WebAppData{Data: "webapp"}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Text: "/start"}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Text: "/start@other_bot"}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Text: "hello"}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Text: "text"}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{PinnedMessage: &Message{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Photo: &Photo{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Voice: &Voice{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Audio: &Audio{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Animation: &Animation{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Document: &Document{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Sticker: &Sticker{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Video: &Video{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{VideoNote: &VideoNote{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Contact: &Contact{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Location: &Location{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Venue: &Venue{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Invoice: &Invoice{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Payment: &Payment{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Dice: &Dice{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{GroupCreated: true}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{UserJoined: &User{ID: 1}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{UsersJoined: []User{{ID: 1}}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{UserLeft: &User{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{NewGroupTitle: "title"}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{NewGroupPhoto: &Photo{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{GroupPhotoDeleted: true}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{Chat: &Chat{ID: 1}, MigrateTo: 2}})
+	b.ProcessUpdateCtx(context.Background(), Update{EditedMessage: &Message{Text: "edited"}})
+	b.ProcessUpdateCtx(context.Background(), Update{ChannelPost: &Message{Text: "post"}})
+	b.ProcessUpdateCtx(context.Background(), Update{ChannelPost: &Message{PinnedMessage: &Message{}}})
+	b.ProcessUpdateCtx(context.Background(), Update{EditedChannelPost: &Message{Text: "edited post"}})
+	b.ProcessUpdateCtx(context.Background(), Update{Callback: &Callback{MessageID: "inline", Data: "callback"}})
+	b.ProcessUpdateCtx(context.Background(), Update{Callback: &Callback{Data: "callback"}})
+	b.ProcessUpdateCtx(context.Background(), Update{Callback: &Callback{Data: "\funique|callback"}})
+	b.ProcessUpdateCtx(context.Background(), Update{Query: &Query{Text: "query"}})
+	b.ProcessUpdateCtx(context.Background(), Update{InlineResult: &InlineResult{ResultID: "result"}})
+	b.ProcessUpdateCtx(context.Background(), Update{ShippingQuery: &ShippingQuery{ID: "shipping"}})
+	b.ProcessUpdateCtx(context.Background(), Update{PreCheckoutQuery: &PreCheckoutQuery{ID: "checkout"}})
+	b.ProcessUpdateCtx(context.Background(), Update{Poll: &Poll{ID: "poll"}})
+	b.ProcessUpdateCtx(context.Background(), Update{PollAnswer: &PollAnswer{PollID: "poll"}})
+	b.ProcessUpdateCtx(context.Background(), Update{Message: &Message{WebAppData: &WebAppData{Data: "webapp"}}})
 }
 
 func TestBotOnError(t *testing.T) {
@@ -366,7 +366,7 @@ func TestBotOnError(t *testing.T) {
 		ok = true
 	}
 
-	b.runHandler(func(c Context) error {
+	b.runHandlerCtx(context.Background(), func(c Context) error {
 		return errors.New("not nil")
 	}, &nativeContext{b: b})
 
@@ -454,7 +454,7 @@ func TestBot(t *testing.T) {
 		require.NoError(t, err)
 		defer resp.Body.Close()
 
-		file, err := ioutil.TempFile("", "")
+		file, err := os.CreateTemp("", "")
 		require.NoError(t, err)
 
 		_, err = io.Copy(file, resp.Body)

@@ -81,9 +81,9 @@ func (t *InlineButton) CallbackUnique() string {
 }
 
 // CallbackUnique implements CallbackEndpoint.
-func (t *Btn) CallbackUnique() string {
-	if t.Unique != "" {
-		return "\f" + t.Unique
+func (b *Btn) CallbackUnique() string {
+	if b.Unique != "" {
+		return "\f" + b.Unique
 	}
-	return t.Text
+	return b.Text
 }

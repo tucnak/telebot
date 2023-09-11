@@ -1,6 +1,7 @@
 package telebot
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -58,7 +59,7 @@ func TestMiddlewarePoller(t *testing.T) {
 		tp.updates <- Update{ID: 0}
 	}()
 
-	go b.Start()
+	go b.Start(context.Background())
 	<-tp.done
 	b.Stop()
 
