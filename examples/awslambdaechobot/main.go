@@ -8,7 +8,6 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"gopkg.in/telebot.v3"
-	tele "gopkg.in/telebot.v3"
 )
 
 func main() {
@@ -16,17 +15,17 @@ func main() {
 	if botToken == "" {
 		log.Fatal("TOKEN must be defined")
 	}
-	pref := tele.Settings{
+	pref := telebot.Settings{
 		Token:       botToken,
 		Synchronous: true,
 	}
 
-	b, err := tele.NewBot(pref)
+	b, err := telebot.NewBot(pref)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	b.Handle(tele.OnText, func(ctx tele.Context) error {
+	b.Handle(telebot.OnText, func(ctx telebot.Context) error {
 		// Echo
 		return ctx.Send(ctx.Text())
 	})
