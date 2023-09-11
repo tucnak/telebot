@@ -124,6 +124,7 @@ var (
 	ErrBlockedByUser        = NewError(403, "Forbidden: bot was blocked by the user")
 	ErrKickedFromGroup      = NewError(403, "Forbidden: bot was kicked from the group chat")
 	ErrKickedFromSuperGroup = NewError(403, "Forbidden: bot was kicked from the supergroup chat")
+	ErrKickedFromChannel    = NewError(403, "Forbidden: bot was kicked from the channel chat")
 	ErrNotStartedByUser     = NewError(403, "Forbidden: bot can't initiate conversation with a user")
 	ErrUserIsDeactivated    = NewError(403, "Forbidden: user is deactivated")
 )
@@ -225,6 +226,8 @@ func Err(s string) error {
 		return ErrKickedFromGroup
 	case ErrKickedFromSuperGroup.ʔ():
 		return ErrKickedFromSuperGroup
+	case ErrKickedFromChannel.ʔ():
+		return ErrKickedFromChannel
 	case ErrNotStartedByUser.ʔ():
 		return ErrNotStartedByUser
 	case ErrUserIsDeactivated.ʔ():
