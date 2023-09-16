@@ -25,7 +25,7 @@ module "bot_handler" {
   architectures              = ["x86_64"]
   memory_size                = "128"
   timeout                    = "1"
-  handler                    = "bot_handler" # This value doesn't matter
+  handler                    = "bootstrap"
   source_path = [{
     path     = "../"
     commands = ["GOOS=linux GOARCH=amd64 go build -tags lambda.norpc -o package/bootstrap", ":zip ../package/bootstrap"]
