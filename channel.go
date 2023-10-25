@@ -10,7 +10,7 @@ func (b *Bot) getChanStopClient() chan struct{} {
 func (b *Bot) closeChanStopClient() {
 	b.stopClientMux.Lock()
 	defer b.stopClientMux.Unlock()
-	
+
 	close(b.stopClient)
 }
 
