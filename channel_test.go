@@ -38,7 +38,10 @@ func TestRaceStopClientChannel(t *testing.T) {
 
 	// act and assert
 	go api.Start()
-	defer api.Close()
+	defer func() {
+		_, err = api.Close()
+		require.NoError(t, err)
+	}()
 
 	<-syncChan
 }
