@@ -199,10 +199,11 @@ func (b *Bot) Start() {
 	}
 
 	// do nothing if called twice
-	if b.stopClient != nil {
+	if b.getChanStopClient() != nil {
 		return
 	}
-	b.stopClient = make(chan struct{})
+
+	b.createNewChanStopClient()
 
 	stop := make(chan struct{})
 	stopConfirm := make(chan struct{})
@@ -222,7 +223,7 @@ func (b *Bot) Start() {
 			close(stop)
 			<-stopConfirm
 			close(confirm)
-			b.stopClient = nil
+			b.destroyChanStopClient()
 			return
 		}
 	}
@@ -230,8 +231,8 @@ func (b *Bot) Start() {
 
 // Stop gracefully shuts the poller down.
 func (b *Bot) Stop() {
-	if b.stopClient != nil {
-		close(b.stopClient)
+	if b.getChanStopClient() != nil {
+		b.closeChanStopClient()
 	}
 	confirm := make(chan struct{})
 	b.stop <- confirm

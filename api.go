@@ -36,7 +36,7 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 
 	go func() {
 		select {
-		case <-b.stopClient:
+		case <-b.getChanStopClient():
 			cancel()
 		case <-exit:
 		}
