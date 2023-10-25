@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -82,6 +83,8 @@ type Bot struct {
 	stop        chan chan struct{}
 	client      *http.Client
 	stopClient  chan struct{}
+
+	stopClientMux sync.RWMutex
 }
 
 // Settings represents a utility struct for passing certain
