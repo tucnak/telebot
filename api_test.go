@@ -3,15 +3,15 @@ package telebot
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // testPayload implements json.Marshaler
@@ -117,4 +117,36 @@ func TestExtractMessage(t *testing.T) {
 	data = []byte(`{"ok":true,"result":{"foo":"bar"}}`)
 	_, err = extractMessage(data)
 	require.NoError(t, err)
+}
+
+func TestBot_url(t *testing.T) {
+	url := "https://api.telegram.com"
+	token := "my-token"
+	method := "my-method"
+
+	tests := []struct {
+		name        string
+		useTestEnv  bool
+		expectedURL string
+	}{
+		{"when bot is not set to test environment", false, fmt.Sprintf("%s/bot%s/%s", url, token, method)},
+		{"when bot is set to test environment", true, fmt.Sprintf("%s/bot%s/test/%s", url, token, method)},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			settings := Settings{
+				URL:        url,
+				Token:      token,
+				Offline:    true,
+				UseTestEnv: tt.useTestEnv,
+			}
+			bot, err := NewBot(settings)
+
+			assert.NoError(t, err)
+
+			url := bot.url(method)
+
+			assert.Equal(t, tt.expectedURL, url)
+		})
+	}
 }
