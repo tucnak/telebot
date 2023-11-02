@@ -373,7 +373,7 @@ func TestBotOnError(t *testing.T) {
 	assert.True(t, ok)
 }
 
-func TestBot_Middleware(t *testing.T) {
+func TestBotMiddleware(t *testing.T) {
 	t.Run("call order", func(t *testing.T) {
 		var trace []string
 
