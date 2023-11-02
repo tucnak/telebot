@@ -373,6 +373,116 @@ func TestBotOnError(t *testing.T) {
 	assert.True(t, ok)
 }
 
+func TestBotMiddleware(t *testing.T) {
+	t.Run("calling order", func(t *testing.T) {
+		var trace []string
+
+		handler := func(name string) HandlerFunc {
+			return func(c Context) error {
+				trace = append(trace, name)
+				return nil
+			}
+		}
+
+		middleware := func(name string) MiddlewareFunc {
+			return func(next HandlerFunc) HandlerFunc {
+				return func(c Context) error {
+					trace = append(trace, name+":in")
+					err := next(c)
+					trace = append(trace, name+":out")
+					return err
+				}
+			}
+		}
+
+		b, err := NewBot(Settings{Synchronous: true, Offline: true})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		b.Use(middleware("global1"), middleware("global2"))
+		b.Handle("/a", handler("/a"), middleware("handler1a"), middleware("handler2a"))
+
+		group := b.Group()
+		group.Use(middleware("group1"), middleware("group2"))
+		group.Handle("/b", handler("/b"), middleware("handler1b"))
+
+		b.ProcessUpdate(Update{
+			Message: &Message{Text: "/a"},
+		})
+		assert.Equal(t, []string{
+			"global1:in", "global2:in",
+			"handler1a:in", "handler2a:in",
+			"/a",
+			"handler2a:out", "handler1a:out",
+			"global2:out", "global1:out",
+		}, trace)
+
+		trace = trace[:0]
+
+		b.ProcessUpdate(Update{
+			Message: &Message{Text: "/b"},
+		})
+		assert.Equal(t, []string{
+			"global1:in", "global2:in",
+			"group1:in", "group2:in",
+			"handler1b:in",
+			"/b",
+			"handler1b:out",
+			"group2:out", "group1:out",
+			"global2:out", "global1:out",
+		}, trace)
+	})
+
+	fatal := func(next HandlerFunc) HandlerFunc {
+		return func(c Context) error {
+			t.Fatal("fatal middleware should not be called")
+			return nil
+		}
+	}
+
+	nop := func(next HandlerFunc) HandlerFunc {
+		return func(c Context) error {
+			return next(c)
+		}
+	}
+
+	t.Run("combining with global middleware", func(t *testing.T) {
+		b, err := NewBot(Settings{Synchronous: true, Offline: true})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// Pre-allocate middleware slice to make sure
+		// it has extra capacity after group-level middleware is added.
+		b.group.middleware = make([]MiddlewareFunc, 0, 2)
+		b.Use(nop)
+
+		b.Handle("/a", func(c Context) error { return nil }, nop)
+		b.Handle("/b", func(c Context) error { return nil }, fatal)
+
+		b.ProcessUpdate(Update{Message: &Message{Text: "/a"}})
+	})
+
+	t.Run("combining with group middleware", func(t *testing.T) {
+		b, err := NewBot(Settings{Synchronous: true, Offline: true})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		g := b.Group()
+		// Pre-allocate middleware slice to make sure
+		// it has extra capacity after group-level middleware is added.
+		g.middleware = make([]MiddlewareFunc, 0, 2)
+		g.Use(nop)
+
+		g.Handle("/a", func(c Context) error { return nil }, nop)
+		g.Handle("/b", func(c Context) error { return nil }, fatal)
+
+		b.ProcessUpdate(Update{Message: &Message{Text: "/a"}})
+	})
+}
+
 func TestBot(t *testing.T) {
 	if b == nil {
 		t.Skip("Cached bot instance is bad (probably wrong or empty TELEBOT_SECRET)")
