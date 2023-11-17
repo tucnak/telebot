@@ -72,6 +72,8 @@ const (
 	OnAddedToGroup      = "\aadded_to_group"
 	OnUserJoined        = "\auser_joined"
 	OnUserLeft          = "\auser_left"
+	OnUserShared        = "\auser_shared"
+	OnChatShared        = "\achat_shared"
 	OnNewGroupTitle     = "\anew_chat_title"
 	OnNewGroupPhoto     = "\anew_chat_photo"
 	OnGroupPhotoDeleted = "\achat_photo_deleted"

@@ -124,6 +124,16 @@ func (b *Bot) ProcessUpdate(u Update) {
 			return
 		}
 
+		if m.UserShared != nil {
+			b.handle(OnUserShared, c)
+			return
+		}
+
+		if m.ChatShared != nil {
+			b.handle(OnChatShared, c)
+			return
+		}
+
 		if m.NewGroupTitle != "" {
 			b.handle(OnNewGroupTitle, c)
 			return
