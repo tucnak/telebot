@@ -283,6 +283,7 @@ func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Messag
 }
 
 // SendAlbum sends multiple instances of media as a single message.
+// To include the caption, make sure the first Inputtable of an album has it.
 // From all existing options, it only supports tele.Silent.
 func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, error) {
 	if to == nil {
