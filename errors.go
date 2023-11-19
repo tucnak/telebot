@@ -77,6 +77,7 @@ var (
 // Bad request errors
 var (
 	ErrBadButtonData          = NewError(400, "Bad Request: BUTTON_DATA_INVALID")
+	ErrBadUserID              = NewError(400, "Bad Request: USER_ID_INVALID")
 	ErrBadPollOptions         = NewError(400, "Bad Request: expected an Array of String as options")
 	ErrBadURLContent          = NewError(400, "Bad Request: failed to get HTTP URL content")
 	ErrCantEditMessage        = NewError(400, "Bad Request: message can't be edited")
@@ -117,11 +118,10 @@ var (
 	ErrWrongTypeOfContent     = NewError(400, "Bad Request: wrong type of the web page content")
 	ErrWrongURL               = NewError(400, "Bad Request: wrong HTTP URL specified")
 	ErrForwardMessage         = NewError(400, "Bad Request: administrators of the chat restricted message forwarding")
-	ErrAlreadyParticipant     = NewError(400, "Bad Request: USER_ALREADY_PARTICIPANT", "User is already a participant")
-	ErrChannelsTooMuch        = NewError(400, "Bad Request: CHANNELS_TOO_MUCH")
-	ErrUserChannelsTooMuch    = NewError(400, "Bad Request: USER_CHANNELS_TOO_MUCH")
+	ErrUserAlreadyParticipant = NewError(400, "Bad Request: USER_ALREADY_PARTICIPANT", "User is already a participant")
 	ErrHideRequesterMissing   = NewError(400, "Bad Request: HIDE_REQUESTER_MISSING")
-	ErrUserIDInvalid          = NewError(400, "Bad Request: USER_ID_INVALID")
+	ErrChannelsTooMuch        = NewError(400, "Bad Request: CHANNELS_TOO_MUCH")
+	ErrChannelsTooMuchUser    = NewError(400, "Bad Request: USER_CHANNELS_TOO_MUCH")
 )
 
 // Forbidden errors
@@ -147,6 +147,8 @@ func Err(s string) error {
 		return ErrInternal
 	case ErrBadButtonData.ʔ():
 		return ErrBadButtonData
+	case ErrBadUserID.ʔ():
+		return ErrBadUserID
 	case ErrBadPollOptions.ʔ():
 		return ErrBadPollOptions
 	case ErrBadURLContent.ʔ():
@@ -239,6 +241,14 @@ func Err(s string) error {
 		return ErrUserIsDeactivated
 	case ErrForwardMessage.ʔ():
 		return ErrForwardMessage
+	case ErrUserAlreadyParticipant.ʔ():
+		return ErrUserAlreadyParticipant
+	case ErrHideRequesterMissing.ʔ():
+		return ErrHideRequesterMissing
+	case ErrChannelsTooMuch.ʔ():
+		return ErrChannelsTooMuch
+	case ErrChannelsTooMuchUser.ʔ():
+		return ErrChannelsTooMuchUser
 	default:
 		return nil
 	}
