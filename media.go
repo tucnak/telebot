@@ -290,7 +290,7 @@ type Sticker struct {
 	MaskPosition     *MaskPosition  `json:"mask_position"`
 	PremiumAnimation *File          `json:"premium_animation"`
 	Type             StickerSetType `json:"type"`
-	CustomEmoji      string         `json:"custom_emoji_id,omitempty"`
+	CustomEmoji      string         `json:"custom_emoji_id"`
 }
 
 func (s *Sticker) MediaType() string {
