@@ -229,6 +229,12 @@ type Message struct {
 	// Message is a service message about a successful payment.
 	Payment *Payment `json:"successful_payment"`
 
+	// For a service message, a user was shared with the bot.
+	UserShared *RecipientShared `json:"user_shared,omitempty"`
+
+	// For a service message, a chat was shared with the bot.
+	ChatShared *RecipientShared `json:"chat_shared,omitempty"`
+
 	// The domain name of the website on which the user has logged in.
 	ConnectedWebsite string `json:"connected_website,omitempty"`
 

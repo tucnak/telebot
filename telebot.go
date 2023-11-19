@@ -77,6 +77,8 @@ const (
 	OnAddedToGroup      = "\aadded_to_group"
 	OnUserJoined        = "\auser_joined"
 	OnUserLeft          = "\auser_left"
+	OnUserShared        = "\auser_shared"
+	OnChatShared        = "\achat_shared"
 	OnNewGroupTitle     = "\anew_chat_title"
 	OnNewGroupPhoto     = "\anew_chat_photo"
 	OnGroupPhotoDeleted = "\achat_photo_deleted"
@@ -136,6 +138,13 @@ const (
 	ModeHTML       ParseMode = "HTML"
 )
 
-// M is a shortcut for map[string]interface{}. Use it for passing
-// arguments to the layout functions.
+// M is a shortcut for map[string]interface{}.
+// Useful for passing arguments to the layout functions.
 type M = map[string]interface{}
+
+// Flag returns a pointer to the given bool.
+// Useful for passing the three-state flags to a Bot API.
+// For example, see ReplyRecipient type.
+func Flag(b bool) *bool {
+	return &b
+}

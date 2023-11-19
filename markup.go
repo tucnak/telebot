@@ -207,10 +207,12 @@ func (r *ReplyMarkup) WebApp(text string, app *WebApp) Btn {
 type ReplyButton struct {
 	Text string `json:"text"`
 
-	Contact  bool     `json:"request_contact,omitempty"`
-	Location bool     `json:"request_location,omitempty"`
-	Poll     PollType `json:"request_poll,omitempty"`
-	WebApp   *WebApp  `json:"web_app,omitempty"`
+	Contact  bool            `json:"request_contact,omitempty"`
+	Location bool            `json:"request_location,omitempty"`
+	Poll     PollType        `json:"request_poll,omitempty"`
+	User     *ReplyRecipient `json:"request_user,omitempty"`
+	Chat     *ReplyRecipient `json:"request_chat,omitempty"`
+	WebApp   *WebApp         `json:"web_app,omitempty"`
 }
 
 // MarshalJSON implements json.Marshaler. It allows passing PollType as a
@@ -221,6 +223,34 @@ func (pt PollType) MarshalJSON() ([]byte, error) {
 	}{
 		Type: string(pt),
 	})
+}
+
+// ReplyRecipient combines both KeyboardButtonRequestUser
+// and KeyboardButtonRequestChat objects. Use inside ReplyButton
+// to request the user or chat sharing with respective settings.
+//
+// To pass the pointers to bool use a special tele.Flag function,
+// that way you will be able to reflect the three-state bool (nil, false, true).
+type ReplyRecipient struct {
+	ID int32 `json:"request_id"`
+
+	Bot     *bool `json:"user_is_bot,omitempty"`     // user only, optional
+	Premium *bool `json:"user_is_premium,omitempty"` // user only, optional
+
+	Channel      bool    `json:"chat_is_channel,omitempty"`           // chat only, required
+	Forum        *bool   `json:"chat_is_forum,omitempty"`             // chat only, optional
+	WithUsername *bool   `json:"chat_has_username,omitempty"`         // chat only, optional
+	Created      *bool   `json:"chat_is_created,omitempty"`           // chat only, optional
+	UserRights   *Rights `json:"user_administrator_rights,omitempty"` // chat only, optional
+	BotRights    *Rights `json:"bot_administrator_rights,omitempty"`  // chat only, optional
+	BotMember    *bool   `json:"bot_is_member,omitempty"`             // chat only, optional
+}
+
+// RecipientShared combines both UserShared and ChatShared objects.
+type RecipientShared struct {
+	ID     int32 `json:"request_id"`
+	UserID int64 `json:"user_id"`
+	ChatID int64 `json:"chat_id"`
 }
 
 // InlineButton represents a button displayed in the message.
