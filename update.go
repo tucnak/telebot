@@ -110,6 +110,22 @@ func (b *Bot) ProcessUpdate(u Update) {
 			b.handle(OnTopicClosed, c)
 			return
 		}
+		if m.TopicEdited != nil {
+			b.handle(OnTopicEdited, c)
+			return
+		}
+		if m.GeneralTopicHidden != nil {
+			b.handle(OnGeneralTopicHidden, c)
+			return
+		}
+		if m.GeneralTopicUnhidden != nil {
+			b.handle(OnGeneralTopicUnhidden, c)
+			return
+		}
+		if m.WriteAccessAllowed != nil {
+			b.handle(OnWriteAccessAllowed, c)
+			return
+		}
 
 		wasAdded := (m.UserJoined != nil && m.UserJoined.ID == b.Me.ID) ||
 			(m.UsersJoined != nil && isUserInList(b.Me, m.UsersJoined))
