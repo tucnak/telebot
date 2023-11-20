@@ -21,13 +21,29 @@ type Rights struct {
 	CanRestrictMembers  bool `json:"can_restrict_members"`
 	CanPromoteMembers   bool `json:"can_promote_members"`
 	CanSendMessages     bool `json:"can_send_messages"`
-	CanSendMedia        bool `json:"can_send_media_messages"`
 	CanSendPolls        bool `json:"can_send_polls"`
 	CanSendOther        bool `json:"can_send_other_messages"`
 	CanAddPreviews      bool `json:"can_add_web_page_previews"`
 	CanManageVideoChats bool `json:"can_manage_video_chats"`
 	CanManageChat       bool `json:"can_manage_chat"`
 	CanManageTopics     bool `json:"can_manage_topics"`
+
+	CanSendMedia      bool `json:"can_send_media_messages,omitempty"` // deprecated
+	CanSendAudios     bool `json:"can_send_audios"`
+	CanSendDocuments  bool `json:"can_send_documents"`
+	CanSendPhotos     bool `json:"can_send_photos"`
+	CanSendVideos     bool `json:"can_send_videos"`
+	CanSendVideoNotes bool `json:"can_send_video_notes"`
+	CanSendVoiceNotes bool `json:"can_send_voice_notes"`
+
+	// Independent defines whether the chat permissions are set independently.
+	// If not, the can_send_other_messages and can_add_web_page_previews permissions
+	// will imply the can_send_messages, can_send_audios, can_send_documents, can_send_photos,
+	// can_send_videos, can_send_video_notes, and can_send_voice_notes permissions;
+	// the can_send_polls permission will imply the can_send_messages permission.
+	//
+	// Works for Restrict and SetGroupPermissions methods only.
+	Independent bool `json:"-"`
 }
 
 // NoRights is the default Rights{}.
@@ -50,13 +66,18 @@ func NoRestrictions() Rights {
 		CanPinMessages:      false,
 		CanPromoteMembers:   false,
 		CanSendMessages:     true,
-		CanSendMedia:        true,
 		CanSendPolls:        true,
 		CanSendOther:        true,
 		CanAddPreviews:      true,
 		CanManageVideoChats: false,
 		CanManageChat:       false,
 		CanManageTopics:     false,
+		CanSendAudios:       true,
+		CanSendDocuments:    true,
+		CanSendPhotos:       true,
+		CanSendVideos:       true,
+		CanSendVideoNotes:   true,
+		CanSendVoiceNotes:   true,
 	}
 }
 
@@ -73,13 +94,18 @@ func AdminRights() Rights {
 		CanPinMessages:      true,
 		CanPromoteMembers:   true,
 		CanSendMessages:     true,
-		CanSendMedia:        true,
 		CanSendPolls:        true,
 		CanSendOther:        true,
 		CanAddPreviews:      true,
 		CanManageVideoChats: true,
 		CanManageChat:       true,
 		CanManageTopics:     true,
+		CanSendAudios:       true,
+		CanSendDocuments:    true,
+		CanSendPhotos:       true,
+		CanSendVideos:       true,
+		CanSendVideoNotes:   true,
+		CanSendVoiceNotes:   true,
 	}
 }
 
@@ -127,14 +153,17 @@ func (b *Bot) Unban(chat *Chat, user *User, forBanned ...bool) error {
 //   - can send other
 //   - can add web page previews
 func (b *Bot) Restrict(chat *Chat, member *ChatMember) error {
-	prv, until := member.Rights, member.RestrictedUntil
+	perms, until := member.Rights, member.RestrictedUntil
 
 	params := map[string]interface{}{
-		"chat_id":    chat.Recipient(),
-		"user_id":    member.User.Recipient(),
-		"until_date": strconv.FormatInt(until, 10),
+		"chat_id":     chat.Recipient(),
+		"user_id":     member.User.Recipient(),
+		"until_date":  strconv.FormatInt(until, 10),
+		"permissions": perms,
 	}
-	embedRights(params, prv)
+	if perms.Independent {
+		params["use_independent_chat_permissions"] = true
+	}
 
 	_, err := b.Raw("restrictChatMember", params)
 	return err
@@ -151,14 +180,12 @@ func (b *Bot) Restrict(chat *Chat, member *ChatMember) error {
 //   - can pin messages
 //   - can promote members
 func (b *Bot) Promote(chat *Chat, member *ChatMember) error {
-	prv := member.Rights
-
 	params := map[string]interface{}{
 		"chat_id":      chat.Recipient(),
 		"user_id":      member.User.Recipient(),
 		"is_anonymous": member.Anonymous,
 	}
-	embedRights(params, prv)
+	embedRights(params, member.Rights)
 
 	_, err := b.Raw("promoteChatMember", params)
 	return err

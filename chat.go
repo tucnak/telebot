@@ -432,6 +432,9 @@ func (b *Bot) SetGroupPermissions(chat *Chat, perms Rights) error {
 		"chat_id":     chat.Recipient(),
 		"permissions": perms,
 	}
+	if perms.Independent {
+		params["use_independent_chat_permissions"] = true
+	}
 
 	_, err := b.Raw("setChatPermissions", params)
 	return err
