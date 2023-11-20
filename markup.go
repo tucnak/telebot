@@ -82,17 +82,19 @@ func (r *ReplyMarkup) copy() *ReplyMarkup {
 
 // Btn is a constructor button, which will later become either a reply, or an inline button.
 type Btn struct {
-	Unique          string   `json:"unique,omitempty"`
-	Text            string   `json:"text,omitempty"`
-	URL             string   `json:"url,omitempty"`
-	Data            string   `json:"callback_data,omitempty"`
-	InlineQuery     string   `json:"switch_inline_query,omitempty"`
-	InlineQueryChat string   `json:"switch_inline_query_current_chat,omitempty"`
-	Contact         bool     `json:"request_contact,omitempty"`
-	Location        bool     `json:"request_location,omitempty"`
-	Poll            PollType `json:"request_poll,omitempty"`
-	Login           *Login   `json:"login_url,omitempty"`
-	WebApp          *WebApp  `json:"web_app,omitempty"`
+	Unique          string          `json:"unique,omitempty"`
+	Text            string          `json:"text,omitempty"`
+	URL             string          `json:"url,omitempty"`
+	Data            string          `json:"callback_data,omitempty"`
+	InlineQuery     string          `json:"switch_inline_query,omitempty"`
+	InlineQueryChat string          `json:"switch_inline_query_current_chat,omitempty"`
+	Login           *Login          `json:"login_url,omitempty"`
+	WebApp          *WebApp         `json:"web_app,omitempty"`
+	Contact         bool            `json:"request_contact,omitempty"`
+	Location        bool            `json:"request_location,omitempty"`
+	Poll            PollType        `json:"request_poll,omitempty"`
+	User            *ReplyRecipient `json:"request_user,omitempty"`
+	Chat            *ReplyRecipient `json:"request_chat,omitempty"`
 }
 
 // Row represents an array of buttons, a row.
@@ -160,18 +162,6 @@ func (r *ReplyMarkup) Text(text string) Btn {
 	return Btn{Text: text}
 }
 
-func (r *ReplyMarkup) Contact(text string) Btn {
-	return Btn{Contact: true, Text: text}
-}
-
-func (r *ReplyMarkup) Location(text string) Btn {
-	return Btn{Location: true, Text: text}
-}
-
-func (r *ReplyMarkup) Poll(text string, poll PollType) Btn {
-	return Btn{Poll: poll, Text: text}
-}
-
 func (r *ReplyMarkup) Data(text, unique string, data ...string) Btn {
 	return Btn{
 		Unique: unique,
@@ -190,6 +180,26 @@ func (r *ReplyMarkup) Query(text, query string) Btn {
 
 func (r *ReplyMarkup) QueryChat(text, query string) Btn {
 	return Btn{Text: text, InlineQueryChat: query}
+}
+
+func (r *ReplyMarkup) Contact(text string) Btn {
+	return Btn{Contact: true, Text: text}
+}
+
+func (r *ReplyMarkup) Location(text string) Btn {
+	return Btn{Location: true, Text: text}
+}
+
+func (r *ReplyMarkup) Poll(text string, poll PollType) Btn {
+	return Btn{Poll: poll, Text: text}
+}
+
+func (r *ReplyMarkup) User(text string, user *ReplyRecipient) Btn {
+	return Btn{Text: text, User: user}
+}
+
+func (r *ReplyMarkup) Chat(text string, chat *ReplyRecipient) Btn {
+	return Btn{Text: text, Chat: chat}
 }
 
 func (r *ReplyMarkup) Login(text string, login *Login) Btn {
@@ -310,6 +320,8 @@ func (b Btn) Reply() *ReplyButton {
 		Contact:  b.Contact,
 		Location: b.Location,
 		Poll:     b.Poll,
+		User:     b.User,
+		Chat:     b.Chat,
 		WebApp:   b.WebApp,
 	}
 }
