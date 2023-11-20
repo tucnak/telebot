@@ -264,22 +264,22 @@ type Message struct {
 	ReplyMarkup *ReplyMarkup `json:"reply_markup,omitempty"`
 
 	// Service message: forum topic created
-	TopicCreated *TopicCreated `json:"forum_topic_created,omitempty"`
+	TopicCreated *Topic `json:"forum_topic_created,omitempty"`
 
 	// Service message: forum topic closed
-	TopicClosed *TopicClosed `json:"forum_topic_closed,omitempty"`
+	TopicClosed *struct{} `json:"forum_topic_closed,omitempty"`
 
 	// Service message: forum topic reopened
-	TopicReopened *TopicReopened `json:"forum_topic_reopened,omitempty"`
+	TopicReopened *Topic `json:"forum_topic_reopened,omitempty"`
 
 	// Service message: forum topic deleted
-	TopicEdited *TopicEdited `json:"forum_topic_edited,omitempty"`
+	TopicEdited *Topic `json:"forum_topic_edited,omitempty"`
 
 	// Service message: general forum topic hidden
-	GeneralTopicHidden *GeneralTopicHidden `json:"general_topic_hidden,omitempty"`
+	GeneralTopicHidden *struct{} `json:"general_topic_hidden,omitempty"`
 
 	// Service message: general forum topic unhidden
-	GeneralTopicUnhidden *GeneralTopicUnhidden `json:"general_topic_unhidden,omitempty"`
+	GeneralTopicUnhidden *struct{} `json:"general_topic_unhidden,omitempty"`
 
 	// Service message: represents spoiler information about the message.
 	HasMediaSpoiler bool `json:"has_media_spoiler,omitempty"`

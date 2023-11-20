@@ -98,7 +98,8 @@ func (b *Bot) ProcessUpdate(u Update) {
 			b.handle(OnPayment, c)
 			return
 		}
-		if m.TopicClosed != nil {
+
+		if m.TopicCreated != nil {
 			b.handle(OnTopicCreated, c)
 			return
 		}
@@ -138,7 +139,6 @@ func (b *Bot) ProcessUpdate(u Update) {
 			b.handle(OnUserJoined, c)
 			return
 		}
-
 		if m.UsersJoined != nil {
 			for _, user := range m.UsersJoined {
 				m.UserJoined = &user
@@ -146,7 +146,6 @@ func (b *Bot) ProcessUpdate(u Update) {
 			}
 			return
 		}
-
 		if m.UserLeft != nil {
 			b.handle(OnUserLeft, c)
 			return
@@ -156,7 +155,6 @@ func (b *Bot) ProcessUpdate(u Update) {
 			b.handle(OnUserShared, c)
 			return
 		}
-
 		if m.ChatShared != nil {
 			b.handle(OnChatShared, c)
 			return
@@ -166,12 +164,10 @@ func (b *Bot) ProcessUpdate(u Update) {
 			b.handle(OnNewGroupTitle, c)
 			return
 		}
-
 		if m.NewGroupPhoto != nil {
 			b.handle(OnNewGroupPhoto, c)
 			return
 		}
-
 		if m.GroupPhotoDeleted {
 			b.handle(OnGroupPhotoDeleted, c)
 			return
@@ -181,12 +177,10 @@ func (b *Bot) ProcessUpdate(u Update) {
 			b.handle(OnGroupCreated, c)
 			return
 		}
-
 		if m.SuperGroupCreated {
 			b.handle(OnSuperGroupCreated, c)
 			return
 		}
-
 		if m.ChannelCreated {
 			b.handle(OnChannelCreated, c)
 			return
@@ -202,17 +196,14 @@ func (b *Bot) ProcessUpdate(u Update) {
 			b.handle(OnVideoChatStarted, c)
 			return
 		}
-
 		if m.VideoChatEnded != nil {
 			b.handle(OnVideoChatEnded, c)
 			return
 		}
-
 		if m.VideoChatParticipants != nil {
 			b.handle(OnVideoChatParticipants, c)
 			return
 		}
-
 		if m.VideoChatScheduled != nil {
 			b.handle(OnVideoChatScheduled, c)
 			return
@@ -220,13 +211,13 @@ func (b *Bot) ProcessUpdate(u Update) {
 
 		if m.WebAppData != nil {
 			b.handle(OnWebApp, c)
+			return
 		}
 
 		if m.ProximityAlert != nil {
 			b.handle(OnProximityAlert, c)
 			return
 		}
-
 		if m.AutoDeleteTimer != nil {
 			b.handle(OnAutoDeleteTimer, c)
 			return
