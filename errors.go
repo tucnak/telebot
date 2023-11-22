@@ -1,6 +1,7 @@
 package telebot
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -252,6 +253,11 @@ func Err(s string) error {
 	default:
 		return nil
 	}
+}
+
+// ErrIs checks if the error with given description matches an error err.
+func ErrIs(s string, err error) bool {
+	return errors.Is(err, Err(s))
 }
 
 // wrapError returns new wrapped telebot-related error.
