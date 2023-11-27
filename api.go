@@ -13,6 +13,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -20,6 +21,17 @@ import (
 // It also handles API errors, so you only need to unwrap
 // result field from json data.
 func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
+	if b.ratelimit {
+		c := sync.NewCond(&sync.Mutex{})
+		c.L.Lock()
+		b.raws <- c
+		c.Wait()
+		c.L.Unlock()
+	}
+	return b.raw(method, payload)
+}
+
+func (b *Bot) raw(method string, payload interface{}) ([]byte, error) {
 	url := b.URL + "/bot" + b.Token + "/" + method
 
 	var buf bytes.Buffer

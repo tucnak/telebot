@@ -21,6 +21,7 @@ go get -u gopkg.in/telebot.v3
 	- [Editable](#editable)
 	- [Keyboards](#keyboards)
 	- [Inline mode](#inline-mode)
+	- [Rate limiter](#rate-limiter)
 * [Contributing](#contributing)
 * [Donate](#donate)
 * [License](#license)
@@ -458,6 +459,21 @@ b.Handle(tele.OnQuery, func(c tele.Context) error {
 		CacheTime: 60, // a minute
 	})
 })
+```
+
+## Rate limiter
+In order not to catch the anti-flood, an implementation has been made that allows you to limit the number of outgoing requests by n times per second.
+```go
+pref := tele.Settings{
+	Token:      "123456:token",
+	// PerSeconds limits the number of requests per second executed
+	// by the client for Raw function. Default per in seconds is -1.
+	// To enable the queue, set the value greater than zero.
+	PerSeconds: 30,
+	// PerBufferSize sets the size of the queue that is waiting for the signal to be sent.
+	// By default, the buffer is infinite and has a value equal to zero.
+	PerBufferSize: 0,
+}
 ```
 
 There's not much to talk about really. It also supports some form of authentication
