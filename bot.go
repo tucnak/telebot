@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"regexp"
 	"strconv"
+	"time"
 	"strings"
 	"sync"
 
@@ -26,7 +28,7 @@ func NewBot(pref Settings) (*Bot, error) {
 
 	client := pref.Client
 	if client == nil {
-		client = http.DefaultClient
+		client = &http.Client{Timeout: time.Minute}
 	}
 
 	if pref.URL == "" {
@@ -43,7 +45,7 @@ func NewBot(pref Settings) (*Bot, error) {
 		Token:   pref.Token,
 		URL:     pref.URL,
 		Poller:  pref.Poller,
-		OnError: pref.OnError,
+		onError: pref.OnError,
 
 		Updates:  make(chan Update, pref.Updates),
 		handlers: make(map[string]HandlerFunc),
@@ -97,7 +99,7 @@ type Bot struct {
 	URL     string
 	Updates chan Update
 	Poller  Poller
-	OnError func(error, Context)
+	onError func(error, Context)
 
 	group       *Group
 	handlers    map[string]HandlerFunc
@@ -106,6 +108,7 @@ type Bot struct {
 	parseMode   ParseMode
 	stop        chan chan struct{}
 	client      *http.Client
+	stopClient  chan struct{}
 	raws        chan *sync.Cond
 	ratelimit   bool
 }
@@ -156,34 +159,22 @@ type Settings struct {
 	PerBufferSize int
 }
 
-// Update object represents an incoming update.
-type Update struct {
-	ID int `json:"update_id"`
-
-	Message           *Message          `json:"message,omitempty"`
-	EditedMessage     *Message          `json:"edited_message,omitempty"`
-	ChannelPost       *Message          `json:"channel_post,omitempty"`
-	EditedChannelPost *Message          `json:"edited_channel_post,omitempty"`
-	Callback          *Callback         `json:"callback_query,omitempty"`
-	Query             *Query            `json:"inline_query,omitempty"`
-	InlineResult      *InlineResult     `json:"chosen_inline_result,omitempty"`
-	ShippingQuery     *ShippingQuery    `json:"shipping_query,omitempty"`
-	PreCheckoutQuery  *PreCheckoutQuery `json:"pre_checkout_query,omitempty"`
-	Poll              *Poll             `json:"poll,omitempty"`
-	PollAnswer        *PollAnswer       `json:"poll_answer,omitempty"`
-	MyChatMember      *ChatMemberUpdate `json:"my_chat_member,omitempty"`
-	ChatMember        *ChatMemberUpdate `json:"chat_member,omitempty"`
-	ChatJoinRequest   *ChatJoinRequest  `json:"chat_join_request,omitempty"`
+var defaultOnError = func(err error, c Context) {
+	if c != nil {
+		log.Println(c.Update().ID, err)
+	} else {
+		log.Println(err)
+	}
 }
 
-// Command represents a bot command.
-type Command struct {
-	// Text is a text of the command, 1-32 characters.
-	// Can contain only lowercase English letters, digits and underscores.
-	Text string `json:"command"`
+func (b *Bot) OnError(err error, c Context) {
+	b.onError(err, c)
+}
 
-	// Description of the command, 3-256 characters.
-	Description string `json:"description"`
+func (b *Bot) debug(err error) {
+	if b.verbose {
+		b.OnError(err, nil)
+	}
 }
 
 // Group returns a new group.
@@ -196,28 +187,31 @@ func (b *Bot) Use(middleware ...MiddlewareFunc) {
 	b.group.Use(middleware...)
 }
 
+var (
+	cmdRx   = regexp.MustCompile(`^(/\w+)(@(\w+))?(\s|$)(.+)?`)
+	cbackRx = regexp.MustCompile(`^\f([-\w]+)(\|(.+))?$`)
+)
+
 // Handle lets you set the handler for some command name or
 // one of the supported endpoints. It also applies middleware
 // if such passed to the function.
 //
 // Example:
 //
-//		b.Handle("/start", func (c tele.Context) error {
-//			return c.Reply("Hello!")
-// 		})
+//	b.Handle("/start", func (c tele.Context) error {
+//		return c.Reply("Hello!")
+//	})
 //
-//		b.Handle(&inlineButton, func (c tele.Context) error {
-//			return c.Respond(&tele.CallbackResponse{Text: "Hello!"})
-//		})
+//	b.Handle(&inlineButton, func (c tele.Context) error {
+//		return c.Respond(&tele.CallbackResponse{Text: "Hello!"})
+//	})
 //
 // Middleware usage:
 //
-//		protected := telemw.Whitelist(ids...)
-//		b.Handle("/ban", onBan, protected)
-//
+//	b.Handle("/ban", onBan, middleware.Whitelist(ids...))
 func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
 	if len(b.group.middleware) > 0 {
-		m = append(b.group.middleware, m...)
+		m = appendMiddleware(b.group.middleware, m)
 	}
 
 	handler := func(c Context) error {
@@ -234,17 +228,18 @@ func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
 	}
 }
 
-var (
-	cmdRx   = regexp.MustCompile(`^(/\w+)(@(\w+))?(\s|$)(.+)?`)
-	cbackRx = regexp.MustCompile(`^\f([-\w]+)(\|(.+))?$`)
-)
-
 // Start brings bot into motion by consuming incoming
 // updates (see Bot.Updates channel).
 func (b *Bot) Start() {
 	if b.Poller == nil {
 		panic("telebot: can't start without a poller")
 	}
+
+	// do nothing if called twice
+	if b.stopClient != nil {
+		return
+	}
+	b.stopClient = make(chan struct{})
 
 	stop := make(chan struct{})
 	stopConfirm := make(chan struct{})
@@ -264,6 +259,7 @@ func (b *Bot) Start() {
 			close(stop)
 			<-stopConfirm
 			close(confirm)
+			b.stopClient = nil
 			return
 		}
 	}
@@ -271,6 +267,9 @@ func (b *Bot) Start() {
 
 // Stop gracefully shuts the poller down.
 func (b *Bot) Stop() {
+	if b.stopClient != nil {
+		close(b.stopClient)
+	}
 	confirm := make(chan struct{})
 	b.stop <- confirm
 	<-confirm
@@ -290,317 +289,20 @@ func (b *Bot) NewContext(u Update) Context {
 	}
 }
 
-// ProcessUpdate processes a single incoming update.
-// A started bot calls this function automatically.
-func (b *Bot) ProcessUpdate(u Update) {
-	c := b.NewContext(u)
-
-	if u.Message != nil {
-		m := u.Message
-
-		if m.PinnedMessage != nil {
-			b.handle(OnPinned, c)
-			return
-		}
-
-		// Commands
-		if m.Text != "" {
-			// Filtering malicious messages
-			if m.Text[0] == '\a' {
-				return
-			}
-
-			match := cmdRx.FindAllStringSubmatch(m.Text, -1)
-			if match != nil {
-				// Syntax: "</command>@<bot> <payload>"
-				command, botName := match[0][1], match[0][3]
-
-				if botName != "" && !strings.EqualFold(b.Me.Username, botName) {
-					return
-				}
-
-				m.Payload = match[0][5]
-				if b.handle(command, c) {
-					return
-				}
-			}
-
-			// 1:1 satisfaction
-			if b.handle(m.Text, c) {
-				return
-			}
-
-			b.handle(OnText, c)
-			return
-		}
-
-		if b.handleMedia(c) {
-			return
-		}
-
-		if m.Contact != nil {
-			b.handle(OnContact, c)
-			return
-		}
-		if m.Location != nil {
-			b.handle(OnLocation, c)
-			return
-		}
-		if m.Venue != nil {
-			b.handle(OnVenue, c)
-			return
-		}
-		if m.Game != nil {
-			b.handle(OnGame, c)
-			return
-		}
-		if m.Dice != nil {
-			b.handle(OnDice, c)
-			return
-		}
-		if m.Invoice != nil {
-			b.handle(OnInvoice, c)
-			return
-		}
-		if m.Payment != nil {
-			b.handle(OnPayment, c)
-			return
-		}
-
-		wasAdded := (m.UserJoined != nil && m.UserJoined.ID == b.Me.ID) ||
-			(m.UsersJoined != nil && isUserInList(b.Me, m.UsersJoined))
-		if m.GroupCreated || m.SuperGroupCreated || wasAdded {
-			b.handle(OnAddedToGroup, c)
-			return
-		}
-
-		if m.UserJoined != nil {
-			b.handle(OnUserJoined, c)
-			return
-		}
-
-		if m.UsersJoined != nil {
-			for _, user := range m.UsersJoined {
-				m.UserJoined = &user
-				b.handle(OnUserJoined, c)
-			}
-			return
-		}
-
-		if m.UserLeft != nil {
-			b.handle(OnUserLeft, c)
-			return
-		}
-
-		if m.NewGroupTitle != "" {
-			b.handle(OnNewGroupTitle, c)
-			return
-		}
-
-		if m.NewGroupPhoto != nil {
-			b.handle(OnNewGroupPhoto, c)
-			return
-		}
-
-		if m.GroupPhotoDeleted {
-			b.handle(OnGroupPhotoDeleted, c)
-			return
-		}
-
-		if m.GroupCreated {
-			b.handle(OnGroupCreated, c)
-			return
-		}
-
-		if m.SuperGroupCreated {
-			b.handle(OnSuperGroupCreated, c)
-			return
-		}
-
-		if m.ChannelCreated {
-			b.handle(OnChannelCreated, c)
-			return
-		}
-
-		if m.MigrateTo != 0 {
-			m.MigrateFrom = m.Chat.ID
-			b.handle(OnMigration, c)
-			return
-		}
-
-		if m.VoiceChatStarted != nil {
-			b.handle(OnVoiceChatStarted, c)
-			return
-		}
-
-		if m.VoiceChatEnded != nil {
-			b.handle(OnVoiceChatEnded, c)
-			return
-		}
-
-		if m.VoiceChatParticipants != nil {
-			b.handle(OnVoiceChatParticipants, c)
-			return
-		}
-
-		if m.VoiceChatScheduled != nil {
-			b.handle(OnVoiceChatScheduled, c)
-			return
-		}
-
-		if m.ProximityAlert != nil {
-			b.handle(OnProximityAlert, c)
-			return
-		}
-
-		if m.AutoDeleteTimer != nil {
-			b.handle(OnAutoDeleteTimer, c)
-			return
-		}
-	}
-
-	if u.EditedMessage != nil {
-		b.handle(OnEdited, c)
-		return
-	}
-
-	if u.ChannelPost != nil {
-		m := u.ChannelPost
-
-		if m.PinnedMessage != nil {
-			b.handle(OnPinned, c)
-			return
-		}
-
-		b.handle(OnChannelPost, c)
-		return
-	}
-
-	if u.EditedChannelPost != nil {
-		b.handle(OnEditedChannelPost, c)
-		return
-	}
-
-	if u.Callback != nil {
-		if data := u.Callback.Data; data != "" && data[0] == '\f' {
-			match := cbackRx.FindAllStringSubmatch(data, -1)
-			if match != nil {
-				unique, payload := match[0][1], match[0][3]
-				if handler, ok := b.handlers["\f"+unique]; ok {
-					u.Callback.Unique = unique
-					u.Callback.Data = payload
-					b.runHandler(handler, c)
-					return
-				}
-			}
-		}
-
-		b.handle(OnCallback, c)
-		return
-	}
-
-	if u.Query != nil {
-		b.handle(OnQuery, c)
-		return
-	}
-
-	if u.InlineResult != nil {
-		b.handle(OnInlineResult, c)
-		return
-	}
-
-	if u.ShippingQuery != nil {
-		b.handle(OnShipping, c)
-		return
-	}
-
-	if u.PreCheckoutQuery != nil {
-		b.handle(OnCheckout, c)
-		return
-	}
-
-	if u.Poll != nil {
-		b.handle(OnPoll, c)
-		return
-	}
-
-	if u.PollAnswer != nil {
-		b.handle(OnPollAnswer, c)
-		return
-	}
-
-	if u.MyChatMember != nil {
-		b.handle(OnMyChatMember, c)
-		return
-	}
-
-	if u.ChatMember != nil {
-		b.handle(OnChatMember, c)
-		return
-	}
-
-	if u.ChatJoinRequest != nil {
-		b.handle(OnChatJoinRequest, c)
-		return
-	}
-}
-
-func (b *Bot) handle(end string, c Context) bool {
-	if handler, ok := b.handlers[end]; ok {
-		b.runHandler(handler, c)
-		return true
-	}
-	return false
-}
-
-func (b *Bot) handleMedia(c Context) bool {
-	var (
-		m     = c.Message()
-		fired = true
-	)
-
-	switch {
-	case m.Photo != nil:
-		fired = b.handle(OnPhoto, c)
-	case m.Voice != nil:
-		fired = b.handle(OnVoice, c)
-	case m.Audio != nil:
-		fired = b.handle(OnAudio, c)
-	case m.Animation != nil:
-		fired = b.handle(OnAnimation, c)
-	case m.Document != nil:
-		fired = b.handle(OnDocument, c)
-	case m.Sticker != nil:
-		fired = b.handle(OnSticker, c)
-	case m.Video != nil:
-		fired = b.handle(OnVideo, c)
-	case m.VideoNote != nil:
-		fired = b.handle(OnVideoNote, c)
-	default:
-		return false
-	}
-
-	if !fired {
-		return b.handle(OnMedia, c)
-	}
-
-	return true
-}
-
 // Send accepts 2+ arguments, starting with destination chat, followed by
 // some Sendable (or string!) and optional send options.
 //
 // NOTE:
-// 		Since most arguments are of type interface{}, but have pointer
-// 		method receivers, make sure to pass them by-pointer, NOT by-value.
+//
+//	Since most arguments are of type interface{}, but have pointer
+//	method receivers, make sure to pass them by-pointer, NOT by-value.
 //
 // What is a send option exactly? It can be one of the following types:
 //
-//     - *SendOptions (the actual object accepted by Telegram API)
-//     - *ReplyMarkup (a component of SendOptions)
-//     - Option (a shortcut flag for popular options)
-//     - ParseMode (HTML, Markdown, etc)
-//
+//   - *SendOptions (the actual object accepted by Telegram API)
+//   - *ReplyMarkup (a component of SendOptions)
+//   - Option (a shortcut flag for popular options)
+//   - ParseMode (HTML, Markdown, etc)
 func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
@@ -619,6 +321,7 @@ func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Messag
 }
 
 // SendAlbum sends multiple instances of media as a single message.
+// To include the caption, make sure the first Inputtable of an album has it.
 // From all existing options, it only supports tele.Silent.
 func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, error) {
 	if to == nil {
@@ -772,14 +475,13 @@ func (b *Bot) Copy(to Recipient, msg Editable, options ...interface{}) (*Message
 //
 // Use cases:
 //
-//     b.Edit(m, m.Text, newMarkup)
-//     b.Edit(m, "new <b>text</b>", tele.ModeHTML)
-//     b.Edit(m, &tele.ReplyMarkup{...})
-//     b.Edit(m, &tele.Photo{File: ...})
-//     b.Edit(m, tele.Location{42.1337, 69.4242})
-//     b.Edit(c, "edit inline message from the callback")
-//     b.Edit(r, "edit message from chosen inline result")
-//
+//	b.Edit(m, m.Text, newMarkup)
+//	b.Edit(m, "new <b>text</b>", tele.ModeHTML)
+//	b.Edit(m, &tele.ReplyMarkup{...})
+//	b.Edit(m, &tele.Photo{File: ...})
+//	b.Edit(m, tele.Location{42.1337, 69.4242})
+//	b.Edit(c, "edit inline message from the callback")
+//	b.Edit(r, "edit message from chosen inline result")
 func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Message, error) {
 	var (
 		method string
@@ -838,7 +540,6 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 //
 // If edited message is sent by the bot, returns it,
 // otherwise returns nil and ErrTrueResult.
-//
 func (b *Bot) EditReplyMarkup(msg Editable, markup *ReplyMarkup) (*Message, error) {
 	msgID, chatID := msg.MessageSig()
 	params := make(map[string]string)
@@ -872,7 +573,6 @@ func (b *Bot) EditReplyMarkup(msg Editable, markup *ReplyMarkup) (*Message, erro
 //
 // If edited message is sent by the bot, returns it,
 // otherwise returns nil and ErrTrueResult.
-//
 func (b *Bot) EditCaption(msg Editable, caption string, opts ...interface{}) (*Message, error) {
 	msgID, chatID := msg.MessageSig()
 
@@ -906,9 +606,8 @@ func (b *Bot) EditCaption(msg Editable, caption string, opts ...interface{}) (*M
 //
 // Use cases:
 //
-//     b.EditMedia(m, &tele.Photo{File: tele.FromDisk("chicken.jpg")})
-//     b.EditMedia(m, &tele.Video{File: tele.FromURL("http://video.mp4")})
-//
+//	b.EditMedia(m, &tele.Photo{File: tele.FromDisk("chicken.jpg")})
+//	b.EditMedia(m, &tele.Video{File: tele.FromURL("http://video.mp4")})
 func (b *Bot) EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*Message, error) {
 	var (
 		repr  string
@@ -990,15 +689,14 @@ func (b *Bot) EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*M
 // Delete removes the message, including service messages.
 // This function will panic upon nil Editable.
 //
-//     * A message can only be deleted if it was sent less than 48 hours ago.
-//     * A dice message in a private chat can only be deleted if it was sent more than 24 hours ago.
-//     * Bots can delete outgoing messages in private chats, groups, and supergroups.
-//     * Bots can delete incoming messages in private chats.
-//     * Bots granted can_post_messages permissions can delete outgoing messages in channels.
-//     * If the bot is an administrator of a group, it can delete any message there.
-//     * If the bot has can_delete_messages permission in a supergroup or a
-//       channel, it can delete any message there.
-//
+//   - A message can only be deleted if it was sent less than 48 hours ago.
+//   - A dice message in a private chat can only be deleted if it was sent more than 24 hours ago.
+//   - Bots can delete outgoing messages in private chats, groups, and supergroups.
+//   - Bots can delete incoming messages in private chats.
+//   - Bots granted can_post_messages permissions can delete outgoing messages in channels.
+//   - If the bot is an administrator of a group, it can delete any message there.
+//   - If the bot has can_delete_messages permission in a supergroup or a
+//     channel, it can delete any message there.
 func (b *Bot) Delete(msg Editable) error {
 	msgID, chatID := msg.MessageSig()
 
@@ -1020,8 +718,7 @@ func (b *Bot) Delete(msg Editable) error {
 //
 // Currently, Telegram supports only a narrow range of possible
 // actions, these are aligned as constants of this package.
-//
-func (b *Bot) Notify(to Recipient, action ChatAction) error {
+func (b *Bot) Notify(to Recipient, action ChatAction, threadID ...int) error {
 	if to == nil {
 		return ErrBadRecipient
 	}
@@ -1029,6 +726,10 @@ func (b *Bot) Notify(to Recipient, action ChatAction) error {
 	params := map[string]string{
 		"chat_id": to.Recipient(),
 		"action":  string(action),
+	}
+
+	if len(threadID) > 0 {
+		params["message_thread_id"] = strconv.Itoa(threadID[0])
 	}
 
 	_, err := b.Raw("sendChatAction", params)
@@ -1040,19 +741,18 @@ func (b *Bot) Notify(to Recipient, action ChatAction) error {
 //
 // Example:
 //
-//		b.Ship(query)          // OK
-//		b.Ship(query, opts...) // OK with options
-//		b.Ship(query, "Oops!") // Error message
-//
+//	b.Ship(query)          // OK
+//	b.Ship(query, opts...) // OK with options
+//	b.Ship(query, "Oops!") // Error message
 func (b *Bot) Ship(query *ShippingQuery, what ...interface{}) error {
 	params := map[string]string{
 		"shipping_query_id": query.ID,
 	}
 
 	if len(what) == 0 {
-		params["ok"] = "True"
+		params["ok"] = "true"
 	} else if s, ok := what[0].(string); ok {
-		params["ok"] = "False"
+		params["ok"] = "false"
 		params["error_message"] = s
 	} else {
 		var opts []ShippingOption
@@ -1064,7 +764,7 @@ func (b *Bot) Ship(query *ShippingQuery, what ...interface{}) error {
 			opts = append(opts, opt)
 		}
 
-		params["ok"] = "True"
+		params["ok"] = "true"
 		data, _ := json.Marshal(opts)
 		params["shipping_options"] = string(data)
 	}
@@ -1080,13 +780,34 @@ func (b *Bot) Accept(query *PreCheckoutQuery, errorMessage ...string) error {
 	}
 
 	if len(errorMessage) == 0 {
-		params["ok"] = "True"
+		params["ok"] = "true"
 	} else {
 		params["ok"] = "False"
 		params["error_message"] = errorMessage[0]
 	}
 
 	_, err := b.Raw("answerPreCheckoutQuery", params)
+	return err
+}
+
+// Respond sends a response for a given callback query. A callback can
+// only be responded to once, subsequent attempts to respond to the same callback
+// will result in an error.
+//
+// Example:
+//
+//	b.Respond(c)
+//	b.Respond(c, response)
+func (b *Bot) Respond(c *Callback, resp ...*CallbackResponse) error {
+	var r *CallbackResponse
+	if resp == nil {
+		r = &CallbackResponse{}
+	} else {
+		r = resp[0]
+	}
+
+	r.CallbackID = c.ID
+	_, err := b.Raw("answerCallbackQuery", r)
 	return err
 }
 
@@ -1104,26 +825,29 @@ func (b *Bot) Answer(query *Query, resp *QueryResponse) error {
 	return err
 }
 
-// Respond sends a response for a given callback query. A callback can
-// only be responded to once, subsequent attempts to respond to the same callback
-// will result in an error.
-//
-// Example:
-//
-//		b.Respond(c)
-//		b.Respond(c, response)
-//
-func (b *Bot) Respond(c *Callback, resp ...*CallbackResponse) error {
-	var r *CallbackResponse
-	if resp == nil {
-		r = &CallbackResponse{}
-	} else {
-		r = resp[0]
+// AnswerWebApp sends a response for a query from Web App and returns
+// information about an inline message sent by a Web App on behalf of a user
+func (b *Bot) AnswerWebApp(query *Query, r Result) (*WebAppMessage, error) {
+	r.Process(b)
+
+	params := map[string]interface{}{
+		"web_app_query_id": query.ID,
+		"result":           r,
 	}
 
-	r.CallbackID = c.ID
-	_, err := b.Raw("answerCallbackQuery", r)
-	return err
+	data, err := b.Raw("answerWebAppQuery", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result *WebAppMessage
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+
+	return resp.Result, err
 }
 
 // FileByID returns full file object including File.FilePath, allowing you to
@@ -1131,7 +855,6 @@ func (b *Bot) Respond(c *Callback, resp ...*CallbackResponse) error {
 //
 // Usually, Telegram-provided File objects miss FilePath so you might need to
 // perform an additional request to fetch them.
-//
 func (b *Bot) FileByID(fileID string) (File, error) {
 	params := map[string]string{
 		"file_id": fileID,
@@ -1211,7 +934,6 @@ func (b *Bot) File(file *File) (io.ReadCloser, error) {
 //
 // If the message is sent by the bot, returns it,
 // otherwise returns nil and ErrTrueResult.
-//
 func (b *Bot) StopLiveLocation(msg Editable, opts ...interface{}) (*Message, error) {
 	msgID, chatID := msg.MessageSig()
 
@@ -1236,7 +958,6 @@ func (b *Bot) StopLiveLocation(msg Editable, opts ...interface{}) (*Message, err
 //
 // It supports ReplyMarkup.
 // This function will panic upon nil Editable.
-//
 func (b *Bot) StopPoll(msg Editable, opts ...interface{}) (*Poll, error) {
 	msgID, chatID := msg.MessageSig()
 
@@ -1262,100 +983,6 @@ func (b *Bot) StopPoll(msg Editable, opts ...interface{}) (*Poll, error) {
 	return resp.Result, nil
 }
 
-// InviteLink should be used to export chat's invite link.
-func (b *Bot) InviteLink(chat *Chat) (string, error) {
-	params := map[string]string{
-		"chat_id": chat.Recipient(),
-	}
-
-	data, err := b.Raw("exportChatInviteLink", params)
-	if err != nil {
-		return "", err
-	}
-
-	var resp struct {
-		Result string
-	}
-	if err := json.Unmarshal(data, &resp); err != nil {
-		return "", wrapError(err)
-	}
-	return resp.Result, nil
-}
-
-// SetGroupTitle should be used to update group title.
-func (b *Bot) SetGroupTitle(chat *Chat, title string) error {
-	params := map[string]string{
-		"chat_id": chat.Recipient(),
-		"title":   title,
-	}
-
-	_, err := b.Raw("setChatTitle", params)
-	return err
-}
-
-// SetGroupDescription should be used to update group description.
-func (b *Bot) SetGroupDescription(chat *Chat, description string) error {
-	params := map[string]string{
-		"chat_id":     chat.Recipient(),
-		"description": description,
-	}
-
-	_, err := b.Raw("setChatDescription", params)
-	return err
-}
-
-// SetGroupPhoto should be used to update group photo.
-func (b *Bot) SetGroupPhoto(chat *Chat, p *Photo) error {
-	params := map[string]string{
-		"chat_id": chat.Recipient(),
-	}
-
-	_, err := b.sendFiles("setChatPhoto", map[string]File{"photo": p.File}, params)
-	return err
-}
-
-// SetGroupStickerSet should be used to update group's group sticker set.
-func (b *Bot) SetGroupStickerSet(chat *Chat, setName string) error {
-	params := map[string]string{
-		"chat_id":          chat.Recipient(),
-		"sticker_set_name": setName,
-	}
-
-	_, err := b.Raw("setChatStickerSet", params)
-	return err
-}
-
-// SetGroupPermissions sets default chat permissions for all members.
-func (b *Bot) SetGroupPermissions(chat *Chat, perms Rights) error {
-	params := map[string]interface{}{
-		"chat_id":     chat.Recipient(),
-		"permissions": perms,
-	}
-
-	_, err := b.Raw("setChatPermissions", params)
-	return err
-}
-
-// DeleteGroupPhoto should be used to just remove group photo.
-func (b *Bot) DeleteGroupPhoto(chat *Chat) error {
-	params := map[string]string{
-		"chat_id": chat.Recipient(),
-	}
-
-	_, err := b.Raw("deleteChatPhoto", params)
-	return err
-}
-
-// DeleteGroupStickerSet should be used to just remove group sticker set.
-func (b *Bot) DeleteGroupStickerSet(chat *Chat) error {
-	params := map[string]string{
-		"chat_id": chat.Recipient(),
-	}
-
-	_, err := b.Raw("deleteChatStickerSet", params)
-	return err
-}
-
 // Leave makes bot leave a group, supergroup or channel.
 func (b *Bot) Leave(chat *Chat) error {
 	params := map[string]string{
@@ -1370,7 +997,6 @@ func (b *Bot) Leave(chat *Chat) error {
 //
 // It supports Silent option.
 // This function will panic upon nil Editable.
-//
 func (b *Bot) Pin(msg Editable, opts ...interface{}) error {
 	msgID, chatID := msg.MessageSig()
 
@@ -1401,7 +1027,6 @@ func (b *Bot) Unpin(chat *Chat, messageID ...int) error {
 }
 
 // UnpinAll unpins all messages in a supergroup or a channel.
-//
 // It supports tb.Silent option.
 func (b *Bot) UnpinAll(chat *Chat) error {
 	params := map[string]string{
@@ -1416,11 +1041,11 @@ func (b *Bot) UnpinAll(chat *Chat) error {
 //
 // Including current name of the user for one-on-one conversations,
 // current username of a user, group or channel, etc.
-//
 func (b *Bot) ChatByID(id int64) (*Chat, error) {
 	return b.ChatByUsername(strconv.FormatInt(id, 10))
 }
 
+// ChatByUsername fetches chat info by its username.
 func (b *Bot) ChatByUsername(name string) (*Chat, error) {
 	params := map[string]string{
 		"chat_id": name,
@@ -1487,16 +1112,20 @@ func (b *Bot) ChatMemberOf(chat, user Recipient) (*ChatMember, error) {
 	return resp.Result, nil
 }
 
-// Commands returns the current list of the bot's commands for the given scope and user language.
-func (b *Bot) Commands(opts ...interface{}) ([]Command, error) {
-	params := extractCommandsParams(opts...)
-	data, err := b.Raw("getMyCommands", params)
+// MenuButton returns the current value of the bot's menu button in a private chat,
+// or the default menu button.
+func (b *Bot) MenuButton(chat *User) (*MenuButton, error) {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+
+	data, err := b.Raw("getChatMenuButton", params)
 	if err != nil {
 		return nil, err
 	}
 
 	var resp struct {
-		Result []Command
+		Result *MenuButton
 	}
 	if err := json.Unmarshal(data, &resp); err != nil {
 		return nil, wrapError(err)
@@ -1504,28 +1133,27 @@ func (b *Bot) Commands(opts ...interface{}) ([]Command, error) {
 	return resp.Result, nil
 }
 
-// SetCommands changes the list of the bot's commands.
-func (b *Bot) SetCommands(opts ...interface{}) error {
-	params := extractCommandsParams(opts...)
-	_, err := b.Raw("setMyCommands", params)
+// SetMenuButton changes the bot's menu button in a private chat,
+// or the default menu button.
+//
+// It accepts two kinds of menu button arguments:
+//
+//   - MenuButtonType for simple menu buttons (default, commands)
+//   - MenuButton complete structure for web_app menu button type
+func (b *Bot) SetMenuButton(chat *User, mb interface{}) error {
+	params := map[string]interface{}{
+		"chat_id": chat.Recipient(),
+	}
+
+	switch v := mb.(type) {
+	case MenuButtonType:
+		params["menu_button"] = MenuButton{Type: v}
+	case *MenuButton:
+		params["menu_button"] = v
+	}
+
+	_, err := b.Raw("setChatMenuButton", params)
 	return err
-}
-
-// DeleteCommands deletes the list of the bot's commands for the given scope and user language.
-func (b *Bot) DeleteCommands(opts ...interface{}) ([]Command, error) {
-	params := extractCommandsParams(opts...)
-	data, err := b.Raw("deleteMyCommands", params)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		Result []Command
-	}
-	if err := json.Unmarshal(data, &resp); err != nil {
-		return nil, wrapError(err)
-	}
-	return resp.Result, nil
 }
 
 // Logout logs out from the cloud Bot API server before launching the bot locally.

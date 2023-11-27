@@ -10,7 +10,18 @@ commands:
 config:
   str: string
   num: 123
-  dur: 10m
+  strs:
+    - abc
+    - def
+  nums:
+    - 123
+    - 456
+  obj: &obj
+    dur: 10m
+  arr:
+    - <<: *obj
+    - <<: *obj
+
 
 buttons:
   # Shortened reply buttons
@@ -37,6 +48,11 @@ buttons:
       - '{{ .Amount }}'
       - '{{ .Currency }}'
 
+  web_app:
+    text: This is a web app
+    web_app:
+      url: https://google.com
+
 markups:
   reply_shortened:
     - [ help ]
@@ -47,6 +63,8 @@ markups:
     one_time_keyboard: true
   inline:
     - [ stop ]
+  web_app:
+    - [ web_app ]
 
 results:
   article:
@@ -54,5 +72,5 @@ results:
     id: '{{ .ID }}'
     title: '{{ .Title }}'
     description: '{{ .Description }}'
-    message_text: '{{ .Content }}'
     thumb_url: '{{ .PreviewURL }}'
+    message_text: '{{ text `article_message` }}'

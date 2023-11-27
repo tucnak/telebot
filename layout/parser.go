@@ -9,6 +9,7 @@ import (
 	"text/template"
 
 	"github.com/goccy/go-yaml"
+	"github.com/spf13/viper"
 	tele "gopkg.in/telebot.v3"
 )
 
@@ -39,7 +40,12 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 		return err
 	}
 
-	lt.Config = &Config{v: aux.Config}
+	v := viper.New()
+	if err := v.MergeConfigMap(aux.Config); err != nil {
+		return err
+	}
+
+	lt.Config = Config{v: v}
 	lt.commands = aux.Commands
 
 	if pref := aux.Settings; pref != nil {
@@ -68,7 +74,8 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 		// 1. Shortened reply button
 
 		if v, ok := v.(string); ok {
-			lt.buttons[k] = Button{Text: v}
+			btn := tele.Btn{Text: v}
+			lt.buttons[k] = Button{Btn: btn}
 			continue
 		}
 
@@ -79,29 +86,26 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 			return err
 		}
 
-		var btn struct {
-			Button `yaml:",inline"`
-			Data   interface{} `yaml:"data"`
-		}
+		var btn Button
 		if err := yaml.Unmarshal(data, &btn); err != nil {
 			return err
 		}
 
-		if btn.Data != nil {
+		if !btn.IsReply && btn.Data != nil {
 			if a, ok := btn.Data.([]interface{}); ok {
 				s := make([]string, len(a))
 				for i, v := range a {
 					s[i] = fmt.Sprint(v)
 				}
-				btn.Button.Data = strings.Join(s, "|")
+				btn.Btn.Data = strings.Join(s, "|")
 			} else if s, ok := btn.Data.(string); ok {
-				btn.Button.Data = s
+				btn.Btn.Data = s
 			} else {
 				return fmt.Errorf("telebot/layout: invalid callback_data for %s button", k)
 			}
 		}
 
-		lt.buttons[k] = btn.Button
+		lt.buttons[k] = btn
 	}
 
 	lt.markups = make(map[string]Markup, len(aux.Markups))
@@ -146,7 +150,10 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 					inline := btn.URL != "" ||
 						btn.Unique != "" ||
 						btn.InlineQuery != "" ||
-						btn.InlineQueryChat != ""
+						btn.InlineQueryChat != "" ||
+						btn.Login != nil ||
+						btn.WebApp != nil
+					inline = !btn.IsReply && inline
 
 					if markup.inline == nil {
 						markup.inline = &inline
