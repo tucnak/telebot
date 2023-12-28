@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -81,7 +82,9 @@ type Bot struct {
 	parseMode   ParseMode
 	stop        chan chan struct{}
 	client      *http.Client
-	stopClient  chan struct{}
+
+	stopMu     sync.RWMutex
+	stopClient chan struct{}
 }
 
 // Settings represents a utility struct for passing certain
@@ -198,10 +201,14 @@ func (b *Bot) Start() {
 	}
 
 	// do nothing if called twice
+	b.stopMu.Lock()
 	if b.stopClient != nil {
+		b.stopMu.Unlock()
 		return
 	}
+
 	b.stopClient = make(chan struct{})
+	b.stopMu.Unlock()
 
 	stop := make(chan struct{})
 	stopConfirm := make(chan struct{})
@@ -221,7 +228,6 @@ func (b *Bot) Start() {
 			close(stop)
 			<-stopConfirm
 			close(confirm)
-			b.stopClient = nil
 			return
 		}
 	}
@@ -229,9 +235,13 @@ func (b *Bot) Start() {
 
 // Stop gracefully shuts the poller down.
 func (b *Bot) Stop() {
+	b.stopMu.Lock()
 	if b.stopClient != nil {
 		close(b.stopClient)
+		b.stopClient = nil
 	}
+	b.stopMu.Unlock()
+
 	confirm := make(chan struct{})
 	b.stop <- confirm
 	<-confirm
