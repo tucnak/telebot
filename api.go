@@ -27,18 +27,21 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 		return nil, err
 	}
 
-	// Cancel the request immediately without waiting for the timeout  when bot is about to stop.
+	// Cancel the request immediately without waiting for the timeout
+	// when bot is about to stop.
 	// This may become important if doing long polling with long timeout.
-	exit := make(chan struct{})
-	defer close(exit)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	go func() {
+		b.stopMu.RLock()
+		stopCh := b.stopClient
+		b.stopMu.RUnlock()
+
 		select {
-		case <-b.stopClient:
+		case <-stopCh:
 			cancel()
-		case <-exit:
+		case <-ctx.Done():
 		}
 	}()
 
