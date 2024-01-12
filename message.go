@@ -336,6 +336,7 @@ const (
 	EntityTextLink      EntityType = "text_link"
 	EntitySpoiler       EntityType = "spoiler"
 	EntityCustomEmoji   EntityType = "custom_emoji"
+	EntityBlockquote    EntityType = "blockquote"
 )
 
 // Entities is used to set message's text entities as a send option.
