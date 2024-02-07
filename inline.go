@@ -131,6 +131,8 @@ func inferIQR(result Result) error {
 		r.Type = "voice"
 	case *StickerResult:
 		r.Type = "sticker"
+	case *GameResult:
+		r.Type = "game"
 	default:
 		return fmt.Errorf("telebot: result %v is not supported", result)
 	}

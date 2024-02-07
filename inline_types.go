@@ -60,6 +60,14 @@ func (r *ResultBase) Process(b *Bot) {
 	}
 }
 
+// GameResult represents a game.
+type GameResult struct {
+	ResultBase
+
+	// Unique identifier of the game.
+	GameShortName string `json:"game_short_name"`
+}
+
 // ArticleResult represents a link to an article or web page.
 type ArticleResult struct {
 	ResultBase
