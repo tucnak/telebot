@@ -355,7 +355,7 @@ func (c *nativeContext) Args() []string {
 	case c.u.Message != nil:
 		payload := strings.Trim(c.u.Message.Payload, " ")
 		if payload != "" {
-			return strings.Split(payload, " ")
+			return strings.Fields(payload)
 		}
 	case c.u.Callback != nil:
 		return strings.Split(c.u.Callback.Data, "|")
