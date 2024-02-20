@@ -47,22 +47,23 @@ type Chat struct {
 	Username  string `json:"username"`
 
 	// Returns only in getChat
-	Bio                string        `json:"bio,omitempty"`
-	Photo              *ChatPhoto    `json:"photo,omitempty"`
-	Description        string        `json:"description,omitempty"`
-	InviteLink         string        `json:"invite_link,omitempty"`
-	PinnedMessage      *Message      `json:"pinned_message,omitempty"`
-	Permissions        *Rights       `json:"permissions,omitempty"`
-	SlowMode           int           `json:"slow_mode_delay,omitempty"`
-	StickerSet         string        `json:"sticker_set_name,omitempty"`
-	CanSetStickerSet   bool          `json:"can_set_sticker_set,omitempty"`
-	LinkedChatID       int64         `json:"linked_chat_id,omitempty"`
-	ChatLocation       *ChatLocation `json:"location,omitempty"`
-	Private            bool          `json:"has_private_forwards,omitempty"`
-	Protected          bool          `json:"has_protected_content,omitempty"`
-	NoVoiceAndVideo    bool          `json:"has_restricted_voice_and_video_messages"`
-	HiddenMembers      bool          `json:"has_hidden_members,omitempty"`
-	AggressiveAntiSpam bool          `json:"has_aggressive_anti_spam_enabled,omitempty"`
+	Bio                 string        `json:"bio,omitempty"`
+	Photo               *ChatPhoto    `json:"photo,omitempty"`
+	Description         string        `json:"description,omitempty"`
+	InviteLink          string        `json:"invite_link,omitempty"`
+	PinnedMessage       *Message      `json:"pinned_message,omitempty"`
+	Permissions         *Rights       `json:"permissions,omitempty"`
+	SlowMode            int           `json:"slow_mode_delay,omitempty"`
+	StickerSet          string        `json:"sticker_set_name,omitempty"`
+	CanSetStickerSet    bool          `json:"can_set_sticker_set,omitempty"`
+	LinkedChatID        int64         `json:"linked_chat_id,omitempty"`
+	ChatLocation        *ChatLocation `json:"location,omitempty"`
+	Private             bool          `json:"has_private_forwards,omitempty"`
+	Protected           bool          `json:"has_protected_content,omitempty"`
+	NoVoiceAndVideo     bool          `json:"has_restricted_voice_and_video_messages"`
+	HiddenMembers       bool          `json:"has_hidden_members,omitempty"`
+	AggressiveAntiSpam  bool          `json:"has_aggressive_anti_spam_enabled,omitempty"`
+	ExpirationEmojiDate int           `json:"emoji_status_expiration_date"`
 }
 
 // Recipient returns chat ID (see Recipient interface).
@@ -238,6 +239,14 @@ type ChatInviteLink struct {
 
 	// (Optional) Number of pending join requests created using this link.
 	PendingCount int `json:"pending_join_request_count"`
+}
+
+type Story struct {
+	// Unique identifier for the story in the chat
+	ID int `json:"id"`
+
+	// Chat that posted the story
+	Sender *Chat `json:"chat"`
 }
 
 // ExpireDate returns the moment of the link expiration in local time.
