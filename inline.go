@@ -53,14 +53,41 @@ type QueryResponse struct {
 	// pagination. Offset length can’t exceed 64 bytes.
 	NextOffset string `json:"next_offset"`
 
-	// (Optional) If passed, clients will display a button with specified
-	// text that switches the user to a private chat with the bot and sends
-	// the bot a start message with the parameter switch_pm_parameter.
-	SwitchPMText string `json:"switch_pm_text,omitempty"`
+	// (Optional) A JSON-serialized object describing a button to be shown
+	// above inline query results.
+	Button *QueryResponseButton `json:"button"`
+}
 
-	// (Optional) Parameter for the start message sent to the bot when user
-	// presses the switch button.
-	SwitchPMParameter string `json:"switch_pm_parameter,omitempty"`
+type QueryResponseButton struct {
+	// Label text on the button
+	Text string `json:"text"`
+
+	// (Optional) Description of the Web App that will be launched when the
+	// user presses the button. The Web App will be able to switch back to the
+	// inline mode using the method switchInlineQuery inside the Web App.
+	WebApp *WebApp `json:"web_app"`
+
+	// (Optional) Deep-linking parameter for the /start message sent to the bot
+	// when a user presses the button. 1-64 characters, only A-Z, a-z, 0-9, _ and - are allowed.
+	Start string `json:"start_parameter"`
+}
+
+type InlineQueryChosenChat struct {
+	// (Optional) The default inline query to be inserted in the input field.
+	// If left empty, only the bot's username will be inserted.
+	Query string `json:"query"`
+
+	// (Optional) True, if private chats with users can be chosen.
+	AllowUserChats bool `json:"allow_user_chats"`
+
+	// (Optional) True, if private chats with bots can be chosen.
+	AllowBotChats bool `json:"allow_bot_chats"`
+
+	// (Optional) True, if group and supergroup chats can be chosen.
+	AllowGroupChats bool `json:"allow_group_chats"`
+
+	// (Optional) True, if channel chats can be chosen.
+	AllowChannelChats bool `json:"allow_channel_chats"`
 }
 
 // InlineResult represents a result of an inline query that was chosen
