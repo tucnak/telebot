@@ -60,12 +60,14 @@ func (r *ResultBase) Process(b *Bot) {
 	}
 }
 
-// GameResult represents a game.
+// GameResult represents a game. Game is a content type
+// supported by Telegram, which can be sent back to the
+// user as a result for an inline query.
 type GameResult struct {
 	ResultBase
 
-	// Unique identifier of the game.
-	GameShortName string `json:"game_short_name"`
+	// ShortName is a unique identifier of the game.
+	ShortName string `json:"game_short_name"`
 }
 
 // ArticleResult represents a link to an article or web page.
