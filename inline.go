@@ -58,6 +58,8 @@ type QueryResponse struct {
 	Button *QueryResponseButton `json:"button"`
 }
 
+// QueryResponseButton represents a button to be shown above inline query results.
+// You must use exactly one of the optional fields.
 type QueryResponseButton struct {
 	// Label text on the button
 	Text string `json:"text"`
@@ -72,6 +74,8 @@ type QueryResponseButton struct {
 	Start string `json:"start_parameter"`
 }
 
+// InlineQueryChosenChat represents an inline button that switches the current
+// user to inline mode in a chosen chat, with an optional default inline query.
 type InlineQueryChosenChat struct {
 	// (Optional) The default inline query to be inserted in the input field.
 	// If left empty, only the bot's username will be inserted.
