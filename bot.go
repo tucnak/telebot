@@ -1172,11 +1172,49 @@ func (b *Bot) SetBotName(name, lc string) error {
 
 // BotName returns the current bot name for the given user language.
 func (b *Bot) BotName(lc string) (*BotInfo, error) {
+	return b.botInfo(lc, "getMyName")
+}
+
+// SetBotDescription change's the bot description, which is shown in the chat
+// with the bot if the chat is empty.
+func (b *Bot) SetBotDescription(desc, lc string) error {
+	params := map[string]string{
+		"description":   desc,
+		"language_code": lc,
+	}
+
+	_, err := b.Raw("setMyDescription", params)
+	return err
+}
+
+// BotDescription the current bot description for the given user language.
+func (b *Bot) BotDescription(lc string) (*BotInfo, error) {
+	return b.botInfo(lc, "getMyDescription")
+}
+
+// SetBotShortDescription change's the bot short description, which is shown on
+// the bot's profile page and is sent together with the link when users share the bot.
+func (b *Bot) SetBotShortDescription(sdesc, lc string) error {
+	params := map[string]string{
+		"short_description": sdesc,
+		"language_code":     lc,
+	}
+
+	_, err := b.Raw("setMyShortDescription", params)
+	return err
+}
+
+// BotShortDescription the current bot short description for the given user language.
+func (b *Bot) BotShortDescription(lc string) (*BotInfo, error) {
+	return b.botInfo(lc, "getMyShortDescription")
+}
+
+func (b *Bot) botInfo(lc, key string) (*BotInfo, error) {
 	params := map[string]string{
 		"language_code": lc,
 	}
 
-	data, err := b.Raw("getMyName", params)
+	data, err := b.Raw(key, params)
 	if err != nil {
 		return nil, err
 	}
