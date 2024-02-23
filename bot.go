@@ -1159,42 +1159,42 @@ type BotInfo struct {
 	ShortDesc   string `json:"short_description,omitempty"`
 }
 
-// SetBotName change's the bot name.
-func (b *Bot) SetBotName(name, lc string) error {
+// SetMyName change's the bot name.
+func (b *Bot) SetMyName(name, language string) error {
 	params := map[string]string{
 		"name":          name,
-		"language_code": lc,
+		"language_code": language,
 	}
 
 	_, err := b.Raw("setMyName", params)
 	return err
 }
 
-// BotName returns the current bot name for the given user language.
-func (b *Bot) BotName(language string) (*BotInfo, error) {
+// MyName returns the current bot name for the given user language.
+func (b *Bot) MyName(language string) (*BotInfo, error) {
 	return b.botInfo(language, "getMyName")
 }
 
-// SetBotDescription change's the bot description, which is shown in the chat
+// SetMyDescription change's the bot description, which is shown in the chat
 // with the bot if the chat is empty.
-func (b *Bot) SetBotDescription(desc, lc string) error {
+func (b *Bot) SetMyDescription(desc, language string) error {
 	params := map[string]string{
 		"description":   desc,
-		"language_code": lc,
+		"language_code": language,
 	}
 
 	_, err := b.Raw("setMyDescription", params)
 	return err
 }
 
-// BotDescription the current bot description for the given user language.
-func (b *Bot) BotDescription(lc string) (*BotInfo, error) {
-	return b.botInfo(lc, "getMyDescription")
+// MyDescription the current bot description for the given user language.
+func (b *Bot) MyDescription(language string) (*BotInfo, error) {
+	return b.botInfo(language, "getMyDescription")
 }
 
-// SetBotShortDescription change's the bot short description, which is shown on
+// SetMyShortDescription change's the bot short description, which is shown on
 // the bot's profile page and is sent together with the link when users share the bot.
-func (b *Bot) SetBotShortDescription(sdesc, lc string) error {
+func (b *Bot) SetMyShortDescription(sdesc, lc string) error {
 	params := map[string]string{
 		"short_description": sdesc,
 		"language_code":     lc,
@@ -1204,14 +1204,14 @@ func (b *Bot) SetBotShortDescription(sdesc, lc string) error {
 	return err
 }
 
-// BotShortDescription the current bot short description for the given user language.
-func (b *Bot) BotShortDescription(lc string) (*BotInfo, error) {
-	return b.botInfo(lc, "getMyShortDescription")
+// MyShortDescription the current bot short description for the given user language.
+func (b *Bot) MyShortDescription(language string) (*BotInfo, error) {
+	return b.botInfo(language, "getMyShortDescription")
 }
 
-func (b *Bot) botInfo(lc, key string) (*BotInfo, error) {
+func (b *Bot) botInfo(language, key string) (*BotInfo, error) {
 	params := map[string]string{
-		"language_code": lc,
+		"language_code": language,
 	}
 
 	data, err := b.Raw(key, params)

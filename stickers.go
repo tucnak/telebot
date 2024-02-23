@@ -73,6 +73,31 @@ func (b *Bot) UploadSticker(to Recipient, png *File) (*File, error) {
 	return &resp.Result, nil
 }
 
+// UploadStickerFile uploads a PNG file with a sticker for later use.
+func (b *Bot) UploadStickerFile(to Recipient, s Sticker) (*File, error) {
+	files := map[string]File{
+		"sticker": s.File,
+	}
+
+	params := map[string]string{
+		"user_id":        to.Recipient(),
+		"sticker_format": s.Format,
+	}
+
+	data, err := b.sendFiles("uploadStickerFile", files, params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result File
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return &resp.Result, nil
+}
+
 // StickerSet returns a sticker set on success.
 func (b *Bot) StickerSet(name string) (*StickerSet, error) {
 	data, err := b.Raw("getStickerSet", map[string]string{"name": name})
@@ -141,6 +166,33 @@ func (b *Bot) AddSticker(to Recipient, s StickerSet) error {
 	if s.MaskPosition != nil {
 		data, _ := json.Marshal(&s.MaskPosition)
 		params["mask_position"] = string(data)
+	}
+
+	_, err := b.sendFiles("addStickerToSet", files, params)
+	return err
+}
+
+// AddStickerToSet adds a new sticker to the existing sticker set.
+func (b *Bot) AddStickerToSet(to Recipient, name string, s Sticker) error {
+	files := make(map[string]File)
+	files["sticker"] = s.File
+
+	params := map[string]string{
+		"user_id": to.Recipient(),
+		"name":    name,
+	}
+
+	if s.Emojis != nil {
+		data, _ := json.Marshal(s.Emojis)
+		params["emoji_list"] = string(data)
+	}
+	if s.MaskPosition != nil {
+		data, _ := json.Marshal(&s.MaskPosition)
+		params["mask_position"] = string(data)
+	}
+	if s.Keywords != nil {
+		data, _ := json.Marshal(s.Keywords)
+		params["keywords"] = string(data)
 	}
 
 	_, err := b.sendFiles("addStickerToSet", files, params)
@@ -226,14 +278,14 @@ func (b *Bot) SetStickerEmojiList(sticker string, emojis []string) error {
 }
 
 // SetStickerKeywords changes search keywords assigned to a regular or custom emoji sticker.
-func (b *Bot) SetStickerKeywords(s string, keywords []string) error {
+func (b *Bot) SetStickerKeywords(sticker string, keywords []string) error {
 	mk, err := json.Marshal(keywords)
 	if err != nil {
 		return err
 	}
 
 	params := map[string]string{
-		"sticker":  s,
+		"sticker":  sticker,
 		"keywords": string(mk),
 	}
 
@@ -242,14 +294,14 @@ func (b *Bot) SetStickerKeywords(s string, keywords []string) error {
 }
 
 // SetStickerMaskPosition changes the mask position of a mask sticker.
-func (b *Bot) SetStickerMaskPosition(s string, mp MaskPosition) error {
-	data, err := json.Marshal(mp)
+func (b *Bot) SetStickerMaskPosition(sticker string, mask MaskPosition) error {
+	data, err := json.Marshal(mask)
 	if err != nil {
 		return err
 	}
 
 	params := map[string]string{
-		"sticker":       s,
+		"sticker":       sticker,
 		"mask_position": string(data),
 	}
 
