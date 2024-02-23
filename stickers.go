@@ -210,15 +210,15 @@ func (b *Bot) DeleteStickerSet(name string) error {
 }
 
 // SetStickerEmojiList changes the list of emoji assigned to a regular or custom emoji sticker.
-func (b *Bot) SetStickerEmojiList(s string, el []string) error {
-	list, err := json.Marshal(el)
+func (b *Bot) SetStickerEmojiList(sticker string, emojis []string) error {
+	data, err := json.Marshal(emojis)
 	if err != nil {
 		return err
 	}
 
 	params := map[string]string{
-		"sticker":    s,
-		"emoji_list": string(list),
+		"sticker":    sticker,
+		"emoji_list": string(data),
 	}
 
 	_, err = b.Raw("setStickerEmojiList", params)
@@ -243,14 +243,14 @@ func (b *Bot) SetStickerKeywords(s string, keywords []string) error {
 
 // SetStickerMaskPosition changes the mask position of a mask sticker.
 func (b *Bot) SetStickerMaskPosition(s string, mp MaskPosition) error {
-	mmp, err := json.Marshal(mp)
+	data, err := json.Marshal(mp)
 	if err != nil {
 		return err
 	}
 
 	params := map[string]string{
 		"sticker":       s,
-		"mask_position": string(mmp),
+		"mask_position": string(data),
 	}
 
 	_, err = b.Raw("setStickerMaskPosition", params)

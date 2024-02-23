@@ -1171,8 +1171,8 @@ func (b *Bot) SetBotName(name, lc string) error {
 }
 
 // BotName returns the current bot name for the given user language.
-func (b *Bot) BotName(lc string) (*BotInfo, error) {
-	return b.botInfo(lc, "getMyName")
+func (b *Bot) BotName(language string) (*BotInfo, error) {
+	return b.botInfo(language, "getMyName")
 }
 
 // SetBotDescription change's the bot description, which is shown in the chat
