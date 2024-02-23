@@ -53,6 +53,15 @@ type QueryResponse struct {
 	// pagination. Offset length can’t exceed 64 bytes.
 	NextOffset string `json:"next_offset"`
 
+	// (Optional) If passed, clients will display a button with specified
+	// text that switches the user to a private chat with the bot and sends
+	// the bot a start message with the parameter switch_pm_parameter.
+	SwitchPMText string `json:"switch_pm_text,omitempty"`
+
+	// (Optional) Parameter for the start message sent to the bot when user
+	// presses the switch button.
+	SwitchPMParameter string `json:"switch_pm_parameter,omitempty"`
+
 	// (Optional) A JSON-serialized object describing a button to be shown
 	// above inline query results.
 	Button *QueryResponseButton `json:"button"`
@@ -74,9 +83,9 @@ type QueryResponseButton struct {
 	Start string `json:"start_parameter"`
 }
 
-// InlineQueryChosenChat represents an inline button that switches the current
+// SwitchInlineQuery represents an inline button that switches the current
 // user to inline mode in a chosen chat, with an optional default inline query.
-type InlineQueryChosenChat struct {
+type SwitchInlineQuery struct {
 	// (Optional) The default inline query to be inserted in the input field.
 	// If left empty, only the bot's username will be inserted.
 	Query string `json:"query"`

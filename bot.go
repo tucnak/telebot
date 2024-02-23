@@ -1152,28 +1152,28 @@ func (b *Bot) Close() (bool, error) {
 	return resp.Result, nil
 }
 
-// BotInfo represents a single object of BotName, BotDescription, BotShortDescription instances.
+// BotInfo represents a single object of MyName, BotDescription, BotShortDescription instances.
 type BotInfo struct {
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
 	ShortDesc   string `json:"short_description,omitempty"`
 }
 
-// SetBotName change's the bot name.
-func (b *Bot) SetBotName(name, lc string) error {
+// SetMyName change's the bot name.
+func (b *Bot) SetMyName(name, language string) error {
 	params := map[string]string{
 		"name":          name,
-		"language_code": lc,
+		"language_code": language,
 	}
 
 	_, err := b.Raw("setMyName", params)
 	return err
 }
 
-// BotName returns the current bot name for the given user language.
-func (b *Bot) BotName(lc string) (*BotInfo, error) {
+// MyName returns the current bot name for the given user language.
+func (b *Bot) MyName(language string) (*BotInfo, error) {
 	params := map[string]string{
-		"language_code": lc,
+		"language_code": language,
 	}
 
 	data, err := b.Raw("getMyName", params)
