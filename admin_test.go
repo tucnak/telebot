@@ -40,6 +40,9 @@ func TestEmbedRights(t *testing.T) {
 		"can_send_videos":           true,
 		"can_send_video_notes":      true,
 		"can_send_voice_notes":      true,
+		"can_post_stories":          false,
+		"can_edit_stories":          false,
+		"can_delete_stories":        false,
 	}
 	assert.Equal(t, expected, params)
 }
