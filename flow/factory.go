@@ -66,13 +66,6 @@ type StepFactory struct {
 	step *Step
 }
 
-// Name sets a value for the [Step.name].
-func (f *StepFactory) Name(name int) *StepFactory {
-	f.step.name = name
-
-	return f
-}
-
 // Validate sets values for the [Step.validators].
 func (f *StepFactory) Validate(validators ...StepValidator) *StepFactory {
 	f.step.validators = validators

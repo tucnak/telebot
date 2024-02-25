@@ -17,8 +17,6 @@ type Step struct {
 	// There are no restrictions on logic; the handler is not required, and the user can even use an empty mock.
 	// Therefore, you can do whatever you want: move backward or forward steps, validate previously saved prompts, and so on.
 	handler StateHandler
-	// Step name (by default, it is filled by auto-increment, but the user is able to define a custom value).
-	name int
 	// Defined validators
 	validators []StepValidator
 	// Callback called after the validation process if successful.
