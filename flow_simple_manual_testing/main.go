@@ -87,7 +87,7 @@ func TextAssigner(value interface{}) flow.StateHandler {
 
 func main() {
 	pref := tele.Settings{
-		Token:  "5931155624:AAGLxTOnMt2O3UYLGpZSZAacxBVJONO1UP4",
+		Token:  "",
 		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
 	}
 
