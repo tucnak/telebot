@@ -163,13 +163,13 @@ var (
 //
 // Example:
 //
-//	b.Handle("/start", func (c tele.Context) error {
-//		return c.Reply("Hello!")
-//	})
+//	 b.Handle("/start", func (c tele.Context) error {
+//			return c.Reply("Hello!")
+//		})
 //
-//	b.Handle(&inlineButton, func (c tele.Context) error {
-//		return c.Respond(&tele.CallbackResponse{Text: "Hello!"})
-//	})
+//		b.Handle(&inlineButton, func (c tele.Context) error {
+//			return c.Respond(&tele.CallbackResponse{Text: "Hello!"})
+//		})
 //
 // Middleware usage:
 //
