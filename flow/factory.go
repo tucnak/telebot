@@ -24,30 +24,23 @@ func (f *Factory) WithState(userState map[interface{}]interface{}) *Factory {
 	return f
 }
 
-// Success sets a handler for the [Flow.Success] event.
-func (f *Factory) Success(handler StateHandler) *Factory {
-	f.flow.success = handler
-
-	return f
-}
-
-// Fail sets a handler for the [Flow.Fail] event.
-func (f *Factory) Fail(handler FailHandler) *Factory {
-	f.flow.fail = handler
-
-	return f
-}
-
-// Step adds a step to the [Flow.Steps]
-func (f *Factory) Step(step *StepFactory) *Factory {
+// Next adds a step to the [Flow.Steps]
+func (f *Factory) Next(step *StepFactory) *Factory {
 	f.flow.steps = append(f.flow.steps, *step.step)
 
 	return f
 }
 
-// UseValidatorErrorsAsUserResponse sets a value for the [Flow.useValidatorErrorsAsUserResponse].
-func (f *Factory) UseValidatorErrorsAsUserResponse(value bool) *Factory {
-	f.flow.useValidatorErrorsAsUserResponse = value
+// Then sets a handler for the [Flow.Success] event.
+func (f *Factory) Then(handler StateHandler) *Factory {
+	f.flow.then = handler
+
+	return f
+}
+
+// Catch sets a handler for the [Flow.Fail] event.
+func (f *Factory) Catch(handler FailHandler) *Factory {
+	f.flow.catch = handler
 
 	return f
 }
@@ -60,16 +53,17 @@ func New() *Factory {
 	}
 }
 
+// NewWithConfiguration start describing the flow.
+func NewWithConfiguration(flow Flow) *Factory {
+	return &Factory{
+		flow:      &flow,
+		userState: make(map[interface{}]interface{}),
+	}
+}
+
 // StepFactory for creating a [Step] object.
 type StepFactory struct {
 	step *Step
-}
-
-// Begin sets a handler for the [Step.begin] event.
-func (f *StepFactory) Begin(handler StateHandler) *StepFactory {
-	f.step.begin = handler
-
-	return f
 }
 
 // Name sets a value for the [Step.name].
@@ -93,14 +87,14 @@ func (f *StepFactory) Assign(assign StateHandler) *StepFactory {
 	return f
 }
 
-// Success sets a value for the [Step.success].
-func (f *StepFactory) Success(success StateHandler) *StepFactory {
-	f.step.success = success
+// Then sets a value for the [Step.then].
+func (f *StepFactory) Then(handler StepThenHandler) *StepFactory {
+	f.step.then = handler
 
 	return f
 }
 
 // NewStep initiates the description of a step for the flow.
-func NewStep() *StepFactory {
-	return &StepFactory{step: &Step{}}
+func NewStep(handler StateHandler) *StepFactory {
+	return &StepFactory{step: &Step{handler: handler}}
 }

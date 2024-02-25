@@ -58,10 +58,11 @@ type Bus interface {
 }
 
 // describes the state to the [SimpleBus.states] value
-type state struct {
+type flowState struct {
 	// User's flow
-	flow  *Flow
-	state *State
+	flow    *Flow
+	state   State
+	machine Machine
 }
 
 // SimpleBus implementation for the [Bus] contract
@@ -110,19 +111,18 @@ func (b *SimpleBus) Handle(c telebot.Context) error {
 		return UserDoesNotHaveActiveFlow
 	}
 
-	st := stV.(*state)
+	st := stV.(flowState)
 	// Update context for the state
-	// @TODO: do we need to persist the latest context every time?
-	st.state.Context = c
+	st.state.Add(StateContextKey, c)
 	// Get active step
-	step := st.flow.steps[st.state.Machine.ActiveStep()]
-	// Call validators if it defined
+	step := st.flow.steps[st.machine.ActiveStep()]
+	// Call validators if they are defined
 	validators := step.validators
 	if len(validators) > 0 {
 		for _, validator := range validators {
 			err := validator.Validate(st.state)
 			if err != nil {
-				if st.flow.useValidatorErrorsAsUserResponse {
+				if st.flow.UseValidatorErrorsAsUserResponse {
 					return c.Reply(err.Error())
 				} else {
 					return err
@@ -138,29 +138,43 @@ func (b *SimpleBus) Handle(c telebot.Context) error {
 		}
 	}
 
-	// Call [success] event if it's defined
-	if step.success != nil {
-		if err := step.success(st.state); err != nil {
+	activeStep := st.machine.ActiveStep()
+	// Call [then] event if it's defined
+	if step.then != nil {
+		if err := step.then(st.state, &step); err != nil {
 			return err
 		}
 	}
 
-	// It was the last step. Call the [success] handler
-	if len(st.flow.steps) <= st.state.Machine.ActiveStep()+1 {
+	// It was the last step. Call the [then] handler
+	if len(st.flow.steps) <= st.machine.ActiveStep()+1 {
 		b.removeState(c.Sender().ID)
 
-		return st.state.Machine.Success(st.state)
+		if st.flow.then == nil {
+			return nil
+		}
+
+		return st.flow.then(st.state)
 	}
 
-	// Process to the next step
-	err := st.state.Machine.Next(st.state)
-	if err != nil {
-		// Remove flow on any error occurring within flow logic.
-		// We need to call the [Fail] function because, typically,
-		// that handler should send something to the user like [Try again].
-		b.removeState(c.Sender().ID)
+	// Sometimes, the user may navigate through steps within handlers.
+	// If this occurs, we don't need to call the [next] function because navigating
+	// through the machine already triggers it.
+	if activeStep == st.machine.ActiveStep() {
+		// Process to the next step
+		err := st.machine.Next(st.state)
+		if err != nil {
+			// Remove flow on any error occurring within flow logic.
+			// We need to call the [Fail] function because, typically,
+			// that handler should send something to the user like [Try again].
+			b.removeState(c.Sender().ID)
 
-		return st.state.Machine.Fail(st.state, err)
+			if st.flow.catch == nil {
+				return nil
+			}
+
+			return st.flow.catch(st.state, err)
+		}
 	}
 
 	return nil
@@ -180,19 +194,24 @@ func (b *SimpleBus) Flow(factory *Factory) telebot.HandlerFunc {
 		// If the user already has a flow, we need to recall the active step.
 		stV, exists := b.states.Load(c.Sender().ID)
 		if exists {
-			st := stV.(*state)
-			st.state.Context = c
+			st := stV.(flowState)
+			// Update context
+			st.state.Add(StateContextKey, c)
 
-			return st.state.Machine.ToStep(st.state.Machine.ActiveStep(), st.state)
+			return st.machine.ToStep(st.machine.ActiveStep(), st.state)
 		}
 
 		machine := NewMachine(factory.flow)
+		state := NewRuntimeState(factory.userState).
+			Add(StateContextKey, c).
+			Add(StateMachineKey, machine)
 		// Register flow for the user
-		st := state{
-			flow:  factory.flow,
-			state: NewState(machine, c, factory.userState),
+		st := flowState{
+			flow:    factory.flow,
+			state:   state,
+			machine: machine,
 		}
-		b.states.Store(c.Sender().ID, &st)
+		b.states.Store(c.Sender().ID, st)
 		// Call the machine for the start the first step
 		return machine.ToStep(0, st.state)
 	}
@@ -204,7 +223,7 @@ func (b *SimpleBus) removeIdleFlows() {
 	// For example, a developer may want to notify a user that their session has expired.
 }
 
-func NewBus(bot *telebot.Bot, flowSessionIsAvailableFor time.Duration) Bus {
+func NewBus(flowSessionIsAvailableFor time.Duration) Bus {
 	bus := &SimpleBus{
 		flowSessionIsAvailableFor: flowSessionIsAvailableFor,
 	}

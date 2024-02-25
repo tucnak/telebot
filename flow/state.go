@@ -1,23 +1,33 @@
 package flow
 
-import (
-	"gopkg.in/telebot.v3"
+// Defines keys for the basic data that must be in the state
+const (
+	StateMachineKey = "machine"
+	StateContextKey = "context"
 )
 
 // StateHandler is a common handler for global processes, such as finally, fail, step, and so on.
-type StateHandler func(state *State) error
+type StateHandler func(State) error
 
 // State defines the user's state and persists common elements, such as the bot instance, flow handler instance, etc.
-type State struct {
-	// Instance for the user's flow.
-	Machine Machine
-	// Received message from a user.
-	Context telebot.Context
+type State interface {
+	// Set initializes the [userState] field.
+	Set(userState map[interface{}]interface{})
+	// Get returns data corresponding to the provided key, along with a boolean value indicating if the key exists.
+	Get(key interface{}) (interface{}, bool)
+	// Read returns data corresponding to the provided key.
+	// You can especially use this for fast type assertion.
+	//
+	//  state.Read("machine").(flow.Machine)
+	Read(key interface{}) interface{}
+	// Add adds data to the storage.
+	// Caution: it does not check if the key already exists. It will overwrite any existing data associated with the key.
+	Add(key interface{}, value interface{}) State
+	// Exists returns a boolean representing whether the key exists in the map.
+	Exists(key interface{}) bool
+}
 
-	// @TODO: We can provide a full history of every step,
-	// including contexts, validation results, and so on.
-	// contextHistory map[string][]StepHistory
-
+type RuntimeState struct {
 	// @TODO: make it concurrently safe?
 	// User state represents any custom data for a user.
 	// It's simply a container that you can use within steps.
@@ -26,35 +36,32 @@ type State struct {
 	userState map[interface{}]interface{}
 }
 
-// Set initializes the [userState] field.
-func (s *State) Set(userState map[interface{}]interface{}) {
+func (s *RuntimeState) Set(userState map[interface{}]interface{}) {
 	s.userState = userState
 }
 
-// Get returns data corresponding to the provided key, along with a boolean value indicating if the key exists.
-func (s *State) Get(key interface{}) (interface{}, bool) {
+func (s *RuntimeState) Get(key interface{}) (interface{}, bool) {
 	value, exists := s.userState[key]
 
 	return value, exists
 }
 
-// Put adds data to the storage.
-// Caution: it does not check if the key already exists. It will overwrite any existing data associated with the key.
-func (s *State) Put(key interface{}, value interface{}) {
-	s.userState[key] = value
+func (s *RuntimeState) Read(key interface{}) interface{} {
+	return s.userState[key]
 }
 
-// Exists returns a boolean representing whether the key exists in the map.
-func (s *State) Exists(key interface{}) bool {
+func (s *RuntimeState) Add(key interface{}, value interface{}) State {
+	s.userState[key] = value
+
+	return s
+}
+
+func (s *RuntimeState) Exists(key interface{}) bool {
 	_, exists := s.userState[key]
 
 	return exists
 }
 
-func NewState(machine Machine, c telebot.Context, userState map[interface{}]interface{}) *State {
-	return &State{
-		Machine:   machine,
-		Context:   c,
-		userState: userState,
-	}
+func NewRuntimeState(userState map[interface{}]interface{}) State {
+	return &RuntimeState{userState: userState}
 }

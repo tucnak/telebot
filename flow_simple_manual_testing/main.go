@@ -14,8 +14,8 @@ import (
 
 type NonEmptyValidator struct{}
 
-func (NonEmptyValidator) Validate(state *flow.State) error {
-	if len(state.Context.Message().Text) < 2 {
+func (NonEmptyValidator) Validate(state flow.State) error {
+	if len(state.Read(flow.StateContextKey).(tele.Context).Message().Text) < 2 {
 		return errors.New("message is required")
 	}
 
@@ -24,8 +24,8 @@ func (NonEmptyValidator) Validate(state *flow.State) error {
 
 type BadValidator struct{}
 
-func (BadValidator) Validate(state *flow.State) error {
-	return nil
+func (BadValidator) Validate(state flow.State) error {
+	return errors.New("test")
 	//return state.Machine.Fail(state)
 }
 
@@ -39,8 +39,8 @@ func TextAssigner(value interface{}) flow.StateHandler {
 	vai := reflect.ValueOf(value)
 	vai = vai.Elem()
 
-	return func(state *flow.State) error {
-		text := state.Context.Text()
+	return func(state flow.State) error {
+		text := state.Read(flow.StateContextKey).(tele.Context).Text()
 		if len(text) == 0 {
 			return nil
 		}
@@ -96,57 +96,56 @@ func main() {
 		panic(err)
 	}
 
-	sendUserMessage := func(message string) func(state *flow.State) error {
-		return func(state *flow.State) error {
-			return state.Context.Reply(message)
+	sendUserMessage := func(message string) func(flow.State) error {
+		return func(state flow.State) error {
+			return state.Read(flow.StateContextKey).(tele.Context).Reply(message)
 		}
+	}
+	stepCompletedLogging := func(state flow.State, step *flow.Step) error {
+		log.Println("Step completed")
+
+		return nil
 	}
 
 	// Configure flow bus
-	flowBus := flow.NewBus(b, 5*time.Minute)
+	flowBus := flow.NewBus(5 * time.Minute)
 	// Handle any text by flow bus
 	b.Handle(tele.OnText, flowBus.Handle)
 	// First flow
 	var email string
 	b.Handle("/start", flowBus.Flow(
 		flow.New().
-			Step(
-				flow.NewStep().
-					Begin(sendUserMessage("Enter email:")).
+			Next(
+				flow.NewStep(sendUserMessage("Enter email:")).
+					Validate(nonEmptyValidator).
+					Assign(TextAssigner(&email)).
+					Then(stepCompletedLogging),
+			).
+			Next(
+				flow.NewStep(sendUserMessage("Enter password:")).
 					Validate(nonEmptyValidator).
 					Assign(TextAssigner(&email)),
 			).
-			Step(
-				flow.NewStep().
-					Begin(sendUserMessage("Enter password:")).
-					Validate(badValidator).
-					Success(func(state *flow.State) error {
-						log.Println("Second step successfully passed!")
+			Next(
+				flow.NewStep(sendUserMessage("Third step:")).
+					Then(func(state flow.State, step *flow.Step) error {
+						//return state.Read(flow.StateMachineKey).(flow.Machine).ToStep(0, state)
 
 						return nil
 					}),
 			).
-			Step(
-				flow.NewStep().
-					Begin(func(state *flow.State) error {
-						return nil
-						//return state.Machine.Back(state)
-						//return state.Machine.ToStep(0, state)
-						//return state.Machine.Next(state)
-					}),
-			).
-			UseValidatorErrorsAsUserResponse(true).
-			Fail(func(state *flow.State, err error) error {
-				log.Println("Something get wrong: ", err)
+			Then(func(state flow.State) error {
+				log.Println("Steps are completed!")
+
+				return state.Read(flow.StateContextKey).(tele.Context).Reply("Done")
+			}).
+			Catch(func(state flow.State, err error) error {
+				log.Println("FAILED: ", err)
 
 				return nil
-			}).
-			Success(func(state *flow.State) error {
-				log.Println(email)
-
-				return state.Context.Reply("You have successfully completed all the steps!")
 			}),
 	))
+
 	// Flow using state storage
 	type user struct {
 		email    string
@@ -156,54 +155,45 @@ func main() {
 	b.Handle("/start2", flowBus.Flow(
 		flow.New().
 			AddState(userStorageKey, &user{}).
-			Step(
-				flow.NewStep().
-					Begin(sendUserMessage("Enter email:")).
+			Next(
+				flow.NewStep(sendUserMessage("Enter email:")).
 					Validate(nonEmptyValidator).
-					Assign(func(state *flow.State) error {
-						value, _ := state.Get(userStorageKey)
-						userValue := value.(*user)
-						userValue.email = state.Context.Message().Text
+					Assign(func(state flow.State) error {
+						u := state.Read(userStorageKey).(*user)
+						u.email = state.Read(flow.StateContextKey).(tele.Context).Message().Text
 
 						return nil
 					}),
 			).
-			Step(
-				flow.NewStep().
-					Begin(sendUserMessage("Enter password:")).
-					Validate(badValidator).
-					Assign(func(state *flow.State) error {
-						value, _ := state.Get(userStorageKey)
-						userValue := value.(*user)
-						userValue.password = state.Context.Message().Text
+			Next(
+				flow.NewStep(sendUserMessage("Enter password:")).
+					Validate(nonEmptyValidator).
+					Assign(func(state flow.State) error {
+						u := state.Read(userStorageKey).(*user)
+						u.password = state.Read(flow.StateContextKey).(tele.Context).Message().Text
 
 						return nil
 					}).
-					Success(func(state *flow.State) error {
+					Then(func(state flow.State, step *flow.Step) error {
 						log.Println("Second step successfully passed!")
 
 						return nil
 					}),
 			).
-			Step(
-				flow.NewStep().
-					Begin(func(state *flow.State) error {
-						return state.Machine.Fail(state, errors.New("should be passed to the [Fail]"))
-						//return state.Machine.Back(state)
-						//return state.Machine.ToStep(0, state)
-						//return state.Machine.Next(state)
-					}),
+			Next(
+				flow.NewStep(func(state flow.State) error {
+					return errors.New("should be passed to the [Catch]")
+				}),
 			).
-			UseValidatorErrorsAsUserResponse(true).
-			Fail(func(state *flow.State, err error) error {
-				log.Println("Something get wrong: ", err)
+			Then(func(state flow.State) error {
+				log.Println("Steps are completed!. User: ", state.Read(userStorageKey))
+
+				return state.Read(flow.StateContextKey).(tele.Context).Reply("Done")
+			}).
+			Catch(func(state flow.State, err error) error {
+				log.Println("FAILED: ", err)
 
 				return nil
-			}).
-			Success(func(state *flow.State) error {
-				log.Println(state.Get(userStorageKey))
-
-				return state.Context.Reply("You have successfully completed all the steps!")
 			}),
 	))
 
