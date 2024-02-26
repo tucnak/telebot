@@ -63,7 +63,7 @@ type Chat struct {
 	NoVoiceAndVideo         bool          `json:"has_restricted_voice_and_video_messages"`
 	HiddenMembers           bool          `json:"has_hidden_members,omitempty"`
 	AggressiveAntiSpam      bool          `json:"has_aggressive_anti_spam_enabled,omitempty"`
-	EmojiExpirationUnixTime int64         `json:"emoji_status_expiration_date"`
+	EmojiExpirationUnixtime int64         `json:"emoji_status_expiration_date"`
 }
 
 // Recipient returns chat ID (see Recipient interface).
@@ -261,7 +261,7 @@ func (r ChatJoinRequest) Time() time.Time {
 
 // Time returns the moment of the emoji status expiration.
 func (c *Chat) Time() time.Time {
-	return time.Unix(c.EmojiExpirationUnixTime, 0)
+	return time.Unix(c.EmojiExpirationUnixtime, 0)
 }
 
 // InviteLink should be used to export chat's invite link.
