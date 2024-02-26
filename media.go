@@ -294,7 +294,6 @@ type Sticker struct {
 	Repaint          bool           `json:"needs_repainting"`
 	Emojis           []string       `json:"emoji_list"`
 	Keywords         []string       `json:"keywords"`
-	Format           string         `json:"sticker_format,omitempty"`
 }
 
 func (s *Sticker) MediaType() string {
@@ -307,9 +306,7 @@ func (s *Sticker) MediaFile() *File {
 
 func (s *Sticker) InputMedia() InputMedia {
 	return InputMedia{
-		Type:   s.Type,
-		Width:  s.Width,
-		Height: s.Height,
+		Type: s.MediaType(),
 	}
 }
 

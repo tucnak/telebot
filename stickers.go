@@ -2,6 +2,7 @@ package telebot
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 )
 
@@ -13,22 +14,29 @@ const (
 	StickerCustomEmoji = "custom_emoji"
 )
 
+type StickerSetFormat = string
+
+const (
+	StickerStatic   = "static"
+	StickerAnimated = "animated"
+	StickerVideo    = "video"
+)
+
 // StickerSet represents a sticker set.
 type StickerSet struct {
-	Type          StickerSetType `json:"sticker_type"`
-	Name          string         `json:"name"`
-	Title         string         `json:"title"`
-	Animated      bool           `json:"is_animated"`
-	Video         bool           `json:"is_video"`
-	Stickers      []Sticker      `json:"stickers"`
-	Thumbnail     *Photo         `json:"thumbnail"`
-	PNG           *File          `json:"png_sticker"`
-	TGS           *File          `json:"tgs_sticker"`
-	WebM          *File          `json:"webm_sticker"`
-	Emojis        string         `json:"emojis"`
-	ContainsMasks bool           `json:"contains_masks"` // FIXME: can be removed
-	MaskPosition  *MaskPosition  `json:"mask_position"`
-	Repaint       bool           `json:"needs_repainting"`
+	Type          StickerSetType   `json:"sticker_type"`
+	Format        StickerSetFormat `json:"sticker_format"`
+	Name          string           `json:"name"`
+	Title         string           `json:"title"`
+	Animated      bool             `json:"is_animated"`
+	Video         bool             `json:"is_video"`
+	Stickers      []Sticker        `json:"stickers"`
+	Sticker       Sticker          `json:"sticker"`
+	Thumbnail     *Photo           `json:"thumbnail"`
+	Emojis        string           `json:"emojis"`
+	ContainsMasks bool             `json:"contains_masks"` // FIXME: can be removed
+	MaskPosition  *MaskPosition    `json:"mask_position"`
+	Repaint       bool             `json:"needs_repainting"`
 }
 
 // MaskPosition describes the position on faces where
@@ -51,32 +59,9 @@ const (
 )
 
 // UploadSticker uploads a PNG file with a sticker for later use.
-func (b *Bot) UploadSticker(to Recipient, png *File) (*File, error) {
+func (b *Bot) UploadSticker(to Recipient, s StickerSet) (*File, error) {
 	files := map[string]File{
-		"png_sticker": *png,
-	}
-	params := map[string]string{
-		"user_id": to.Recipient(),
-	}
-
-	data, err := b.sendFiles("uploadStickerFile", files, params)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		Result File
-	}
-	if err := json.Unmarshal(data, &resp); err != nil {
-		return nil, wrapError(err)
-	}
-	return &resp.Result, nil
-}
-
-// UploadStickerFile uploads a PNG file with a sticker for later use.
-func (b *Bot) UploadStickerFile(to Recipient, s Sticker) (*File, error) {
-	files := map[string]File{
-		"sticker": s.File,
+		"sticker": s.Sticker.File,
 	}
 
 	params := map[string]string{
@@ -117,81 +102,53 @@ func (b *Bot) StickerSet(name string) (*StickerSet, error) {
 // CreateStickerSet creates a new sticker set.
 func (b *Bot) CreateStickerSet(to Recipient, s StickerSet) error {
 	files := make(map[string]File)
-	if s.PNG != nil {
-		files["png_sticker"] = *s.PNG
+	for i, sticker := range s.Stickers {
+		key := fmt.Sprint("sticker", i)
+		files[key] = sticker.File
 	}
-	if s.TGS != nil {
-		files["tgs_sticker"] = *s.TGS
-	}
-	if s.WebM != nil {
-		files["webm_sticker"] = *s.WebM
+
+	data, err := json.Marshal(s.Stickers)
+	if err != nil {
+		return err
 	}
 
 	params := map[string]string{
 		"user_id":          to.Recipient(),
-		"sticker_type":     s.Type,
 		"name":             s.Name,
 		"title":            s.Title,
-		"emojis":           s.Emojis,
+		"sticker_type":     s.Type,
+		"sticker_format":   s.Format,
+		"stickers":         string(data),
 		"needs_repainting": strconv.FormatBool(s.Repaint),
-		"contains_masks":   strconv.FormatBool(s.ContainsMasks),
 	}
 
-	if s.MaskPosition != nil {
-		data, _ := json.Marshal(&s.MaskPosition)
-		params["mask_position"] = string(data)
-	}
-
-	_, err := b.sendFiles("createNewStickerSet", files, params)
-	return err
-}
-
-// AddSticker adds a new sticker to the existing sticker set.
-func (b *Bot) AddSticker(to Recipient, s StickerSet) error {
-	files := make(map[string]File)
-	if s.PNG != nil {
-		files["png_sticker"] = *s.PNG
-	} else if s.TGS != nil {
-		files["tgs_sticker"] = *s.TGS
-	} else if s.WebM != nil {
-		files["webm_sticker"] = *s.WebM
-	}
-
-	params := map[string]string{
-		"user_id": to.Recipient(),
-		"name":    s.Name,
-		"emojis":  s.Emojis,
-	}
-
-	if s.MaskPosition != nil {
-		data, _ := json.Marshal(&s.MaskPosition)
-		params["mask_position"] = string(data)
-	}
-
-	_, err := b.sendFiles("addStickerToSet", files, params)
+	_, err = b.sendFiles("createNewStickerSet", files, params)
 	return err
 }
 
 // AddStickerToSet adds a new sticker to the existing sticker set.
-func (b *Bot) AddStickerToSet(to Recipient, name string, s Sticker) error {
-	files := make(map[string]File)
-	files["sticker"] = s.File
+func (b *Bot) AddStickerToSet(to Recipient, s StickerSet) error {
+	var (
+		files   = make(map[string]File)
+		sticker = s.Sticker
+	)
+	files["sticker"] = sticker.File
 
 	params := map[string]string{
 		"user_id": to.Recipient(),
-		"name":    name,
+		"name":    s.Name,
 	}
 
-	if s.Emojis != nil {
+	if sticker.Emojis != nil {
 		data, _ := json.Marshal(s.Emojis)
 		params["emoji_list"] = string(data)
 	}
 	if s.MaskPosition != nil {
-		data, _ := json.Marshal(&s.MaskPosition)
+		data, _ := json.Marshal(s.MaskPosition)
 		params["mask_position"] = string(data)
 	}
-	if s.Keywords != nil {
-		data, _ := json.Marshal(s.Keywords)
+	if sticker.Keywords != nil {
+		data, _ := json.Marshal(sticker.Keywords)
 		params["keywords"] = string(data)
 	}
 
@@ -226,19 +183,24 @@ func (b *Bot) DeleteSticker(sticker string) error {
 //
 // Animated sticker set thumbnail can't be uploaded via HTTP URL.
 func (b *Bot) SetStickerSetThumb(to Recipient, s StickerSet) error {
-	files := make(map[string]File)
-	if s.PNG != nil {
-		files["thumbnail"] = *s.PNG
-	} else if s.TGS != nil {
-		files["thumbnail"] = *s.TGS
+	var (
+		sticker = s.Sticker
+		files   = make(map[string]File)
+	)
+	files["thumbnail"] = sticker.File
+
+	data, err := json.Marshal(sticker.File)
+	if err != nil {
+		return err
 	}
 
 	params := map[string]string{
-		"name":    s.Name,
-		"user_id": to.Recipient(),
+		"name":      s.Name,
+		"user_id":   to.Recipient(),
+		"thumbnail": string(data),
 	}
 
-	_, err := b.sendFiles("setStickerSetThumbnail", files, params)
+	_, err = b.sendFiles("setStickerSetThumbnail", files, params)
 	return err
 }
 

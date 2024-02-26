@@ -1154,9 +1154,9 @@ func (b *Bot) Close() (bool, error) {
 
 // BotInfo represents a single object of BotName, BotDescription, BotShortDescription instances.
 type BotInfo struct {
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
-	ShortDesc   string `json:"short_description,omitempty"`
+	Name             string `json:"name,omitempty"`
+	Description      string `json:"description,omitempty"`
+	ShortDescription string `json:"short_description,omitempty"`
 }
 
 // SetMyName change's the bot name.
@@ -1194,10 +1194,10 @@ func (b *Bot) MyDescription(language string) (*BotInfo, error) {
 
 // SetMyShortDescription change's the bot short description, which is shown on
 // the bot's profile page and is sent together with the link when users share the bot.
-func (b *Bot) SetMyShortDescription(sdesc, lc string) error {
+func (b *Bot) SetMyShortDescription(desc, language string) error {
 	params := map[string]string{
-		"short_description": sdesc,
-		"language_code":     lc,
+		"short_description": desc,
+		"language_code":     language,
 	}
 
 	_, err := b.Raw("setMyShortDescription", params)
