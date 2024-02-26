@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	tele "gopkg.in/telebot.v3"
 	"gopkg.in/telebot.v3/flow"
 	"log"
@@ -101,25 +102,23 @@ func main() {
 			return state.Read(flow.StateContextKey).(tele.Context).Reply(message)
 		}
 	}
-	stepCompletedLogging := func(state flow.State, step *flow.Step) error {
-		log.Println("Step completed")
-
-		return nil
+	stepCompletedLogging := func(state flow.State, metadata flow.StepMetaData) {
+		log.Println(fmt.Sprintf("Step completed [%d]", metadata.Step))
 	}
 
 	// Configure flow bus
-	flowBus := flow.NewBus(5 * time.Minute)
+	flowBus := flow.NewBus(b, 5*time.Minute)
 	// Handle any text by flow bus
 	b.Handle(tele.OnText, flowBus.Handle)
 	// First flow
 	var email string
-	b.Handle("/start", flowBus.Flow(
+	flowBus.Flow(
+		"/start",
 		flow.New().
 			Next(
 				flow.NewStep(sendUserMessage("Enter email:")).
 					Validate(nonEmptyValidator).
-					Assign(TextAssigner(&email)).
-					Then(stepCompletedLogging),
+					Assign(TextAssigner(&email)),
 			).
 			Next(
 				flow.NewStep(sendUserMessage("Enter password:")).
@@ -128,23 +127,18 @@ func main() {
 			).
 			Next(
 				flow.NewStep(sendUserMessage("Third step:")).
-					Then(func(state flow.State, step *flow.Step) error {
-						//return state.Read(flow.StateMachineKey).(flow.Machine).ToStep(0, state)
-
-						return nil
-					}),
+					Validate(badValidator),
 			).
+			OnEachStep(stepCompletedLogging).
 			Then(func(state flow.State) error {
-				log.Println("Steps are completed!")
-
 				return state.Read(flow.StateContextKey).(tele.Context).Reply("Done")
 			}).
-			Catch(func(state flow.State, err error) error {
-				log.Println("FAILED: ", err)
+			Catch(func(state flow.State, metadata *flow.MetaData) error {
+				log.Println("Catch an error: ", metadata)
 
-				return nil
+				return state.Read(flow.StateContextKey).(tele.Context).Reply("Try later")
 			}),
-	))
+	)
 
 	// Flow using state storage
 	type user struct {
@@ -152,7 +146,8 @@ func main() {
 		password string
 	}
 	userStorageKey := "user"
-	b.Handle("/start2", flowBus.Flow(
+	flowBus.Flow(
+		"/start2",
 		flow.New().
 			AddState(userStorageKey, &user{}).
 			Next(
@@ -173,11 +168,6 @@ func main() {
 						u.password = state.Read(flow.StateContextKey).(tele.Context).Message().Text
 
 						return nil
-					}).
-					Then(func(state flow.State, step *flow.Step) error {
-						log.Println("Second step successfully passed!")
-
-						return nil
 					}),
 			).
 			Next(
@@ -190,12 +180,12 @@ func main() {
 
 				return state.Read(flow.StateContextKey).(tele.Context).Reply("Done")
 			}).
-			Catch(func(state flow.State, err error) error {
-				log.Println("FAILED: ", err)
+			Catch(func(state flow.State, metadata *flow.MetaData) error {
+				log.Println("FAILED: ", metadata.FailedError)
 
 				return nil
 			}),
-	))
+	)
 
 	b.Start()
 }

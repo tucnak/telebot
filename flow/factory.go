@@ -24,21 +24,28 @@ func (f *Factory) WithState(userState map[interface{}]interface{}) *Factory {
 	return f
 }
 
-// Next adds a step to the [Flow.Steps]
+// Next adds a step to the [Flow.steps]
 func (f *Factory) Next(step *StepFactory) *Factory {
 	f.flow.steps = append(f.flow.steps, *step.step)
 
 	return f
 }
 
-// Then sets a handler for the [Flow.Success] event.
+// OnEachStep sets a handler for the [Flow.onEachStep] event.
+func (f *Factory) OnEachStep(handler OnEachStepHandler) *Factory {
+	f.flow.onEachStep = handler
+
+	return f
+}
+
+// Then sets a handler for the [Flow.then] event.
 func (f *Factory) Then(handler StateHandler) *Factory {
 	f.flow.then = handler
 
 	return f
 }
 
-// Catch sets a handler for the [Flow.Fail] event.
+// Catch sets a handler for the [Flow.catch] event.
 func (f *Factory) Catch(handler FailHandler) *Factory {
 	f.flow.catch = handler
 
@@ -49,14 +56,6 @@ func (f *Factory) Catch(handler FailHandler) *Factory {
 func New() *Factory {
 	return &Factory{
 		flow:      &Flow{},
-		userState: make(map[interface{}]interface{}),
-	}
-}
-
-// NewWithConfiguration start describing the flow.
-func NewWithConfiguration(flow Flow) *Factory {
-	return &Factory{
-		flow:      &flow,
 		userState: make(map[interface{}]interface{}),
 	}
 }
@@ -76,13 +75,6 @@ func (f *StepFactory) Validate(validators ...StepValidator) *StepFactory {
 // Assign sets a value for the [Step.assign].
 func (f *StepFactory) Assign(assign StateHandler) *StepFactory {
 	f.step.assign = assign
-
-	return f
-}
-
-// Then sets a value for the [Step.then].
-func (f *StepFactory) Then(handler StepThenHandler) *StepFactory {
-	f.step.then = handler
 
 	return f
 }

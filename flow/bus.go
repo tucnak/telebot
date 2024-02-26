@@ -54,19 +54,23 @@ type Bus interface {
 	Handle(telebot.Context) error
 
 	// Flow initiates flow configuration
-	Flow(factory *Factory) telebot.HandlerFunc
+	Flow(endpoint interface{}, factory *Factory) error
 }
 
 // describes the state to the [SimpleBus.states] value
 type flowState struct {
+	// telegram bot endpoint
+	endpoint interface{}
 	// User's flow
-	flow    *Flow
-	state   State
-	machine Machine
+	flow     *Flow
+	state    State
+	machine  Machine
+	metaData *MetaData
 }
 
 // SimpleBus implementation for the [Bus] contract
 type SimpleBus struct {
+	bot *telebot.Bot
 	// Stores the active user flows by their IDs.
 	// Key - user id (int64)
 	// Value - the [state] instance
@@ -105,6 +109,51 @@ func (b *SimpleBus) UserContinueFlowOrCustom(handler telebot.HandlerFunc) telebo
 	}
 }
 
+// Calls the meta functions for the step [validators/assign/etc].
+func (b *SimpleBus) handleMetaForStep(st flowState, c telebot.Context, step Step) error {
+	// Call validators if they are defined
+	validators := step.validators
+	if len(validators) > 0 {
+		for _, validator := range validators {
+			err := validator.Validate(st.state)
+			// Fill metadata information on error
+			if err != nil {
+				st.metaData.FailureStage = MetaDataFailureStageValidation
+				st.metaData.FailedError = err
+
+				return err
+			}
+		}
+	}
+
+	// Call [assign]
+	if step.assign != nil {
+		if err := step.assign(st.state); err != nil {
+			// Fill step metadata
+			st.metaData.FailureStage = MetaDataFailureStageAssign
+			st.metaData.FailedError = err
+
+			return err
+		}
+	}
+
+	return nil
+}
+
+// Call the [catch] function for the [flow] and remove the flow from the state.
+func (b *SimpleBus) handleCatch(st flowState, c telebot.Context) error {
+	// Remove flow on any error occurring within flow logic.
+	// We need to call the [Fail] function because, typically,
+	// that handler should send something to the user like [Try again].
+	b.removeState(c.Sender().ID)
+
+	if st.flow.catch == nil {
+		return nil
+	}
+
+	return st.flow.catch(st.state, st.metaData)
+}
+
 func (b *SimpleBus) Handle(c telebot.Context) error {
 	stV, exists := b.states.Load(c.Sender().ID)
 	if !exists {
@@ -114,47 +163,50 @@ func (b *SimpleBus) Handle(c telebot.Context) error {
 	st := stV.(flowState)
 	// Update context for the state
 	st.state.Add(StateContextKey, c)
-	// Get active step
-	step := st.flow.steps[st.machine.ActiveStep()]
-	// Call validators if they are defined
-	validators := step.validators
-	if len(validators) > 0 {
-		for _, validator := range validators {
-			err := validator.Validate(st.state)
-			if err != nil {
-				if st.flow.UseValidatorErrorsAsUserResponse {
-					return c.Reply(err.Error())
-				} else {
-					return err
-				}
-			}
-		}
-	}
-
-	// Call [assign]
-	if step.assign != nil {
-		if err := step.assign(st.state); err != nil {
-			return err
-		}
-	}
-
 	activeStep := st.machine.ActiveStep()
-	// Call [then] event if it's defined
-	if step.then != nil {
-		if err := step.then(st.state, &step); err != nil {
-			return err
+	// Get active step
+	step := st.flow.steps[activeStep]
+	// Begin filling metadata for the current step.
+	st.metaData.LastActiveStep = StepMetaData{Step: st.machine.ActiveStep()}
+	defer func() {
+		// Update the flowState for the user only if [failedError] is nil.
+		// Otherwise, if the flow failed and the [catch] function was called,
+		// we don't need to update the flow because it no longer exists.
+		if st.metaData.FailureStage == MetaDataFailureStageNone {
+			b.states.Store(c.Sender().ID, st)
 		}
+	}()
+
+	if err := b.handleMetaForStep(st, c, step); err != nil {
+		st.metaData.FailedStep = &st.metaData.LastActiveStep
+
+		return b.handleCatch(st, c)
 	}
 
-	// It was the last step. Call the [then] handler
-	if len(st.flow.steps) <= st.machine.ActiveStep()+1 {
-		b.removeState(c.Sender().ID)
+	// Since it is the last step, call the [then] handler.
+	if len(st.flow.steps) <= activeStep+1 {
+		// Call on each step handler if it is defined
+		if st.flow.onEachStep != nil {
+			st.flow.onEachStep(st.state, st.metaData.LastActiveStep)
+		}
 
 		if st.flow.then == nil {
+			b.removeState(c.Sender().ID)
+
 			return nil
 		}
 
-		return st.flow.then(st.state)
+		// If an error is returned, we need to call [catch] for the flow.
+		err := st.flow.then(st.state)
+		if err != nil {
+			// Fill step metadata
+			st.metaData.FailureStage = MetaDataFailureStageThen
+			st.metaData.FailedError = err
+
+			return b.handleCatch(st, c)
+		}
+
+		return err
 	}
 
 	// Sometimes, the user may navigate through steps within handlers.
@@ -164,33 +216,33 @@ func (b *SimpleBus) Handle(c telebot.Context) error {
 		// Process to the next step
 		err := st.machine.Next(st.state)
 		if err != nil {
-			// Remove flow on any error occurring within flow logic.
-			// We need to call the [Fail] function because, typically,
-			// that handler should send something to the user like [Try again].
-			b.removeState(c.Sender().ID)
+			// Fill step metadata
+			st.metaData.FailureStage = MetaDataFailureStageBegin
+			st.metaData.FailedError = err
 
-			if st.flow.catch == nil {
-				return nil
-			}
+			return b.handleCatch(st, c)
+		}
 
-			return st.flow.catch(st.state, err)
+		// Call on each step handler if it is defined
+		if st.flow.onEachStep != nil {
+			st.flow.onEachStep(st.state, st.metaData.LastActiveStep)
 		}
 	}
 
 	return nil
 }
 
-// Remove [state] from the [SimpleBus.states]
+// Remove the [state] from the [SimpleBus.states].
 func (b *SimpleBus) removeState(userID int64) {
 	b.states.Delete(userID)
 }
 
-func (b *SimpleBus) Flow(factory *Factory) telebot.HandlerFunc {
-	return func(c telebot.Context) error {
-		if len(factory.flow.steps) == 0 {
-			return NoStepsDefined
-		}
+func (b *SimpleBus) Flow(endpoint interface{}, factory *Factory) error {
+	if len(factory.flow.steps) == 0 {
+		return NoStepsDefined
+	}
 
+	b.bot.Handle(endpoint, func(c telebot.Context) error {
 		// If the user already has a flow, we need to recall the active step.
 		stV, exists := b.states.Load(c.Sender().ID)
 		if exists {
@@ -207,14 +259,23 @@ func (b *SimpleBus) Flow(factory *Factory) telebot.HandlerFunc {
 			Add(StateMachineKey, machine)
 		// Register flow for the user
 		st := flowState{
-			flow:    factory.flow,
-			state:   state,
-			machine: machine,
+			endpoint: endpoint,
+			flow:     factory.flow,
+			state:    state,
+			machine:  machine,
+			metaData: &MetaData{
+				Endpoint: endpoint,
+				// Sets the first step as the last active step.
+				LastActiveStep: StepMetaData{Step: 0},
+			},
 		}
 		b.states.Store(c.Sender().ID, st)
+
 		// Call the machine for the start the first step
 		return machine.ToStep(0, st.state)
-	}
+	})
+
+	return nil
 }
 
 // Removes flows that have been active for longer than [flowSessionIsAvailableFor] time.
@@ -223,8 +284,9 @@ func (b *SimpleBus) removeIdleFlows() {
 	// For example, a developer may want to notify a user that their session has expired.
 }
 
-func NewBus(flowSessionIsAvailableFor time.Duration) Bus {
+func NewBus(bot *telebot.Bot, flowSessionIsAvailableFor time.Duration) Bus {
 	bus := &SimpleBus{
+		bot:                       bot,
 		flowSessionIsAvailableFor: flowSessionIsAvailableFor,
 	}
 

@@ -1,5 +1,11 @@
 package flow
 
+// StepMetaData is an object that provides the user with information for different stages
+type StepMetaData struct {
+	// Ordinal number
+	Step int
+}
+
 // StepThenHandler handler for the successfully completed step
 type StepThenHandler func(State, *Step) error
 
@@ -22,6 +28,4 @@ type Step struct {
 	// Callback called after the validation process if successful.
 	// It can, for example, assign the user's prompt to a variable.
 	assign StateHandler
-	// Called if the step is successfully passed.
-	then StepThenHandler
 }
