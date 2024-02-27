@@ -19,7 +19,7 @@ type InputMedia struct {
 	Type                 string   `json:"type"`
 	Media                string   `json:"media"`
 	Caption              string   `json:"caption"`
-	Thumbnail            string   `json:"thumb,omitempty"`
+	Thumbnail            string   `json:"thumbnail,omitempty"`
 	ParseMode            string   `json:"parse_mode,omitempty"`
 	Entities             Entities `json:"caption_entities,omitempty"`
 	Width                int      `json:"width,omitempty"`
@@ -113,7 +113,7 @@ type Audio struct {
 
 	// (Optional)
 	Caption   string `json:"caption,omitempty"`
-	Thumbnail *Photo `json:"thumb,omitempty"`
+	Thumbnail *Photo `json:"thumbnail,omitempty"`
 	Title     string `json:"title,omitempty"`
 	Performer string `json:"performer,omitempty"`
 	MIME      string `json:"mime_type,omitempty"`
@@ -145,7 +145,7 @@ type Document struct {
 	File
 
 	// (Optional)
-	Thumbnail            *Photo `json:"thumb,omitempty"`
+	Thumbnail            *Photo `json:"thumbnail,omitempty"`
 	Caption              string `json:"caption,omitempty"`
 	MIME                 string `json:"mime_type"`
 	FileName             string `json:"file_name,omitempty"`
@@ -179,7 +179,7 @@ type Video struct {
 
 	// (Optional)
 	Caption   string `json:"caption,omitempty"`
-	Thumbnail *Photo `json:"thumb,omitempty"`
+	Thumbnail *Photo `json:"thumbnail,omitempty"`
 	Streaming bool   `json:"supports_streaming,omitempty"`
 	MIME      string `json:"mime_type,omitempty"`
 	FileName  string `json:"file_name,omitempty"`
@@ -215,7 +215,7 @@ type Animation struct {
 
 	// (Optional)
 	Caption   string `json:"caption,omitempty"`
-	Thumbnail *Photo `json:"thumb,omitempty"`
+	Thumbnail *Photo `json:"thumbnail,omitempty"`
 	MIME      string `json:"mime_type,omitempty"`
 	FileName  string `json:"file_name,omitempty"`
 }
@@ -265,7 +265,7 @@ type VideoNote struct {
 	Duration int `json:"duration"`
 
 	// (Optional)
-	Thumbnail *Photo `json:"thumb,omitempty"`
+	Thumbnail *Photo `json:"thumbnail,omitempty"`
 	Length    int    `json:"length,omitempty"`
 }
 
@@ -284,13 +284,16 @@ type Sticker struct {
 	Height           int            `json:"height"`
 	Animated         bool           `json:"is_animated"`
 	Video            bool           `json:"is_video"`
-	Thumbnail        *Photo         `json:"thumb"`
+	Thumbnail        *Photo         `json:"thumbnail"`
 	Emoji            string         `json:"emoji"`
 	SetName          string         `json:"set_name"`
 	MaskPosition     *MaskPosition  `json:"mask_position"`
 	PremiumAnimation *File          `json:"premium_animation"`
 	Type             StickerSetType `json:"type"`
 	CustomEmoji      string         `json:"custom_emoji_id"`
+	Repaint          bool           `json:"needs_repainting"`
+	Emojis           []string       `json:"emoji_list"`
+	Keywords         []string       `json:"keywords"`
 }
 
 func (s *Sticker) MediaType() string {
@@ -299,6 +302,12 @@ func (s *Sticker) MediaType() string {
 
 func (s *Sticker) MediaFile() *File {
 	return &s.File
+}
+
+func (s *Sticker) InputMedia() InputMedia {
+	return InputMedia{
+		Type: s.MediaType(),
+	}
 }
 
 // Contact object represents a contact to Telegram user.

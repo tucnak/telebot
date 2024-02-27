@@ -1161,3 +1161,79 @@ func (b *Bot) Close() (bool, error) {
 
 	return resp.Result, nil
 }
+
+// BotInfo represents a single object of BotName, BotDescription, BotShortDescription instances.
+type BotInfo struct {
+	Name             string `json:"name,omitempty"`
+	Description      string `json:"description,omitempty"`
+	ShortDescription string `json:"short_description,omitempty"`
+}
+
+// SetMyName change's the bot name.
+func (b *Bot) SetMyName(name, language string) error {
+	params := map[string]string{
+		"name":          name,
+		"language_code": language,
+	}
+
+	_, err := b.Raw("setMyName", params)
+	return err
+}
+
+// MyName returns the current bot name for the given user language.
+func (b *Bot) MyName(language string) (*BotInfo, error) {
+	return b.botInfo(language, "getMyName")
+}
+
+// SetMyDescription change's the bot description, which is shown in the chat
+// with the bot if the chat is empty.
+func (b *Bot) SetMyDescription(desc, language string) error {
+	params := map[string]string{
+		"description":   desc,
+		"language_code": language,
+	}
+
+	_, err := b.Raw("setMyDescription", params)
+	return err
+}
+
+// MyDescription the current bot description for the given user language.
+func (b *Bot) MyDescription(language string) (*BotInfo, error) {
+	return b.botInfo(language, "getMyDescription")
+}
+
+// SetMyShortDescription change's the bot short description, which is shown on
+// the bot's profile page and is sent together with the link when users share the bot.
+func (b *Bot) SetMyShortDescription(desc, language string) error {
+	params := map[string]string{
+		"short_description": desc,
+		"language_code":     language,
+	}
+
+	_, err := b.Raw("setMyShortDescription", params)
+	return err
+}
+
+// MyShortDescription the current bot short description for the given user language.
+func (b *Bot) MyShortDescription(language string) (*BotInfo, error) {
+	return b.botInfo(language, "getMyShortDescription")
+}
+
+func (b *Bot) botInfo(language, key string) (*BotInfo, error) {
+	params := map[string]string{
+		"language_code": language,
+	}
+
+	data, err := b.Raw(key, params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result *BotInfo
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return resp.Result, nil
+}

@@ -91,13 +91,13 @@ type ArticleResult struct {
 	Description string `json:"description,omitempty"`
 
 	// Optional. URL of the thumbnail for the result.
-	ThumbURL string `json:"thumb_url,omitempty"`
+	ThumbURL string `json:"thumbnail_url,omitempty"`
 
 	// Optional. Width of the thumbnail for the result.
-	ThumbWidth int `json:"thumb_width,omitempty"`
+	ThumbWidth int `json:"thumbnail_width,omitempty"`
 
 	// Optional. Height of the thumbnail for the result.
-	ThumbHeight int `json:"thumb_height,omitempty"`
+	ThumbHeight int `json:"thumbnail_height,omitempty"`
 }
 
 // AudioResult represents a link to an mp3 audio file.
@@ -140,13 +140,13 @@ type ContactResult struct {
 	LastName string `json:"last_name,omitempty"`
 
 	// Optional. URL of the thumbnail for the result.
-	ThumbURL string `json:"thumb_url,omitempty"`
+	ThumbURL string `json:"thumbnail_url,omitempty"`
 
 	// Optional. Width of the thumbnail for the result.
-	ThumbWidth int `json:"thumb_width,omitempty"`
+	ThumbWidth int `json:"thumbnail_width,omitempty"`
 
 	// Optional. Height of the thumbnail for the result.
-	ThumbHeight int `json:"thumb_height,omitempty"`
+	ThumbHeight int `json:"thumbnail_height,omitempty"`
 }
 
 // DocumentResult represents a link to a file.
@@ -170,13 +170,13 @@ type DocumentResult struct {
 	Description string `json:"description,omitempty"`
 
 	// Optional. URL of the thumbnail (jpeg only) for the file.
-	ThumbURL string `json:"thumb_url,omitempty"`
+	ThumbURL string `json:"thumbnail_url,omitempty"`
 
 	// Optional. Width of the thumbnail for the result.
-	ThumbWidth int `json:"thumb_width,omitempty"`
+	ThumbWidth int `json:"thumbnail_width,omitempty"`
 
 	// Optional. Height of the thumbnail for the result.
-	ThumbHeight int `json:"thumb_height,omitempty"`
+	ThumbHeight int `json:"thumbnail_height,omitempty"`
 
 	// If Cache != "", it'll be used instead
 	Cache string `json:"document_file_id,omitempty"`
@@ -199,11 +199,11 @@ type GifResult struct {
 	Duration int `json:"gif_duration,omitempty"`
 
 	// URL of the static thumbnail for the result (jpeg or gif).
-	ThumbURL string `json:"thumb_url"`
+	ThumbURL string `json:"thumbnail_url"`
 
 	// Optional. MIME type of the thumbnail, must be one of
 	// “image/jpeg”, “image/gif”, or “video/mp4”.
-	ThumbMIME string `json:"thumb_mime_type,omitempty"`
+	ThumbMIME string `json:"thumbnail_mime_type,omitempty"`
 
 	// Optional. Title for the result.
 	Title string `json:"title,omitempty"`
@@ -225,7 +225,7 @@ type LocationResult struct {
 	Title string `json:"title"`
 
 	// Optional. Url of the thumbnail for the result.
-	ThumbURL string `json:"thumb_url,omitempty"`
+	ThumbURL string `json:"thumbnail_url,omitempty"`
 }
 
 // Mpeg4GifResult represents a link to a video animation
@@ -246,11 +246,11 @@ type Mpeg4GifResult struct {
 	Duration int `json:"mpeg4_duration,omitempty"`
 
 	// URL of the static thumbnail (jpeg or gif) for the result.
-	ThumbURL string `json:"thumb_url,omitempty"`
+	ThumbURL string `json:"thumbnail_url,omitempty"`
 
 	// Optional. MIME type of the thumbnail, must be one of
 	// “image/jpeg”, “image/gif”, or “video/mp4”.
-	ThumbMIME string `json:"thumb_mime_type,omitempty"`
+	ThumbMIME string `json:"thumbnail_mime_type,omitempty"`
 
 	// Optional. Title for the result.
 	Title string `json:"title,omitempty"`
@@ -286,7 +286,7 @@ type PhotoResult struct {
 	Caption string `json:"caption,omitempty"`
 
 	// URL of the thumbnail for the photo.
-	ThumbURL string `json:"thumb_url"`
+	ThumbURL string `json:"thumbnail_url"`
 
 	// If Cache != "", it'll be used instead
 	Cache string `json:"photo_file_id,omitempty"`
@@ -308,13 +308,13 @@ type VenueResult struct {
 	FoursquareID string `json:"foursquare_id,omitempty"`
 
 	// Optional. URL of the thumbnail for the result.
-	ThumbURL string `json:"thumb_url,omitempty"`
+	ThumbURL string `json:"thumbnail_url,omitempty"`
 
 	// Optional. Width of the thumbnail for the result.
-	ThumbWidth int `json:"thumb_width,omitempty"`
+	ThumbWidth int `json:"thumbnail_width,omitempty"`
 
 	// Optional. Height of the thumbnail for the result.
-	ThumbHeight int `json:"thumb_height,omitempty"`
+	ThumbHeight int `json:"thumbnail_height,omitempty"`
 }
 
 // VideoResult represents a link to a page containing an embedded
@@ -329,7 +329,7 @@ type VideoResult struct {
 	MIME string `json:"mime_type"`
 
 	// URL of the thumbnail (jpeg only) for the video.
-	ThumbURL string `json:"thumb_url"`
+	ThumbURL string `json:"thumbnail_url"`
 
 	// Title for the result.
 	Title string `json:"title"`

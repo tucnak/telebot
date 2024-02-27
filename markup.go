@@ -271,13 +271,14 @@ type InlineButton struct {
 	// It will be used as a callback endpoint.
 	Unique string `json:"unique,omitempty"`
 
-	Text            string  `json:"text"`
-	URL             string  `json:"url,omitempty"`
-	Data            string  `json:"callback_data,omitempty"`
-	InlineQuery     string  `json:"switch_inline_query,omitempty"`
-	InlineQueryChat string  `json:"switch_inline_query_current_chat"`
-	Login           *Login  `json:"login_url,omitempty"`
-	WebApp          *WebApp `json:"web_app,omitempty"`
+	Text                  string             `json:"text"`
+	URL                   string             `json:"url,omitempty"`
+	Data                  string             `json:"callback_data,omitempty"`
+	InlineQuery           string             `json:"switch_inline_query,omitempty"`
+	InlineQueryChat       string             `json:"switch_inline_query_current_chat"`
+	InlineQueryChosenChat *SwitchInlineQuery `json:"switch_inline_query_chosen_chat,omitempty"`
+	Login                 *Login             `json:"login_url,omitempty"`
+	WebApp                *WebApp            `json:"web_app,omitempty"`
 }
 
 // MarshalJSON implements json.Marshaler interface.
