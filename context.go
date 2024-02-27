@@ -152,6 +152,12 @@ type Context interface {
 	// See Respond from bot.go.
 	Respond(resp ...*CallbackResponse) error
 
+	// RespondText sends a popup response for the current callback query.
+	RespondText(t string) error
+
+	// RespondAlert sends an alert response for the current callback query.
+	RespondAlert(t string) error
+
 	// Get retrieves data from the context.
 	Get(key string) interface{}
 
@@ -481,6 +487,14 @@ func (c *nativeContext) Respond(resp ...*CallbackResponse) error {
 	return c.b.Respond(c.u.Callback, resp...)
 }
 
+func (c *nativeContext) RespondText(t string) error {
+	return c.respondTextAlert(t)
+}
+
+func (c *nativeContext) RespondAlert(t string) error {
+	return c.respondTextAlert(t, true)
+}
+
 func (c *nativeContext) Answer(resp *QueryResponse) error {
 	if c.u.Query == nil {
 		return errors.New("telebot: context inline query is nil")
@@ -502,4 +516,14 @@ func (c *nativeContext) Get(key string) interface{} {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 	return c.store[key]
+}
+
+func (c *nativeContext) respondTextAlert(text string, show ...bool) error {
+	if c.u.Callback == nil {
+		return errors.New("telebot: context callback is nil")
+	}
+	return c.b.Respond(c.u.Callback, &CallbackResponse{
+		Text:      text,
+		ShowAlert: len(show) > 0 && show[0],
+	})
 }
