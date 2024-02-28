@@ -163,6 +163,19 @@ func addFileToWriter(writer *multipart.Writer, filename, field string, file inte
 	return err
 }
 
+func (f *File) process(name string, files map[string]File) string {
+	switch {
+	case f.InCloud():
+		return f.FileID
+	case f.FileURL != "":
+		return f.FileURL
+	case f.OnDisk() || f.FileReader != nil:
+		files[name] = *f
+		return "attach://" + name
+	}
+	return ""
+}
+
 func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
 		"chat_id": to.Recipient(),

@@ -2,24 +2,34 @@ package telebot
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 )
 
-type StickerSetType = string
-
-const (
-	StickerRegular     = "regular"
-	StickerMask        = "mask"
-	StickerCustomEmoji = "custom_emoji"
+type (
+	StickerSetType   = string
+	StickerSetFormat = string
+	MaskFeature      = string
 )
 
-type StickerSetFormat = string
+const (
+	StickerRegular     StickerSetType = "regular"
+	StickerMask        StickerSetType = "mask"
+	StickerCustomEmoji StickerSetType = "custom_emoji"
+)
 
 const (
-	StickerStatic   = "static"
-	StickerAnimated = "animated"
-	StickerVideo    = "video"
+	StickerStatic   StickerSetFormat = "static"
+	StickerAnimated StickerSetFormat = "animated"
+	StickerVideo    StickerSetFormat = "video"
+)
+
+const (
+	MaskForehead MaskFeature = "forehead"
+	MaskEyes     MaskFeature = "eyes"
+	MaskMouth    MaskFeature = "mouth"
+	MaskChin     MaskFeature = "chin"
 )
 
 // StickerSet represents a sticker set.
@@ -31,12 +41,23 @@ type StickerSet struct {
 	Animated      bool             `json:"is_animated"`
 	Video         bool             `json:"is_video"`
 	Stickers      []Sticker        `json:"stickers"`
-	Sticker       Sticker          `json:"sticker"`
 	Thumbnail     *Photo           `json:"thumbnail"`
 	Emojis        string           `json:"emojis"`
 	ContainsMasks bool             `json:"contains_masks"` // FIXME: can be removed
 	MaskPosition  *MaskPosition    `json:"mask_position"`
 	Repaint       bool             `json:"needs_repainting"`
+
+	// Input is a field used in createNewStickerSet method to specify a list
+	// of pre-defined stickers of type InputSticker to add to the set.
+	Input []InputSticker
+}
+
+type InputSticker struct {
+	File
+	Sticker      string        `json:"sticker"`
+	MaskPosition *MaskPosition `json:"mask_position"`
+	Emojis       []string      `json:"emoji_list"`
+	Keywords     []string      `json:"keywords"`
 }
 
 // MaskPosition describes the position on faces where
@@ -48,28 +69,14 @@ type MaskPosition struct {
 	Scale   float32     `json:"scale"`
 }
 
-// MaskFeature defines sticker mask position.
-type MaskFeature string
-
-const (
-	FeatureForehead MaskFeature = "forehead"
-	FeatureEyes     MaskFeature = "eyes"
-	FeatureMouth    MaskFeature = "mouth"
-	FeatureChin     MaskFeature = "chin"
-)
-
-// UploadSticker uploads a PNG file with a sticker for later use.
-func (b *Bot) UploadSticker(to Recipient, s StickerSet) (*File, error) {
-	files := map[string]File{
-		"sticker": s.Sticker.File,
-	}
-
+// UploadSticker uploads a sticker file for later use.
+func (b *Bot) UploadSticker(to Recipient, format StickerSetFormat, f File) (*File, error) {
 	params := map[string]string{
 		"user_id":        to.Recipient(),
-		"sticker_format": s.Format,
+		"sticker_format": format,
 	}
 
-	data, err := b.sendFiles("uploadStickerFile", files, params)
+	data, err := b.sendFiles("uploadStickerFile", map[string]File{"0": f}, params)
 	if err != nil {
 		return nil, err
 	}
@@ -100,56 +107,51 @@ func (b *Bot) StickerSet(name string) (*StickerSet, error) {
 }
 
 // CreateStickerSet creates a new sticker set.
-func (b *Bot) CreateStickerSet(to Recipient, s StickerSet) error {
+func (b *Bot) CreateStickerSet(of Recipient, set *StickerSet) error {
 	files := make(map[string]File)
-	for i, sticker := range s.Stickers {
-		key := fmt.Sprint("sticker", i)
-		files[key] = sticker.File
+	for i, s := range set.Input {
+		repr := s.File.process(strconv.Itoa(i), files)
+		if repr == "" {
+			return fmt.Errorf("telebot: sticker #%d does not exist", i+1)
+		}
+		set.Input[i].Sticker = repr
 	}
 
-	data, err := json.Marshal(s.Stickers)
-	if err != nil {
-		return err
-	}
+	data, _ := json.Marshal(set.Input)
 
 	params := map[string]string{
-		"user_id":          to.Recipient(),
-		"name":             s.Name,
-		"title":            s.Title,
-		"sticker_type":     s.Type,
-		"sticker_format":   s.Format,
-		"stickers":         string(data),
-		"needs_repainting": strconv.FormatBool(s.Repaint),
+		"user_id":        of.Recipient(),
+		"name":           set.Name,
+		"title":          set.Title,
+		"sticker_format": set.Format,
+		"stickers":       string(data),
+	}
+	if set.Type != "" {
+		params["sticker_type"] = set.Type
+	}
+	if set.Repaint {
+		params["needs_repainting"] = "true"
 	}
 
-	_, err = b.sendFiles("createNewStickerSet", files, params)
+	_, err := b.sendFiles("createNewStickerSet", files, params)
 	return err
 }
 
 // AddStickerToSet adds a new sticker to the existing sticker set.
-func (b *Bot) AddStickerToSet(to Recipient, s StickerSet) error {
-	var (
-		files   = make(map[string]File)
-		sticker = s.Sticker
-	)
-	files["sticker"] = sticker.File
+func (b *Bot) AddStickerToSet(of Recipient, name string, sticker InputSticker) error {
+	files := make(map[string]File)
+	repr := sticker.File.process("0", files)
+	if repr == "" {
+		return errors.New("telebot: sticker does not exist")
+	}
+
+	sticker.Sticker = repr
+	data, _ := json.Marshal(sticker)
 
 	params := map[string]string{
-		"user_id": to.Recipient(),
-		"name":    s.Name,
-	}
-
-	if sticker.Emojis != nil {
-		data, _ := json.Marshal(s.Emojis)
-		params["emoji_list"] = string(data)
-	}
-	if s.MaskPosition != nil {
-		data, _ := json.Marshal(s.MaskPosition)
-		params["mask_position"] = string(data)
-	}
-	if sticker.Keywords != nil {
-		data, _ := json.Marshal(sticker.Keywords)
-		params["keywords"] = string(data)
+		"user_id": of.Recipient(),
+		"name":    name,
+		"sticker": string(data),
 	}
 
 	_, err := b.sendFiles("addStickerToSet", files, params)
@@ -182,25 +184,24 @@ func (b *Bot) DeleteSticker(sticker string) error {
 // up to 32 kilobytes in size.
 //
 // Animated sticker set thumbnail can't be uploaded via HTTP URL.
-func (b *Bot) SetStickerSetThumb(to Recipient, s StickerSet) error {
-	var (
-		sticker = s.Sticker
-		files   = make(map[string]File)
-	)
-	files["thumbnail"] = sticker.File
+func (b *Bot) SetStickerSetThumb(of Recipient, set *StickerSet) error {
+	if set.Thumbnail == nil {
+		return errors.New("telebot: thumbnail is required")
+	}
 
-	data, err := json.Marshal(sticker.File)
-	if err != nil {
-		return err
+	files := make(map[string]File)
+	repr := set.Thumbnail.File.process("thumb", files)
+	if repr == "" {
+		return errors.New("telebot: thumbnail does not exist")
 	}
 
 	params := map[string]string{
-		"name":      s.Name,
-		"user_id":   to.Recipient(),
-		"thumbnail": string(data),
+		"user_id":   of.Recipient(),
+		"name":      set.Name,
+		"thumbnail": repr,
 	}
 
-	_, err = b.sendFiles("setStickerSetThumbnail", files, params)
+	_, err := b.sendFiles("setStickerSetThumbnail", files, params)
 	return err
 }
 
@@ -223,8 +224,8 @@ func (b *Bot) DeleteStickerSet(name string) error {
 	return err
 }
 
-// SetStickerEmojiList changes the list of emoji assigned to a regular or custom emoji sticker.
-func (b *Bot) SetStickerEmojiList(sticker string, emojis []string) error {
+// SetStickerEmojis changes the list of emoji assigned to a regular or custom emoji sticker.
+func (b *Bot) SetStickerEmojis(sticker string, emojis []string) error {
 	data, err := json.Marshal(emojis)
 	if err != nil {
 		return err

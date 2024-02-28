@@ -24,6 +24,9 @@ var (
 	b, _ = newTestBot()      // cached bot instance to avoid getMe method flooding
 	to   = &Chat{ID: chatID} // to chat recipient for send and edit methods
 	user = &User{ID: userID} // to user recipient for some special cases
+
+	logo  = FromURL("https://telegra.ph/file/c95b8fe46dd3df15d12e5.png")
+	thumb = FromURL("https://telegra.ph/file/fe28e378784b3a4e367fb.png")
 )
 
 func defaultSettings() Settings {
@@ -502,7 +505,7 @@ func TestBot(t *testing.T) {
 	assert.Equal(t, ErrBadRecipient, err)
 
 	photo := &Photo{
-		File:    FromURL("https://telegra.ph/file/65c5237b040ebf80ec278.jpg"),
+		File:    logo,
 		Caption: t.Name(),
 	}
 	var msg *Message

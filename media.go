@@ -280,6 +280,7 @@ func (v *VideoNote) MediaFile() *File {
 // Sticker object represents a WebP image, so-called sticker.
 type Sticker struct {
 	File
+	Type             StickerSetType `json:"type"`
 	Width            int            `json:"width"`
 	Height           int            `json:"height"`
 	Animated         bool           `json:"is_animated"`
@@ -287,13 +288,10 @@ type Sticker struct {
 	Thumbnail        *Photo         `json:"thumbnail"`
 	Emoji            string         `json:"emoji"`
 	SetName          string         `json:"set_name"`
-	MaskPosition     *MaskPosition  `json:"mask_position"`
 	PremiumAnimation *File          `json:"premium_animation"`
-	Type             StickerSetType `json:"type"`
+	MaskPosition     *MaskPosition  `json:"mask_position"`
 	CustomEmoji      string         `json:"custom_emoji_id"`
 	Repaint          bool           `json:"needs_repainting"`
-	Emojis           []string       `json:"emoji_list"`
-	Keywords         []string       `json:"keywords"`
 }
 
 func (s *Sticker) MediaType() string {
@@ -302,12 +300,6 @@ func (s *Sticker) MediaType() string {
 
 func (s *Sticker) MediaFile() *File {
 	return &s.File
-}
-
-func (s *Sticker) InputMedia() InputMedia {
-	return InputMedia{
-		Type: s.MediaType(),
-	}
 }
 
 // Contact object represents a contact to Telegram user.

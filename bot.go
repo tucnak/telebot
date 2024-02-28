@@ -305,21 +305,8 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 	files := make(map[string]File)
 
 	for i, x := range a {
-		var (
-			repr string
-			data []byte
-			file = x.MediaFile()
-		)
-
-		switch {
-		case file.InCloud():
-			repr = file.FileID
-		case file.FileURL != "":
-			repr = file.FileURL
-		case file.OnDisk() || file.FileReader != nil:
-			repr = "attach://" + strconv.Itoa(i)
-			files[strconv.Itoa(i)] = *file
-		default:
+		repr := x.MediaFile().process(strconv.Itoa(i), files)
+		if repr == "" {
 			return nil, fmt.Errorf("telebot: album entry #%d does not exist", i)
 		}
 
@@ -332,7 +319,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 			im.ParseMode = sendOpts.ParseMode
 		}
 
-		data, _ = json.Marshal(im)
+		data, _ := json.Marshal(im)
 		media[i] = string(data)
 	}
 
