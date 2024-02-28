@@ -127,13 +127,13 @@ var (
 
 // Forbidden errors
 var (
-	ErrBlockedByUser         = NewError(403, "Forbidden: bot was blocked by the user")
-	ErrKickedFromGroup       = NewError(403, "Forbidden: bot was kicked from the group chat")
-	ErrKickedFromSuperGroup  = NewError(403, "Forbidden: bot was kicked from the supergroup chat")
-	ErrKickedFromChannel     = NewError(403, "Forbidden: bot was kicked from the channel chat")
-	ErrNotStartedByUser      = NewError(403, "Forbidden: bot can't initiate conversation with a user")
-	ErrUserIsDeactivated     = NewError(403, "Forbidden: user is deactivated")
-	ErrBotIsNotChannelMember = NewError(403, "Forbidden: bot is not a member of the channel chat")
+	ErrBlockedByUser        = NewError(403, "Forbidden: bot was blocked by the user")
+	ErrKickedFromGroup      = NewError(403, "Forbidden: bot was kicked from the group chat")
+	ErrKickedFromSuperGroup = NewError(403, "Forbidden: bot was kicked from the supergroup chat")
+	ErrKickedFromChannel    = NewError(403, "Forbidden: bot was kicked from the channel chat")
+	ErrNotStartedByUser     = NewError(403, "Forbidden: bot can't initiate conversation with a user")
+	ErrUserIsDeactivated    = NewError(403, "Forbidden: user is deactivated")
+	ErrNotChannelMember     = NewError(403, "Forbidden: bot is not a member of the channel chat")
 )
 
 // Err returns Error instance by given description.
@@ -251,8 +251,8 @@ func Err(s string) error {
 		return ErrChannelsTooMuch
 	case ErrChannelsTooMuchUser.ʔ():
 		return ErrChannelsTooMuchUser
-	case ErrBotIsNotChannelMember.ʔ():
-		return ErrBotIsNotChannelMember
+	case ErrNotChannelMember.ʔ():
+		return ErrNotChannelMember
 	default:
 		return nil
 	}
