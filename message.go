@@ -56,6 +56,9 @@ type Message struct {
 	// itself is a reply.
 	ReplyTo *Message `json:"reply_to_message"`
 
+	// (Optional) For replies to a story, the original story
+	Story *Story `json:"reply_to_story"`
+
 	// Shows through which bot the message was sent.
 	Via *User `json:"via_bot"`
 
