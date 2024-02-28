@@ -59,6 +59,14 @@ type Message struct {
 	// (Optional) For replies to a story, the original story
 	Story *Story `json:"reply_to_story"`
 
+	// (Optional) Information about the message that is being replied to,
+	// which may come from another chat or forum topic.
+	Reply *ExternalReply `json:"external_reply"`
+
+	// (Optional) For replies that quote part of the original message,
+	// the quoted part of the message.
+	Quote *TextQuote `json:"quote"`
+
 	// Shows through which bot the message was sent.
 	Via *User `json:"via_bot"`
 
@@ -510,4 +518,158 @@ type MessageReactionCount struct {
 
 func (mc *MessageReactionCount) Time() time.Time {
 	return time.Unix(mc.DateUnixtime, 0)
+}
+
+type TextQuote struct {
+	// Text of the quoted part of a message that is replied to by the given message.
+	Text string `json:"text"`
+
+	// (Optional) Special entities that appear in the quote.
+	// Currently, only bold, italic, underline, strikethrough, spoiler,
+	// and custom_emoji entities are kept in quotes.
+	Entities []MessageEntity `json:"entities"`
+
+	// Approximate quote position in the original message in UTF-16 code units
+	// as specified by the sender.
+	Position int `json:"position"`
+
+	// (Optional) True, if the quote was chosen manually by the message sender.
+	// Otherwise, the quote was added automatically by the server.
+	Manual bool `json:"is_manual"`
+}
+
+type MessageOrigin struct {
+	// Type of the message origin, always “channel”.
+	Type string `json:"type"`
+
+	// Date the message was sent originally in Unix time.
+	DateUnixtime int64 `json:"date"`
+
+	// User that sent the message originally.
+	User *User `json:"sender_user,omitempty"`
+
+	// Name of the user that sent the message originally.
+	UserName string `json:"sender_user_name,omitempty"`
+
+	// Chat that sent the message originally.
+	SenderChat *Chat `json:"sender_chat,omitempty"`
+
+	// Channel chat to which the message was originally sent.
+	Chat *Chat `json:"chat,omitempty"`
+
+	// Unique message identifier inside the chat.
+	MessageID int `json:"message_id,omitempty"`
+
+	// (Optional) For messages originally sent by an anonymous chat administrator,
+	// original message author signature.
+	Signature string `json:"author_signature,omitempty"`
+}
+
+func (mo *MessageOrigin) Time() time.Time {
+	return time.Unix(mo.DateUnixtime, 0)
+}
+
+type ExternalReply struct {
+	// Origin of the message replied to by the given message.
+	OriginalMessage *MessageOrigin `json:"origin"`
+
+	// (Optional) Chat the original message belongs to.
+	// Available only if the chat is a supergroup or a channel.
+	Chat *Chat `json:"chat"`
+
+	// (Optional) Unique message identifier inside the original chat.
+	// Available only if the original chat is a supergroup or a channel.
+	MessageID int `json:"message_id"`
+
+	// (Optional) Options used for link preview generation for the original message,
+	// if it is a text message.
+	PreviewOptions *PreviewOptions `json:"link_preview_options"`
+
+	// (Optional) Message is an animation, information about the animation.
+	Animation *Animation `json:"animation"`
+
+	// (Optional) Message is an audio file, information about the file.
+	Audio *Audio `json:"audio"`
+
+	// (Optional) Message is a general file, information about the file.
+	Document *Document `json:"document"`
+
+	// (Optional) Message is a photo, available sizes of the photo.
+	Photo []Photo `json:"photo"`
+
+	// (Optional) Message is a sticker, information about the sticker.
+	Sticker *Sticker `json:"sticker"`
+
+	// (Optional) Message is a forwarded story.
+	//Story	*Story `json:"story"`
+
+	// (Optional) Message is a video, information about the video.
+	Video *Video `json:"video"`
+
+	// (Optional) Message is a video note, information about the video message.
+	Note *VideoNote `json:"video_note"`
+
+	// (Optional) Message is a voice message, information about the file.
+	Voice *Voice `json:"voice"`
+
+	// (Optional) True, if the message media is covered by a spoiler animation.
+	HasMediaSpoiler bool `json:"has_media_spoiler"`
+
+	// (Optional) Message is a shared contact, information about the contact.
+	Contact *Contact `json:"contact"`
+
+	// (Optional) Message is a dice with random value.
+	Dice *Dice `json:"dice"`
+
+	//( Optional) Message is a game, information about the game.
+	Game *Game `json:"game"`
+
+	// (Optional) Message is a venue, information about the venue.
+	Venue *Venue `json:"venue"`
+
+	// (Optional) Message is a native poll, information about the poll.
+	Poll *Poll `json:"poll"`
+
+	// (Optional) Message is a shared location, information about the location.
+	Location *Location `json:"location"`
+
+	// (Optional) Message is an invoice for a payment, information about the invoice.
+	Invoice *Invoice `json:"invoice"`
+
+	// (Optional) Message is a scheduled giveaway, information about the giveaway.
+	Giveaway *Giveaway `json:"giveaway"`
+
+	// (Optional) A giveaway with public winners was completed.
+	GiveawayWinners *GiveawayWinners `json:"giveaway_winners"`
+}
+
+type ReplyParameters struct {
+	// Identifier of the message that will be replied to in the current chat,
+	// or in the chat chat_id if it is specified.
+	MessageID int `json:"message_id"`
+
+	// (Optional) If the message to be replied to is from a different chat,
+	// unique identifier for the chat or username of the channel.
+	ChatID int64 `json:"chat_id"`
+
+	// Optional. Pass True if the message should be sent even if the specified message
+	// to be replied to is not found; can be used only for replies in the
+	// same chat and forum topic.
+	AllowWithoutReply bool `json:"allow_sending_without_reply"`
+
+	// (Optional) Quoted part of the message to be replied to; 0-1024 characters after
+	// entities parsing. The quote must be an exact substring of the message to be replied to,
+	// including bold, italic, underline, strikethrough, spoiler, and custom_emoji entities.
+	// The message will fail to send if the quote isn't found in the original message.
+	Quote string `json:"quote"`
+
+	// (Optional) Mode for parsing entities in the quote.
+	QuoteParseMode string `json:"quote_parse_mode"`
+
+	// (Optional) A JSON-serialized list of special entities that appear in the quote.
+	// It can be specified instead of quote_parse_mode.
+	QuoteEntities []MessageEntity `json:"quote_entities"`
+
+	// (Optional) Position of the quote in the original message in UTF-16 code units.
+	QuotePosition int `json:"quote_position"`
 }
