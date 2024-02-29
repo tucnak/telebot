@@ -2,6 +2,7 @@ package telebot
 
 import "time"
 
+// Giveaway represents a message about a scheduled giveaway.
 type Giveaway struct {
 	// The list of chats which the user must join to participate in the giveaway.
 	Chats []Chat `json:"chats"`
@@ -33,10 +34,13 @@ type Giveaway struct {
 	MonthSubscriptionCount int `json:"premium_subscription_month_count"`
 }
 
+// Time returns the moment of when winners of the giveaway were selected in local time.
 func (g *Giveaway) Time() time.Time {
 	return time.Unix(g.DateUnixtime, 0)
 }
 
+// GiveawayWinners object represents a message about the completion of a
+// giveaway with public winners.
 type GiveawayWinners struct {
 	// The chat that created the giveaway.
 	Chat *Chat `json:"chat"`
@@ -75,6 +79,7 @@ type GiveawayWinners struct {
 	PrizeDescription string `json:"prize_description"`
 }
 
+// Time returns the moment of when winners of the giveaway were selected in local time.
 func (g *GiveawayWinners) Time() time.Time {
 	return time.Unix(g.DateUnixtime, 0)
 }

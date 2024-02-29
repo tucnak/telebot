@@ -229,6 +229,7 @@ func processButtons(keys [][]InlineButton) {
 	}
 }
 
+// PreviewOptions describes the options used for link preview generation.
 type PreviewOptions struct {
 	// (Optional) True, if the link preview is disabled.
 	Disabled bool `json:"is_disabled"`

@@ -473,6 +473,7 @@ func (m *Message) Media() Media {
 	}
 }
 
+// MessageReaction object represents a change of a reaction on a message performed by a user.
 type MessageReaction struct {
 	// The chat containing the message the user reacted to.
 	Chat *Chat `json:"chat"`
@@ -502,6 +503,8 @@ func (mu *MessageReaction) Time() time.Time {
 	return time.Unix(mu.DateUnixtime, 0)
 }
 
+// MessageReactionCount represents reaction changes on a message with
+// anonymous reactions.
 type MessageReactionCount struct {
 	// The chat containing the message.
 	Chat *Chat `json:"chat"`
@@ -516,10 +519,13 @@ type MessageReactionCount struct {
 	Reactions *ReactionCount `json:"reactions"`
 }
 
+// Time returns the moment of change in local time.
 func (mc *MessageReactionCount) Time() time.Time {
 	return time.Unix(mc.DateUnixtime, 0)
 }
 
+// TextQuote contains information about the quoted part of a message that is
+// replied to by the given message.
 type TextQuote struct {
 	// Text of the quoted part of a message that is replied to by the given message.
 	Text string `json:"text"`
@@ -538,6 +544,7 @@ type TextQuote struct {
 	Manual bool `json:"is_manual"`
 }
 
+// MessageOrigin a message reference that has been sent originally by a known user.
 type MessageOrigin struct {
 	// Type of the message origin, always “channel”.
 	Type string `json:"type"`
@@ -565,10 +572,13 @@ type MessageOrigin struct {
 	Signature string `json:"author_signature,omitempty"`
 }
 
+// Time returns the moment of message that was sent originally in local time.
 func (mo *MessageOrigin) Time() time.Time {
 	return time.Unix(mo.DateUnixtime, 0)
 }
 
+// ExternalReply contains information about a message that is being replied to,
+// which may come from another chat or forum topic.
 type ExternalReply struct {
 	// Origin of the message replied to by the given message.
 	OriginalMessage *MessageOrigin `json:"origin"`
@@ -643,6 +653,7 @@ type ExternalReply struct {
 	GiveawayWinners *GiveawayWinners `json:"giveaway_winners"`
 }
 
+// ReplyParameters describes reply parameters for the message that is being sent.
 type ReplyParameters struct {
 	// Identifier of the message that will be replied to in the current chat,
 	// or in the chat chat_id if it is specified.

@@ -124,6 +124,9 @@ type ReactionOptions struct {
 	IsBig     bool
 }
 
+// SetMessageReaction changes the chosen reactions on a message. Service messages can't be
+// reacted to. Automatically forwarded messages from a channel to its discussion group have
+// the same available reactions as messages in the channel.
 func (b *Bot) SetMessageReaction(to Recipient, msg Editable, opts ...ReactionOptions) error {
 	if to == nil {
 		return ErrBadRecipient
