@@ -98,6 +98,10 @@ type Message struct {
 	// etc. that appear in the text.
 	Entities Entities `json:"entities,omitempty"`
 
+	// (Optional) Options used for link preview generation for the message,
+	// if it is a text message and link preview options were changed
+	PreviewOptions PreviewOptions `json:"link_preview_options,omitempty"`
+
 	// Some messages containing media, may as well have a caption.
 	Caption string `json:"caption,omitempty"`
 
@@ -146,6 +150,18 @@ type Message struct {
 
 	// For a dice, information about it.
 	Dice *Dice `json:"dice"`
+
+	// (Optional) The message is a scheduled giveaway message.
+	Giveaway *Giveaway `json:"giveaway"`
+
+	// (Optional) A giveaway with public winners was completed.
+	GiveawayWinners *GiveawayWinners `json:"giveaway_winners"`
+
+	// (Optional) Service message: a scheduled giveaway was created.
+	GiveawayCreated *GiveawayCreated `json:"giveaway_created"`
+
+	// (Optional) Service message: a giveaway without public winners was completed.
+	GiveawayCompleted *GiveawayCompleted `json:"giveaway_completed"`
 
 	// For a service message, represents a user,
 	// that just got added to chat, this message came from.

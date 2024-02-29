@@ -83,3 +83,20 @@ type GiveawayWinners struct {
 func (g *GiveawayWinners) Time() time.Time {
 	return time.Unix(g.DateUnixtime, 0)
 }
+
+// GiveawayCreated represents a service message about the creation of a scheduled giveaway.
+// Currently holds no information.
+type GiveawayCreated struct{}
+
+// GiveawayCompleted represents a service message about the completion of a
+// giveaway without public winners.
+type GiveawayCompleted struct {
+	// Number of winners in the giveaway.
+	Winners int `json:"winner_count"`
+
+	// (Optional) Number of undistributed prizes.
+	UnclaimedPrizes int `json:"unclaimed_prize_count"`
+
+	// (Optional) Message with the giveaway that was completed, if it wasn't deleted.
+	Message *Message `json:"giveaway_message"`
+}
