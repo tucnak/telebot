@@ -46,6 +46,9 @@ type Message struct {
 	// For forwarded messages, unixtime of the original message.
 	OriginalUnixtime int `json:"forward_date"`
 
+	// For information about the original message for forwarded messages.
+	Origin *MessageOrigin `json:"forward_origin"`
+
 	// Message is a channel post that was automatically forwarded to the connected discussion group.
 	AutomaticForward bool `json:"is_automatic_forward"`
 
