@@ -152,6 +152,12 @@ type Context interface {
 	// See Respond from bot.go.
 	Respond(resp ...*CallbackResponse) error
 
+	// RespondText sends a popup response for the current callback query.
+	RespondText(text string) error
+
+	// RespondAlert sends an alert response for the current callback query.
+	RespondAlert(text string) error
+
 	// Get retrieves data from the context.
 	Get(key string) interface{}
 
@@ -479,6 +485,14 @@ func (c *nativeContext) Respond(resp ...*CallbackResponse) error {
 		return errors.New("telebot: context callback is nil")
 	}
 	return c.b.Respond(c.u.Callback, resp...)
+}
+
+func (c *nativeContext) RespondText(text string) error {
+	return c.Respond(&CallbackResponse{Text: text})
+}
+
+func (c *nativeContext) RespondAlert(text string) error {
+	return c.Respond(&CallbackResponse{Text: text, ShowAlert: true})
 }
 
 func (c *nativeContext) Answer(resp *QueryResponse) error {
