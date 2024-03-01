@@ -17,7 +17,7 @@ type InputTextMessageContent struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 
 	// Optional. Disables link previews for links in the sent message.
-	DisablePreview bool `json:"disable_web_page_preview"`
+	DisablePreview bool `json:"link_preview_options"`
 }
 
 func (input *InputTextMessageContent) IsInputMessageContent() bool {

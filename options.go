@@ -163,7 +163,7 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 	}
 
 	if opt.DisableWebPagePreview {
-		params["disable_web_page_preview"] = "true"
+		params["link_preview_options"] = "true"
 	}
 
 	if opt.DisableNotification {

@@ -16,7 +16,7 @@ type Callback struct {
 
 	// Message will be set if the button that originated the query
 	// was attached to a message sent by a bot.
-	Message *Message `json:"message"`
+	Message *InaccessibleMessage `json:"message"`
 
 	// MessageID will be set if the button was attached to a message
 	// sent via the bot in inline mode.
@@ -46,7 +46,7 @@ func (c *Callback) MessageSig() (string, int64) {
 	if c.IsInline() {
 		return c.MessageID, 0
 	}
-	return c.Message.MessageSig()
+	return c.Message.Message.MessageSig()
 }
 
 // IsInline says whether message is an inline message.

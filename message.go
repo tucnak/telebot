@@ -251,7 +251,7 @@ type Message struct {
 	// Specified message was pinned. Note that the Message object
 	// in this field will not contain further ReplyTo fields even
 	// if it is itself a reply.
-	PinnedMessage *Message `json:"pinned_message"`
+	PinnedMessage *InaccessibleMessage `json:"pinned_message"`
 
 	// Message is an invoice for a payment.
 	Invoice *Invoice `json:"invoice"`
@@ -490,6 +490,27 @@ func (m *Message) Media() Media {
 	default:
 		return nil
 	}
+}
+
+// InaccessibleMessage describes a message that was deleted or is otherwise
+// inaccessible to the bot. An instance of MaybeInaccessibleMessage object.
+type InaccessibleMessage struct {
+	// A message that can be inaccessible to the bot.
+	Message *Message `json:"-"`
+
+	// Chat the message belonged to.
+	Chat *Chat `json:"chat"`
+
+	// Unique message identifier inside the chat.
+	MessageID int `json:"message_id"`
+
+	// Always 0. The field can be used to differentiate regular and
+	// inaccessible messages.
+	DateUnixtime int64 `json:"date"`
+}
+
+func (im *InaccessibleMessage) Time() time.Time {
+	return time.Unix(im.DateUnixtime, 0)
 }
 
 // MessageReaction object represents a change of a reaction on a message performed by a user.
