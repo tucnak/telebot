@@ -60,7 +60,7 @@ type Message struct {
 	ReplyTo *Message `json:"reply_to_message"`
 
 	// (Optional) For replies to a story, the original story
-	Story *Story `json:"reply_to_story"`
+	Story *Story `json:"story"`
 
 	// (Optional) Information about the message that is being replied to,
 	// which may come from another chat or forum topic.
@@ -74,7 +74,7 @@ type Message struct {
 	Via *User `json:"via_bot"`
 
 	// For replies to a story, the original story.
-	//ReplyToStory *Story `json:"reply_to_story"`
+	ReplyToStory *Story `json:"reply_to_story"`
 
 	// (Optional) Time of last edit in Unix.
 	LastEdit int64 `json:"edit_date"`
@@ -661,7 +661,7 @@ type ExternalReply struct {
 	Sticker *Sticker `json:"sticker"`
 
 	// (Optional) Message is a forwarded story.
-	//Story	*Story `json:"story"`
+	Story *Story `json:"story"`
 
 	// (Optional) Message is a video, information about the video.
 	Video *Video `json:"video"`
