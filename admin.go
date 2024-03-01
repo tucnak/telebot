@@ -28,10 +28,6 @@ type Rights struct {
 	CanManageChat       bool `json:"can_manage_chat"`
 	CanManageTopics     bool `json:"can_manage_topics"`
 
-	CanPostStories   bool `json:"can_post_stories"`
-	CanEditStories   bool `json:"can_edit_stories"`
-	CanDeleteStories bool `json:"can_delete_stories"`
-
 	CanSendMedia      bool `json:"can_send_media_messages,omitempty"` // deprecated
 	CanSendAudios     bool `json:"can_send_audios"`
 	CanSendDocuments  bool `json:"can_send_documents"`

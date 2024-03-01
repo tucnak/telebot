@@ -187,12 +187,12 @@ func (c *nativeContext) Message() *Message {
 	case c.u.Message != nil:
 		return c.u.Message
 	case c.u.Callback != nil:
-		return c.u.Callback.Message
+		return c.u.Callback.Message.Message
 	case c.u.EditedMessage != nil:
 		return c.u.EditedMessage
 	case c.u.ChannelPost != nil:
 		if c.u.ChannelPost.PinnedMessage != nil {
-			return c.u.ChannelPost.PinnedMessage
+			return c.u.ChannelPost.PinnedMessage.Message
 		}
 		return c.u.ChannelPost
 	case c.u.EditedChannelPost != nil:
