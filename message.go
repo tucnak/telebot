@@ -339,7 +339,7 @@ const (
 	EntityTextLink      EntityType = "text_link"
 	EntitySpoiler       EntityType = "spoiler"
 	EntityCustomEmoji   EntityType = "custom_emoji"
-	EntityBlockquote    EntityType = "blockquote"
+	EntityBlockQuote    EntityType = "blockquote"
 )
 
 // Entities is used to set message's text entities as a send option.
@@ -464,4 +464,51 @@ func (m *Message) Media() Media {
 	default:
 		return nil
 	}
+}
+
+type MessageReaction struct {
+	// The chat containing the message the user reacted to.
+	Chat *Chat `json:"chat"`
+
+	// Unique identifier of the message inside the chat.
+	MessageID int `json:"message_id"`
+
+	// (Optional) The user that changed the reaction,
+	// if the user isn't anonymous
+	User *User `json:"user"`
+
+	// (Optional) The chat on behalf of which the reaction was changed,
+	// if the user is anonymous.
+	ActorChat *Chat `json:"actor_chat"`
+
+	// 	Date of the change in Unix time.
+	DateUnixtime int64 `json:"date"`
+
+	// Previous list of reaction types that were set by the user.
+	OldReaction []ReactionType `json:"old_reaction"`
+
+	// New list of reaction types that have been set by the user.
+	NewReaction []ReactionType
+}
+
+func (mu *MessageReaction) Time() time.Time {
+	return time.Unix(mu.DateUnixtime, 0)
+}
+
+type MessageReactionCount struct {
+	// The chat containing the message.
+	Chat *Chat `json:"chat"`
+
+	// Unique message identifier inside the chat.
+	MessageID int `json:"message_id"`
+
+	// Date of the change in Unix time.
+	DateUnixtime int64 `json:"date"`
+
+	// List of reactions that are present on the message.
+	Reactions *ReactionCount `json:"reactions"`
+}
+
+func (mc *MessageReactionCount) Time() time.Time {
+	return time.Unix(mc.DateUnixtime, 0)
 }

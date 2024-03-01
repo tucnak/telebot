@@ -10,6 +10,7 @@ type Update struct {
 	EditedMessage     *Message          `json:"edited_message,omitempty"`
 	ChannelPost       *Message          `json:"channel_post,omitempty"`
 	EditedChannelPost *Message          `json:"edited_channel_post,omitempty"`
+	MessageReaction   *MessageReaction  `json:"message_reaction"`
 	Callback          *Callback         `json:"callback_query,omitempty"`
 	Query             *Query            `json:"inline_query,omitempty"`
 	InlineResult      *InlineResult     `json:"chosen_inline_result,omitempty"`
