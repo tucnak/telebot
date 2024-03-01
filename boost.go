@@ -35,6 +35,12 @@ type BoostSource struct {
 	Unclaimed bool `json:"is_unclaimed,omitempty"`
 }
 
+// BoostAdded represents a service message about a user boosting a chat.
+type BoostAdded struct {
+	// Number of boosts added by the user.
+	Count int `json:"boost_count"`
+}
+
 // BoostUpdated represents a boost added to a chat or changed.
 type BoostUpdated struct {
 	// Chat which was boosted.

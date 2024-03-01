@@ -73,6 +73,9 @@ type Message struct {
 	// Shows through which bot the message was sent.
 	Via *User `json:"via_bot"`
 
+	// For replies to a story, the original story.
+	//ReplyToStory *Story `json:"reply_to_story"`
+
 	// (Optional) Time of last edit in Unix.
 	LastEdit int64 `json:"edit_date"`
 
@@ -292,6 +295,13 @@ type Message struct {
 
 	// Inline keyboard attached to the message.
 	ReplyMarkup *ReplyMarkup `json:"reply_markup,omitempty"`
+
+	// Service message: user boosted the chat.
+	BoostAdded *BoostAdded `json:"boost_added"`
+
+	// If the sender of the message boosted the chat, the number of boosts
+	// added by the user.
+	SenderBoostCount int `json:"sender_boost_count"`
 
 	// Service message: forum topic created
 	TopicCreated *Topic `json:"forum_topic_created,omitempty"`

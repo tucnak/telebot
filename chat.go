@@ -57,6 +57,7 @@ type Chat struct {
 	SlowMode                 int            `json:"slow_mode_delay,omitempty"`
 	StickerSet               string         `json:"sticker_set_name,omitempty"`
 	CanSetStickerSet         bool           `json:"can_set_sticker_set,omitempty"`
+	CustomEmojiSetName       string         `json:"custom_emoji_sticker_set_name"`
 	LinkedChatID             int64          `json:"linked_chat_id,omitempty"`
 	ChatLocation             *ChatLocation  `json:"location,omitempty"`
 	Private                  bool           `json:"has_private_forwards,omitempty"`
@@ -71,6 +72,7 @@ type Chat struct {
 	ProfileAccentID          int            `json:"profile_accent_color_id"`
 	ProfileBackgroundEmojiID string         `json:"profile_background_custom_emoji_id"`
 	VisibleHistory           bool           `json:"has_visible_history"`
+	UnrestrictBoost          int            `json:"unrestrict_boost_count"`
 }
 
 // Recipient returns chat ID (see Recipient interface).
