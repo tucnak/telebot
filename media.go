@@ -45,6 +45,24 @@ type Inputtable interface {
 // Album lets you group multiple media into a single message.
 type Album []Inputtable
 
+func (a Album) SetCaption(caption string) {
+	if len(a) < 1 {
+		return
+	}
+	switch a[0].MediaType() {
+	case "audio":
+		a[0].(*Audio).Caption = caption
+	case "video":
+		a[0].(*Video).Caption = caption
+	case "document":
+		a[0].(*Document).Caption = caption
+	case "photo":
+		a[0].(*Photo).Caption = caption
+	case "animation":
+		a[0].(*Animation).Caption = caption
+	}
+}
+
 // Photo object represents a single photo file.
 type Photo struct {
 	File
