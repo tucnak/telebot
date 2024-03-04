@@ -2,7 +2,6 @@ package telebot
 
 import (
 	"encoding/json"
-	"strconv"
 )
 
 // EmojiType defines emoji types.
@@ -93,8 +92,8 @@ type ReactionType struct {
 	// Reaction emoji.
 	Emoji EmojiType `json:"emoji,omitempty"`
 
-	// 	Custom emoji identifier.
-	ID string `json:"custom_emoji_id,omitempty"`
+	// Custom emoji identifier.
+	CustomEmoji string `json:"custom_emoji_id,omitempty"`
 }
 
 // ReactionCount represents a reaction added to a message along
@@ -110,10 +109,10 @@ type ReactionCount struct {
 // ReactionOptions represents an object of reaction options.
 type ReactionOptions struct {
 	// List of reaction types to set on the message.
-	Reactions []ReactionType
+	Reactions []ReactionType `json:"reaction"`
 
 	// Pass True to set the reaction with a big animation.
-	IsBig bool
+	IsBig bool `json:"is_big"`
 }
 
 // SetMessageReaction changes the chosen reactions on a message. Service messages can't be
@@ -137,7 +136,9 @@ func (b *Bot) SetMessageReaction(to Recipient, msg Editable, opts ...ReactionOpt
 			data, _ := json.Marshal(opt.Reactions)
 			params["reaction"] = string(data)
 		}
-		params["is_big"] = strconv.FormatBool(opt.IsBig)
+		if opt.IsBig {
+			params["is_big"] = "true"
+		}
 	}
 
 	_, err := b.Raw("setMessageReaction", params)

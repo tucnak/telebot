@@ -69,10 +69,10 @@ type Chat struct {
 	EmojiExpirationUnixtime  int64          `json:"emoji_status_expiration_date"`
 	BackgroundEmojiID        string         `json:"background_custom_emoji_id"`
 	AccentColorID            int            `json:"accent_color_id"`
-	ProfileAccentID          int            `json:"profile_accent_color_id"`
+	ProfileAccentColorID     int            `json:"profile_accent_color_id"`
 	ProfileBackgroundEmojiID string         `json:"profile_background_custom_emoji_id"`
 	VisibleHistory           bool           `json:"has_visible_history"`
-	UnrestrictBoost          int            `json:"unrestrict_boost_count"`
+	UnrestrictBoosts         int            `json:"unrestrict_boost_count"`
 }
 
 // Recipient returns chat ID (see Recipient interface).

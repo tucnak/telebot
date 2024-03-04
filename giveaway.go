@@ -8,10 +8,10 @@ type Giveaway struct {
 	Chats []Chat `json:"chats"`
 
 	// Point in time (Unix timestamp) when winners of the giveaway will be selected.
-	DateUnixtime int64 `json:"winners_selection_date"`
+	SelectionUnixtime int64 `json:"winners_selection_date"`
 
 	// The number of users which are supposed to be selected as winners of the giveaway.
-	Winners int `json:"winner_count"`
+	WinnerCount int `json:"winner_count"`
 
 	// (Optional) True, if only users who join the chats after the giveaway
 	// started should be eligible to win.
@@ -27,16 +27,16 @@ type Giveaway struct {
 	// the countries from which eligible users for the giveaway must come.
 	// If empty, then all users can participate in the giveaway. Users with a phone number
 	// that was bought on Fragment can always participate in giveaways.
-	Codes []string `json:"country_codes"`
+	CountryCodes []string `json:"country_codes"`
 
 	// (Optional) The number of months the Telegram Premium subscription won from
 	// the giveaway will be active for.
-	MonthSubscriptionCount int `json:"premium_subscription_month_count"`
+	PremiumMonthCount int `json:"premium_subscription_month_count"`
 }
 
-// Time returns the moment of when winners of the giveaway were selected in local time.
-func (g *Giveaway) Time() time.Time {
-	return time.Unix(g.DateUnixtime, 0)
+// SelectionDate returns the moment of when winners of the giveaway were selected in local time.
+func (g *Giveaway) SelectionDate() time.Time {
+	return time.Unix(g.SelectionUnixtime, 0)
 }
 
 // GiveawayWinners object represents a message about the completion of a
@@ -49,7 +49,7 @@ type GiveawayWinners struct {
 	MessageID int `json:"message_id"`
 
 	// Point in time (Unix timestamp) when winners of the giveaway were selected.
-	DateUnixtime int64 `json:"winners_selection_date"`
+	SelectionUnixtime int64 `json:"winners_selection_date"`
 
 	// The number of users which are supposed to be selected as winners of the giveaway.
 	WinnerCount int `json:"winner_count"`
@@ -63,7 +63,7 @@ type GiveawayWinners struct {
 
 	// (Optional) The number of months the Telegram Premium subscription won from
 	// the giveaway will be active for.
-	MonthSubscriptionCount int `json:"premium_subscription_month_count"`
+	PremiumMonthCount int `json:"premium_subscription_month_count"`
 
 	// (Optional) Number of undistributed prizes.
 	UnclaimedPrizes int `json:"unclaimed_prize_count"`
@@ -79,9 +79,10 @@ type GiveawayWinners struct {
 	PrizeDescription string `json:"prize_description"`
 }
 
-// Time returns the moment of when winners of the giveaway were selected in local time.
-func (g *GiveawayWinners) Time() time.Time {
-	return time.Unix(g.DateUnixtime, 0)
+// SelectionDate returns the moment of when winners of the giveaway
+// were selected in local time.
+func (g *GiveawayWinners) SelectionDate() time.Time {
+	return time.Unix(g.SelectionUnixtime, 0)
 }
 
 // GiveawayCreated represents a service message about the creation of a scheduled giveaway.
@@ -92,7 +93,7 @@ type GiveawayCreated struct{}
 // giveaway without public winners.
 type GiveawayCompleted struct {
 	// Number of winners in the giveaway.
-	Winners int `json:"winner_count"`
+	WinnerCount int `json:"winner_count"`
 
 	// (Optional) Number of undistributed prizes.
 	UnclaimedPrizes int `json:"unclaimed_prize_count"`

@@ -327,31 +327,12 @@ func extractMessage(data []byte) (*Message, error) {
 	return resp.Result, nil
 }
 
-func messageIDs(msgs []Editable) (string, int64) {
-	ids := make([]string, 0, len(msgs))
-
-	_, chatID := msgs[0].MessageSig()
-	for _, msg := range msgs {
-		msgID, _ := msg.MessageSig()
-		ids = append(ids, msgID)
-	}
-
-	data, err := json.Marshal(ids)
-	if err != nil {
-		return "", 0
-	}
-
-	return string(data), chatID
-}
-
 func (b *Bot) forwardCopyMessages(to Recipient, msgs []Editable, key string, opts ...*SendOptions) ([]Message, error) {
-	ids, chatID := messageIDs(msgs)
-
 	params := map[string]string{
-		"chat_id":      to.Recipient(),
-		"from_chat_id": strconv.FormatInt(chatID, 10),
-		"message_ids":  ids,
+		"chat_id": to.Recipient(),
 	}
+
+	embedMessages(params, msgs)
 
 	if len(opts) > 0 {
 		b.embedSendOptions(params, opts[0])
@@ -371,9 +352,6 @@ func (b *Bot) forwardCopyMessages(to Recipient, msgs []Editable, key string, opt
 		}
 		if err := json.Unmarshal(data, &resp); err != nil {
 			return nil, wrapError(err)
-		}
-		if resp.Result {
-			return nil, ErrTrueResult
 		}
 		return nil, wrapError(err)
 	}

@@ -696,12 +696,9 @@ func (b *Bot) Delete(msg Editable) error {
 // DeleteMessages deletes multiple messages simultaneously.
 // If some of the specified messages can't be found, they are skipped.
 func (b *Bot) DeleteMessages(msgs []Editable) error {
-	ids, chatID := messageIDs(msgs)
+	params := make(map[string]string)
 
-	params := map[string]string{
-		"chat_id":     strconv.FormatInt(chatID, 10),
-		"message_ids": ids,
-	}
+	embedMessages(params, msgs)
 
 	_, err := b.Raw("deleteMessages", params)
 	return err

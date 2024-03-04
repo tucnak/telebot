@@ -64,7 +64,7 @@ type Message struct {
 
 	// (Optional) Information about the message that is being replied to,
 	// which may come from another chat or forum topic.
-	Reply *ExternalReply `json:"external_reply"`
+	ExternalReply *ExternalReply `json:"external_reply"`
 
 	// (Optional) For replies that quote part of the original message,
 	// the quoted part of the message.
@@ -376,6 +376,7 @@ const (
 	EntityTextLink      EntityType = "text_link"
 	EntitySpoiler       EntityType = "spoiler"
 	EntityCustomEmoji   EntityType = "custom_emoji"
+	EntityBlockquote    EntityType = "blockquote"
 )
 
 // Entities is used to set message's text entities as a send option.
@@ -539,14 +540,14 @@ type MessageReaction struct {
 	// if the user is anonymous.
 	ActorChat *Chat `json:"actor_chat"`
 
-	// 	Date of the change in Unix time.
+	// Date of the change in Unix time.
 	DateUnixtime int64 `json:"date"`
 
 	// Previous list of reaction types that were set by the user.
 	OldReaction []ReactionType `json:"old_reaction"`
 
 	// New list of reaction types that have been set by the user.
-	NewReaction []ReactionType
+	NewReaction []ReactionType `json:"new_reaction"`
 }
 
 func (mu *MessageReaction) Time() time.Time {
@@ -603,10 +604,10 @@ type MessageOrigin struct {
 	DateUnixtime int64 `json:"date"`
 
 	// User that sent the message originally.
-	User *User `json:"sender_user,omitempty"`
+	Sender *User `json:"sender_user,omitempty"`
 
 	// Name of the user that sent the message originally.
-	UserName string `json:"sender_user_name,omitempty"`
+	SenderUsername string `json:"sender_user_name,omitempty"`
 
 	// Chat that sent the message originally.
 	SenderChat *Chat `json:"sender_chat,omitempty"`
@@ -703,8 +704,8 @@ type ExternalReply struct {
 	GiveawayWinners *GiveawayWinners `json:"giveaway_winners"`
 }
 
-// ReplyParameters describes reply parameters for the message that is being sent.
-type ReplyParameters struct {
+// ReplyParams describes reply parameters for the message that is being sent.
+type ReplyParams struct {
 	// Identifier of the message that will be replied to in the current chat,
 	// or in the chat chat_id if it is specified.
 	MessageID int `json:"message_id"`
@@ -725,7 +726,7 @@ type ReplyParameters struct {
 	Quote string `json:"quote"`
 
 	// (Optional) Mode for parsing entities in the quote.
-	QuoteParseMode string `json:"quote_parse_mode"`
+	QuoteParseMode ParseMode `json:"quote_parse_mode"`
 
 	// (Optional) A JSON-serialized list of special entities that appear in the quote.
 	// It can be specified instead of quote_parse_mode.

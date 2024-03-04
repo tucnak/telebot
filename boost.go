@@ -1,6 +1,9 @@
 package telebot
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+)
 
 // Boost contains information about a chat boost.
 type Boost struct {
@@ -18,10 +21,30 @@ type Boost struct {
 	Source *BoostSource `json:"source"`
 }
 
+// AddDate returns the moment of time when the chat has been boosted in local time.
+func (c *Boost) AddDate() time.Time {
+	return time.Unix(c.AddUnixtime, 0)
+}
+
+// ExpirationDate returns the moment of time when the boost of the channel
+// will expire in local time.
+func (c *Boost) ExpirationDate() time.Time {
+	return time.Unix(c.ExpirationUnixtime, 0)
+}
+
+// BoostSourceType describes a type of boost.
+type BoostSourceType = string
+
+const (
+	SourcePremium  = "premium"
+	SourceGiftCode = "gift_code"
+	SourceGiveaway = "giveaway"
+)
+
 // BoostSource describes the source of a chat boost.
 type BoostSource struct {
 	// Source of the boost, always (“premium”, “gift_code”, “giveaway”).
-	Source string `json:"source"`
+	Source *BoostSourceType `json:"source"`
 
 	// User that boosted the chat.
 	Booster *User `json:"user"`
