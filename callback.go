@@ -46,7 +46,7 @@ func (c *Callback) MessageSig() (string, int64) {
 	if c.IsInline() {
 		return c.MessageID, 0
 	}
-	return c.Message.Message.MessageSig()
+	return c.Message.MessageSig()
 }
 
 // IsInline says whether message is an inline message.

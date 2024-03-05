@@ -520,6 +520,10 @@ type InaccessibleMessage struct {
 	DateUnixtime int64 `json:"date"`
 }
 
+func (im *InaccessibleMessage) MessageSig() (string, int64) {
+	return strconv.Itoa(im.MessageID), im.Chat.ID
+}
+
 func (im *InaccessibleMessage) Time() time.Time {
 	return time.Unix(im.DateUnixtime, 0)
 }
