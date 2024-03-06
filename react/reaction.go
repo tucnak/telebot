@@ -1,8 +1,4 @@
-package telebot
-
-import (
-	"encoding/json"
-)
+package react
 
 // EmojiType defines emoji types.
 type EmojiType = string
@@ -113,34 +109,4 @@ type ReactionOptions struct {
 
 	// Pass True to set the reaction with a big animation.
 	IsBig bool `json:"is_big"`
-}
-
-// SetMessageReaction changes the chosen reactions on a message. Service messages can't be
-// reacted to. Automatically forwarded messages from a channel to its discussion group have
-// the same available reactions as messages in the channel.
-func (b *Bot) SetMessageReaction(to Recipient, msg Editable, opts ...ReactionOptions) error {
-	if to == nil {
-		return ErrBadRecipient
-	}
-	msgID, _ := msg.MessageSig()
-
-	params := map[string]string{
-		"chat_id":    to.Recipient(),
-		"message_id": msgID,
-	}
-
-	if len(opts) > 0 {
-		opt := opts[0]
-
-		if len(opt.Reactions) > 0 {
-			data, _ := json.Marshal(opt.Reactions)
-			params["reaction"] = string(data)
-		}
-		if opt.IsBig {
-			params["is_big"] = "true"
-		}
-	}
-
-	_, err := b.Raw("setMessageReaction", params)
-	return err
 }

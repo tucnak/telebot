@@ -1,9 +1,12 @@
 package telebot
 
 import (
+	"encoding/json"
 	"strconv"
 	"time"
 	"unicode/utf16"
+
+	"gopkg.in/telebot.v3/react"
 )
 
 // Message object represents a message.
@@ -548,10 +551,10 @@ type MessageReaction struct {
 	DateUnixtime int64 `json:"date"`
 
 	// Previous list of reaction types that were set by the user.
-	OldReaction []ReactionType `json:"old_reaction"`
+	OldReaction []react.ReactionType `json:"old_reaction"`
 
 	// New list of reaction types that have been set by the user.
-	NewReaction []ReactionType `json:"new_reaction"`
+	NewReaction []react.ReactionType `json:"new_reaction"`
 }
 
 func (mu *MessageReaction) Time() time.Time {
@@ -571,7 +574,7 @@ type MessageReactionCount struct {
 	DateUnixtime int64 `json:"date"`
 
 	// List of reactions that are present on the message.
-	Reactions *ReactionCount `json:"reactions"`
+	Reactions *react.ReactionCount `json:"reactions"`
 }
 
 // Time returns the moment of change in local time.
@@ -738,4 +741,34 @@ type ReplyParams struct {
 
 	// (Optional) Position of the quote in the original message in UTF-16 code units.
 	QuotePosition int `json:"quote_position"`
+}
+
+// SetMessageReaction changes the chosen reactions on a message. Service messages can't be
+// reacted to. Automatically forwarded messages from a channel to its discussion group have
+// the same available reactions as messages in the channel.
+func (b *Bot) SetMessageReaction(to Recipient, msg Editable, opts ...react.ReactionOptions) error {
+	if to == nil {
+		return ErrBadRecipient
+	}
+	msgID, _ := msg.MessageSig()
+
+	params := map[string]string{
+		"chat_id":    to.Recipient(),
+		"message_id": msgID,
+	}
+
+	if len(opts) > 0 {
+		opt := opts[0]
+
+		if len(opt.Reactions) > 0 {
+			data, _ := json.Marshal(opt.Reactions)
+			params["reaction"] = string(data)
+		}
+		if opt.IsBig {
+			params["is_big"] = "true"
+		}
+	}
+
+	_, err := b.Raw("setMessageReaction", params)
+	return err
 }
