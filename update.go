@@ -312,6 +312,16 @@ func (b *Bot) ProcessUpdate(u Update) {
 		b.handle(OnChatJoinRequest, c)
 		return
 	}
+
+	if u.ChatBoost != nil {
+		b.handle(OnBoostUpdated, c)
+		return
+	}
+
+	if u.ChatRemovedBoost != nil {
+		b.handle(onBoostRemoved, c)
+		return
+	}
 }
 
 func (b *Bot) handle(end string, c Context) bool {
