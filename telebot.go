@@ -110,7 +110,7 @@ const (
 	OnVideoChatParticipants = "\avideo_chat_participants_invited"
 	OnVideoChatScheduled    = "\avideo_chat_scheduled"
 
-	OnBoostUpdated = "\aboost_updated"
+	OnBoost        = "\aboost_updated"
 	onBoostRemoved = "\aboost_removed"
 )
 

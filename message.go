@@ -67,7 +67,7 @@ type Message struct {
 
 	// (Optional) Information about the message that is being replied to,
 	// which may come from another chat or forum topic.
-	ExternalReply *ExternalReply `json:"external_reply"`
+	ExternalReplyInfo *ExternalReplyInfo `json:"external_reply"`
 
 	// (Optional) For replies that quote part of the original message,
 	// the quoted part of the message.
@@ -551,10 +551,10 @@ type MessageReaction struct {
 	DateUnixtime int64 `json:"date"`
 
 	// Previous list of reaction types that were set by the user.
-	OldReaction []react.ReactionType `json:"old_reaction"`
+	OldReaction []react.Reaction `json:"old_reaction"`
 
 	// New list of reaction types that have been set by the user.
-	NewReaction []react.ReactionType `json:"new_reaction"`
+	NewReaction []react.Reaction `json:"new_reaction"`
 }
 
 func (mu *MessageReaction) Time() time.Time {
@@ -574,7 +574,7 @@ type MessageReactionCount struct {
 	DateUnixtime int64 `json:"date"`
 
 	// List of reactions that are present on the message.
-	Reactions *react.ReactionCount `json:"reactions"`
+	Reactions *react.Count `json:"reactions"`
 }
 
 // Time returns the moment of change in local time.
@@ -635,11 +635,11 @@ func (mo *MessageOrigin) Time() time.Time {
 	return time.Unix(mo.DateUnixtime, 0)
 }
 
-// ExternalReply contains information about a message that is being replied to,
+// ExternalReplyInfo contains information about a message that is being replied to,
 // which may come from another chat or forum topic.
-type ExternalReply struct {
+type ExternalReplyInfo struct {
 	// Origin of the message replied to by the given message.
-	OriginalMessage *MessageOrigin `json:"origin"`
+	Origin *MessageOrigin `json:"origin"`
 
 	// (Optional) Chat the original message belongs to.
 	// Available only if the chat is a supergroup or a channel.
@@ -743,10 +743,10 @@ type ReplyParams struct {
 	QuotePosition int `json:"quote_position"`
 }
 
-// SetMessageReaction changes the chosen reactions on a message. Service messages can't be
+// React changes the chosen reactions on a message. Service messages can't be
 // reacted to. Automatically forwarded messages from a channel to its discussion group have
 // the same available reactions as messages in the channel.
-func (b *Bot) SetMessageReaction(to Recipient, msg Editable, opts ...react.ReactionOptions) error {
+func (b *Bot) React(to Recipient, msg Editable, opts ...react.Options) error {
 	if to == nil {
 		return ErrBadRecipient
 	}
@@ -764,7 +764,7 @@ func (b *Bot) SetMessageReaction(to Recipient, msg Editable, opts ...react.React
 			data, _ := json.Marshal(opt.Reactions)
 			params["reaction"] = string(data)
 		}
-		if opt.IsBig {
+		if opt.Big {
 			params["is_big"] = "true"
 		}
 	}

@@ -22,8 +22,8 @@ type Update struct {
 	MyChatMember         *ChatMemberUpdate     `json:"my_chat_member,omitempty"`
 	ChatMember           *ChatMemberUpdate     `json:"chat_member,omitempty"`
 	ChatJoinRequest      *ChatJoinRequest      `json:"chat_join_request,omitempty"`
-	ChatBoost            *BoostUpdated         `json:"chat_boost"`
-	ChatRemovedBoost     *BoostRemoved         `json:"removed_chat_boost"`
+	Boost                *BoostUpdated         `json:"chat_boost"`
+	BoostRemoved         *BoostRemoved         `json:"removed_chat_boost"`
 }
 
 // ProcessUpdate processes a single incoming update.
@@ -313,12 +313,12 @@ func (b *Bot) ProcessUpdate(u Update) {
 		return
 	}
 
-	if u.ChatBoost != nil {
-		b.handle(OnBoostUpdated, c)
+	if u.Boost != nil {
+		b.handle(OnBoost, c)
 		return
 	}
 
-	if u.ChatRemovedBoost != nil {
+	if u.BoostRemoved != nil {
 		b.handle(onBoostRemoved, c)
 		return
 	}
