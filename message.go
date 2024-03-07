@@ -510,7 +510,7 @@ func (m *Message) Media() Media {
 // inaccessible to the bot. An instance of MaybeInaccessibleMessage object.
 type InaccessibleMessage struct {
 	// A message that can be inaccessible to the bot.
-	Message *Message `json:"-"`
+	*Message
 
 	// Chat the message belonged to.
 	Chat *Chat `json:"chat"`
