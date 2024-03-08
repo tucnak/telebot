@@ -16,6 +16,12 @@ type Context interface {
 	// Bot returns the bot instance.
 	Bot() *Bot
 
+	// Boost returns the boost instance.
+	Boost() *BoostUpdated
+
+	// BoostRemoved returns the boost removed from a chat instance.
+	BoostRemoved() *BoostRemoved
+
 	// Update returns the original update.
 	Update() Update
 
@@ -176,6 +182,14 @@ type nativeContext struct {
 
 func (c *nativeContext) Bot() *Bot {
 	return c.b
+}
+
+func (c *nativeContext) Boost() *BoostUpdated {
+	return c.u.Boost
+}
+
+func (c *nativeContext) BoostRemoved() *BoostRemoved {
+	return c.u.BoostRemoved
 }
 
 func (c *nativeContext) Update() Update {
