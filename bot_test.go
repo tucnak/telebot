@@ -67,6 +67,7 @@ func TestNewBot(t *testing.T) {
 	pref.Poller = &LongPoller{Timeout: time.Second}
 	pref.Updates = 50
 	pref.ParseMode = ModeHTML
+	pref.UseTestEnv = true
 	pref.Offline = true
 
 	b, err = NewBot(pref)
@@ -76,6 +77,7 @@ func TestNewBot(t *testing.T) {
 	assert.Equal(t, pref.Poller, b.Poller)
 	assert.Equal(t, 50, cap(b.Updates))
 	assert.Equal(t, ModeHTML, b.parseMode)
+	assert.Equal(t, pref.UseTestEnv, b.useTestEnv)
 }
 
 func TestBotHandle(t *testing.T) {
