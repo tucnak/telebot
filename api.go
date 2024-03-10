@@ -327,6 +327,37 @@ func extractMessage(data []byte) (*Message, error) {
 	return resp.Result, nil
 }
 
+func (b *Bot) forwardCopyMessages(to Recipient, msgs []Editable, key string, opts ...*SendOptions) ([]Message, error) {
+	params := map[string]string{
+		"chat_id": to.Recipient(),
+	}
+
+	embedMessages(params, msgs)
+
+	if len(opts) > 0 {
+		b.embedSendOptions(params, opts[0])
+	}
+
+	data, err := b.Raw(key, params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result []Message
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		var resp struct {
+			Result bool
+		}
+		if err := json.Unmarshal(data, &resp); err != nil {
+			return nil, wrapError(err)
+		}
+		return nil, wrapError(err)
+	}
+	return resp.Result, nil
+}
+
 func verbose(method string, payload interface{}, data []byte) {
 	body, _ := json.Marshal(payload)
 	body = bytes.ReplaceAll(body, []byte(`\"`), []byte(`"`))

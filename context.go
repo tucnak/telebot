@@ -16,6 +16,12 @@ type Context interface {
 	// Bot returns the bot instance.
 	Bot() *Bot
 
+	// Boost returns the boost instance.
+	Boost() *BoostUpdated
+
+	// BoostRemoved returns the boost removed from a chat instance.
+	BoostRemoved() *BoostRemoved
+
 	// Update returns the original update.
 	Update() Update
 
@@ -178,6 +184,14 @@ func (c *nativeContext) Bot() *Bot {
 	return c.b
 }
 
+func (c *nativeContext) Boost() *BoostUpdated {
+	return c.u.Boost
+}
+
+func (c *nativeContext) BoostRemoved() *BoostRemoved {
+	return c.u.BoostRemoved
+}
+
 func (c *nativeContext) Update() Update {
 	return c.u
 }
@@ -187,12 +201,12 @@ func (c *nativeContext) Message() *Message {
 	case c.u.Message != nil:
 		return c.u.Message
 	case c.u.Callback != nil:
-		return c.u.Callback.Message
+		return c.u.Callback.Message.Message
 	case c.u.EditedMessage != nil:
 		return c.u.EditedMessage
 	case c.u.ChannelPost != nil:
 		if c.u.ChannelPost.PinnedMessage != nil {
-			return c.u.ChannelPost.PinnedMessage
+			return c.u.ChannelPost.PinnedMessage.Message
 		}
 		return c.u.ChannelPost
 	case c.u.EditedChannelPost != nil:

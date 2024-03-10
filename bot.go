@@ -400,6 +400,17 @@ func (b *Bot) Forward(to Recipient, msg Editable, opts ...interface{}) (*Message
 	return extractMessage(data)
 }
 
+// ForwardMessages method forwards multiple messages of any kind.
+// If some of the specified messages can't be found or forwarded, they are skipped.
+// Service messages and messages with protected content can't be forwarded.
+// Album grouping is kept for forwarded messages.
+func (b *Bot) ForwardMessages(to Recipient, msgs []Editable, opts ...*SendOptions) ([]Message, error) {
+	if to == nil {
+		return nil, ErrBadRecipient
+	}
+	return b.forwardCopyMessages(to, msgs, "forwardMessages", opts...)
+}
+
 // Copy behaves just like Forward() but the copied message doesn't have a link to the original message (see Bots API).
 //
 // This function will panic upon nil Editable.
@@ -424,6 +435,20 @@ func (b *Bot) Copy(to Recipient, msg Editable, options ...interface{}) (*Message
 	}
 
 	return extractMessage(data)
+}
+
+// CopyMessages this method makes a copy of messages of any kind.
+// If some of the specified messages can't be found or copied, they are skipped.
+// Service messages, giveaway messages, giveaway winners messages, and
+// invoice messages can't be copied. A quiz poll can be copied only if the value of the field
+// correct_option_id is known to the bot. The method is analogous
+// to the method forwardMessages, but the copied messages don't have a link to the original message.
+// Album grouping is kept for copied messages.
+func (b *Bot) CopyMessages(to Recipient, msgs []Editable, opts ...*SendOptions) ([]Message, error) {
+	if to == nil {
+		return nil, ErrBadRecipient
+	}
+	return b.forwardCopyMessages(to, msgs, "copyMessages", opts...)
 }
 
 // Edit is magic, it lets you change already sent message.
@@ -665,6 +690,17 @@ func (b *Bot) Delete(msg Editable) error {
 	}
 
 	_, err := b.Raw("deleteMessage", params)
+	return err
+}
+
+// DeleteMessages deletes multiple messages simultaneously.
+// If some of the specified messages can't be found, they are skipped.
+func (b *Bot) DeleteMessages(msgs []Editable) error {
+	params := make(map[string]string)
+
+	embedMessages(params, msgs)
+
+	_, err := b.Raw("deleteMessages", params)
 	return err
 }
 
