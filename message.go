@@ -5,8 +5,6 @@ import (
 	"strconv"
 	"time"
 	"unicode/utf16"
-
-	"gopkg.in/telebot.v3/react"
 )
 
 // Message object represents a message.
@@ -107,7 +105,7 @@ type Message struct {
 	// etc. that appear in the text.
 	Entities Entities `json:"entities,omitempty"`
 
-	// (Optional) Options used for link preview generation for the message,
+	// (Optional) ReactionOptions used for link preview generation for the message,
 	// if it is a text message and link preview options were changed
 	PreviewOptions PreviewOptions `json:"link_preview_options,omitempty"`
 
@@ -551,10 +549,10 @@ type MessageReaction struct {
 	DateUnixtime int64 `json:"date"`
 
 	// Previous list of reaction types that were set by the user.
-	OldReaction []react.Reaction `json:"old_reaction"`
+	OldReaction []Reaction `json:"old_reaction"`
 
 	// New list of reaction types that have been set by the user.
-	NewReaction []react.Reaction `json:"new_reaction"`
+	NewReaction []Reaction `json:"new_reaction"`
 }
 
 func (mu *MessageReaction) Time() time.Time {
@@ -574,7 +572,7 @@ type MessageReactionCount struct {
 	DateUnixtime int64 `json:"date"`
 
 	// List of reactions that are present on the message.
-	Reactions *react.Count `json:"reactions"`
+	Reactions *ReactionCount `json:"reactions"`
 }
 
 // Time returns the moment of change in local time.
@@ -649,7 +647,7 @@ type ExternalReplyInfo struct {
 	// Available only if the original chat is a supergroup or a channel.
 	MessageID int `json:"message_id"`
 
-	// (Optional) Options used for link preview generation for the original message,
+	// (Optional) ReactionOptions used for link preview generation for the original message,
 	// if it is a text message.
 	PreviewOptions *PreviewOptions `json:"link_preview_options"`
 
@@ -746,7 +744,7 @@ type ReplyParams struct {
 // React changes the chosen reactions on a message. Service messages can't be
 // reacted to. Automatically forwarded messages from a channel to its discussion group have
 // the same available reactions as messages in the channel.
-func (b *Bot) React(to Recipient, msg Editable, opts ...react.Options) error {
+func (b *Bot) React(to Recipient, msg Editable, opts ...ReactionOptions) error {
 	if to == nil {
 		return ErrBadRecipient
 	}
