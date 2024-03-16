@@ -3,8 +3,9 @@ package layout
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io/fs"
 	"log"
+	"os"
 	"strings"
 	"sync"
 	"text/template"
@@ -69,7 +70,13 @@ type (
 
 // New parses the given layout file.
 func New(path string, funcs ...template.FuncMap) (*Layout, error) {
-	data, err := ioutil.ReadFile(path)
+	return NewFromFS(os.DirFS("."), path, funcs...)
+}
+
+// NewFromFS parses the layout from the given fs.FS. It allows to read layout
+// from the go:embed filesystem.
+func NewFromFS(fsys fs.FS, path string, funcs ...template.FuncMap) (*Layout, error) {
+	data, err := fs.ReadFile(fsys, path)
 	if err != nil {
 		return nil, err
 	}
@@ -121,10 +128,10 @@ var builtinFuncs = template.FuncMap{
 //		webhook: (or webhook settings)
 //
 // Usage:
+//
 //	lt, err := layout.New("bot.yml")
 //	b, err := tele.NewBot(lt.Settings())
 //	// That's all!
-//
 func (lt *Layout) Settings() tele.Settings {
 	if lt.pref == nil {
 		panic("telebot/layout: settings is empty")
@@ -183,16 +190,20 @@ func (lt *Layout) Commands() (cmds []tele.Command) {
 // used in b.SetCommands later.
 //
 // Example of bot.yml:
+//
 //	commands:
 //	  /start: '{{ text `cmdStart` }}'
 //
 // en.yml:
+//
 //	cmdStart: Start the bot
 //
 // ru.yml:
+//
 //	cmdStart: Запуск бота
 //
 // Usage:
+//
 //	b.SetCommands(lt.CommandsLocale("en"), "en")
 //	b.SetCommands(lt.CommandsLocale("ru"), "ru")
 func (lt *Layout) CommandsLocale(locale string, args ...interface{}) (cmds []tele.Command) {
@@ -226,13 +237,14 @@ func (lt *Layout) CommandsLocale(locale string, args ...interface{}) (cmds []tel
 // The given optional argument will be passed to the template engine.
 //
 // Example of en.yml:
+//
 //	start: Hi, {{.FirstName}}!
 //
 // Usage:
+//
 //	func onStart(c tele.Context) error {
 //		return c.Send(lt.Text(c, "start", c.Sender()))
 //	}
-//
 func (lt *Layout) Text(c tele.Context, k string, args ...interface{}) string {
 	locale, ok := lt.Locale(c)
 	if !ok {
@@ -266,9 +278,9 @@ func (lt *Layout) TextLocale(locale, k string, args ...interface{}) string {
 // Callback returns a callback endpoint used to handle buttons.
 //
 // Example:
+//
 //	// Handling settings button
 //	b.Handle(lt.Callback("settings"), onSettings)
-//
 func (lt *Layout) Callback(k string) tele.CallbackEndpoint {
 	btn, ok := lt.buttons[k]
 	if !ok {
@@ -287,6 +299,7 @@ func (lt *Layout) Callback(k string) tele.CallbackEndpoint {
 //			text: Item #{{.Number}}
 //
 // Usage:
+//
 //	btns := make([]tele.Btn, len(items))
 //	for i, item := range items {
 //		btns[i] = lt.Button(c, "item", struct {
@@ -301,7 +314,6 @@ func (lt *Layout) Callback(k string) tele.CallbackEndpoint {
 //	m := b.NewMarkup()
 //	m.Inline(m.Row(btns...))
 //	// Your generated markup is ready.
-//
 func (lt *Layout) Button(c tele.Context, k string, args ...interface{}) *tele.Btn {
 	locale, ok := lt.Locale(c)
 	if !ok {
@@ -360,13 +372,13 @@ func (lt *Layout) ButtonLocale(locale, k string, args ...interface{}) *tele.Btn 
 //		- [settings]
 //
 // Usage:
+//
 //	func onStart(c tele.Context) error {
 //		return c.Send(
 //			lt.Text(c, "start"),
 //			lt.Markup(c, "menu"),
 //		)
 //	}
-//
 func (lt *Layout) Markup(c tele.Context, k string, args ...interface{}) *tele.ReplyMarkup {
 	locale, ok := lt.Locale(c)
 	if !ok {
@@ -427,6 +439,7 @@ func (lt *Layout) MarkupLocale(locale, k string, args ...interface{}) *tele.Repl
 //			thumb_url: '{{ .PreviewURL }}'
 //
 // Usage:
+//
 //	func onQuery(c tele.Context) error {
 //		results := make(tele.Results, len(articles))
 //		for i, article := range articles {
@@ -437,7 +450,6 @@ func (lt *Layout) MarkupLocale(locale, k string, args ...interface{}) *tele.Repl
 //			CacheTime: 100,
 //		})
 //	}
-//
 func (lt *Layout) Result(c tele.Context, k string, args ...interface{}) tele.Result {
 	locale, ok := lt.Locale(c)
 	if !ok {

@@ -1,6 +1,7 @@
 package layout
 
 import (
+	"embed"
 	"os"
 	"testing"
 	"time"
@@ -8,6 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	tele "gopkg.in/telebot.v3"
 )
+
+//go:embed *
+var fsys embed.FS
 
 func TestLayout(t *testing.T) {
 	os.Setenv("TOKEN", "TEST")
@@ -17,10 +21,16 @@ func TestLayout(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	ltfs, err := NewFromFS(fsys, "example.yml")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	pref := lt.Settings()
 	assert.Equal(t, "TEST", pref.Token)
 	assert.Equal(t, "html", pref.ParseMode)
 	assert.Equal(t, &tele.LongPoller{}, pref.Poller)
+	assert.Equal(t, pref, ltfs.Settings())
 
 	assert.ElementsMatch(t, []tele.Command{{
 		Text:        "start",
