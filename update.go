@@ -319,7 +319,7 @@ func (b *Bot) ProcessUpdate(u Update) {
 	}
 
 	if u.BoostRemoved != nil {
-		b.handle(onBoostRemoved, c)
+		b.handle(OnBoostRemoved, c)
 		return
 	}
 }
