@@ -31,4 +31,5 @@ coverage.txt
 *.zip
 .terraform*
 terraform*
-/examples/awslambdaechobot/awslambdaechobot
+/examples/awslambdaechobot/package
+/examples/awslambdaechobot/tf/builds
