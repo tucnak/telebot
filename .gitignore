@@ -24,6 +24,8 @@ _testmain.go
 *.prof
 
 .idea
+.vscode
+bin
 .DS_Store
 coverage.txt
 
