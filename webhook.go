@@ -38,13 +38,16 @@ type WebhookEndpoint struct {
 // You can also leave the Listen field empty. In this case it is up to the caller to
 // add the Webhook to a http-mux.
 //
+// If you want to ignore the automatic setWebhook call, you can set IgnoreSetWebhook to true.
+//
 type Webhook struct {
-	Listen         string   `json:"url"`
-	MaxConnections int      `json:"max_connections"`
-	AllowedUpdates []string `json:"allowed_updates"`
-	IP             string   `json:"ip_address"`
-	DropUpdates    bool     `json:"drop_pending_updates"`
-	SecretToken    string   `json:"secret_token"`
+	Listen           string   `json:"url"`
+	MaxConnections   int      `json:"max_connections"`
+	AllowedUpdates   []string `json:"allowed_updates"`
+	IP               string   `json:"ip_address"`
+	DropUpdates      bool     `json:"drop_pending_updates"`
+	SecretToken      string   `json:"secret_token"`
+	IgnoreSetWebhook bool     `json:"ignore_set_web_hook"`
 
 	// (WebhookInfo)
 	HasCustomCert     bool   `json:"has_custom_certificate"`
@@ -118,10 +121,13 @@ func (h *Webhook) getParams() map[string]string {
 }
 
 func (h *Webhook) Poll(b *Bot, dest chan Update, stop chan struct{}) {
-	if err := b.SetWebhook(h); err != nil {
-		b.OnError(err, nil)
-		close(stop)
-		return
+	// by default, the set webhook method will be called, to ignore it, set IgnoreSetWebhook to true
+	if !h.IgnoreSetWebhook {
+		if err := b.SetWebhook(h); err != nil {
+			b.OnError(err, nil)
+			close(stop)
+			return
+		}
 	}
 
 	// store the variables so the HTTP-handler can use 'em
