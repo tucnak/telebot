@@ -17,7 +17,7 @@ type InputTextMessageContent struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 
 	// (Optional) Link preview generation options for the message.
-	PreviewOptions *PreviewOptions `json:"link_preview_options"`
+	PreviewOptions *PreviewOptions `json:"link_preview_options,omitempty"`
 }
 
 func (input *InputTextMessageContent) IsInputMessageContent() bool {

@@ -105,9 +105,9 @@ type Message struct {
 	// etc. that appear in the text.
 	Entities Entities `json:"entities,omitempty"`
 
-	// (Optional) ReactionOptions used for link preview generation for the message,
-	// if it is a text message and link preview options were changed
-	PreviewOptions PreviewOptions `json:"link_preview_options,omitempty"`
+	// (Optional) PreviewOptions used for link preview generation for the message,
+	// if it is a text message and link preview options were changed.
+	PreviewOptions *PreviewOptions `json:"link_preview_options,omitempty"`
 
 	// Some messages containing media, may as well have a caption.
 	Caption string `json:"caption,omitempty"`
@@ -137,7 +137,7 @@ type Message struct {
 	// For a video, information about it.
 	Video *Video `json:"video"`
 
-	// For a animation, information about it.
+	// For an animation, information about it.
 	Animation *Animation `json:"animation"`
 
 	// For a contact, contact information itself.
@@ -255,7 +255,7 @@ type Message struct {
 	// Specified message was pinned. Note that the Message object
 	// in this field will not contain further ReplyTo fields even
 	// if it is itself a reply.
-	PinnedMessage *InaccessibleMessage `json:"pinned_message"`
+	PinnedMessage *Message `json:"pinned_message"`
 
 	// Message is an invoice for a payment.
 	Invoice *Invoice `json:"invoice"`
@@ -380,7 +380,7 @@ const (
 	EntityBlockquote    EntityType = "blockquote"
 )
 
-// Entities is used to set message's text entities as a send option.
+// Entities are used to set message's text entities as a send option.
 type Entities []MessageEntity
 
 // ProximityAlert sent whenever a user in the chat triggers
@@ -394,6 +394,11 @@ type ProximityAlert struct {
 // AutoDeleteTimer represents a service message about a change in auto-delete timer settings.
 type AutoDeleteTimer struct {
 	Unixtime int `json:"message_auto_delete_time"`
+}
+
+// Inaccessible shows whether the message is InaccessibleMessage object.
+func (m *Message) Inaccessible() bool {
+	return m.Sender == nil
 }
 
 // MessageSig satisfies Editable interface (see Editable.)
@@ -502,31 +507,6 @@ func (m *Message) Media() Media {
 	default:
 		return nil
 	}
-}
-
-// InaccessibleMessage describes a message that was deleted or is otherwise
-// inaccessible to the bot. An instance of MaybeInaccessibleMessage object.
-type InaccessibleMessage struct {
-	// A message that can be inaccessible to the bot.
-	*Message
-
-	// Chat the message belonged to.
-	Chat *Chat `json:"chat"`
-
-	// Unique message identifier inside the chat.
-	MessageID int `json:"message_id"`
-
-	// Always 0. The field can be used to differentiate regular and
-	// inaccessible messages.
-	DateUnixtime int64 `json:"date"`
-}
-
-func (im *InaccessibleMessage) MessageSig() (string, int64) {
-	return strconv.Itoa(im.MessageID), im.Chat.ID
-}
-
-func (im *InaccessibleMessage) Time() time.Time {
-	return time.Unix(im.DateUnixtime, 0)
 }
 
 // MessageReaction object represents a change of a reaction on a message performed by a user.

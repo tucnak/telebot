@@ -16,7 +16,7 @@ type Callback struct {
 
 	// Message will be set if the button that originated the query
 	// was attached to a message sent by a bot.
-	Message *InaccessibleMessage `json:"message"`
+	Message *Message `json:"message"`
 
 	// MessageID will be set if the button was attached to a message
 	// sent via the bot in inline mode.
