@@ -93,7 +93,7 @@ type Btn struct {
 	Contact         bool            `json:"request_contact,omitempty"`
 	Location        bool            `json:"request_location,omitempty"`
 	Poll            PollType        `json:"request_poll,omitempty"`
-	User            *ReplyRecipient `json:"request_user,omitempty"`
+	User            *ReplyRecipient `json:"request_users,omitempty"`
 	Chat            *ReplyRecipient `json:"request_chat,omitempty"`
 }
 
@@ -255,13 +255,32 @@ type ReplyRecipient struct {
 	UserRights   *Rights `json:"user_administrator_rights,omitempty"` // chat only, optional
 	BotRights    *Rights `json:"bot_administrator_rights,omitempty"`  // chat only, optional
 	BotMember    *bool   `json:"bot_is_member,omitempty"`             // chat only, optional
+
+	RequestName     *bool `json:"request_name,omitempty"`     // user, optional
+	RequestTitle    *bool `json:"request_title,omitempty"`    // chat, optional
+	RequestUsername *bool `json:"request_username,omitempty"` // chat & user, optional
+	RequestPhoto    *bool `json:"request_photo,omitempty"`    // chat & user, optional
 }
 
 // RecipientShared combines both UserShared and ChatShared objects.
-type RecipientShared struct {
-	ID     int32 `json:"request_id"`
-	UserID int64 `json:"user_id"`
-	ChatID int64 `json:"chat_id"`
+type RecipientSharedChat struct {
+	ID       int32   `json:"request_id"`
+	Title    string  `json:"title"`
+	ChatID   int64   `json:"chat_id"`
+	UserName string  `json:"username"`
+	Photo    []Photo `json:"photo"`
+}
+
+type RecipientSharedUser struct {
+	ID      int32   `json:"request_id"`
+	UserIDS []int64 `json:"user_ids"`
+	Users   []struct {
+		UserID    int64   `json:"user_id"`
+		FirstName string  `json:"first_name"`
+		LastName  string  `json:"last_name"`
+		UserName  string  `json:"username"`
+		Photo     []Photo `json:"photo"`
+	} `json:"users"`
 }
 
 // InlineButton represents a button displayed in the message.
