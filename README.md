@@ -87,6 +87,33 @@ if you'd like to see some endpoint or endpoint ideas implemented. This system
 is completely extensible, so I can introduce them without breaking
 backwards compatibility.
 
+## Cache
+
+Cache is a provider for cache that provides a contract to work with external storage.
+By default, is in memory, can be implemented redis, mecmached, etc.
+
+```go
+// Cache is a provider for cache
+//
+// All cache providers must implement methods, which work with storage
+// to store a cache of user state, inline results
+// for a Telegram bot.
+type Cache interface {
+	Get(key string) (interface{}, error)
+	Set(key string, value interface{}) error
+	
+	Keys() []string
+}
+```
+
+To store context to cache, could be used cache context middleware.
+
+```go
+cache := tele.NewInMemoryCache()
+
+b.Use(middleware.CacheContext(cache))
+```
+
 ## Context
 Context is a special type that wraps a huge update structure and represents
 the context of the current event. It provides several helpers, which allow
