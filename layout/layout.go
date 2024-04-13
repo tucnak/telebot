@@ -200,9 +200,9 @@ func (lt *Layout) Commands() (cmds []tele.Command) {
 //
 // Usage:
 //
-// b.SetCommands(lt.CommandsLocale("en"), "en")
-// b.SetCommands(lt.CommandsLocale("ru"), "ru")
-// b.SetCommands(lt.CommandsLocale("en"))
+//	b.SetCommands(lt.CommandsLocale("en"), "en")
+//	b.SetCommands(lt.CommandsLocale("ru"), "ru")
+//	b.SetCommands(lt.CommandsLocale("en"))
 func (lt *Layout) CommandsLocale(locale string, args ...interface{}) (cmds []tele.Command) {
 	var arg interface{}
 	if len(args) > 0 {
