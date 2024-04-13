@@ -6,3 +6,5 @@ nested:
   another:
     example: |-
       This is {{ . }}.
+
+cmd_settings: Settings
