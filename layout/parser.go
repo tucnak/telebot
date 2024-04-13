@@ -30,7 +30,7 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 	var aux struct {
 		Settings *Settings
 		Config   map[string]interface{}
-		Commands map[string]string
+		Commands yaml.MapSlice
 		Buttons  yaml.MapSlice
 		Markups  yaml.MapSlice
 		Results  yaml.MapSlice
@@ -46,7 +46,22 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 	}
 
 	lt.Config = Config{v: v}
-	lt.commands = aux.Commands
+	lt.commands = make([]tele.Command, 0, len(aux.Commands))
+	for _, cmd := range aux.Commands {
+		var (
+			text        string
+			description string
+			ok          bool
+		)
+
+		if text, ok = cmd.Key.(string); !ok {
+			continue
+		}
+		if description, ok = cmd.Value.(string); !ok {
+			continue
+		}
+		lt.commands = append(lt.commands, tele.Command{Text: strings.TrimLeft(text, "/"), Description: description})
+	}
 
 	if pref := aux.Settings; pref != nil {
 		lt.pref = &tele.Settings{

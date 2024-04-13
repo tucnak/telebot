@@ -6,7 +6,6 @@ import (
 	"io/fs"
 	"log"
 	"os"
-	"strings"
 	"sync"
 	"text/template"
 
@@ -23,7 +22,7 @@ type (
 		ctxs  map[tele.Context]string
 		funcs template.FuncMap
 
-		commands map[string]string
+		commands []tele.Command
 		buttons  map[string]Button
 		markups  map[string]Markup
 		results  map[string]Result
@@ -174,19 +173,16 @@ func (lt *Layout) SetLocale(c tele.Context, locale string) {
 	lt.mu.Unlock()
 }
 
-// Commands returns a list of telebot commands, which can be
+// Commands returns a list of telebot commands
+// in the order they were defined in config, which can be
 // used in b.SetCommands later.
+// "commands" must be not templates
 func (lt *Layout) Commands() (cmds []tele.Command) {
-	for k, v := range lt.commands {
-		cmds = append(cmds, tele.Command{
-			Text:        strings.TrimLeft(k, "/"),
-			Description: v,
-		})
-	}
-	return
+	return lt.commands
 }
 
-// CommandsLocale returns a list of telebot commands and localized description, which can be
+// CommandsLocale returns a list of telebot commands and localized descriptions
+// in the order they were defined in config, which can be
 // used in b.SetCommands later.
 //
 // Example of bot.yml:
@@ -204,16 +200,18 @@ func (lt *Layout) Commands() (cmds []tele.Command) {
 //
 // Usage:
 //
-//	b.SetCommands(lt.CommandsLocale("en"), "en")
-//	b.SetCommands(lt.CommandsLocale("ru"), "ru")
+// b.SetCommands(lt.CommandsLocale("en"), "en")
+// b.SetCommands(lt.CommandsLocale("ru"), "ru")
+// b.SetCommands(lt.CommandsLocale("en"))
 func (lt *Layout) CommandsLocale(locale string, args ...interface{}) (cmds []tele.Command) {
 	var arg interface{}
 	if len(args) > 0 {
 		arg = args[0]
 	}
 
-	for k, v := range lt.commands {
-		tmpl, err := lt.template(template.New(k).Funcs(lt.funcs), locale).Parse(v)
+	for _, cmd := range lt.commands {
+		tmpl, err := lt.template(template.New(cmd.Text).Funcs(lt.funcs), locale).
+			Parse(cmd.Description)
 		if err != nil {
 			log.Println("telebot/layout:", err)
 			return nil
@@ -226,7 +224,7 @@ func (lt *Layout) CommandsLocale(locale string, args ...interface{}) (cmds []tel
 		}
 
 		cmds = append(cmds, tele.Command{
-			Text:        strings.TrimLeft(k, "/"),
+			Text:        cmd.Text,
 			Description: buf.String(),
 		})
 	}

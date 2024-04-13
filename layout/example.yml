@@ -6,6 +6,7 @@ settings:
 commands:
   /start: Start the bot
   /help: How to use the bot
+  /settings: "{{ text `cmd_settings` }}"
 
 config:
   str: string
@@ -22,7 +23,6 @@ config:
     - <<: *obj
     - <<: *obj
 
-
 buttons:
   # Shortened reply buttons
   help: Help
@@ -37,16 +37,16 @@ buttons:
   stop:
     unique: stop
     text: Stop
-    data: '{{.}}'
+    data: "{{.}}"
 
   # Callback data
   pay:
     unique: pay
     text: Pay
     data:
-      - '{{ .UserID }}'
-      - '{{ .Amount }}'
-      - '{{ .Currency }}'
+      - "{{ .UserID }}"
+      - "{{ .Amount }}"
+      - "{{ .Currency }}"
 
   web_app:
     text: This is a web app
@@ -55,22 +55,22 @@ buttons:
 
 markups:
   reply_shortened:
-    - [ help ]
-    - [ settings ]
+    - [help]
+    - [settings]
   reply_extended:
     keyboard:
-      - [ contact ]
+      - [contact]
     one_time_keyboard: true
   inline:
-    - [ stop ]
+    - [stop]
   web_app:
-    - [ web_app ]
+    - [web_app]
 
 results:
   article:
     type: article
-    id: '{{ .ID }}'
-    title: '{{ .Title }}'
-    description: '{{ .Description }}'
-    thumbnail_url: '{{ .PreviewURL }}'
-    message_text: '{{ text `article_message` }}'
+    id: "{{ .ID }}"
+    title: "{{ .Title }}"
+    description: "{{ .Description }}"
+    thumbnail_url: "{{ .PreviewURL }}"
+    message_text: "{{ text `article_message` }}"
