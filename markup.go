@@ -280,7 +280,7 @@ type InlineButton struct {
 	InlineQueryChosenChat *SwitchInlineQuery `json:"switch_inline_query_chosen_chat,omitempty"`
 	Login                 *Login             `json:"login_url,omitempty"`
 	WebApp                *WebApp            `json:"web_app,omitempty"`
-	CallbackGame          bool               `json:"callback_game,omitempty"`
+	CallbackGame          *CallbackGame      `json:"callback_game,omitempty"`
 	Pay                   bool               `json:"pay,omitempty"`
 }
 
