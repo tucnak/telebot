@@ -66,6 +66,11 @@ func (b *Bot) ProcessUpdate(u Update) {
 				return
 			}
 
+			// regexp
+			if b.handleRegexp(m.Text, c) {
+				return
+			}
+
 			b.handle(OnText, c)
 			return
 		}
@@ -329,6 +334,17 @@ func (b *Bot) handle(end string, c Context) bool {
 		b.runHandler(handler, c)
 		return true
 	}
+	return false
+}
+
+func (b *Bot) handleRegexp(end string, c Context) bool {
+	for regexp, handler := range b.regexpHandlers {
+		if regexp.MatchString(end) {
+			b.runHandler(handler, c)
+			return true
+		}
+	}
+
 	return false
 }
 

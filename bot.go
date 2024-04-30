@@ -42,9 +42,10 @@ func NewBot(pref Settings) (*Bot, error) {
 		Poller:  pref.Poller,
 		onError: pref.OnError,
 
-		Updates:  make(chan Update, pref.Updates),
-		handlers: make(map[string]HandlerFunc),
-		stop:     make(chan chan struct{}),
+		Updates:        make(chan Update, pref.Updates),
+		handlers:       make(map[string]HandlerFunc),
+		regexpHandlers: make(map[*regexp.Regexp]HandlerFunc),
+		stop:           make(chan chan struct{}),
 
 		synchronous: pref.Synchronous,
 		verbose:     pref.Verbose,
@@ -75,13 +76,14 @@ type Bot struct {
 	Poller  Poller
 	onError func(error, Context)
 
-	group       *Group
-	handlers    map[string]HandlerFunc
-	synchronous bool
-	verbose     bool
-	parseMode   ParseMode
-	stop        chan chan struct{}
-	client      *http.Client
+	group          *Group
+	handlers       map[string]HandlerFunc
+	regexpHandlers map[*regexp.Regexp]HandlerFunc
+	synchronous    bool
+	verbose        bool
+	parseMode      ParseMode
+	stop           chan chan struct{}
+	client         *http.Client
 
 	stopMu     sync.RWMutex
 	stopClient chan struct{}
@@ -171,6 +173,9 @@ var (
 //		return c.Respond(&tele.CallbackResponse{Text: "Hello!"})
 //	})
 //
+//	onEmailRegex := regexp.MustCompile(`^\S+@\S+\.\S+$`)
+//	b.Handle(onEmailRegex, onEmail)
+//
 // Middleware usage:
 //
 //	b.Handle("/ban", onBan, middleware.Whitelist(ids...))
@@ -188,6 +193,8 @@ func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
 		b.handlers[end] = handler
 	case CallbackEndpoint:
 		b.handlers[end.CallbackUnique()] = handler
+	case *regexp.Regexp:
+		b.regexpHandlers[end] = handler
 	default:
 		panic("telebot: unsupported endpoint")
 	}

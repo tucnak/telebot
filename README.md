@@ -16,6 +16,7 @@ go get -u gopkg.in/telebot.v3
 	- [Middleware](#middleware)
 	- [Poller](#poller)
 	- [Commands](#commands)
+	- [Regpexp Handlers](#regexp-handlers)
 	- [Files](#files)
 	- [Sendable](#sendable)
 	- [Editable](#editable)
@@ -209,6 +210,19 @@ b.Handle("/tags", func(c tele.Context) error {
 	for _, tag := range tags {
 		// iterate through passed arguments
 	}
+})
+```
+
+## Regpexp Handlers
+In some cases regular expressions are required for the handler.
+
+Example:
+```go
+// Handling when sending e-mail
+
+onEmailRegex := regexp.MustCompile(`^\S+@\S+\.\S+$`)
+b.Handle(onEmailRegex, func(c tele.Context) error {
+	return c.Send(c.Message().Text)
 })
 ```
 
