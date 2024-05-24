@@ -301,6 +301,20 @@ func (c *nativeContext) Sender() *User {
 		return c.u.ChatMember.Sender
 	case c.u.ChatJoinRequest != nil:
 		return c.u.ChatJoinRequest.Sender
+	case c.u.Boost != nil:
+		b := c.u.Boost
+		if b.Boost == nil && b.Boost.Source == nil {
+			return nil
+		}
+
+		return b.Boost.Source.Booster
+	case c.u.BoostRemoved != nil:
+		src := c.u.BoostRemoved.Source
+		if src == nil {
+			return nil
+		}
+
+		return src.Booster
 	default:
 		return nil
 	}
