@@ -107,7 +107,7 @@ func (b *Bot) UserBoosts(chat, user Recipient) ([]Boost, error) {
 		}
 	}
 	if err := json.Unmarshal(data, &resp); err != nil {
-		return nil, err
+		return nil, wrapError(err)
 	}
 	return resp.Result.Boosts, nil
 }
