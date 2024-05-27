@@ -1260,3 +1260,22 @@ func (b *Bot) botInfo(language, key string) (*BotInfo, error) {
 	}
 	return resp.Result, nil
 }
+
+// Trigger simulates command execution.
+func (b *Bot) Trigger(end string, c Context) error {
+	handler, ok := b.handlers[end]
+	if !ok {
+		return fmt.Errorf("telebot: unsupported endpoint")
+	}
+
+	ctx := b.NewContext(Update{
+		Message: &Message{
+			Text:     end,
+			Chat:     c.Chat(),
+			Sender:   c.Sender(),
+			Entities: []MessageEntity{{Type: EntityCommand, Offset: 0, Length: len(end)}},
+		},
+	})
+
+	return handler(ctx)
+}
