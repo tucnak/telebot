@@ -102,10 +102,12 @@ func (b *Bot) UserBoosts(chat, user Recipient) ([]Boost, error) {
 	}
 
 	var resp struct {
-		Result []Boost `json:"boosts"`
+		Result struct {
+			Boosts []Boost `json:"boosts"`
+		}
 	}
 	if err := json.Unmarshal(data, &resp); err != nil {
 		return nil, wrapError(err)
 	}
-	return resp.Result, nil
+	return resp.Result.Boosts, nil
 }

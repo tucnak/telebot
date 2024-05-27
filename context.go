@@ -16,12 +16,6 @@ type Context interface {
 	// Bot returns the bot instance.
 	Bot() *Bot
 
-	// Boost returns the boost instance.
-	Boost() *BoostUpdated
-
-	// BoostRemoved returns the boost removed from a chat instance.
-	BoostRemoved() *BoostRemoved
-
 	// Update returns the original update.
 	Update() Update
 
@@ -164,6 +158,12 @@ type Context interface {
 	// RespondAlert sends an alert response for the current callback query.
 	RespondAlert(text string) error
 
+	// Boost returns the boost instance.
+	Boost() *BoostUpdated
+
+	// BoostRemoved returns the boost removed from a chat instance.
+	BoostRemoved() *BoostRemoved
+
 	// Get retrieves data from the context.
 	Get(key string) interface{}
 
@@ -301,9 +301,16 @@ func (c *nativeContext) Sender() *User {
 		return c.u.ChatMember.Sender
 	case c.u.ChatJoinRequest != nil:
 		return c.u.ChatJoinRequest.Sender
-	default:
-		return nil
+	case c.u.Boost != nil:
+		if b := c.u.Boost.Boost; b != nil && b.Source != nil {
+			return b.Source.Booster
+		}
+	case c.u.BoostRemoved != nil:
+		if b := c.u.BoostRemoved; b.Source != nil {
+			return b.Source.Booster
+		}
 	}
+	return nil
 }
 
 func (c *nativeContext) Chat() *Chat {
