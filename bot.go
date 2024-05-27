@@ -1260,3 +1260,25 @@ func (b *Bot) botInfo(language, key string) (*BotInfo, error) {
 	}
 	return resp.Result, nil
 }
+
+// Trigger executes the registered handler by the endpoint.
+func (b *Bot) Trigger(endpoint any, c Context) error {
+	var (
+		ok      bool
+		handler HandlerFunc
+	)
+
+	switch end := endpoint.(type) {
+	case string:
+		handler, ok = b.handlers[end]
+	case CallbackEndpoint:
+		handler, ok = b.handlers[end.CallbackUnique()]
+	default:
+		return fmt.Errorf("telebot: unsupported endpoint")
+	}
+	if !ok {
+		return fmt.Errorf("telebot: no handler registered for provided endpoint")
+	}
+
+	return handler(c)
+}
