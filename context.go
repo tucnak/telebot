@@ -302,22 +302,15 @@ func (c *nativeContext) Sender() *User {
 	case c.u.ChatJoinRequest != nil:
 		return c.u.ChatJoinRequest.Sender
 	case c.u.Boost != nil:
-		b := c.u.Boost
-		if b.Boost == nil && b.Boost.Source == nil {
-			return nil
+		if b := c.u.Boost.Boost; b != nil && b.Source != nil {
+			return b.Source.Booster
 		}
-
-		return b.Boost.Source.Booster
 	case c.u.BoostRemoved != nil:
-		src := c.u.BoostRemoved.Source
-		if src == nil {
-			return nil
+		if b := c.u.BoostRemoved; b.Source != nil {
+			return b.Source.Booster
 		}
-
-		return src.Booster
-	default:
-		return nil
 	}
+	return nil
 }
 
 func (c *nativeContext) Chat() *Chat {
