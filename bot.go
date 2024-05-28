@@ -175,22 +175,33 @@ var (
 //
 //	b.Handle("/ban", onBan, middleware.Whitelist(ids...))
 func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
+	end := extractEndpoint(endpoint)
+	if end == "" {
+		panic("telebot: unsupported endpoint")
+	}
+
 	if len(b.group.middleware) > 0 {
 		m = appendMiddleware(b.group.middleware, m)
 	}
 
-	handler := func(c Context) error {
+	b.handlers[end] = func(c Context) error {
 		return applyMiddleware(h, m...)(c)
 	}
+}
 
-	switch end := endpoint.(type) {
-	case string:
-		b.handlers[end] = handler
-	case CallbackEndpoint:
-		b.handlers[end.CallbackUnique()] = handler
-	default:
-		panic("telebot: unsupported endpoint")
+// Trigger executes the registered handler by the endpoint.
+func (b *Bot) Trigger(endpoint interface{}, c Context) error {
+	end := extractEndpoint(endpoint)
+	if end == "" {
+		return fmt.Errorf("telebot: unsupported endpoint")
 	}
+
+	handler, ok := b.handlers[end]
+	if !ok {
+		return fmt.Errorf("telebot: no handler found for given endpoint")
+	}
+
+	return handler(c)
 }
 
 // Start brings bot into motion by consuming incoming
@@ -1261,24 +1272,12 @@ func (b *Bot) botInfo(language, key string) (*BotInfo, error) {
 	return resp.Result, nil
 }
 
-// Trigger executes the registered handler by the endpoint.
-func (b *Bot) Trigger(endpoint any, c Context) error {
-	var (
-		ok      bool
-		handler HandlerFunc
-	)
-
+func extractEndpoint(endpoint interface{}) string {
 	switch end := endpoint.(type) {
 	case string:
-		handler, ok = b.handlers[end]
+		return end
 	case CallbackEndpoint:
-		handler, ok = b.handlers[end.CallbackUnique()]
-	default:
-		return fmt.Errorf("telebot: unsupported endpoint")
+		return end.CallbackUnique()
 	}
-	if !ok {
-		return fmt.Errorf("telebot: no handler registered for provided endpoint")
-	}
-
-	return handler(c)
+	return ""
 }
