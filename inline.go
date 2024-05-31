@@ -80,7 +80,7 @@ type QueryResponseButton struct {
 
 	// (Optional) Deep-linking parameter for the /start message sent to the bot
 	// when a user presses the button. 1-64 characters, only A-Z, a-z, 0-9, _ and - are allowed.
-	Start string `json:"start_parameter"`
+	Start string `json:"start_parameter,omitempty"`
 }
 
 // SwitchInlineQuery represents an inline button that switches the current
