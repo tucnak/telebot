@@ -204,7 +204,7 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 	}
 
 	if opt.HasSpoiler {
-		params["spoiler"] = "true"
+		params["has_spoiler"] = "true"
 	}
 }
 
