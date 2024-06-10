@@ -1,7 +1,6 @@
 package telebot
 
 import (
-	"encoding/json"
 	"strconv"
 	"time"
 	"unicode/utf16"
@@ -719,34 +718,4 @@ type ReplyParams struct {
 
 	// (Optional) Position of the quote in the original message in UTF-16 code units.
 	QuotePosition int `json:"quote_position"`
-}
-
-// React changes the chosen reactions on a message. Service messages can't be
-// reacted to. Automatically forwarded messages from a channel to its discussion group have
-// the same available reactions as messages in the channel.
-func (b *Bot) React(to Recipient, msg Editable, opts ...ReactionOptions) error {
-	if to == nil {
-		return ErrBadRecipient
-	}
-	msgID, _ := msg.MessageSig()
-
-	params := map[string]string{
-		"chat_id":    to.Recipient(),
-		"message_id": msgID,
-	}
-
-	if len(opts) > 0 {
-		opt := opts[0]
-
-		if len(opt.Reactions) > 0 {
-			data, _ := json.Marshal(opt.Reactions)
-			params["reaction"] = string(data)
-		}
-		if opt.Big {
-			params["is_big"] = "true"
-		}
-	}
-
-	_, err := b.Raw("setMessageReaction", params)
-	return err
 }
