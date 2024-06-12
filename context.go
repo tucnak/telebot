@@ -13,6 +13,7 @@ type HandlerFunc func(Context) error
 
 // Context wraps an update and represents the context of current event.
 type Context interface {
+
 	// Bot returns the bot instance.
 	Bot() *Bot
 
@@ -131,7 +132,7 @@ type Context interface {
 
 	// Delete removes the current message.
 	// See Delete from bot.go.
-	Delete() error
+	Delete(opts ...interface{}) error
 
 	// DeleteAfter waits for the duration to elapse and then removes the
 	// message. It handles an error automatically using b.OnError callback.
@@ -395,11 +396,13 @@ func (c *nativeContext) Args() []string {
 }
 
 func (c *nativeContext) Send(what interface{}, opts ...interface{}) error {
+	opts = append(opts, UseWebhook)
 	_, err := c.b.Send(c.Recipient(), what, opts...)
 	return err
 }
 
 func (c *nativeContext) SendAlbum(a Album, opts ...interface{}) error {
+	opts = append(opts, UseWebhook)
 	_, err := c.b.SendAlbum(c.Recipient(), a, opts...)
 	return err
 }
@@ -409,11 +412,13 @@ func (c *nativeContext) Reply(what interface{}, opts ...interface{}) error {
 	if msg == nil {
 		return ErrBadContext
 	}
+	opts = append(opts, UseWebhook)
 	_, err := c.b.Reply(msg, what, opts...)
 	return err
 }
 
 func (c *nativeContext) Forward(msg Editable, opts ...interface{}) error {
+	opts = append(opts, UseWebhook)
 	_, err := c.b.Forward(c.Recipient(), msg, opts...)
 	return err
 }
@@ -423,11 +428,13 @@ func (c *nativeContext) ForwardTo(to Recipient, opts ...interface{}) error {
 	if msg == nil {
 		return ErrBadContext
 	}
+	opts = append(opts, UseWebhook)
 	_, err := c.b.Forward(to, msg, opts...)
 	return err
 }
 
 func (c *nativeContext) Edit(what interface{}, opts ...interface{}) error {
+	opts = append(opts, UseWebhook)
 	if c.u.InlineResult != nil {
 		_, err := c.b.Edit(c.u.InlineResult, what, opts...)
 		return err
@@ -440,6 +447,7 @@ func (c *nativeContext) Edit(what interface{}, opts ...interface{}) error {
 }
 
 func (c *nativeContext) EditCaption(caption string, opts ...interface{}) error {
+	opts = append(opts, UseWebhook)
 	if c.u.InlineResult != nil {
 		_, err := c.b.EditCaption(c.u.InlineResult, caption, opts...)
 		return err
@@ -467,12 +475,13 @@ func (c *nativeContext) EditOrReply(what interface{}, opts ...interface{}) error
 	return err
 }
 
-func (c *nativeContext) Delete() error {
+func (c *nativeContext) Delete(opts ...interface{}) error {
 	msg := c.Message()
 	if msg == nil {
 		return ErrBadContext
 	}
-	return c.b.Delete(msg)
+	opts = append(opts, UseWebhook)
+	return c.b.Delete(msg, opts...)
 }
 
 func (c *nativeContext) DeleteAfter(d time.Duration) *time.Timer {

@@ -112,6 +112,9 @@ const (
 
 	OnBoost        = "\aboost_updated"
 	OnBoostRemoved = "\aboost_removed"
+
+	// Action
+	OnForward = "\aforward"
 )
 
 // ChatAction is a client-side status indicating bot activity.

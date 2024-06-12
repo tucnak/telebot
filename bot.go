@@ -77,6 +77,7 @@ type Bot struct {
 
 	group       *Group
 	handlers    map[string]HandlerFunc
+	response    map[string]interface{}
 	synchronous bool
 	verbose     bool
 	parseMode   ParseMode
@@ -154,7 +155,7 @@ func (b *Bot) Use(middleware ...MiddlewareFunc) {
 
 var (
 	cmdRx   = regexp.MustCompile(`^(/\w+)(@(\w+))?(\s|$)(.+)?`)
-	cbackRx = regexp.MustCompile(`^\f([-\w]+)(\|(.+))?$`)
+	cbackRx = regexp.MustCompile(`^\f([-\w/]+)(\|(.+))?$`)
 )
 
 // Handle lets you set the handler for some command name or
@@ -202,6 +203,11 @@ func (b *Bot) Trigger(endpoint interface{}, c Context) error {
 	}
 
 	return handler(c)
+}
+
+// Response returns the last response object.
+func (b *Bot) Response() map[string]interface{} {
+	return b.response
 }
 
 // Start brings bot into motion by consuming incoming
@@ -692,13 +698,16 @@ func (b *Bot) EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*M
 //   - If the bot is an administrator of a group, it can delete any message there.
 //   - If the bot has can_delete_messages permission in a supergroup or a
 //     channel, it can delete any message there.
-func (b *Bot) Delete(msg Editable) error {
+func (b *Bot) Delete(msg Editable, opts ...interface{}) error {
 	msgID, chatID := msg.MessageSig()
 
 	params := map[string]string{
 		"chat_id":    strconv.FormatInt(chatID, 10),
 		"message_id": msgID,
 	}
+
+	sendOpts := extractOptions(opts)
+	b.embedSendOptions(params, sendOpts)
 
 	_, err := b.Raw("deleteMessage", params)
 	return err

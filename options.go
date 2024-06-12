@@ -34,6 +34,12 @@ const (
 
 	// RemoveKeyboard = ReplyMarkup.RemoveKeyboard
 	RemoveKeyboard
+
+	// UseWebhook
+	UseWebhook
+
+	// NoWebhook
+	NoWebhook
 )
 
 // Placeholder is used to set input field placeholder as a send option.
@@ -86,6 +92,12 @@ type SendOptions struct {
 
 	// ReplyParams Describes the message to reply to
 	ReplyParams *ReplyParams
+
+	// UseWebhook forces the message to be sent via webhook.
+	UseWebhook bool
+
+	// NoWebhook forces the message to be sent via long-polling.
+	NoWebhook bool
 }
 
 func (og *SendOptions) copy() *SendOptions {
@@ -134,6 +146,10 @@ func extractOptions(how []interface{}) *SendOptions {
 				opts.ReplyMarkup.RemoveKeyboard = true
 			case Protected:
 				opts.Protected = true
+			case UseWebhook:
+				opts.UseWebhook = true
+			case NoWebhook:
+				opts.NoWebhook = true
 			default:
 				panic("telebot: unsupported flag-option")
 			}
@@ -205,6 +221,14 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 
 	if opt.HasSpoiler {
 		params["spoiler"] = "true"
+	}
+
+	if opt.UseWebhook {
+		params["use_webhook"] = "true"
+	}
+
+	if opt.NoWebhook {
+		delete(params, "use_webhook")
 	}
 }
 

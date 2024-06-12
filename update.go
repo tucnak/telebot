@@ -1,6 +1,8 @@
 package telebot
 
-import "strings"
+import (
+	"strings"
+)
 
 // Update object represents an incoming update.
 type Update struct {
@@ -29,6 +31,9 @@ type Update struct {
 // ProcessUpdate processes a single incoming update.
 // A started bot calls this function automatically.
 func (b *Bot) ProcessUpdate(u Update) {
+	// Reset the response object
+	b.response = nil
+
 	c := b.NewContext(u)
 
 	if u.Message != nil {
@@ -37,6 +42,12 @@ func (b *Bot) ProcessUpdate(u Update) {
 		if m.PinnedMessage != nil {
 			b.handle(OnPinned, c)
 			return
+		}
+
+		if m.Origin != nil {
+			if b.handle(OnForward, c) {
+				return
+			}
 		}
 
 		// Commands
@@ -255,7 +266,11 @@ func (b *Bot) ProcessUpdate(u Update) {
 			match := cbackRx.FindAllStringSubmatch(data, -1)
 			if match != nil {
 				unique, payload := match[0][1], match[0][3]
-				if handler, ok := b.handlers["\f"+unique]; ok {
+				end := "\f" + unique
+				if len(unique) > 1 && unique[0] == '/' {
+					end = unique
+				}
+				if handler, ok := b.handlers[end]; ok {
 					u.Callback.Unique = unique
 					u.Callback.Data = payload
 					b.runHandler(handler, c)
