@@ -163,19 +163,6 @@ type Currency struct {
 	MaxAmount    interface{} `json:"max_amount"`
 }
 
-type RefundStarPayment struct {
-	UserID                  int    `json:"userID"`
-	TelegramPaymentChargeId string `json:"telegramPaymentChargeId"`
-}
-
-func (r RefundStarPayment) params() map[string]string {
-	params := map[string]string{
-		"user_id":                    strconv.Itoa(r.UserID),
-		"telegram_payment_charge_id": r.TelegramPaymentChargeId,
-	}
-	return params
-}
-
 func (c Currency) FromTotal(total int) float64 {
 	return float64(total) / math.Pow(10, float64(c.Exp))
 }

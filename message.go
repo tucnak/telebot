@@ -108,8 +108,8 @@ type Message struct {
 	// if it is a text message and link preview options were changed.
 	PreviewOptions *PreviewOptions `json:"link_preview_options,omitempty"`
 
-	//Optional. Unique identifier of the message effect added to the message
-	EffectId string `json:"effect_id"`
+	// (Optional) Unique identifier of the message effect added to the message
+	EffectID string `json:"effect_id"`
 
 	// Some messages containing media, may as well have a caption.
 	Caption string `json:"caption,omitempty"`
@@ -327,6 +327,7 @@ type Message struct {
 	// Service message: represents spoiler information about the message.
 	HasMediaSpoiler bool `json:"has_media_spoiler,omitempty"`
 
+	// (Optional) Pass True, if the caption must be shown above the message media
 	ShowCaptionAboveMedia bool `json:"show_caption_above_media"`
 
 	// Service message: the user allowed the bot added to the attachment menu to write messages
@@ -364,24 +365,25 @@ type MessageEntity struct {
 type EntityType string
 
 const (
-	EntityMention       EntityType = "mention"
-	EntityTMention      EntityType = "text_mention"
-	EntityHashtag       EntityType = "hashtag"
-	EntityCashtag       EntityType = "cashtag"
-	EntityCommand       EntityType = "bot_command"
-	EntityURL           EntityType = "url"
-	EntityEmail         EntityType = "email"
-	EntityPhone         EntityType = "phone_number"
-	EntityBold          EntityType = "bold"
-	EntityItalic        EntityType = "italic"
-	EntityUnderline     EntityType = "underline"
-	EntityStrikethrough EntityType = "strikethrough"
-	EntityCode          EntityType = "code"
-	EntityCodeBlock     EntityType = "pre"
-	EntityTextLink      EntityType = "text_link"
-	EntitySpoiler       EntityType = "spoiler"
-	EntityCustomEmoji   EntityType = "custom_emoji"
-	EntityBlockquote    EntityType = "blockquote"
+	EntityMention              EntityType = "mention"
+	EntityTMention             EntityType = "text_mention"
+	EntityHashtag              EntityType = "hashtag"
+	EntityCashtag              EntityType = "cashtag"
+	EntityCommand              EntityType = "bot_command"
+	EntityURL                  EntityType = "url"
+	EntityEmail                EntityType = "email"
+	EntityPhone                EntityType = "phone_number"
+	EntityBold                 EntityType = "bold"
+	EntityItalic               EntityType = "italic"
+	EntityUnderline            EntityType = "underline"
+	EntityStrikethrough        EntityType = "strikethrough"
+	EntityCode                 EntityType = "code"
+	EntityCodeBlock            EntityType = "pre"
+	EntityTextLink             EntityType = "text_link"
+	EntitySpoiler              EntityType = "spoiler"
+	EntityCustomEmoji          EntityType = "custom_emoji"
+	EntityBlockquote           EntityType = "blockquote"
+	EntityExpandableBlockquote EntityType = "expandable_blockquote"
 )
 
 // Entities are used to set message's text entities as a send option.
