@@ -330,6 +330,19 @@ func (i *Invoice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 	return extractMessage(data)
 }
 
+func (r *RefundStarPayment) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
+	params := r.params()
+
+	b.embedSendOptions(params, opt)
+
+	data, err := b.Raw("refundStarPayment", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMessage(data)
+}
+
 // Send delivers poll through bot b to recipient.
 func (p *Poll) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{

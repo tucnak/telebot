@@ -68,7 +68,7 @@ type Invoice struct {
 	Payload     string  `json:"payload"`
 	Currency    string  `json:"currency"`
 	Prices      []Price `json:"prices"`
-	Token       string  `json:"provider_token"`
+	Token       string  `json:"provider_token,omitempty"`
 	Data        string  `json:"provider_data"`
 
 	Photo     *Photo `json:"photo"`
@@ -161,6 +161,19 @@ type Currency struct {
 	Exp          int         `json:"exp"`
 	MinAmount    interface{} `json:"min_amount"`
 	MaxAmount    interface{} `json:"max_amount"`
+}
+
+type RefundStarPayment struct {
+	UserID                  int    `json:"userID"`
+	TelegramPaymentChargeId string `json:"telegramPaymentChargeId"`
+}
+
+func (r RefundStarPayment) params() map[string]string {
+	params := map[string]string{
+		"user_id":                    strconv.Itoa(r.UserID),
+		"telegram_payment_charge_id": r.TelegramPaymentChargeId,
+	}
+	return params
 }
 
 func (c Currency) FromTotal(total int) float64 {
