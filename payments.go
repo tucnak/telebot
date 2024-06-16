@@ -68,7 +68,7 @@ type Invoice struct {
 	Payload     string  `json:"payload"`
 	Currency    string  `json:"currency"`
 	Prices      []Price `json:"prices"`
-	Token       string  `json:"provider_token"`
+	Token       string  `json:"provider_token,omitempty"`
 	Data        string  `json:"provider_data"`
 
 	Photo     *Photo `json:"photo"`
