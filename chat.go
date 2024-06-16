@@ -73,6 +73,7 @@ type Chat struct {
 	ProfileBackgroundEmojiID string        `json:"profile_background_custom_emoji_id"`
 	HasVisibleHistory        bool          `json:"has_visible_history"`
 	UnrestrictBoosts         int           `json:"unrestrict_boost_count"`
+	MaxReactionCount         int           `json:"max_reaction_count"`
 }
 
 // Recipient returns chat ID (see Recipient interface).
@@ -164,6 +165,11 @@ type ChatMemberUpdate struct {
 	// (Optional) InviteLink which was used by the user to
 	// join the chat; for joining by invite link events only.
 	InviteLink *ChatInviteLink `json:"invite_link"`
+
+	// (Optional) True, if the user joined the chat after sending
+	//a direct join request without using an invite link and being
+	//approved by an administrator
+	ViaJoinRequest bool `json:"via_join_request"`
 
 	// (Optional) True, if the user joined the chat via a chat folder invite link.
 	ViaFolderLink bool `json:"via_chat_folder_invite_link"`
@@ -259,6 +265,30 @@ type Story struct {
 
 	// Chat that posted the story
 	Poster *Chat `json:"chat"`
+}
+
+type BackgroundFill struct {
+	// Type of the background fill, always “solid”
+	Type string `json:"type"`
+
+	// The color of the background fill in the RGB24 format
+	Color int `json:"color"`
+}
+
+type BackgroundType struct {
+	// Type of the background, always “fill”
+	Type string `json:"type"`
+
+	// The background fill
+	Fill BackgroundFill `json:"fill"`
+
+	// Dimming of the background in dark themes, as a percentage; 0-100
+	DarkThemeDimming int `json:"dark_theme_dimming"`
+}
+
+type ChatBackground struct {
+	// Type of the background
+	Type BackgroundType `json:"type"`
 }
 
 // ExpireDate returns the moment of the link expiration in local time.
