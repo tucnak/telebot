@@ -67,9 +67,10 @@ func (a Album) SetCaption(caption string) {
 type Photo struct {
 	File
 
-	Width   int    `json:"width"`
-	Height  int    `json:"height"`
-	Caption string `json:"caption,omitempty"`
+	Width                 int    `json:"width"`
+	Height                int    `json:"height"`
+	Caption               string `json:"caption,omitempty"`
+	ShowCaptionAboveMedia bool   `json:"show_caption_above_media,omitempty"`
 }
 
 type photoSize struct {
@@ -196,11 +197,12 @@ type Video struct {
 	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
-	Caption   string `json:"caption,omitempty"`
-	Thumbnail *Photo `json:"thumbnail,omitempty"`
-	Streaming bool   `json:"supports_streaming,omitempty"`
-	MIME      string `json:"mime_type,omitempty"`
-	FileName  string `json:"file_name,omitempty"`
+	Caption               string `json:"caption,omitempty"`
+	Thumbnail             *Photo `json:"thumbnail,omitempty"`
+	Streaming             bool   `json:"supports_streaming,omitempty"`
+	MIME                  string `json:"mime_type,omitempty"`
+	FileName              string `json:"file_name,omitempty"`
+	ShowCaptionAboveMedia bool   `json:"show_caption_above_media,omitempty"`
 }
 
 func (v *Video) MediaType() string {
@@ -232,10 +234,11 @@ type Animation struct {
 	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
-	Caption   string `json:"caption,omitempty"`
-	Thumbnail *Photo `json:"thumbnail,omitempty"`
-	MIME      string `json:"mime_type,omitempty"`
-	FileName  string `json:"file_name,omitempty"`
+	Caption               string `json:"caption,omitempty"`
+	Thumbnail             *Photo `json:"thumbnail,omitempty"`
+	MIME                  string `json:"mime_type,omitempty"`
+	FileName              string `json:"file_name,omitempty"`
+	ShowCaptionAboveMedia bool   `json:"show_caption_above_media,omitempty"`
 }
 
 func (a *Animation) MediaType() string {
