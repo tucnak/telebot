@@ -74,6 +74,10 @@ func (b *Bot) ProcessUpdate(u Update) {
 			return
 		}
 
+		if m.Origin != nil && m.Text == "" {
+			b.handle(OnForward, c)
+		}
+
 		if m.Contact != nil {
 			b.handle(OnContact, c)
 			return
