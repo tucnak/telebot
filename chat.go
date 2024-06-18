@@ -73,6 +73,7 @@ type Chat struct {
 	ProfileBackgroundEmojiID string        `json:"profile_background_custom_emoji_id"`
 	HasVisibleHistory        bool          `json:"has_visible_history"`
 	UnrestrictBoosts         int           `json:"unrestrict_boost_count"`
+	MaxReactionCount         int           `json:"max_reaction_count"`
 }
 
 // Recipient returns chat ID (see Recipient interface).
@@ -164,6 +165,11 @@ type ChatMemberUpdate struct {
 	// (Optional) InviteLink which was used by the user to
 	// join the chat; for joining by invite link events only.
 	InviteLink *ChatInviteLink `json:"invite_link"`
+
+	// (Optional) True, if the user joined the chat after sending
+	//a direct join request without using an invite link and being
+	//approved by an administrator
+	ViaJoinRequest bool `json:"via_join_request"`
 
 	// (Optional) True, if the user joined the chat via a chat folder invite link.
 	ViaFolderLink bool `json:"via_chat_folder_invite_link"`
@@ -259,6 +265,60 @@ type Story struct {
 
 	// Chat that posted the story
 	Poster *Chat `json:"chat"`
+}
+
+type BackgroundFill struct {
+	// Type of the background fill, always “solid”
+	Type string `json:"type"`
+
+	// The color of the background fill in the RGB24 format
+	Color int `json:"color,omitempty"`
+
+	// Top color of the gradient in the RGB24 format
+	TopColor int `json:"top_color,omitempty"`
+
+	// Bottom color of the gradient in the RGB24 format
+	BottomColor int `json:"bottom_color,omitempty"`
+
+	// Clockwise rotation angle of the background fill in degrees; 0-359
+	RotationAngle int `json:"rotation_angle,omitempty"`
+
+	// A list of the 3 or 4 base colors that are used to generate
+	// the freeform gradient in the RGB24 format
+	Colors []int `json:"colors,omitempty"`
+}
+
+type BackgroundType struct {
+	// Type of the background, always “fill”
+	Type string `json:"type"`
+
+	// The background fill
+	Fill BackgroundFill `json:"fill,omitempty"`
+
+	// Document with the wallpaper
+	Document Document `json:"document,omitempty"`
+
+	// Dimming of the background in dark themes, as a percentage; 0-100
+	DarkThemeDimming int `json:"dark_theme_dimming,omitempty"`
+
+	// Intensity of the pattern when it is shown above the filled background; 0-100
+	Intensity int `json:"intensity,omitempty"`
+
+	// (Optional) True, if the wallpaper is downscaled to fit in a 450x450
+	// square and then box-blurred with radius 12
+	IsBlurred bool `json:"is_blurred,omitempty"`
+
+	// (Optional) True, if the background moves slightly when the device is tilted
+	IsMoving bool `json:"is_moving,omitempty"`
+
+	// (Optional) True, if the background fill must be applied only to the pattern itself.
+	// All other pixels are black in this case. For dark themes only
+	IsInverted bool `json:"is_inverted,omitempty"`
+}
+
+type ChatBackground struct {
+	// Type of the background
+	Type BackgroundType `json:"type"`
 }
 
 // ExpireDate returns the moment of the link expiration in local time.

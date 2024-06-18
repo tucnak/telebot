@@ -299,6 +299,9 @@ type Message struct {
 	// Service message: user boosted the chat.
 	BoostAdded *BoostAdded `json:"boost_added"`
 
+	// Service message: chat background set
+	ChatBackgroundSet ChatBackground `json:"chat_background_set"`
+
 	// If the sender of the message boosted the chat, the number of boosts
 	// added by the user.
 	SenderBoostCount int `json:"sender_boost_count"`
