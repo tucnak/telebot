@@ -1,25 +1,47 @@
 package telebot
 
+import "time"
+
+type TransactionType = string
+
+const (
+	TransactionTypeFragment       TransactionType = "fragment"
+	TransactionTypeUser           TransactionType = "user"
+	TransactionTypeOther          TransactionType = "other"
+	TransactionPartnerTelegramAds TransactionType = "telegram_ads"
+)
+
+type RevenueState = string
+
+const (
+	RevenueStatePending   RevenueState = "pending"
+	RevenueStateSucceeded RevenueState = "succeeded"
+	RevenueStateFailed    RevenueState = "failed"
+)
+
+type TransactionPartner struct {
+	// Type of the state
+	Type TransactionType `json:"type"`
+
+	// (Optional) State of the transaction if the transaction is outgoing$$
+	WithdrawalState RevenueWithdrawalState `json:"withdrawal_state,omitempty"`
+
+	// Information about the user
+	Partner *User `json:"user,omitempty"`
+
+	// (Optional) Bot-specified invoice payload
+	InvoicePayload string `json:"invoice_payload"`
+}
+
 type RevenueWithdrawalState struct {
-	// Type of the state, always “pending”
-	Type string `json:"type"`
+	// Type of the state
+	Type RevenueState `json:"type"`
 
 	// Date the withdrawal was completed in Unix time
 	Date int `json:"date,omitempty"`
 
 	// An HTTPS URL that can be used to see transaction details
 	URL string `json:"url,omitempty"`
-}
-
-type TransactionPartner struct {
-	// Type of the state, always “fragment”
-	Type string `json:"type"`
-
-	// (Optional) State of the transaction if the transaction is outgoing$$
-	WithdrawalState RevenueWithdrawalState `json:"withdrawal_state,omitempty"`
-
-	// Information about the user
-	User User `json:"user,omitempty"`
 }
 
 type StarTransaction struct {
@@ -33,18 +55,18 @@ type StarTransaction struct {
 	Amount int `json:"amount"`
 
 	// Date the transaction was created in Unix time
-	Date int `json:"date"`
+	Unixtime int64 `json:"date"`
 
 	// (Optional) Source of an incoming transaction (e.g., a user purchasing goods
-	//or services, Fragment refunding a failed withdrawal). Only for incoming transactions
+	// or services, Fragment refunding a failed withdrawal). Only for incoming transactions
 	Source TransactionPartner `json:"source"`
 
 	// (Optional) Receiver of an outgoing transaction (e.g., a user for a purchase
-	//refund, Fragment for a withdrawal). Only for outgoing transactions
+	// refund, Fragment for a withdrawal). Only for outgoing transactions
 	Receiver TransactionPartner `json:"receiver"`
 }
 
-type StarTransactions struct {
-	// The list of transactions
-	Transactions []StarTransaction `json:"transactions"`
+// Date returns the local datetime.
+func (c *StarTransaction) Date() time.Time {
+	return time.Unix(c.Unixtime, 0)
 }
