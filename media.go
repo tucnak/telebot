@@ -341,6 +341,10 @@ type Location struct {
 	// Period in seconds for which the location will be updated
 	// (see Live Locations, should be between 60 and 86400.)
 	LivePeriod int `json:"live_period,omitempty"`
+
+	// (Optional) Unique identifier of the business connection
+	// on behalf of which the message to be edited was sent
+	BusinessConnectionID string `json:"business_connection_id"`
 }
 
 // Venue object represents a venue location with name, address and

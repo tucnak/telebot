@@ -1252,6 +1252,26 @@ func (b *Bot) MyShortDescription(language string) (*BotInfo, error) {
 	return b.botInfo(language, "getMyShortDescription")
 }
 
+func (b *Bot) GetStarTransactions(offset, limit int) (*StarTransaction, error) {
+	params := map[string]int{
+		"offset": offset,
+		"limit":  limit,
+	}
+
+	data, err := b.Raw("getStarTransactions", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result *StarTransaction
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return resp.Result, nil
+}
+
 func (b *Bot) botInfo(language, key string) (*BotInfo, error) {
 	params := map[string]string{
 		"language_code": language,
