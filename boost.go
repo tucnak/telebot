@@ -36,9 +36,9 @@ func (c *Boost) ExpirationDate() time.Time {
 type BoostSourceType = string
 
 const (
-	BoostPremium  = "premium"
-	BoostGiftCode = "gift_code"
-	BoostGiveaway = "giveaway"
+	BoostPremium  BoostSourceType = "premium"
+	BoostGiftCode BoostSourceType = "gift_code"
+	BoostGiveaway BoostSourceType = "giveaway"
 )
 
 // BoostSource describes the source of a chat boost.

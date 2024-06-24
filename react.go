@@ -1,7 +1,8 @@
 package telebot
 
-// EmojiType defines emoji types.
-type EmojiType = string
+import (
+	"encoding/json"
+)
 
 // Reaction describes the type of reaction.
 // Describes an instance of ReactionTypeCustomEmoji and ReactionTypeEmoji.
@@ -10,7 +11,7 @@ type Reaction struct {
 	Type string `json:"type"`
 
 	// Reaction emoji.
-	Emoji EmojiType `json:"emoji,omitempty"`
+	Emoji string `json:"emoji,omitempty"`
 
 	// Custom emoji identifier.
 	CustomEmoji string `json:"custom_emoji_id,omitempty"`
@@ -33,4 +34,34 @@ type ReactionOptions struct {
 
 	// Pass True to set the reaction with a big animation.
 	Big bool `json:"is_big"`
+}
+
+// React changes the chosen reactions on a message. Service messages can't be
+// reacted to. Automatically forwarded messages from a channel to its discussion group have
+// the same available reactions as messages in the channel.
+func (b *Bot) React(to Recipient, msg Editable, opts ...ReactionOptions) error {
+	if to == nil {
+		return ErrBadRecipient
+	}
+	msgID, _ := msg.MessageSig()
+
+	params := map[string]string{
+		"chat_id":    to.Recipient(),
+		"message_id": msgID,
+	}
+
+	if len(opts) > 0 {
+		opt := opts[0]
+
+		if len(opt.Reactions) > 0 {
+			data, _ := json.Marshal(opt.Reactions)
+			params["reaction"] = string(data)
+		}
+		if opt.Big {
+			params["is_big"] = "true"
+		}
+	}
+
+	_, err := b.Raw("setMessageReaction", params)
+	return err
 }

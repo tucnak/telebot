@@ -254,6 +254,37 @@ func (b *Bot) getUpdates(offset, limit int, timeout time.Duration, allowed []str
 	return resp.Result, nil
 }
 
+func (b *Bot) forwardCopyMany(to Recipient, msgs []Editable, key string, opts ...*SendOptions) ([]Message, error) {
+	params := map[string]string{
+		"chat_id": to.Recipient(),
+	}
+
+	embedMessages(params, msgs)
+
+	if len(opts) > 0 {
+		b.embedSendOptions(params, opts[0])
+	}
+
+	data, err := b.Raw(key, params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result []Message
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		var resp struct {
+			Result bool
+		}
+		if err := json.Unmarshal(data, &resp); err != nil {
+			return nil, wrapError(err)
+		}
+		return nil, wrapError(err)
+	}
+	return resp.Result, nil
+}
+
 // extractOk checks given result for error. If result is ok returns nil.
 // In other cases it extracts API error. If error is not presented
 // in errors.go, it will be prefixed with `unknown` keyword.
@@ -321,37 +352,6 @@ func extractMessage(data []byte) (*Message, error) {
 		}
 		if resp.Result {
 			return nil, ErrTrueResult
-		}
-		return nil, wrapError(err)
-	}
-	return resp.Result, nil
-}
-
-func (b *Bot) forwardCopyMessages(to Recipient, msgs []Editable, key string, opts ...*SendOptions) ([]Message, error) {
-	params := map[string]string{
-		"chat_id": to.Recipient(),
-	}
-
-	embedMessages(params, msgs)
-
-	if len(opts) > 0 {
-		b.embedSendOptions(params, opts[0])
-	}
-
-	data, err := b.Raw(key, params)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		Result []Message
-	}
-	if err := json.Unmarshal(data, &resp); err != nil {
-		var resp struct {
-			Result bool
-		}
-		if err := json.Unmarshal(data, &resp); err != nil {
-			return nil, wrapError(err)
 		}
 		return nil, wrapError(err)
 	}

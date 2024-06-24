@@ -12,7 +12,7 @@ import (
 var b, _ = tele.NewBot(tele.Settings{Offline: true})
 
 func TestRecover(t *testing.T) {
-	onError := func(err error) {
+	onError := func(err error, c tele.Context) {
 		require.Error(t, err, "recover test")
 	}
 

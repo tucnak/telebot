@@ -1,8 +1,14 @@
 package react
 
-import "gopkg.in/telebot.v3"
+import (
+	tele "gopkg.in/telebot.v3"
+)
 
-type Reaction = telebot.Reaction
+type Reaction = tele.Reaction
+
+func React(r ...Reaction) tele.ReactionOptions {
+	return tele.ReactionOptions{Reactions: r}
+}
 
 // Currently available emojis.
 var (

@@ -55,6 +55,12 @@ type Context interface {
 	// Topic returns the topic changes.
 	Topic() *Topic
 
+	// Boost returns the boost instance.
+	Boost() *BoostUpdated
+
+	// BoostRemoved returns the boost removed from a chat instance.
+	BoostRemoved() *BoostRemoved
+
 	// Sender returns the current recipient, depending on the context type.
 	// Returns nil if user is not presented.
 	Sender() *User
@@ -158,12 +164,6 @@ type Context interface {
 	// RespondAlert sends an alert response for the current callback query.
 	RespondAlert(text string) error
 
-	// Boost returns the boost instance.
-	Boost() *BoostUpdated
-
-	// BoostRemoved returns the boost removed from a chat instance.
-	BoostRemoved() *BoostRemoved
-
 	// Get retrieves data from the context.
 	Get(key string) interface{}
 
@@ -182,14 +182,6 @@ type nativeContext struct {
 
 func (c *nativeContext) Bot() *Bot {
 	return c.b
-}
-
-func (c *nativeContext) Boost() *BoostUpdated {
-	return c.u.Boost
-}
-
-func (c *nativeContext) BoostRemoved() *BoostRemoved {
-	return c.u.BoostRemoved
 }
 
 func (c *nativeContext) Update() Update {
@@ -277,6 +269,14 @@ func (c *nativeContext) Topic() *Topic {
 		return m.TopicEdited
 	}
 	return nil
+}
+
+func (c *nativeContext) Boost() *BoostUpdated {
+	return c.u.Boost
+}
+
+func (c *nativeContext) BoostRemoved() *BoostRemoved {
+	return c.u.BoostRemoved
 }
 
 func (c *nativeContext) Sender() *User {
