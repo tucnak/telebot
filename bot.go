@@ -53,7 +53,15 @@ func NewBot(pref Settings) (*Bot, error) {
 	}
 
 	if pref.Offline {
-		bot.Me = &User{}
+		var botID int64 = 0
+		if pos := strings.Index(bot.Token, ":"); pos > -1 {
+			if v, err := strconv.ParseInt(bot.Token[0:pos], 10, 64); err == nil {
+				botID = v
+			}
+		}
+		bot.Me = &User{
+			ID: botID,
+		}
 	} else {
 		user, err := bot.getMe()
 		if err != nil {
