@@ -551,7 +551,7 @@ type MessageReactionCount struct {
 	DateUnixtime int64 `json:"date"`
 
 	// List of reactions that are present on the message.
-	Reactions *ReactionCount `json:"reactions"`
+	Reactions []*ReactionCount `json:"reactions"`
 }
 
 // Time returns the moment of change in local time.
