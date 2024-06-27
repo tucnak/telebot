@@ -85,6 +85,10 @@ type Message struct {
 	// (Optional) Message can't be forwarded.
 	Protected bool `json:"has_protected_content,omitempty"`
 
+	// (Optional) True, if the message was sent by an implicit action,
+	// for example, as an away or a greeting business message, or as a scheduled message
+	FromOffline bool `json:"is_from_offline,omitempty"`
+
 	// AlbumID is the unique identifier of a media message group
 	// this message belongs to.
 	AlbumID string `json:"media_group_id"`

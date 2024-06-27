@@ -303,3 +303,24 @@ func (b *Bot) SetCustomEmojiStickerSetThumb(name, id string) error {
 	_, err := b.Raw("setCustomEmojiStickerSetThumbnail", params)
 	return err
 }
+
+// ReplaceStickerInSet returns True on success, if existing sticker was replaced with a new one
+func (b *Bot) ReplaceStickerInSet(of Recipient, name, old_sticker string, sticker InputSticker) (bool, error) {
+	files := make(map[string]File)
+	repr := sticker.File.process("0", files)
+	if repr == "" {
+		return false, errors.New("telebot: sticker does not exist")
+	}
+	sticker.Sticker = repr
+	data, _ := json.Marshal(sticker)
+
+	params := map[string]string{
+		"user_id":     of.Recipient(),
+		"name":        name,
+		"old_stikcer": old_sticker,
+		"sticker":     string(data),
+	}
+
+	_, err := b.sendFiles("replaceStickerInSet", files, params)
+	return true, err
+}

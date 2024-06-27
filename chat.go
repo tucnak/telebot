@@ -22,9 +22,10 @@ type User struct {
 	CustomEmojiStatus string   `json:"emoji_status_custom_emoji_id"`
 
 	// Returns only in getMe
-	CanJoinGroups   bool `json:"can_join_groups"`
-	CanReadMessages bool `json:"can_read_all_group_messages"`
-	SupportsInline  bool `json:"supports_inline_queries"`
+	CanJoinGroups        bool `json:"can_join_groups"`
+	CanReadMessages      bool `json:"can_read_all_group_messages"`
+	SupportsInline       bool `json:"supports_inline_queries"`
+	CanConnectToBusiness bool `json:"can_connect_to_business"`
 }
 
 // Recipient returns user ID (see Recipient interface).
@@ -73,9 +74,11 @@ type Chat struct {
 	ProfileBackgroundEmojiID string               `json:"profile_background_custom_emoji_id"`
 	HasVisibleHistory        bool                 `json:"has_visible_history"`
 	UnrestrictBoosts         int                  `json:"unrestrict_boost_count"`
-	BusinessIntro            BusinessIntro        `json:"business_intro"`
-	BusinessLocation         BusinessLocation     `json:"business_location"`
-	BusinessOpeningHours     BusinessOpeningHours `json:"business_opening_hours"`
+	Birthdate                Birthdate            `json:"birthdate,omitempty"`
+	PersonalChat             *Chat                `json:"personal_chat,omitempty"`
+	BusinessIntro            BusinessIntro        `json:"business_intro,omitempty"`
+	BusinessLocation         BusinessLocation     `json:"business_location,omitempty"`
+	BusinessOpeningHours     BusinessOpeningHours `json:"business_opening_hours,omitempty"`
 }
 
 // Recipient returns chat ID (see Recipient interface).
@@ -262,6 +265,16 @@ type Story struct {
 
 	// Chat that posted the story
 	Poster *Chat `json:"chat"`
+}
+type Birthdate struct {
+	// Day of the user's birth; 1-31
+	Day int `json:"day"`
+
+	// Month of the user's birth; 1-12
+	Month int `json:"month"`
+
+	// (Optional) Year of the user's birth
+	Year int `json:"year"`
 }
 
 // ExpireDate returns the moment of the link expiration in local time.
