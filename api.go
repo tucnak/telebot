@@ -119,6 +119,7 @@ func (b *Bot) sendFiles(method string, files map[string]File, params map[string]
 	}
 
 	if len(rawFiles) == 0 {
+		delete(params, "use_webhook")
 		return b.Raw(method, params)
 	}
 
