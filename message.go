@@ -169,6 +169,16 @@ type Message struct {
 	// (Optional) Service message: a giveaway without public winners was completed.
 	GiveawayCompleted *GiveawayCompleted `json:"giveaway_completed"`
 
+	// (Optional) Unique identifier of the business connection from which the message
+	// was received. If non-empty, the message belongs to a chat of the corresponding
+	// business account that is independent from any potential bot chat which might
+	// share the same identifier.
+	BusinessConnectionID string `json:"business_connection_id"`
+
+	// (Optional) The bot that actually sent the message on behalf of the business account.
+	// Available only for outgoing messages sent on behalf of the connected business account.
+	SenderBusinessBot *User `json:"sender_business_bot"`
+
 	// For a service message, represents a user,
 	// that just got added to chat, this message came from.
 	//
