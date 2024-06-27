@@ -41,3 +41,43 @@ type BusinessMessagesDeleted struct {
 	// The list of identifiers of deleted messages in the chat of the business account
 	MessageIDs []int `json:"message_ids"`
 }
+
+type BusinessIntro struct {
+	// (Optional)
+	// Title text of the business intro
+	Title string `json:"title"`
+
+	// Message text of the business intro
+	Message string `json:"message"`
+
+	// Sticker of the business intro
+	Sticker *Sticker `json:"sticker"`
+}
+
+type BusinessLocation struct {
+	// Address of the business
+	Address string `json:"address"`
+
+	// (Optional) Location of the business
+	Location *Location `json:"location"`
+}
+
+type BusinessOpeningHoursInterval struct {
+	// The minute's sequence number in a week, starting on Monday,
+	// marking the start of the time interval during which the business
+	// is open; 0 - 7 * 24 * 60
+	OpeningMinute int `json:"opening_minute"`
+
+	// The minute's sequence number in a week, starting on Monday,
+	// marking the start of the time interval during which the business
+	// is open; 0 - 7 * 24 * 60
+	ClosingMinute int `json:"closing_minute"`
+}
+
+type BusinessOpeningHours struct {
+	// Unique name of the time zone for which the opening hours are defined
+	TimeZoneName string `json:"time_zone_name"`
+
+	// List of time intervals describing business opening hours
+	OpeningHours []BusinessOpeningHoursInterval `json:"opening_hours"`
+}
