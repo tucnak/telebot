@@ -181,7 +181,7 @@ type Message struct {
 
 	// (Optional) The bot that actually sent the message on behalf of the business account.
 	// Available only for outgoing messages sent on behalf of the connected business account.
-	SenderBusinessBot *User `json:"sender_business_bot"`
+	BusinessBot *User `json:"sender_business_bot"`
 
 	// For a service message, represents a user,
 	// that just got added to chat, this message came from.

@@ -1271,11 +1271,11 @@ func (b *Bot) botInfo(language, key string) (*BotInfo, error) {
 	return resp.Result, nil
 }
 
-// GetBusinessConnection use this method to get information about the connection of the bot with a business account.
+// BusinessConnection use this method to get information about the connection of the bot with a business account.
 // Returns a BusinessConnection object on success.
-func (b *Bot) GetBusinessConnection(businessConnectionID string) (*BusinessConnection, error) {
+func (b *Bot) BusinessConnection(connectionID string) (*BusinessConnection, error) {
 	params := map[string]string{
-		"business_connection_id": businessConnectionID,
+		"business_connection_id": connectionID,
 	}
 
 	data, err := b.Raw("getBusinessConnection", params)
@@ -1286,6 +1286,7 @@ func (b *Bot) GetBusinessConnection(businessConnectionID string) (*BusinessConne
 	var resp struct {
 		Result *BusinessConnection
 	}
+
 	if err := json.Unmarshal(data, &resp); err != nil {
 		return nil, wrapError(err)
 	}

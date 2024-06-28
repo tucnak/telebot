@@ -305,22 +305,27 @@ func (b *Bot) SetCustomEmojiStickerSetThumb(name, id string) error {
 }
 
 // ReplaceStickerInSet returns True on success, if existing sticker was replaced with a new one
-func (b *Bot) ReplaceStickerInSet(of Recipient, name, old_sticker string, sticker InputSticker) (bool, error) {
+func (b *Bot) ReplaceStickerInSet(of Recipient, name, oldSticker string, sticker InputSticker) (bool, error) {
 	files := make(map[string]File)
+
 	repr := sticker.File.process("0", files)
 	if repr == "" {
 		return false, errors.New("telebot: sticker does not exist")
 	}
 	sticker.Sticker = repr
-	data, _ := json.Marshal(sticker)
+
+	data, err := json.Marshal(sticker)
+	if err != nil {
+		return false, err
+	}
 
 	params := map[string]string{
 		"user_id":     of.Recipient(),
 		"name":        name,
-		"old_stikcer": old_sticker,
+		"old_sticker": oldSticker,
 		"sticker":     string(data),
 	}
 
-	_, err := b.sendFiles("replaceStickerInSet", files, params)
+	_, err = b.sendFiles("replaceStickerInSet", files, params)
 	return true, err
 }
