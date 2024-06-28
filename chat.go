@@ -45,20 +45,6 @@ type Chat struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Username  string `json:"username"`
-}
-
-type ChatFullInfo struct {
-	ID int64 `json:"id"`
-
-	// See ChatType and consts.
-	Type ChatType `json:"type"`
-
-	// Won't be there for ChatPrivate.
-	Title string `json:"title"`
-
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Username  string `json:"username"`
 
 	// Returns only in getChat
 	Bio                      string        `json:"bio,omitempty"`
@@ -346,7 +332,7 @@ func (r ChatJoinRequest) Time() time.Time {
 }
 
 // Time returns the moment of the emoji status expiration.
-func (c *ChatFullInfo) Time() time.Time {
+func (c *Chat) Time() time.Time {
 	return time.Unix(c.EmojiExpirationUnixtime, 0)
 }
 

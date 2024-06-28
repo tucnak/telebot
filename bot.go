@@ -1051,7 +1051,7 @@ func (b *Bot) ChatByID(id int64) (*Chat, error) {
 }
 
 // ChatByUsername fetches chat info by its username.
-func (b *Bot) ChatByUsername(name string) (*ChatFullInfo, error) {
+func (b *Bot) ChatByUsername(name string) (*Chat, error) {
 	params := map[string]string{
 		"chat_id": name,
 	}
