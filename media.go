@@ -328,6 +328,7 @@ type Contact struct {
 	// (Optional)
 	LastName string `json:"last_name"`
 	UserID   int64  `json:"user_id,omitempty"`
+	VCard    string `json:"vcard"`
 }
 
 // Location object represents geographic position.
