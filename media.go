@@ -126,6 +126,7 @@ func (p *Photo) UnmarshalJSON(data []byte) error {
 	p.File = hq.File
 	p.Width = hq.Width
 	p.Height = hq.Height
+	p.Caption = hq.Caption
 
 	return nil
 }
