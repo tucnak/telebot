@@ -169,6 +169,9 @@ type Context interface {
 
 	// Set saves data in the context.
 	Set(key string, val interface{})
+
+	// Payment returns payment instance.
+	Payment() *Payment
 }
 
 // nativeContext is a native implementation of the Context interface.
@@ -537,4 +540,8 @@ func (c *nativeContext) Get(key string) interface{} {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 	return c.store[key]
+}
+
+func (c *nativeContext) Payment() *Payment {
+	return c.u.Message.Payment
 }

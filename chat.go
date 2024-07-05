@@ -73,6 +73,7 @@ type Chat struct {
 	ProfileBackgroundEmojiID string        `json:"profile_background_custom_emoji_id"`
 	HasVisibleHistory        bool          `json:"has_visible_history"`
 	UnrestrictBoosts         int           `json:"unrestrict_boost_count"`
+	CanSendPaidMedia         bool          `json:"can_send_paid_media"`
 }
 
 // Recipient returns chat ID (see Recipient interface).
