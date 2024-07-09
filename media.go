@@ -36,6 +36,30 @@ type InputMedia struct {
 	HasSpoiler           bool     `json:"is_spoiler,omitempty"`
 }
 
+type InputPaidMedia struct {
+	Type              string `json:"type"`
+	Media             string `json:"media"`
+	Thumbnail         string `json:"thumbnail,omitempty"`
+	Width             int    `json:"width,omitempty"`
+	Height            int    `json:"height,omitempty"`
+	Duration          int    `json:"duration,omitempty"`
+	SupportsStreaming bool   `json:"supports_streaming"`
+}
+
+type PaidMediaInfo struct {
+	StarCount int         `json:"star_count"`
+	PaidMedia []PaidMedia `json:"paid_media"`
+}
+
+type PaidMedia struct {
+	Type     string      `json:"type"`
+	Photo    []photoSize `json:"photo,omitempty"`
+	Video    Video       `json:"video,omitempty"`
+	Width    int         `json:"width,omitempty"`
+	Height   int         `json:"height,omitempty"`
+	Duration int         `json:"duration,omitempty"`
+}
+
 // Inputtable is a generic type for all kinds of media you
 // can put into an album.
 type Inputtable interface {

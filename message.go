@@ -128,6 +128,9 @@ type Message struct {
 	// For a general file, information about it.
 	Document *Document `json:"document"`
 
+	// Message contains paid media; information about the paid media
+	PaidMedia PaidMediaInfo `json:"paid_media"`
+
 	// For a photo, all available sizes (thumbnails).
 	Photo *Photo `json:"photo"`
 
@@ -662,6 +665,9 @@ type ExternalReplyInfo struct {
 
 	// (Optional) Message is a general file, information about the file.
 	Document *Document `json:"document"`
+
+	// Message contains paid media; information about the paid media
+	PaidMedia PaidMediaInfo `json:"paid_media"`
 
 	// (Optional) Message is a photo, available sizes of the photo.
 	Photo []Photo `json:"photo"`

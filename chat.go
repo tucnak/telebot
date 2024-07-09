@@ -80,6 +80,7 @@ type Chat struct {
 	BusinessLocation         BusinessLocation     `json:"business_location,omitempty"`
 	BusinessOpeningHours     BusinessOpeningHours `json:"business_opening_hours,omitempty"`
 	MaxReactionCount         int                  `json:"max_reaction_count"`
+	CanSendPaidMedia         bool                 `json:"can_send_paid_media"`
 }
 
 // Recipient returns chat ID (see Recipient interface).
