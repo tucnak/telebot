@@ -38,6 +38,8 @@ type StickerSet struct {
 	Format        StickerSetFormat `json:"sticker_format"`
 	Name          string           `json:"name"`
 	Title         string           `json:"title"`
+	Animated      bool             `json:"is_animated"`
+	Video         bool             `json:"is_video"`
 	Stickers      []Sticker        `json:"stickers"`
 	Thumbnail     *Photo           `json:"thumbnail"`
 	Emojis        string           `json:"emojis"`
@@ -119,10 +121,11 @@ func (b *Bot) CreateStickerSet(of Recipient, set *StickerSet) error {
 	data, _ := json.Marshal(set.Input)
 
 	params := map[string]string{
-		"user_id":  of.Recipient(),
-		"name":     set.Name,
-		"title":    set.Title,
-		"stickers": string(data),
+		"user_id":        of.Recipient(),
+		"name":           set.Name,
+		"title":          set.Title,
+		"sticker_format": set.Format,
+		"stickers":       string(data),
 	}
 	if set.Type != "" {
 		params["sticker_type"] = set.Type

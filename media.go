@@ -2,7 +2,11 @@ package telebot
 
 import (
 	"encoding/json"
+	"math"
 )
+
+// Alias for math.MaxInt32
+const LiveForever = math.MaxInt32
 
 // Media is a generic type for all kinds of media that includes File.
 type Media interface {
