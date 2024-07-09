@@ -1265,10 +1265,33 @@ func (b *Bot) botInfo(language, key string) (*BotInfo, error) {
 	var resp struct {
 		Result *BotInfo
 	}
+
 	if err := json.Unmarshal(data, &resp); err != nil {
 		return nil, wrapError(err)
 	}
 	return resp.Result, nil
+}
+
+func (b *Bot) GetStarTransactions(offset, limit int) ([]StarTransaction, error) {
+	params := map[string]int{
+		"offset": offset,
+		"limit":  limit,
+	}
+
+	data, err := b.Raw("getStarTransactions", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result struct {
+			Transactions []StarTransaction `json:"transactions"`
+		}
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return resp.Result.Transactions, nil
 }
 
 // BusinessConnection use this method to get information about the connection of the bot with a business account.
