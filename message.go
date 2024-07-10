@@ -262,6 +262,9 @@ type Message struct {
 	// Message is a service message about a successful payment.
 	Payment *Payment `json:"successful_payment"`
 
+	// Message is a service message about a refunded payment, information about the payment.
+	RefundedPayment *RefundedPayment `json:"refunded_payment"`
+
 	// For a service message, a user was shared with the bot.
 	UserShared *RecipientShared `json:"users_shared,omitempty"`
 

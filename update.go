@@ -102,6 +102,10 @@ func (b *Bot) ProcessUpdate(u Update) {
 			b.handle(OnPayment, c)
 			return
 		}
+		if m.RefundedPayment != nil {
+			b.handle(OnRefund, c)
+			return
+		}
 
 		if m.TopicCreated != nil {
 			b.handle(OnTopicCreated, c)

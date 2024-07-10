@@ -231,6 +231,10 @@ func TestBotProcessUpdate(t *testing.T) {
 		assert.NotNil(t, c.Message().Payment)
 		return nil
 	})
+	b.Handle(OnRefund, func(c Context) error {
+		assert.NotNil(t, c.Message().RefundedPayment)
+		return nil
+	})
 	b.Handle(OnAddedToGroup, func(c Context) error {
 		assert.NotNil(t, c.Message().GroupCreated)
 		return nil
@@ -331,6 +335,7 @@ func TestBotProcessUpdate(t *testing.T) {
 	b.ProcessUpdate(Update{Message: &Message{Venue: &Venue{}}})
 	b.ProcessUpdate(Update{Message: &Message{Invoice: &Invoice{}}})
 	b.ProcessUpdate(Update{Message: &Message{Payment: &Payment{}}})
+	b.ProcessUpdate(Update{Message: &Message{RefundedPayment: &RefundedPayment{}}})
 	b.ProcessUpdate(Update{Message: &Message{Dice: &Dice{}}})
 	b.ProcessUpdate(Update{Message: &Message{GroupCreated: true}})
 	b.ProcessUpdate(Update{Message: &Message{UserJoined: &User{ID: 1}}})
