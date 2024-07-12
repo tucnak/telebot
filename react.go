@@ -55,21 +55,19 @@ func (b *Bot) React(to Recipient, msg Editable, opts ReactionOptions) error {
 		"message_id": msgID,
 	}
 
-	if len(opts.Reactions) > 0 {
-		reactions := make([]Reaction, 0, len(opts.Reactions))
+	reactions := make([]Reaction, 0, len(opts.Reactions))
 
-		for _, reaction := range opts.Reactions {
-			// Type is required
-			if reaction.Type == "" {
-				reaction.Type = ReactionTypeEmoji
-			}
-
-			reactions = append(reactions, reaction)
+	for _, reaction := range opts.Reactions {
+		// Type is required, use ReactionTypeEmoji as default
+		if reaction.Type == "" {
+			reaction.Type = ReactionTypeEmoji
 		}
 
-		data, _ := json.Marshal(reactions)
-		params["reaction"] = string(data)
+		reactions = append(reactions, reaction)
 	}
+
+	data, _ := json.Marshal(reactions)
+	params["reaction"] = string(data)
 
 	if opts.Big {
 		params["is_big"] = "true"
