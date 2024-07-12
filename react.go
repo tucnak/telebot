@@ -4,6 +4,11 @@ import (
 	"encoding/json"
 )
 
+const (
+	ReactionTypeEmoji       = "emoji"
+	ReactionTypeCustomEmoji = "custom_emoji"
+)
+
 // Reaction describes the type of reaction.
 // Describes an instance of ReactionTypeCustomEmoji and ReactionTypeEmoji.
 type Reaction struct {
@@ -14,7 +19,7 @@ type Reaction struct {
 	Emoji string `json:"emoji,omitempty"`
 
 	// Custom emoji identifier.
-	CustomEmoji string `json:"custom_emoji_id,omitempty"`
+	CustomEmojiID string `json:"custom_emoji_id,omitempty"`
 }
 
 // ReactionCount represents a reaction added to a message along
@@ -39,7 +44,7 @@ type ReactionOptions struct {
 // React changes the chosen reactions on a message. Service messages can't be
 // reacted to. Automatically forwarded messages from a channel to its discussion group have
 // the same available reactions as messages in the channel.
-func (b *Bot) React(to Recipient, msg Editable, opts ...ReactionOptions) error {
+func (b *Bot) React(to Recipient, msg Editable, opts ReactionOptions) error {
 	if to == nil {
 		return ErrBadRecipient
 	}
@@ -50,18 +55,27 @@ func (b *Bot) React(to Recipient, msg Editable, opts ...ReactionOptions) error {
 		"message_id": msgID,
 	}
 
-	if len(opts) > 0 {
-		opt := opts[0]
+	if len(opts.Reactions) > 0 {
+		reactions := make([]Reaction, 0, len(opts.Reactions))
 
-		if len(opt.Reactions) > 0 {
-			data, _ := json.Marshal(opt.Reactions)
-			params["reaction"] = string(data)
+		for _, reaction := range opts.Reactions {
+			// Type is required
+			if reaction.Type == "" {
+				reaction.Type = ReactionTypeEmoji
+			}
+
+			reactions = append(reactions, reaction)
 		}
-		if opt.Big {
-			params["is_big"] = "true"
-		}
+
+		data, _ := json.Marshal(reactions)
+		params["reaction"] = string(data)
+	}
+
+	if opts.Big {
+		params["is_big"] = "true"
 	}
 
 	_, err := b.Raw("setMessageReaction", params)
+
 	return err
 }
