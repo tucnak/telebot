@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -20,7 +19,7 @@ import (
 // It also handles API errors, so you only need to unwrap
 // result field from json data.
 func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
-	url := b.URL + "/bot" + b.Token + "/" + method
+	url := b.url(method)
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(payload); err != nil {
@@ -58,7 +57,7 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 	resp.Close = true
 	defer resp.Body.Close()
 
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, wrapError(err)
 	}
@@ -69,6 +68,16 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 
 	// returning data as well
 	return data, extractOk(data)
+}
+
+func (b *Bot) url(method string) string {
+	url := b.URL + "/bot" + b.Token
+
+	if b.useTestEnv {
+		url += "/test"
+	}
+
+	return url + "/" + method
 }
 
 func (b *Bot) sendFiles(method string, files map[string]File, params map[string]string) ([]byte, error) {
@@ -131,7 +140,7 @@ func (b *Bot) sendFiles(method string, files map[string]File, params map[string]
 		return nil, ErrInternal
 	}
 
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, wrapError(err)
 	}
