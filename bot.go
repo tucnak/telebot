@@ -1146,8 +1146,11 @@ func (b *Bot) MenuButton(chat *User) (*MenuButton, error) {
 //   - MenuButtonType for simple menu buttons (default, commands)
 //   - MenuButton complete structure for web_app menu button type
 func (b *Bot) SetMenuButton(chat *User, mb interface{}) error {
-	params := map[string]interface{}{
-		"chat_id": chat.Recipient(),
+	params := map[string]interface{}{}
+
+	// chat_id is optional
+	if chat != nil {
+		params["chat_id"] = chat.Recipient()
 	}
 
 	switch v := mb.(type) {
