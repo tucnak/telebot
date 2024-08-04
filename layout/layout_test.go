@@ -132,4 +132,17 @@ func TestLayout(t *testing.T) {
 		Description: "Some description",
 		PreviewURL:  "https://preview.picture",
 	}))
+
+	assert.Equal(t,
+		"This is an article.",
+		lt.TextLocale("en", "article_message"),
+	)
+	assert.Equal(t,
+		lt.TextLocale("en", "nested.example", "an example"),
+		"This is an example.",
+	)
+	assert.Equal(t,
+		lt.TextLocale("en", "nested.another.example", "another example"),
+		"This is another example.",
+	)
 }

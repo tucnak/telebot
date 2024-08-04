@@ -246,8 +246,13 @@ func (lt *Layout) parseLocales(dir string) error {
 			return err
 		}
 
-		var texts map[string]string
+		var texts map[string]interface{}
 		if err := yaml.Unmarshal(data, &texts); err != nil {
+			return err
+		}
+
+		v := viper.New()
+		if err := v.MergeConfigMap(texts); err != nil {
 			return err
 		}
 
@@ -255,9 +260,9 @@ func (lt *Layout) parseLocales(dir string) error {
 		name = strings.TrimSuffix(name, filepath.Ext(name))
 
 		tmpl := template.New(name).Funcs(lt.funcs)
-		for key, text := range texts {
-			_, err = tmpl.New(key).Parse(strings.Trim(text, "\r\n"))
-			if err != nil {
+		for _, key := range v.AllKeys() {
+			text := strings.Trim(v.GetString(key), "\r\n")
+			if _, err := tmpl.New(key).Parse(text); err != nil {
 				return err
 			}
 		}
