@@ -291,7 +291,7 @@ func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Messag
 		return nil, ErrBadRecipient
 	}
 
-	sendOpts := extractOptions(opts)
+	sendOpts := b.extractOptions(opts)
 
 	switch object := what.(type) {
 	case string:
@@ -311,7 +311,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 		return nil, ErrBadRecipient
 	}
 
-	sendOpts := extractOptions(opts)
+	sendOpts := b.extractOptions(opts)
 	media := make([]string, len(a))
 	files := make(map[string]File)
 
@@ -377,7 +377,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 // Reply behaves just like Send() with an exception of "reply-to" indicator.
 // This function will panic upon nil Message.
 func (b *Bot) Reply(to *Message, what interface{}, opts ...interface{}) (*Message, error) {
-	sendOpts := extractOptions(opts)
+	sendOpts := b.extractOptions(opts)
 	if sendOpts == nil {
 		sendOpts = &SendOptions{}
 	}
@@ -400,7 +400,7 @@ func (b *Bot) Forward(to Recipient, msg Editable, opts ...interface{}) (*Message
 		"message_id":   msgID,
 	}
 
-	sendOpts := extractOptions(opts)
+	sendOpts := b.extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw("forwardMessage", params)
@@ -425,7 +425,7 @@ func (b *Bot) ForwardMany(to Recipient, msgs []Editable, opts ...*SendOptions) (
 // Copy behaves just like Forward() but the copied message doesn't have a link to the original message (see Bots API).
 //
 // This function will panic upon nil Editable.
-func (b *Bot) Copy(to Recipient, msg Editable, options ...interface{}) (*Message, error) {
+func (b *Bot) Copy(to Recipient, msg Editable, opts ...interface{}) (*Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
 	}
@@ -437,7 +437,7 @@ func (b *Bot) Copy(to Recipient, msg Editable, options ...interface{}) (*Message
 		"message_id":   msgID,
 	}
 
-	sendOpts := extractOptions(options)
+	sendOpts := b.extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw("copyMessage", params)
@@ -518,7 +518,7 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 		params["message_id"] = msgID
 	}
 
-	sendOpts := extractOptions(opts)
+	sendOpts := b.extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw(method, params)
@@ -582,7 +582,7 @@ func (b *Bot) EditCaption(msg Editable, caption string, opts ...interface{}) (*M
 		params["message_id"] = msgID
 	}
 
-	sendOpts := extractOptions(opts)
+	sendOpts := b.extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw("editMessageCaption", params)
@@ -646,7 +646,7 @@ func (b *Bot) EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*M
 	msgID, chatID := msg.MessageSig()
 	params := make(map[string]string)
 
-	sendOpts := extractOptions(opts)
+	sendOpts := b.extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
 	im := media.InputMedia()
@@ -947,7 +947,7 @@ func (b *Bot) StopLiveLocation(msg Editable, opts ...interface{}) (*Message, err
 		"message_id": msgID,
 	}
 
-	sendOpts := extractOptions(opts)
+	sendOpts := b.extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw("stopMessageLiveLocation", params)
@@ -971,7 +971,7 @@ func (b *Bot) StopPoll(msg Editable, opts ...interface{}) (*Poll, error) {
 		"message_id": msgID,
 	}
 
-	sendOpts := extractOptions(opts)
+	sendOpts := b.extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
 	data, err := b.Raw("stopPoll", params)
@@ -1010,7 +1010,7 @@ func (b *Bot) Pin(msg Editable, opts ...interface{}) error {
 		"message_id": msgID,
 	}
 
-	sendOpts := extractOptions(opts)
+	sendOpts := b.extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
 	_, err := b.Raw("pinChatMessage", params)

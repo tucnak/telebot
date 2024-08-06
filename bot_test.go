@@ -534,7 +534,7 @@ func TestBot(t *testing.T) {
 	})
 
 	t.Run("EditCaption()+ParseMode", func(t *testing.T) {
-		b.parseMode = ModeHTML
+		b.parseMode = "html"
 
 		edited, err := b.EditCaption(msg, "<b>new caption with html</b>")
 		require.NoError(t, err)
@@ -554,14 +554,15 @@ func TestBot(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, "new caption with markdown (V2)", edited.Caption)
 		assert.Equal(t, EntityItalic, edited.CaptionEntities[0].Type)
-
-		b.parseMode = ModeDefault
 	})
 
 	t.Run("Edit(what=Media)", func(t *testing.T) {
+		photo.Caption = "<code>new caption with html</code>"
+
 		edited, err := b.Edit(msg, photo)
 		require.NoError(t, err)
 		assert.Equal(t, edited.Photo.UniqueID, photo.UniqueID)
+		assert.Equal(t, EntityCode, edited.CaptionEntities[0].Type)
 
 		resp, err := http.Get("https://telegra.ph/file/274e5eb26f348b10bd8ee.mp4")
 		require.NoError(t, err)

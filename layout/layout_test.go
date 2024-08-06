@@ -28,7 +28,7 @@ func TestLayout(t *testing.T) {
 
 	pref := lt.Settings()
 	assert.Equal(t, "TEST", pref.Token)
-	assert.Equal(t, "html", pref.ParseMode)
+	assert.Equal(t, tele.ModeHTML, pref.ParseMode)
 	assert.Equal(t, &tele.LongPoller{}, pref.Poller)
 	assert.Equal(t, pref, ltfs.Settings())
 

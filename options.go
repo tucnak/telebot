@@ -96,8 +96,10 @@ func (og *SendOptions) copy() *SendOptions {
 	return &cp
 }
 
-func extractOptions(how []interface{}) *SendOptions {
-	opts := &SendOptions{}
+func (b *Bot) extractOptions(how []interface{}) *SendOptions {
+	opts := &SendOptions{
+		ParseMode: b.parseMode,
+	}
 
 	for _, prop := range how {
 		switch opt := prop.(type) {
@@ -150,10 +152,6 @@ func extractOptions(how []interface{}) *SendOptions {
 }
 
 func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
-	if b.parseMode != ModeDefault {
-		params["parse_mode"] = b.parseMode
-	}
-
 	if opt == nil {
 		return
 	}
