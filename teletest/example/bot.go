@@ -22,7 +22,7 @@ func NewBot() (*tele.Bot, error) {
 		if !users[id] {
 			users[id] = true
 		}
-		return c.Reply("Hello!")
+		return c.Send("Hello!")
 	})
 	b.Handle(tele.OnText, func(c tele.Context) error {
 		return c.Reply(c.Text())

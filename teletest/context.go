@@ -9,6 +9,7 @@ import (
 type Context struct {
 	nc tele.Context
 
+	send  Response
 	reply Response
 }
 
@@ -125,8 +126,9 @@ func (c *Context) Args() []string {
 }
 
 func (c *Context) Send(what interface{}, opts ...interface{}) error {
-	//TODO implement me
-	panic("implement me")
+	c.send.what = what
+	c.send.opts = opts
+	return nil
 }
 
 func (c *Context) SendAlbum(a tele.Album, opts ...interface{}) error {

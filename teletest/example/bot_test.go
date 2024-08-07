@@ -3,10 +3,10 @@ package example
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	tele "gopkg.in/telebot.v3"
 	"gopkg.in/telebot.v3/teletest"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var b, _ = NewBot()
@@ -21,8 +21,8 @@ func TestBot(t *testing.T) {
 		},
 	})
 
-	expect.Reply(t, "Hello!")
-	require.Contains(t, users, int64(1))
+	expect.Send(t, "Hello!")
+	assert.Contains(t, users, int64(1))
 
 	r.Trigger(tele.Update{
 		Message: &tele.Message{

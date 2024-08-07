@@ -26,6 +26,10 @@ type Expect struct {
 	c *Context
 }
 
+func (e Expect) Send(t *testing.T, what interface{}, opts ...interface{}) {
+	e.c.send.Expect(t, what, opts)
+}
+
 func (e Expect) Reply(t *testing.T, what interface{}, opts ...interface{}) {
 	e.c.reply.Expect(t, what, opts)
 }
