@@ -11,6 +11,15 @@ import (
 // used to handle actual endpoints.
 type HandlerFunc func(Context) error
 
+// NewContext returns a new native context object,
+// field by the passed update.
+func NewContext(b API, u Update) Context {
+	return &nativeContext{
+		b: b,
+		u: u,
+	}
+}
+
 // Context wraps an update and represents the context of current event.
 type Context interface {
 	// Bot returns the bot instance.
