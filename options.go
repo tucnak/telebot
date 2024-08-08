@@ -86,6 +86,9 @@ type SendOptions struct {
 
 	// ReplyParams Describes the message to reply to
 	ReplyParams *ReplyParams
+
+	// Unique identifier of the business connection
+	BusinessConnectionID string
 }
 
 func (og *SendOptions) copy() *SendOptions {
