@@ -46,6 +46,7 @@ const (
 	// Basic message handlers.
 	OnText                 = "\atext"
 	OnForward              = "\aforward"
+	OnReply                = "\areply"
 	OnEdited               = "\aedited"
 	OnPhoto                = "\aphoto"
 	OnAudio                = "\aaudio"

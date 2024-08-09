@@ -66,6 +66,10 @@ func (b *Bot) ProcessUpdate(u Update) {
 				return
 			}
 
+			if m.ReplyTo != nil {
+				b.handle(OnReply, c)
+			}
+
 			b.handle(OnText, c)
 			return
 		}
@@ -74,7 +78,7 @@ func (b *Bot) ProcessUpdate(u Update) {
 			return
 		}
 
-		if m.Origin != nil && m.Text == "" {
+		if m.Origin != nil {
 			b.handle(OnForward, c)
 		}
 
