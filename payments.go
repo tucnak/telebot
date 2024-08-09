@@ -45,6 +45,14 @@ type Payment struct {
 	ProviderChargeID string `json:"provider_payment_charge_id"`
 }
 
+type RefundedPayment struct {
+	Currency         string `json:"currency"`
+	TotalAmount      int    `json:"total_amount"`
+	InvoicePayload   string `json:"invoice_payload"`
+	TelegramChargeID string `json:"telegram_payment_charge_id"`
+	ProviderChargeID string `json:"provider_payment_charge_id"`
+}
+
 // PreCheckoutQuery contains information about an incoming pre-checkout query.
 type PreCheckoutQuery struct {
 	Sender   *User  `json:"from"`
