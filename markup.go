@@ -263,14 +263,16 @@ type ReplyRecipient struct {
 
 // RecipientShared combines both UserShared and ChatShared objects.
 type RecipientShared struct {
-	ID       int32        `json:"request_id"`
-	Users    []SharedUser `json:"users"`
-	ChatID   int64        `json:"chat_id"`
-	Title    string       `json:"title"`
-	Username string       `json:"username"`
-	Photo    []photoSize  `json:"photo"`
+	ID       int32        `json:"request_id"` // chat, users
+	Users    []SharedUser `json:"users"`      // users only
+	ChatID   int64        `json:"chat_id"`    // chat only
+	Title    string       `json:"title"`      // chat only
+	Username string       `json:"username"`   // chat only
+	Photo    *Photo       `json:"photo"`      // chat only
 }
 
+// SharedUser contains information about a user that was shared
+// with the bot using a KeyboardButtonRequestUsers button.
 type SharedUser struct {
 	UserID    int64       `json:"user_id"`
 	FirstName string      `json:"first_name"`
