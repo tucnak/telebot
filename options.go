@@ -86,6 +86,12 @@ type SendOptions struct {
 
 	// ReplyParams Describes the message to reply to
 	ReplyParams *ReplyParams
+
+	// Unique identifier of the business connection
+	BusinessConnectionID string
+
+	// 	Unique identifier of the message effect to be added to the message; for private chats only
+	EffectID string `json:"message_effect_id"`
 }
 
 func (og *SendOptions) copy() *SendOptions {
@@ -205,6 +211,14 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 
 	if opt.HasSpoiler {
 		params["spoiler"] = "true"
+	}
+
+	if opt.BusinessConnectionID != "" {
+		params["business_connection_id"] = opt.BusinessConnectionID
+	}
+
+	if opt.EffectID != "" {
+		params["message_effect_id"] = opt.EffectID
 	}
 }
 

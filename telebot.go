@@ -112,6 +112,11 @@ const (
 
 	OnBoost        = "\aboost_updated"
 	OnBoostRemoved = "\aboost_removed"
+
+	OnBusinessConnection      = "\abusiness_connection"
+	OnBusinessMessage         = "\abusiness_message"
+	OnEditedBusinessMessage   = "\aedited_business_message"
+	OnDeletedBusinessMessages = "\adeleted_business_messages"
 )
 
 // ChatAction is a client-side status indicating bot activity.

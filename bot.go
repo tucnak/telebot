@@ -505,6 +505,9 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 		if v.AlertRadius != 0 {
 			params["proximity_alert_radius"] = strconv.Itoa(v.AlertRadius)
 		}
+		if v.LivePeriod != 0 {
+			params["live_period"] = strconv.Itoa(v.LivePeriod)
+		}
 	default:
 		return nil, ErrUnsupportedWhat
 	}
@@ -1250,6 +1253,28 @@ func (b *Bot) SetMyShortDescription(desc, language string) error {
 // MyShortDescription the current bot short description for the given user language.
 func (b *Bot) MyShortDescription(language string) (*BotInfo, error) {
 	return b.botInfo(language, "getMyShortDescription")
+}
+
+func (b *Bot) StarTransactions(offset, limit int) ([]StarTransaction, error) {
+	params := map[string]int{
+		"offset": offset,
+		"limit":  limit,
+	}
+
+	data, err := b.Raw("getStarTransactions", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result struct {
+			Transactions []StarTransaction `json:"transactions"`
+		}
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return resp.Result.Transactions, nil
 }
 
 func (b *Bot) botInfo(language, key string) (*BotInfo, error) {

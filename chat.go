@@ -22,9 +22,10 @@ type User struct {
 	CustomEmojiStatus string   `json:"emoji_status_custom_emoji_id"`
 
 	// Returns only in getMe
-	CanJoinGroups   bool `json:"can_join_groups"`
-	CanReadMessages bool `json:"can_read_all_group_messages"`
-	SupportsInline  bool `json:"supports_inline_queries"`
+	CanJoinGroups        bool `json:"can_join_groups"`
+	CanReadMessages      bool `json:"can_read_all_group_messages"`
+	SupportsInline       bool `json:"supports_inline_queries"`
+	CanConnectToBusiness bool `json:"can_connect_to_business"`
 }
 
 // Recipient returns user ID (see Recipient interface).
@@ -47,33 +48,39 @@ type Chat struct {
 	Username  string `json:"username"`
 
 	// Returns only in getChat
-	Bio                      string        `json:"bio,omitempty"`
-	Photo                    *ChatPhoto    `json:"photo,omitempty"`
-	Description              string        `json:"description,omitempty"`
-	InviteLink               string        `json:"invite_link,omitempty"`
-	PinnedMessage            *Message      `json:"pinned_message,omitempty"`
-	Permissions              *Rights       `json:"permissions,omitempty"`
-	Reactions                []Reaction    `json:"available_reactions"`
-	SlowMode                 int           `json:"slow_mode_delay,omitempty"`
-	StickerSet               string        `json:"sticker_set_name,omitempty"`
-	CanSetStickerSet         bool          `json:"can_set_sticker_set,omitempty"`
-	CustomEmojiSetName       string        `json:"custom_emoji_sticker_set_name"`
-	LinkedChatID             int64         `json:"linked_chat_id,omitempty"`
-	ChatLocation             *ChatLocation `json:"location,omitempty"`
-	Private                  bool          `json:"has_private_forwards,omitempty"`
-	Protected                bool          `json:"has_protected_content,omitempty"`
-	NoVoiceAndVideo          bool          `json:"has_restricted_voice_and_video_messages"`
-	HasHiddenMembers         bool          `json:"has_hidden_members,omitempty"`
-	AggressiveAntiSpam       bool          `json:"has_aggressive_anti_spam_enabled,omitempty"`
-	CustomEmojiID            string        `json:"emoji_status_custom_emoji_id"`
-	EmojiExpirationUnixtime  int64         `json:"emoji_status_expiration_date"`
-	BackgroundEmojiID        string        `json:"background_custom_emoji_id"`
-	AccentColorID            int           `json:"accent_color_id"`
-	ProfileAccentColorID     int           `json:"profile_accent_color_id"`
-	ProfileBackgroundEmojiID string        `json:"profile_background_custom_emoji_id"`
-	HasVisibleHistory        bool          `json:"has_visible_history"`
-	UnrestrictBoosts         int           `json:"unrestrict_boost_count"`
-	CanSendPaidMedia         bool          `json:"can_send_paid_media"`
+	Bio                      string               `json:"bio,omitempty"`
+	Photo                    *ChatPhoto           `json:"photo,omitempty"`
+	Description              string               `json:"description,omitempty"`
+	InviteLink               string               `json:"invite_link,omitempty"`
+	PinnedMessage            *Message             `json:"pinned_message,omitempty"`
+	Permissions              *Rights              `json:"permissions,omitempty"`
+	Reactions                []Reaction           `json:"available_reactions"`
+	SlowMode                 int                  `json:"slow_mode_delay,omitempty"`
+	StickerSet               string               `json:"sticker_set_name,omitempty"`
+	CanSetStickerSet         bool                 `json:"can_set_sticker_set,omitempty"`
+	CustomEmojiSetName       string               `json:"custom_emoji_sticker_set_name"`
+	LinkedChatID             int64                `json:"linked_chat_id,omitempty"`
+	Location                 *ChatLocation        `json:"location,omitempty"`
+	Private                  bool                 `json:"has_private_forwards,omitempty"`
+	Protected                bool                 `json:"has_protected_content,omitempty"`
+	NoVoiceAndVideo          bool                 `json:"has_restricted_voice_and_video_messages"`
+	HasHiddenMembers         bool                 `json:"has_hidden_members,omitempty"`
+	AggressiveAntiSpam       bool                 `json:"has_aggressive_anti_spam_enabled,omitempty"`
+	CustomEmojiID            string               `json:"emoji_status_custom_emoji_id"`
+	EmojiExpirationUnixtime  int64                `json:"emoji_status_expiration_date"`
+	BackgroundEmojiID        string               `json:"background_custom_emoji_id"`
+	AccentColorID            int                  `json:"accent_color_id"`
+	ProfileAccentColorID     int                  `json:"profile_accent_color_id"`
+	ProfileBackgroundEmojiID string               `json:"profile_background_custom_emoji_id"`
+	HasVisibleHistory        bool                 `json:"has_visible_history"`
+	UnrestrictBoosts         int                  `json:"unrestrict_boost_count"`
+	MaxReactions             int                  `json:"max_reaction_count"`
+	Birthdate                Birthdate            `json:"birthdate,omitempty"`
+	PersonalChat             *Chat                `json:"personal_chat,omitempty"`
+	BusinessIntro            BusinessIntro        `json:"business_intro,omitempty"`
+	BusinessLocation         BusinessLocation     `json:"business_location,omitempty"`
+	BusinessOpeningHours     BusinessOpeningHours `json:"business_opening_hours,omitempty"`
+	CanSendPaidMedia         bool                 `json:"can_send_paid_media"`
 }
 
 // Recipient returns chat ID (see Recipient interface).
@@ -165,6 +172,11 @@ type ChatMemberUpdate struct {
 	// (Optional) InviteLink which was used by the user to
 	// join the chat; for joining by invite link events only.
 	InviteLink *ChatInviteLink `json:"invite_link"`
+
+	// (Optional) True, if the user joined the chat after sending
+	// a direct join request without using an invite link and being
+	// approved by an administrator
+	ViaJoinRequest bool `json:"via_join_request"`
 
 	// (Optional) True, if the user joined the chat via a chat folder invite link.
 	ViaFolderLink bool `json:"via_chat_folder_invite_link"`
@@ -260,6 +272,74 @@ type Story struct {
 
 	// Chat that posted the story
 	Poster *Chat `json:"chat"`
+}
+
+type Birthdate struct {
+	// Day of the user's birth; 1-31
+	Day int `json:"day"`
+
+	// Month of the user's birth; 1-12
+	Month int `json:"month"`
+
+	// (Optional) Year of the user's birth
+	Year int `json:"year"`
+}
+
+type ChatBackground struct {
+	// Type of the background
+	Type BackgroundType `json:"type"`
+}
+
+type BackgroundType struct {
+	// Type of the background, always “fill”
+	Type string `json:"type"`
+
+	// The background fill
+	Fill BackgroundFill `json:"fill,omitempty"`
+
+	// Document with the wallpaper
+	Document Document `json:"document,omitempty"`
+
+	// Dimming of the background in dark themes, as a percentage; 0-100
+	DarkThemeDimming int `json:"dark_theme_dimming,omitempty"`
+
+	// Intensity of the pattern when it is shown above the filled background; 0-100
+	Intensity int `json:"intensity,omitempty"`
+
+	// (Optional) True, if the wallpaper is downscaled to fit in a 450x450
+	// square and then box-blurred with radius 12
+	Blurred bool `json:"is_blurred,omitempty"`
+
+	// (Optional) True, if the background moves slightly when the device is tilted
+	Moving bool `json:"is_moving,omitempty"`
+
+	// (Optional) True, if the background fill must be applied only to the pattern itself.
+	// All other pixels are black in this case. For dark themes only
+	Inverted bool `json:"is_inverted,omitempty"`
+
+	// Name of the chat theme, which is usually an emoji
+	ThemeName string `json:"theme_name,omitempty"`
+}
+
+type BackgroundFill struct {
+	// Type of the background fill.
+	Type string `json:"type"`
+
+	// The color of the background fill in the RGB24 format
+	SolidColor int `json:"color,omitempty"`
+
+	// Top color of the gradient in the RGB24 format
+	GradientTopColor int `json:"top_color,omitempty"`
+
+	// Bottom color of the gradient in the RGB24 format
+	GradientBottomColor int `json:"bottom_color,omitempty"`
+
+	// Clockwise rotation angle of the background fill in degrees; 0-359
+	GradientRotationAngle int `json:"rotation_angle,omitempty"`
+
+	// A list of the 3 or 4 base colors that are used to generate
+	// the freeform gradient in the RGB24 format
+	GradientColors []int `json:"colors,omitempty"`
 }
 
 // ExpireDate returns the moment of the link expiration in local time.

@@ -6,6 +6,9 @@ import (
 	"strconv"
 )
 
+// Stars is a provider token for Telegram Stars.
+const Stars = "XTR"
+
 // ShippingQuery contains information about an incoming shipping query.
 type ShippingQuery struct {
 	Sender  *User           `json:"from"`
@@ -185,4 +188,19 @@ func (b *Bot) CreateInvoiceLink(i Invoice) (string, error) {
 		return "", wrapError(err)
 	}
 	return resp.Result, nil
+}
+
+// RefundStars returns a successful payment in Telegram Stars.
+func (b *Bot) RefundStars(to Recipient, chargeID string) error {
+	params := map[string]string{
+		"user_id":                    to.Recipient(),
+		"telegram_payment_charge_id": chargeID,
+	}
+
+	_, err := b.Raw("refundStarPayment", params)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

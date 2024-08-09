@@ -85,6 +85,10 @@ type Message struct {
 	// (Optional) Message can't be forwarded.
 	Protected bool `json:"has_protected_content,omitempty"`
 
+	// (Optional) True, if the message was sent by an implicit action,
+	// for example, as an away or a greeting business message, or as a scheduled message
+	FromOffline bool `json:"is_from_offline,omitempty"`
+
 	// AlbumID is the unique identifier of a media message group
 	// this message belongs to.
 	AlbumID string `json:"media_group_id"`
@@ -107,6 +111,9 @@ type Message struct {
 	// (Optional) PreviewOptions used for link preview generation for the message,
 	// if it is a text message and link preview options were changed.
 	PreviewOptions *PreviewOptions `json:"link_preview_options,omitempty"`
+
+	// (Optional) Unique identifier of the message effect added to the message
+	EffectID string `json:"effect_id"`
 
 	// Some messages containing media, may as well have a caption.
 	Caption string `json:"caption,omitempty"`
@@ -171,6 +178,16 @@ type Message struct {
 
 	// (Optional) Service message: a giveaway without public winners was completed.
 	GiveawayCompleted *GiveawayCompleted `json:"giveaway_completed"`
+
+	// (Optional) Unique identifier of the business connection from which the message
+	// was received. If non-empty, the message belongs to a chat of the corresponding
+	// business account that is independent from any potential bot chat which might
+	// share the same identifier.
+	BusinessConnectionID string `json:"business_connection_id"`
+
+	// (Optional) The bot that actually sent the message on behalf of the business account.
+	// Available only for outgoing messages sent on behalf of the connected business account.
+	BusinessBot *User `json:"sender_business_bot"`
 
 	// For a service message, represents a user,
 	// that just got added to chat, this message came from.
@@ -302,9 +319,12 @@ type Message struct {
 	// Service message: user boosted the chat.
 	BoostAdded *BoostAdded `json:"boost_added"`
 
+	// Service message: chat background set
+	ChatBackground ChatBackground `json:"chat_background_set"`
+
 	// If the sender of the message boosted the chat, the number of boosts
 	// added by the user.
-	SenderBoostCount int `json:"sender_boost_count"`
+	SenderBoosts int `json:"sender_boost_count"`
 
 	// Service message: forum topic created
 	TopicCreated *Topic `json:"forum_topic_created,omitempty"`
@@ -326,6 +346,9 @@ type Message struct {
 
 	// Service message: represents spoiler information about the message.
 	HasMediaSpoiler bool `json:"has_media_spoiler,omitempty"`
+
+	// (Optional) Pass True, if the caption must be shown above the message media
+	CaptionAbove bool `json:"show_caption_above_media"`
 
 	// Service message: the user allowed the bot added to the attachment menu to write messages
 	WriteAccessAllowed *WriteAccessAllowed `json:"write_access_allowed,omitempty"`
@@ -380,6 +403,7 @@ const (
 	EntitySpoiler       EntityType = "spoiler"
 	EntityCustomEmoji   EntityType = "custom_emoji"
 	EntityBlockquote    EntityType = "blockquote"
+	EntityEBlockquote   EntityType = "expandable_blockquote"
 )
 
 // Entities are used to set message's text entities as a send option.

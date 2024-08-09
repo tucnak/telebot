@@ -248,20 +248,37 @@ type ReplyRecipient struct {
 	Premium  *bool `json:"user_is_premium,omitempty"` // user only, optional
 	Quantity int   `json:"max_quantity,omitempty"`    // user only, optional
 
-	Channel      bool    `json:"chat_is_channel,omitempty"`           // chat only, required
-	Forum        *bool   `json:"chat_is_forum,omitempty"`             // chat only, optional
-	WithUsername *bool   `json:"chat_has_username,omitempty"`         // chat only, optional
-	Created      *bool   `json:"chat_is_created,omitempty"`           // chat only, optional
-	UserRights   *Rights `json:"user_administrator_rights,omitempty"` // chat only, optional
-	BotRights    *Rights `json:"bot_administrator_rights,omitempty"`  // chat only, optional
-	BotMember    *bool   `json:"bot_is_member,omitempty"`             // chat only, optional
+	Channel         bool    `json:"chat_is_channel,omitempty"`           // chat only, required
+	Forum           *bool   `json:"chat_is_forum,omitempty"`             // chat only, optional
+	WithUsername    *bool   `json:"chat_has_username,omitempty"`         // chat only, optional
+	Created         *bool   `json:"chat_is_created,omitempty"`           // chat only, optional
+	UserRights      *Rights `json:"user_administrator_rights,omitempty"` // chat only, optional
+	BotRights       *Rights `json:"bot_administrator_rights,omitempty"`  // chat only, optional
+	BotMember       *bool   `json:"bot_is_member,omitempty"`             // chat only, optional
+	RequestTitle    *bool   `json:"request_title,omitempty"`             // chat only, optional
+	RequestName     *bool   `json:"request_name,omitempty"`              // user only, optional
+	RequestUsername *bool   `json:"request_username,omitempty"`          // user only, optional
+	RequestPhoto    *bool   `json:"request_photo,omitempty"`             // user only, optional
 }
 
 // RecipientShared combines both UserShared and ChatShared objects.
 type RecipientShared struct {
-	ID     int32 `json:"request_id"`
-	UserID int64 `json:"user_id"`
-	ChatID int64 `json:"chat_id"`
+	ID       int32        `json:"request_id"` // chat, users
+	Users    []SharedUser `json:"users"`      // users only
+	ChatID   int64        `json:"chat_id"`    // chat only
+	Title    string       `json:"title"`      // chat only
+	Username string       `json:"username"`   // chat only
+	Photo    *Photo       `json:"photo"`      // chat only
+}
+
+// SharedUser contains information about a user that was shared
+// with the bot using a KeyboardButtonRequestUsers button.
+type SharedUser struct {
+	UserID    int64       `json:"user_id"`
+	FirstName string      `json:"first_name"`
+	LastName  string      `json:"last_name"`
+	Username  string      `json:"username"`
+	Photo     []photoSize `json:"photo"`
 }
 
 // InlineButton represents a button displayed in the message.
