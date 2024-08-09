@@ -314,11 +314,11 @@ type Message struct {
 	BoostAdded *BoostAdded `json:"boost_added"`
 
 	// Service message: chat background set
-	ChatBackgroundSet ChatBackground `json:"chat_background_set"`
+	ChatBackground ChatBackground `json:"chat_background_set"`
 
 	// If the sender of the message boosted the chat, the number of boosts
 	// added by the user.
-	SenderBoostCount int `json:"sender_boost_count"`
+	SenderBoosts int `json:"sender_boost_count"`
 
 	// Service message: forum topic created
 	TopicCreated *Topic `json:"forum_topic_created,omitempty"`

@@ -5,9 +5,6 @@ import (
 	"math"
 )
 
-// Alias for math.MaxInt32
-const LiveForever = math.MaxInt32
-
 // Media is a generic type for all kinds of media that includes File.
 type Media interface {
 	// MediaType returns string-represented media type.
@@ -333,6 +330,10 @@ type Contact struct {
 	LastName string `json:"last_name"`
 	UserID   int64  `json:"user_id,omitempty"`
 }
+
+// LiveForever is an alias for math.MaxInt32.
+// Use it for LivePeriod of the Location.
+const LiveForever = math.MaxInt32
 
 // Location object represents geographic position.
 type Location struct {

@@ -505,6 +505,9 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 		if v.AlertRadius != 0 {
 			params["proximity_alert_radius"] = strconv.Itoa(v.AlertRadius)
 		}
+		if v.LivePeriod != 0 {
+			params["live_period"] = strconv.Itoa(v.LivePeriod)
+		}
 	default:
 		return nil, ErrUnsupportedWhat
 	}
