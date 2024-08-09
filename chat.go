@@ -74,7 +74,7 @@ type Chat struct {
 	ProfileBackgroundEmojiID string               `json:"profile_background_custom_emoji_id"`
 	HasVisibleHistory        bool                 `json:"has_visible_history"`
 	UnrestrictBoosts         int                  `json:"unrestrict_boost_count"`
-	MaxReactionCount         int           `json:"max_reaction_count"`
+	MaxReactions             int                  `json:"max_reaction_count"`
 	Birthdate                Birthdate            `json:"birthdate,omitempty"`
 	PersonalChat             *Chat                `json:"personal_chat,omitempty"`
 	BusinessIntro            BusinessIntro        `json:"business_intro,omitempty"`
@@ -173,8 +173,8 @@ type ChatMemberUpdate struct {
 	InviteLink *ChatInviteLink `json:"invite_link"`
 
 	// (Optional) True, if the user joined the chat after sending
-	//a direct join request without using an invite link and being
-	//approved by an administrator
+	// a direct join request without using an invite link and being
+	// approved by an administrator
 	ViaJoinRequest bool `json:"via_join_request"`
 
 	// (Optional) True, if the user joined the chat via a chat folder invite link.
@@ -273,25 +273,20 @@ type Story struct {
 	Poster *Chat `json:"chat"`
 }
 
-type BackgroundFill struct {
-	// Type of the background fill, always “solid”
-	Type string `json:"type"`
+type Birthdate struct {
+	// Day of the user's birth; 1-31
+	Day int `json:"day"`
 
-	// The color of the background fill in the RGB24 format
-	Color int `json:"color,omitempty"`
+	// Month of the user's birth; 1-12
+	Month int `json:"month"`
 
-	// Top color of the gradient in the RGB24 format
-	TopColor int `json:"top_color,omitempty"`
+	// (Optional) Year of the user's birth
+	Year int `json:"year"`
+}
 
-	// Bottom color of the gradient in the RGB24 format
-	BottomColor int `json:"bottom_color,omitempty"`
-
-	// Clockwise rotation angle of the background fill in degrees; 0-359
-	RotationAngle int `json:"rotation_angle,omitempty"`
-
-	// A list of the 3 or 4 base colors that are used to generate
-	// the freeform gradient in the RGB24 format
-	Colors []int `json:"colors,omitempty"`
+type ChatBackground struct {
+	// Type of the background
+	Type BackgroundType `json:"type"`
 }
 
 type BackgroundType struct {
@@ -312,30 +307,38 @@ type BackgroundType struct {
 
 	// (Optional) True, if the wallpaper is downscaled to fit in a 450x450
 	// square and then box-blurred with radius 12
-	IsBlurred bool `json:"is_blurred,omitempty"`
+	Blurred bool `json:"is_blurred,omitempty"`
 
 	// (Optional) True, if the background moves slightly when the device is tilted
-	IsMoving bool `json:"is_moving,omitempty"`
+	Moving bool `json:"is_moving,omitempty"`
 
 	// (Optional) True, if the background fill must be applied only to the pattern itself.
 	// All other pixels are black in this case. For dark themes only
-	IsInverted bool `json:"is_inverted,omitempty"`
+	Inverted bool `json:"is_inverted,omitempty"`
+
+	// Name of the chat theme, which is usually an emoji
+	ThemeName string `json:"theme_name,omitempty"`
 }
 
-type ChatBackground struct {
-	// Type of the background
-	Type BackgroundType `json:"type"`
-}
+type BackgroundFill struct {
+	// Type of the background fill.
+	Type string `json:"type"`
 
-type Birthdate struct {
-	// Day of the user's birth; 1-31
-	Day int `json:"day"`
+	// The color of the background fill in the RGB24 format
+	SolidColor int `json:"color,omitempty"`
 
-	// Month of the user's birth; 1-12
-	Month int `json:"month"`
+	// Top color of the gradient in the RGB24 format
+	GradientTopColor int `json:"top_color,omitempty"`
 
-	// (Optional) Year of the user's birth
-	Year int `json:"year"`
+	// Bottom color of the gradient in the RGB24 format
+	GradientBottomColor int `json:"bottom_color,omitempty"`
+
+	// Clockwise rotation angle of the background fill in degrees; 0-359
+	GradientRotationAngle int `json:"rotation_angle,omitempty"`
+
+	// A list of the 3 or 4 base colors that are used to generate
+	// the freeform gradient in the RGB24 format
+	GradientColors []int `json:"colors,omitempty"`
 }
 
 // ExpireDate returns the moment of the link expiration in local time.

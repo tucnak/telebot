@@ -352,12 +352,7 @@ func (p *Poll) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	}
 	b.embedSendOptions(params, opt)
 
-	var options []string
-	for _, o := range p.Options {
-		options = append(options, o.Text)
-	}
-
-	opts, _ := json.Marshal(options)
+	opts, _ := json.Marshal(p.Options)
 	params["options"] = string(opts)
 
 	data, err := b.Raw("sendPoll", params)

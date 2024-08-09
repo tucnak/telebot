@@ -29,9 +29,9 @@ type Poll struct {
 	MultipleAnswers   bool            `json:"allows_multiple_answers,omitempty"`
 	Explanation       string          `json:"explanation,omitempty"`
 	ParseMode         ParseMode       `json:"explanation_parse_mode,omitempty"`
-	Entities          []MessageEntity `json:"explanation_entities"`
-	QuestionEntities  []MessageEntity `json:"question_entities"`
-	QuestionParseMode string          `json:"question_parse_mode"`
+	Entities          []MessageEntity `json:"explanation_entities,omitempty"`
+	QuestionParseMode string          `json:"question_parse_mode,omitempty"`
+	QuestionEntities  []MessageEntity `json:"question_entities,omitempty"`
 
 	// True by default, shouldn't be omitted.
 	Anonymous bool `json:"is_anonymous"`
@@ -43,12 +43,10 @@ type Poll struct {
 
 // PollOption contains information about one answer option in a poll.
 type PollOption struct {
-	Text       string `json:"text"`
-	VoterCount int    `json:"voter_count"`
-
-	// (Optional) A JSON-serialized list of special entities that appear
-	//in the poll option text. It can be specified instead of text_parse_mode
-	TextEntities []MessageEntity `json:"text_entities"`
+	Text       string          `json:"text"`
+	VoterCount int             `json:"voter_count"`
+	ParseMode  ParseMode       `json:"text_parse_mode,omitempty"`
+	Entities   []MessageEntity `json:"text_entities,omitempty"`
 }
 
 // PollAnswer represents an answer of a user in a non-anonymous poll.
