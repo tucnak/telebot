@@ -345,7 +345,7 @@ type Message struct {
 	HasMediaSpoiler bool `json:"has_media_spoiler,omitempty"`
 
 	// (Optional) Pass True, if the caption must be shown above the message media
-	ShowCaptionAboveMedia bool `json:"show_caption_above_media"`
+	CaptionAbove bool `json:"show_caption_above_media"`
 
 	// Service message: the user allowed the bot added to the attachment menu to write messages
 	WriteAccessAllowed *WriteAccessAllowed `json:"write_access_allowed,omitempty"`
@@ -382,25 +382,25 @@ type MessageEntity struct {
 type EntityType string
 
 const (
-	EntityMention              EntityType = "mention"
-	EntityTMention             EntityType = "text_mention"
-	EntityHashtag              EntityType = "hashtag"
-	EntityCashtag              EntityType = "cashtag"
-	EntityCommand              EntityType = "bot_command"
-	EntityURL                  EntityType = "url"
-	EntityEmail                EntityType = "email"
-	EntityPhone                EntityType = "phone_number"
-	EntityBold                 EntityType = "bold"
-	EntityItalic               EntityType = "italic"
-	EntityUnderline            EntityType = "underline"
-	EntityStrikethrough        EntityType = "strikethrough"
-	EntityCode                 EntityType = "code"
-	EntityCodeBlock            EntityType = "pre"
-	EntityTextLink             EntityType = "text_link"
-	EntitySpoiler              EntityType = "spoiler"
-	EntityCustomEmoji          EntityType = "custom_emoji"
-	EntityBlockquote           EntityType = "blockquote"
-	EntityExpandableBlockquote EntityType = "expandable_blockquote"
+	EntityMention       EntityType = "mention"
+	EntityTMention      EntityType = "text_mention"
+	EntityHashtag       EntityType = "hashtag"
+	EntityCashtag       EntityType = "cashtag"
+	EntityCommand       EntityType = "bot_command"
+	EntityURL           EntityType = "url"
+	EntityEmail         EntityType = "email"
+	EntityPhone         EntityType = "phone_number"
+	EntityBold          EntityType = "bold"
+	EntityItalic        EntityType = "italic"
+	EntityUnderline     EntityType = "underline"
+	EntityStrikethrough EntityType = "strikethrough"
+	EntityCode          EntityType = "code"
+	EntityCodeBlock     EntityType = "pre"
+	EntityTextLink      EntityType = "text_link"
+	EntitySpoiler       EntityType = "spoiler"
+	EntityCustomEmoji   EntityType = "custom_emoji"
+	EntityBlockquote    EntityType = "blockquote"
+	EntityEBlockquote   EntityType = "expandable_blockquote"
 )
 
 // Entities are used to set message's text entities as a send option.

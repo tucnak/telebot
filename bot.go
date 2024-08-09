@@ -1305,18 +1305,3 @@ func extractEndpoint(endpoint interface{}) string {
 	}
 	return ""
 }
-
-// SendStarRefund returns a successful payment in Telegram Stars.
-func (b *Bot) SendStarRefund(to Recipient, chargeID string) error {
-	params := map[string]string{
-		"user_id":                    to.Recipient(),
-		"telegram_payment_charge_id": chargeID,
-	}
-
-	_, err := b.Raw("refundStarPayment", params)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}

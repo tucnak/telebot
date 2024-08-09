@@ -215,7 +215,7 @@ type GifResult struct {
 	Cache string `json:"gif_file_id,omitempty"`
 
 	// (Optional) Pass True, if the caption must be shown above the message media
-	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
+	CaptionAbove bool `json:"show_caption_above_media,omitempty"`
 }
 
 // LocationResult represents a location on a map.
@@ -265,7 +265,7 @@ type Mpeg4GifResult struct {
 	Cache string `json:"mpeg4_file_id,omitempty"`
 
 	// (Optional) Pass True, if the caption must be shown above the message media
-	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
+	CaptionAbove bool `json:"show_caption_above_media,omitempty"`
 }
 
 // PhotoResult represents a link to a photo.
@@ -298,7 +298,7 @@ type PhotoResult struct {
 	Cache string `json:"photo_file_id,omitempty"`
 
 	// (Optional) Pass True, if the caption must be shown above the message media
-	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
+	CaptionAbove bool `json:"show_caption_above_media,omitempty"`
 }
 
 // VenueResult represents a venue.
@@ -362,7 +362,7 @@ type VideoResult struct {
 	Cache string `json:"video_file_id,omitempty"`
 
 	// (Optional) Pass True, if the caption must be shown above the message media
-	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
+	CaptionAbove bool `json:"show_caption_above_media,omitempty"`
 }
 
 // VoiceResult represents a link to a voice recording in an .ogg
