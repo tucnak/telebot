@@ -22,9 +22,10 @@ type User struct {
 	CustomEmojiStatus string   `json:"emoji_status_custom_emoji_id"`
 
 	// Returns only in getMe
-	CanJoinGroups   bool `json:"can_join_groups"`
-	CanReadMessages bool `json:"can_read_all_group_messages"`
-	SupportsInline  bool `json:"supports_inline_queries"`
+	CanJoinGroups        bool `json:"can_join_groups"`
+	CanReadMessages      bool `json:"can_read_all_group_messages"`
+	SupportsInline       bool `json:"supports_inline_queries"`
+	CanConnectToBusiness bool `json:"can_connect_to_business"`
 }
 
 // Recipient returns user ID (see Recipient interface).
@@ -47,33 +48,38 @@ type Chat struct {
 	Username  string `json:"username"`
 
 	// Returns only in getChat
-	Bio                      string        `json:"bio,omitempty"`
-	Photo                    *ChatPhoto    `json:"photo,omitempty"`
-	Description              string        `json:"description,omitempty"`
-	InviteLink               string        `json:"invite_link,omitempty"`
-	PinnedMessage            *Message      `json:"pinned_message,omitempty"`
-	Permissions              *Rights       `json:"permissions,omitempty"`
-	Reactions                []Reaction    `json:"available_reactions"`
-	SlowMode                 int           `json:"slow_mode_delay,omitempty"`
-	StickerSet               string        `json:"sticker_set_name,omitempty"`
-	CanSetStickerSet         bool          `json:"can_set_sticker_set,omitempty"`
-	CustomEmojiSetName       string        `json:"custom_emoji_sticker_set_name"`
-	LinkedChatID             int64         `json:"linked_chat_id,omitempty"`
-	ChatLocation             *ChatLocation `json:"location,omitempty"`
-	Private                  bool          `json:"has_private_forwards,omitempty"`
-	Protected                bool          `json:"has_protected_content,omitempty"`
-	NoVoiceAndVideo          bool          `json:"has_restricted_voice_and_video_messages"`
-	HasHiddenMembers         bool          `json:"has_hidden_members,omitempty"`
-	AggressiveAntiSpam       bool          `json:"has_aggressive_anti_spam_enabled,omitempty"`
-	CustomEmojiID            string        `json:"emoji_status_custom_emoji_id"`
-	EmojiExpirationUnixtime  int64         `json:"emoji_status_expiration_date"`
-	BackgroundEmojiID        string        `json:"background_custom_emoji_id"`
-	AccentColorID            int           `json:"accent_color_id"`
-	ProfileAccentColorID     int           `json:"profile_accent_color_id"`
-	ProfileBackgroundEmojiID string        `json:"profile_background_custom_emoji_id"`
-	HasVisibleHistory        bool          `json:"has_visible_history"`
-	UnrestrictBoosts         int           `json:"unrestrict_boost_count"`
+	Bio                      string               `json:"bio,omitempty"`
+	Photo                    *ChatPhoto           `json:"photo,omitempty"`
+	Description              string               `json:"description,omitempty"`
+	InviteLink               string               `json:"invite_link,omitempty"`
+	PinnedMessage            *Message             `json:"pinned_message,omitempty"`
+	Permissions              *Rights              `json:"permissions,omitempty"`
+	Reactions                []Reaction           `json:"available_reactions"`
+	SlowMode                 int                  `json:"slow_mode_delay,omitempty"`
+	StickerSet               string               `json:"sticker_set_name,omitempty"`
+	CanSetStickerSet         bool                 `json:"can_set_sticker_set,omitempty"`
+	CustomEmojiSetName       string               `json:"custom_emoji_sticker_set_name"`
+	LinkedChatID             int64                `json:"linked_chat_id,omitempty"`
+	ChatLocation             *ChatLocation        `json:"location,omitempty"`
+	Private                  bool                 `json:"has_private_forwards,omitempty"`
+	Protected                bool                 `json:"has_protected_content,omitempty"`
+	NoVoiceAndVideo          bool                 `json:"has_restricted_voice_and_video_messages"`
+	HasHiddenMembers         bool                 `json:"has_hidden_members,omitempty"`
+	AggressiveAntiSpam       bool                 `json:"has_aggressive_anti_spam_enabled,omitempty"`
+	CustomEmojiID            string               `json:"emoji_status_custom_emoji_id"`
+	EmojiExpirationUnixtime  int64                `json:"emoji_status_expiration_date"`
+	BackgroundEmojiID        string               `json:"background_custom_emoji_id"`
+	AccentColorID            int                  `json:"accent_color_id"`
+	ProfileAccentColorID     int                  `json:"profile_accent_color_id"`
+	ProfileBackgroundEmojiID string               `json:"profile_background_custom_emoji_id"`
+	HasVisibleHistory        bool                 `json:"has_visible_history"`
+	UnrestrictBoosts         int                  `json:"unrestrict_boost_count"`
 	MaxReactionCount         int           `json:"max_reaction_count"`
+	Birthdate                Birthdate            `json:"birthdate,omitempty"`
+	PersonalChat             *Chat                `json:"personal_chat,omitempty"`
+	BusinessIntro            BusinessIntro        `json:"business_intro,omitempty"`
+	BusinessLocation         BusinessLocation     `json:"business_location,omitempty"`
+	BusinessOpeningHours     BusinessOpeningHours `json:"business_opening_hours,omitempty"`
 }
 
 // Recipient returns chat ID (see Recipient interface).
@@ -319,6 +325,17 @@ type BackgroundType struct {
 type ChatBackground struct {
 	// Type of the background
 	Type BackgroundType `json:"type"`
+}
+
+type Birthdate struct {
+	// Day of the user's birth; 1-31
+	Day int `json:"day"`
+
+	// Month of the user's birth; 1-12
+	Month int `json:"month"`
+
+	// (Optional) Year of the user's birth
+	Year int `json:"year"`
 }
 
 // ExpireDate returns the moment of the link expiration in local time.

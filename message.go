@@ -85,6 +85,10 @@ type Message struct {
 	// (Optional) Message can't be forwarded.
 	Protected bool `json:"has_protected_content,omitempty"`
 
+	// (Optional) True, if the message was sent by an implicit action,
+	// for example, as an away or a greeting business message, or as a scheduled message
+	FromOffline bool `json:"is_from_offline,omitempty"`
+
 	// AlbumID is the unique identifier of a media message group
 	// this message belongs to.
 	AlbumID string `json:"media_group_id"`
@@ -168,6 +172,16 @@ type Message struct {
 
 	// (Optional) Service message: a giveaway without public winners was completed.
 	GiveawayCompleted *GiveawayCompleted `json:"giveaway_completed"`
+
+	// (Optional) Unique identifier of the business connection from which the message
+	// was received. If non-empty, the message belongs to a chat of the corresponding
+	// business account that is independent from any potential bot chat which might
+	// share the same identifier.
+	BusinessConnectionID string `json:"business_connection_id"`
+
+	// (Optional) The bot that actually sent the message on behalf of the business account.
+	// Available only for outgoing messages sent on behalf of the connected business account.
+	BusinessBot *User `json:"sender_business_bot"`
 
 	// For a service message, represents a user,
 	// that just got added to chat, this message came from.
