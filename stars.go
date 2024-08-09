@@ -5,10 +5,10 @@ import "time"
 type TransactionType = string
 
 const (
-	TransactionTypeFragment       TransactionType = "fragment"
 	TransactionTypeUser           TransactionType = "user"
-	TransactionTypeOther          TransactionType = "other"
+	TransactionTypeFragment       TransactionType = "fragment"
 	TransactionPartnerTelegramAds TransactionType = "telegram_ads"
+	TransactionTypeOther          TransactionType = "other"
 )
 
 type RevenueState = string
@@ -19,33 +19,8 @@ const (
 	RevenueStateFailed    RevenueState = "failed"
 )
 
-type TransactionPartner struct {
-	// Type of the state
-	Type TransactionType `json:"type"`
-
-	// (Optional) State of the transaction if the transaction is outgoing$$
-	WithdrawalState RevenueWithdrawalState `json:"withdrawal_state,omitempty"`
-
-	// Information about the user
-	Partner *User `json:"user,omitempty"`
-
-	// (Optional) Bot-specified invoice payload
-	InvoicePayload string `json:"invoice_payload"`
-}
-
-type RevenueWithdrawalState struct {
-	// Type of the state
-	Type RevenueState `json:"type"`
-
-	// Date the withdrawal was completed in Unix time
-	Date int `json:"date,omitempty"`
-
-	// An HTTPS URL that can be used to see transaction details
-	URL string `json:"url,omitempty"`
-}
-
 type StarTransaction struct {
-	// Unique identifier of the transaction. Coincides with the identifer of the
+	// Unique identifier of the transaction. Coincides with the identifier of the
 	// original transaction for refund transactions. Coincides with
 	// SuccessfulPayment.telegram_payment_charge_id for successful incoming
 	// payments from users.
@@ -66,7 +41,33 @@ type StarTransaction struct {
 	Receiver TransactionPartner `json:"receiver"`
 }
 
-// Date returns the local datetime.
-func (c *StarTransaction) Date() time.Time {
+type TransactionPartner struct {
+	// Type of the state
+	Type    TransactionType `json:"type"`
+	User    *User           `json:"user,omitempty"`
+	Payload string          `json:"invoice_payload"`
+
+	// (Optional) State of the transaction if the transaction is outgoing$$
+	Withdrawal RevenueWithdrawal `json:"withdrawal_state,omitempty"`
+}
+
+type RevenueWithdrawal struct {
+	// Type of the state
+	Type RevenueState `json:"type"`
+
+	// Date the withdrawal was completed in Unix time
+	Unixtime int `json:"date,omitempty"`
+
+	// An HTTPS URL that can be used to see transaction details
+	URL string `json:"url,omitempty"`
+}
+
+// Time returns the date of the transaction.
+func (c *StarTransaction) Time() time.Time {
 	return time.Unix(c.Unixtime, 0)
+}
+
+// Time returns the date of the withdrawal.
+func (s *RevenueWithdrawal) Time() time.Time {
+	return time.Unix(int64(s.Unixtime), 0)
 }

@@ -363,7 +363,7 @@ type Location struct {
 
 	// (Optional) Unique identifier of the business connection
 	// on behalf of which the message to be edited was sent
-	BusinessConnectionID string `json:"business_connection_id"`
+	BusinessConnectionID string `json:"business_connection_id,omitempty"`
 }
 
 // Venue object represents a venue location with name, address and

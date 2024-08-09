@@ -1255,7 +1255,7 @@ func (b *Bot) MyShortDescription(language string) (*BotInfo, error) {
 	return b.botInfo(language, "getMyShortDescription")
 }
 
-func (b *Bot) GetStarTransactions(offset, limit int) ([]StarTransaction, error) {
+func (b *Bot) StarTransactions(offset, limit int) ([]StarTransaction, error) {
 	params := map[string]int{
 		"offset": offset,
 		"limit":  limit,
