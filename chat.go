@@ -61,7 +61,7 @@ type Chat struct {
 	CanSetStickerSet         bool                 `json:"can_set_sticker_set,omitempty"`
 	CustomEmojiSetName       string               `json:"custom_emoji_sticker_set_name"`
 	LinkedChatID             int64                `json:"linked_chat_id,omitempty"`
-	ChatLocation             *ChatLocation        `json:"location,omitempty"`
+	Location                 *ChatLocation        `json:"location,omitempty"`
 	Private                  bool                 `json:"has_private_forwards,omitempty"`
 	Protected                bool                 `json:"has_protected_content,omitempty"`
 	NoVoiceAndVideo          bool                 `json:"has_restricted_voice_and_video_messages"`
@@ -81,6 +81,7 @@ type Chat struct {
 	BusinessIntro            BusinessIntro        `json:"business_intro,omitempty"`
 	BusinessLocation         BusinessLocation     `json:"business_location,omitempty"`
 	BusinessOpeningHours     BusinessOpeningHours `json:"business_opening_hours,omitempty"`
+	CanSendPaidMedia         bool                 `json:"can_send_paid_media"`
 }
 
 // Recipient returns chat ID (see Recipient interface).

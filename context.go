@@ -69,6 +69,9 @@ type Context interface {
 	// Returns nil if chat is not presented.
 	Chat() *Chat
 
+	// Payment returns payment instance.
+	Payment() *Payment
+
 	// Recipient combines both Sender and Chat functions. If there is no user
 	// the chat will be returned. The native context cannot be without sender,
 	// but it is useful in the case when the context created intentionally
@@ -326,6 +329,10 @@ func (c *nativeContext) Chat() *Chat {
 	default:
 		return nil
 	}
+}
+
+func (c *nativeContext) Payment() *Payment {
+	return c.u.Message.Payment
 }
 
 func (c *nativeContext) Recipient() Recipient {
