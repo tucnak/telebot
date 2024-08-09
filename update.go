@@ -296,7 +296,6 @@ func (b *Bot) ProcessUpdate(u Update) {
 		b.handle(OnPoll, c)
 		return
 	}
-
 	if u.PollAnswer != nil {
 		b.handle(OnPollAnswer, c)
 		return
@@ -306,12 +305,10 @@ func (b *Bot) ProcessUpdate(u Update) {
 		b.handle(OnMyChatMember, c)
 		return
 	}
-
 	if u.ChatMember != nil {
 		b.handle(OnChatMember, c)
 		return
 	}
-
 	if u.ChatJoinRequest != nil {
 		b.handle(OnChatJoinRequest, c)
 		return
@@ -321,9 +318,25 @@ func (b *Bot) ProcessUpdate(u Update) {
 		b.handle(OnBoost, c)
 		return
 	}
-
 	if u.BoostRemoved != nil {
 		b.handle(OnBoostRemoved, c)
+		return
+	}
+
+	if u.BusinessConnection != nil {
+		b.handle(OnBusinessConnection, c)
+		return
+	}
+	if u.BusinessMessage != nil {
+		b.handle(OnBusinessMessage, c)
+		return
+	}
+	if u.EditedBusinessMessage != nil {
+		b.handle(OnEditedBusinessMessage, c)
+		return
+	}
+	if u.DeletedBusinessMessages != nil {
+		b.handle(OnDeletedBusinessMessages, c)
 		return
 	}
 }

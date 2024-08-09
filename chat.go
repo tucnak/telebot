@@ -266,6 +266,7 @@ type Story struct {
 	// Chat that posted the story
 	Poster *Chat `json:"chat"`
 }
+
 type Birthdate struct {
 	// Day of the user's birth; 1-31
 	Day int `json:"day"`

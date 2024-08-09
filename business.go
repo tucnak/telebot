@@ -1,13 +1,16 @@
 package telebot
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type BusinessConnection struct {
 	// Unique identifier of the business connection
 	ID string `json:"id"`
 
 	// Business account user that created the business connection
-	User *User `json:"user"`
+	Sender *User `json:"user"`
 
 	// Identifier of a private chat with the user who created the business connection. This
 	// number may have more than 32 significant bits and some programming languages may
@@ -22,7 +25,7 @@ type BusinessConnection struct {
 	CanReply bool `json:"can_reply"`
 
 	// True, if the connection is active
-	IsEnabled bool `json:"is_enabled"`
+	Enabled bool `json:"is_enabled"`
 }
 
 // Time returns the moment of business connection creation in local time.
@@ -76,8 +79,28 @@ type BusinessOpeningHoursInterval struct {
 
 type BusinessOpeningHours struct {
 	// Unique name of the time zone for which the opening hours are defined
-	TimeZoneName string `json:"time_zone_name"`
+	Timezone string `json:"time_zone_name"`
 
 	// List of time intervals describing business opening hours
 	OpeningHours []BusinessOpeningHoursInterval `json:"opening_hours"`
+}
+
+// BusinessConnection returns the information about the connection of the bot with a business account.
+func (b *Bot) BusinessConnection(id string) (*BusinessConnection, error) {
+	params := map[string]string{
+		"business_connection_id": id,
+	}
+
+	data, err := b.Raw("getBusinessConnection", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result *BusinessConnection
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return resp.Result, nil
 }
