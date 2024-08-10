@@ -11,10 +11,19 @@ import (
 // used to handle actual endpoints.
 type HandlerFunc func(Context) error
 
+// NewContext returns a new native context object,
+// field by the passed update.
+func NewContext(b API, u Update) Context {
+	return &nativeContext{
+		b: b,
+		u: u,
+	}
+}
+
 // Context wraps an update and represents the context of current event.
 type Context interface {
 	// Bot returns the bot instance.
-	Bot() *Bot
+	Bot() API
 
 	// Update returns the original update.
 	Update() Update
@@ -176,13 +185,13 @@ type Context interface {
 // nativeContext is a native implementation of the Context interface.
 // "context" is taken by context package, maybe there is a better name.
 type nativeContext struct {
-	b     *Bot
+	b     API
 	u     Update
 	lock  sync.RWMutex
 	store map[string]interface{}
 }
 
-func (c *nativeContext) Bot() *Bot {
+func (c *nativeContext) Bot() API {
 	return c.b
 }
 
@@ -498,7 +507,9 @@ func (c *nativeContext) Delete() error {
 func (c *nativeContext) DeleteAfter(d time.Duration) *time.Timer {
 	return time.AfterFunc(d, func() {
 		if err := c.Delete(); err != nil {
-			c.b.OnError(err, c)
+			if b, ok := c.b.(*Bot); ok {
+				b.OnError(err, c)
+			}
 		}
 	})
 }

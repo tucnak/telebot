@@ -266,10 +266,7 @@ func (b *Bot) NewMarkup() *ReplyMarkup {
 // NewContext returns a new native context object,
 // field by the passed update.
 func (b *Bot) NewContext(u Update) Context {
-	return &nativeContext{
-		b: b,
-		u: u,
-	}
+	return NewContext(b, u)
 }
 
 // Send accepts 2+ arguments, starting with destination chat, followed by
