@@ -59,6 +59,7 @@ type Chat struct {
 	SlowMode                       int                  `json:"slow_mode_delay,omitempty"`
 	StickerSet                     string               `json:"sticker_set_name,omitempty"`
 	CanSetStickerSet               bool                 `json:"can_set_sticker_set,omitempty"`
+	CanSendPaidMedia               bool                 `json:"can_send_paid_media"`
 	CustomEmojiStickerSet          string               `json:"custom_emoji_sticker_set_name"`
 	LinkedChatID                   int64                `json:"linked_chat_id,omitempty"`
 	ChatLocation                   *ChatLocation        `json:"location,omitempty"`

@@ -212,6 +212,33 @@ func (b *Bot) sendMedia(media Media, params map[string]string, files map[string]
 	return extractMessage(data)
 }
 
+func (b *Bot) sendPaidMedia(to Recipient, media Media, stars int, opts ...interface{}) (*Message, error) {
+	sendOpts := b.extractOptions(opts)
+
+	kind := media.MediaType()
+	what := "send" + strings.Title(kind)
+
+	if kind == "videoNote" {
+		kind = "video_note"
+	}
+
+	sendFiles := map[string]File{kind: *media.MediaFile()}
+	sendFiles[media.MediaFile().FileURL] = *media.MediaFile()
+
+	params := map[string]string{
+		"chat_id":    to.Recipient(),
+		"star_count": strconv.Itoa(stars),
+	}
+	b.embedSendOptions(params, sendOpts)
+
+	data, err := b.sendFiles(what, sendFiles, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMessage(data)
+}
+
 func (b *Bot) getMe() (*User, error) {
 	data, err := b.Raw("getMe", nil)
 	if err != nil {

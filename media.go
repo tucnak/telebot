@@ -34,6 +34,20 @@ type InputMedia struct {
 	HasSpoiler           bool     `json:"has_spoiler,omitempty"`
 }
 
+type PaidMediaInfo struct {
+	Stars     int         `json:"star_count"`
+	PaidMedia []PaidMedia `json:"paid_media"`
+}
+
+type PaidMedia struct {
+	Type     string `json:"type"`
+	Photo    *Photo `json:"photo,omitempty"`
+	Video    Video  `json:"video,omitempty"`
+	Width    int    `json:"width,omitempty"`
+	Height   int    `json:"height,omitempty"`
+	Duration int    `json:"duration,omitempty"`
+}
+
 // Inputtable is a generic type for all kinds of media you
 // can put into an album.
 type Inputtable interface {
@@ -344,6 +358,7 @@ type Contact struct {
 	// (Optional)
 	LastName string `json:"last_name"`
 	UserID   int64  `json:"user_id,omitempty"`
+	VCard    string `json:"vcard,omitempty"`
 }
 
 // LiveForever is an alias for math.MaxInt32.
