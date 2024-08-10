@@ -47,8 +47,8 @@ type Payment struct {
 
 type RefundedPayment struct {
 	Currency         string `json:"currency"`
-	TotalAmount      int    `json:"total_amount"`
-	InvoicePayload   string `json:"invoice_payload"`
+	Total            int    `json:"total_amount"`
+	Payload          string `json:"invoice_payload"`
 	TelegramChargeID string `json:"telegram_payment_charge_id"`
 	ProviderChargeID string `json:"provider_payment_charge_id"`
 }
