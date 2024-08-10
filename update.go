@@ -49,6 +49,10 @@ func (b *Bot) ProcessContext(c Context) {
 			return
 		}
 
+		if m.Origin != nil {
+			b.handle(OnForward, c)
+		}
+
 		// Commands
 		if m.Text != "" {
 			// Filtering malicious messages
@@ -86,10 +90,6 @@ func (b *Bot) ProcessContext(c Context) {
 
 		if b.handleMedia(c) {
 			return
-		}
-
-		if m.Origin != nil {
-			b.handle(OnForward, c)
 		}
 
 		if m.Contact != nil {
