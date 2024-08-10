@@ -37,6 +37,9 @@ type Context interface {
 	// PreCheckoutQuery returns stored pre checkout query if such presented.
 	PreCheckoutQuery() *PreCheckoutQuery
 
+	// Payment returns payment instance.
+	Payment() *Payment
+
 	// Poll returns stored poll if such presented.
 	Poll() *Poll
 
@@ -68,10 +71,6 @@ type Context interface {
 	// Chat returns the current chat, depending on the context type.
 	// Returns nil if chat is not presented.
 	Chat() *Chat
-
-	// Payment returns payment instance.
-	Payment() *Payment
-
 	// Recipient combines both Sender and Chat functions. If there is no user
 	// the chat will be returned. The native context cannot be without sender,
 	// but it is useful in the case when the context created intentionally
@@ -231,6 +230,13 @@ func (c *nativeContext) PreCheckoutQuery() *PreCheckoutQuery {
 	return c.u.PreCheckoutQuery
 }
 
+func (c *nativeContext) Payment() *Payment {
+	if c.u.Message == nil {
+		return nil
+	}
+	return c.u.Message.Payment
+}
+
 func (c *nativeContext) ChatMember() *ChatMemberUpdate {
 	switch {
 	case c.u.ChatMember != nil:
@@ -255,7 +261,11 @@ func (c *nativeContext) PollAnswer() *PollAnswer {
 }
 
 func (c *nativeContext) Migration() (int64, int64) {
-	return c.u.Message.MigrateFrom, c.u.Message.MigrateTo
+	m := c.u.Message
+	if m == nil {
+		return 0, 0
+	}
+	return m.MigrateFrom, m.MigrateTo
 }
 
 func (c *nativeContext) Topic() *Topic {
@@ -331,10 +341,6 @@ func (c *nativeContext) Chat() *Chat {
 	}
 }
 
-func (c *nativeContext) Payment() *Payment {
-	return c.u.Message.Payment
-}
-
 func (c *nativeContext) Recipient() Recipient {
 	chat := c.Chat()
 	if chat != nil {
@@ -368,7 +374,11 @@ func (c *nativeContext) Entities() Entities {
 func (c *nativeContext) Data() string {
 	switch {
 	case c.u.Message != nil:
-		return c.u.Message.Payload
+		m := c.u.Message
+		if m.Payment != nil {
+			return m.Payment.Payload
+		}
+		return m.Payload
 	case c.u.Callback != nil:
 		return c.u.Callback.Data
 	case c.u.Query != nil:
@@ -385,9 +395,12 @@ func (c *nativeContext) Data() string {
 }
 
 func (c *nativeContext) Args() []string {
+	m := c.u.Message
 	switch {
-	case c.u.Message != nil:
-		payload := strings.Trim(c.u.Message.Payload, " ")
+	case m != nil && m.Payment != nil:
+		return strings.Split(m.Payment.Payload, "|")
+	case m != nil:
+		payload := strings.Trim(m.Payload, " ")
 		if payload != "" {
 			return strings.Fields(payload)
 		}
@@ -537,6 +550,7 @@ func (c *nativeContext) Set(key string, value interface{}) {
 	if c.store == nil {
 		c.store = make(map[string]interface{})
 	}
+
 	c.store[key] = value
 }
 
