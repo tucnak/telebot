@@ -90,7 +90,7 @@ type SendOptions struct {
 	// Unique identifier of the business connection
 	BusinessConnectionID string
 
-	// 	Unique identifier of the message effect to be added to the message; for private chats only
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	EffectID string
 }
 

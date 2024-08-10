@@ -263,22 +263,20 @@ type ReplyRecipient struct {
 
 // RecipientShared combines both UserShared and ChatShared objects.
 type RecipientShared struct {
-	ID       int32        `json:"request_id"` // chat, users
-	Users    []SharedUser `json:"users"`      // users only
-	ChatID   int64        `json:"chat_id"`    // chat only
-	Title    string       `json:"title"`      // chat only
-	Username string       `json:"username"`   // chat only
-	Photo    *Photo       `json:"photo"`      // chat only
-}
+	ID       int32  `json:"request_id"` // chat, users
+	ChatID   int64  `json:"chat_id"`    // chat only
+	Title    string `json:"title"`      // chat only
+	Username string `json:"username"`   // chat only
+	Photo    *Photo `json:"photo"`      // chat only
 
-// SharedUser contains information about a user that was shared
-// with the bot using a KeyboardButtonRequestUsers button.
-type SharedUser struct {
-	UserID    int64       `json:"user_id"`
-	FirstName string      `json:"first_name"`
-	LastName  string      `json:"last_name"`
-	Username  string      `json:"username"`
-	Photo     []photoSize `json:"photo"`
+	Users []struct {
+		UserID    int64  `json:"user_id"`
+		FirstName string `json:"first_name"`
+		LastName  string `json:"last_name"`
+		Username  string `json:"username"`
+		Photo     *Photo `json:"photo"`
+	} `json:"users"` // users only
+
 }
 
 // InlineButton represents a button displayed in the message.

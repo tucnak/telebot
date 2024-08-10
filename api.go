@@ -15,6 +15,7 @@ type API interface {
 	ApproveJoinRequest(chat Recipient, user *User) error
 	Ban(chat *Chat, member *ChatMember, revokeMessages ...bool) error
 	BanSenderChat(chat *Chat, sender Recipient) error
+	BusinessConnection(id string) (*BusinessConnection, error)
 	ChatByID(id int64) (*Chat, error)
 	ChatByUsername(name string) (*Chat, error)
 	ChatMemberOf(chat, user Recipient) (*ChatMember, error)
@@ -65,16 +66,19 @@ type API interface {
 	Pin(msg Editable, opts ...interface{}) error
 	ProfilePhotosOf(user *User) ([]Photo, error)
 	Promote(chat *Chat, member *ChatMember) error
-	React(to Recipient, msg Editable, opts ...ReactionOptions) error
+	React(to Recipient, msg Editable, r Reactions) error
+	RefundStars(to Recipient, chargeID string) error
 	RemoveWebhook(dropPending ...bool) error
 	ReopenGeneralTopic(chat *Chat) error
 	ReopenTopic(chat *Chat, topic *Topic) error
+	ReplaceStickerInSet(of Recipient, stickerSet, oldSticker string, sticker InputSticker) (bool, error)
 	Reply(to *Message, what interface{}, opts ...interface{}) (*Message, error)
 	Respond(c *Callback, resp ...*CallbackResponse) error
 	Restrict(chat *Chat, member *ChatMember) error
 	RevokeInviteLink(chat Recipient, link string) (*ChatInviteLink, error)
 	Send(to Recipient, what interface{}, opts ...interface{}) (*Message, error)
 	SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, error)
+	SendPaid(to Recipient, stars int, a PaidAlbum, opts ...interface{}) (*Message, error)
 	SetAdminTitle(chat *Chat, user *User, title string) error
 	SetCommands(opts ...interface{}) error
 	SetCustomEmojiStickerSetThumb(name, id string) error
@@ -96,6 +100,7 @@ type API interface {
 	SetStickerSetTitle(s StickerSet) error
 	SetWebhook(w *Webhook) error
 	Ship(query *ShippingQuery, what ...interface{}) error
+	StarTransactions(offset, limit int) ([]StarTransaction, error)
 	StickerSet(name string) (*StickerSet, error)
 	StopLiveLocation(msg Editable, opts ...interface{}) (*Message, error)
 	StopPoll(msg Editable, opts ...interface{}) (*Poll, error)
