@@ -10,16 +10,16 @@ import (
 type User struct {
 	ID int64 `json:"id"`
 
-	FirstName         string   `json:"first_name"`
-	LastName          string   `json:"last_name"`
-	IsForum           bool     `json:"is_forum"`
-	Username          string   `json:"username"`
-	LanguageCode      string   `json:"language_code"`
-	IsBot             bool     `json:"is_bot"`
-	IsPremium         bool     `json:"is_premium"`
-	AddedToMenu       bool     `json:"added_to_attachment_menu"`
-	Usernames         []string `json:"active_usernames"`
-	CustomEmojiStatus string   `json:"emoji_status_custom_emoji_id"`
+	FirstName           string   `json:"first_name"`
+	LastName            string   `json:"last_name"`
+	IsForum             bool     `json:"is_forum"`
+	Username            string   `json:"username"`
+	LanguageCode        string   `json:"language_code"`
+	IsBot               bool     `json:"is_bot"`
+	IsPremium           bool     `json:"is_premium"`
+	AddedToMenu         bool     `json:"added_to_attachment_menu"`
+	Usernames           []string `json:"active_usernames"`
+	StatusCustomEmojiID string   `json:"emoji_status_custom_emoji_id"`
 
 	// Returns only in getMe
 	CanJoinGroups        bool `json:"can_join_groups"`
@@ -49,38 +49,38 @@ type Chat struct {
 	Username  string `json:"username"`
 
 	// Returns only in getChat
-	Bio                      string               `json:"bio,omitempty"`
-	Photo                    *ChatPhoto           `json:"photo,omitempty"`
-	Description              string               `json:"description,omitempty"`
-	InviteLink               string               `json:"invite_link,omitempty"`
-	PinnedMessage            *Message             `json:"pinned_message,omitempty"`
-	Permissions              *Rights              `json:"permissions,omitempty"`
-	Reactions                []Reaction           `json:"available_reactions"`
-	SlowMode                 int                  `json:"slow_mode_delay,omitempty"`
-	StickerSet               string               `json:"sticker_set_name,omitempty"`
-	CanSetStickerSet         bool                 `json:"can_set_sticker_set,omitempty"`
-	CustomEmojiSetName       string               `json:"custom_emoji_sticker_set_name"`
-	LinkedChatID             int64                `json:"linked_chat_id,omitempty"`
-	ChatLocation             *ChatLocation        `json:"location,omitempty"`
-	Private                  bool                 `json:"has_private_forwards,omitempty"`
-	Protected                bool                 `json:"has_protected_content,omitempty"`
-	NoVoiceAndVideo          bool                 `json:"has_restricted_voice_and_video_messages"`
-	HasHiddenMembers         bool                 `json:"has_hidden_members,omitempty"`
-	AggressiveAntiSpam       bool                 `json:"has_aggressive_anti_spam_enabled,omitempty"`
-	CustomEmojiID            string               `json:"emoji_status_custom_emoji_id"`
-	EmojiExpirationUnixtime  int64                `json:"emoji_status_expiration_date"`
-	BackgroundEmojiID        string               `json:"background_custom_emoji_id"`
-	AccentColorID            int                  `json:"accent_color_id"`
-	ProfileAccentColorID     int                  `json:"profile_accent_color_id"`
-	ProfileBackgroundEmojiID string               `json:"profile_background_custom_emoji_id"`
-	HasVisibleHistory        bool                 `json:"has_visible_history"`
-	UnrestrictBoosts         int                  `json:"unrestrict_boost_count"`
-	MaxReactions             int                  `json:"max_reaction_count"`
-	Birthdate                Birthdate            `json:"birthdate,omitempty"`
-	PersonalChat             *Chat                `json:"personal_chat,omitempty"`
-	BusinessIntro            BusinessIntro        `json:"business_intro,omitempty"`
-	BusinessLocation         BusinessLocation     `json:"business_location,omitempty"`
-	BusinessOpeningHours     BusinessOpeningHours `json:"business_opening_hours,omitempty"`
+	Bio                            string               `json:"bio,omitempty"`
+	Photo                          *ChatPhoto           `json:"photo,omitempty"`
+	Description                    string               `json:"description,omitempty"`
+	InviteLink                     string               `json:"invite_link,omitempty"`
+	PinnedMessage                  *Message             `json:"pinned_message,omitempty"`
+	Permissions                    *Rights              `json:"permissions,omitempty"`
+	Reactions                      []Reaction           `json:"available_reactions"`
+	SlowMode                       int                  `json:"slow_mode_delay,omitempty"`
+	StickerSet                     string               `json:"sticker_set_name,omitempty"`
+	CanSetStickerSet               bool                 `json:"can_set_sticker_set,omitempty"`
+	CustomEmojiStickerSet          string               `json:"custom_emoji_sticker_set_name"`
+	LinkedChatID                   int64                `json:"linked_chat_id,omitempty"`
+	ChatLocation                   *ChatLocation        `json:"location,omitempty"`
+	Private                        bool                 `json:"has_private_forwards,omitempty"`
+	Protected                      bool                 `json:"has_protected_content,omitempty"`
+	NoVoiceAndVideo                bool                 `json:"has_restricted_voice_and_video_messages"`
+	HasHiddenMembers               bool                 `json:"has_hidden_members,omitempty"`
+	AggressiveAntiSpam             bool                 `json:"has_aggressive_anti_spam_enabled,omitempty"`
+	StatusCustomEmojiID            string               `json:"emoji_status_custom_emoji_id"`
+	EmojiExpirationUnixtime        int64                `json:"emoji_status_expiration_date"`
+	BackgroundCustomEmojiID        string               `json:"background_custom_emoji_id"`
+	AccentColorID                  int                  `json:"accent_color_id"`
+	ProfileAccentColorID           int                  `json:"profile_accent_color_id"`
+	ProfileBackgroundCustomEmojiID string               `json:"profile_background_custom_emoji_id"`
+	HasVisibleHistory              bool                 `json:"has_visible_history"`
+	UnrestrictBoosts               int                  `json:"unrestrict_boost_count"`
+	MaxReactions                   int                  `json:"max_reaction_count"`
+	Birthdate                      Birthdate            `json:"birthdate,omitempty"`
+	PersonalChat                   *Chat                `json:"personal_chat,omitempty"`
+	BusinessIntro                  BusinessIntro        `json:"business_intro,omitempty"`
+	BusinessLocation               BusinessLocation     `json:"business_location,omitempty"`
+	BusinessOpeningHours           BusinessOpeningHours `json:"business_opening_hours,omitempty"`
 }
 
 // Recipient returns chat ID (see Recipient interface).

@@ -32,8 +32,8 @@ type ReactionCount struct {
 	Count int `json:"total_count"`
 }
 
-// ReactionOptions represents an object of reaction options.
-type ReactionOptions struct {
+// Reactions represents an object of reaction options.
+type Reactions struct {
 	// List of reaction types to set on the message.
 	Reactions []Reaction `json:"reaction"`
 
@@ -44,36 +44,24 @@ type ReactionOptions struct {
 // React changes the chosen reactions on a message. Service messages can't be
 // reacted to. Automatically forwarded messages from a channel to its discussion group have
 // the same available reactions as messages in the channel.
-func (b *Bot) React(to Recipient, msg Editable, opts ReactionOptions) error {
+func (b *Bot) React(to Recipient, msg Editable, r Reactions) error {
 	if to == nil {
 		return ErrBadRecipient
 	}
-	msgID, _ := msg.MessageSig()
 
+	msgID, _ := msg.MessageSig()
 	params := map[string]string{
 		"chat_id":    to.Recipient(),
 		"message_id": msgID,
 	}
 
-	reactions := make([]Reaction, 0, len(opts.Reactions))
-
-	for _, reaction := range opts.Reactions {
-		// Type is required, use ReactionTypeEmoji as default
-		if reaction.Type == "" {
-			reaction.Type = ReactionTypeEmoji
-		}
-
-		reactions = append(reactions, reaction)
-	}
-
-	data, _ := json.Marshal(reactions)
+	data, _ := json.Marshal(r.Reactions)
 	params["reaction"] = string(data)
 
-	if opts.Big {
+	if r.Big {
 		params["is_big"] = "true"
 	}
 
 	_, err := b.Raw("setMessageReaction", params)
-
 	return err
 }

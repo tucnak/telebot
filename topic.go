@@ -6,10 +6,10 @@ import (
 )
 
 type Topic struct {
-	Name            string `json:"name"`
-	IconColor       int    `json:"icon_color"`
-	IconCustomEmoji string `json:"icon_custom_emoji_id"`
-	ThreadID        int    `json:"message_thread_id"`
+	Name              string `json:"name"`
+	IconColor         int    `json:"icon_color"`
+	IconCustomEmojiID string `json:"icon_custom_emoji_id"`
+	ThreadID          int    `json:"message_thread_id"`
 }
 
 // CreateTopic creates a topic in a forum supergroup chat.
