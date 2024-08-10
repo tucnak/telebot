@@ -70,12 +70,20 @@ func (b *Bot) ProcessUpdate(u Update) {
 				return
 			}
 
+			if m.ReplyTo != nil {
+				b.handle(OnReply, c)
+			}
+
 			b.handle(OnText, c)
 			return
 		}
 
 		if b.handleMedia(c) {
 			return
+		}
+
+		if m.Origin != nil {
+			b.handle(OnForward, c)
 		}
 
 		if m.Contact != nil {
