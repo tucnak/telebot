@@ -378,7 +378,7 @@ type MessageEntity struct {
 	Language string `json:"language,omitempty"`
 
 	// (Optional) For EntityCustomEmoji entity type only.
-	CustomEmoji string `json:"custom_emoji_id"`
+	CustomEmojiID string `json:"custom_emoji_id"`
 }
 
 // EntityType is a MessageEntity type.
@@ -653,7 +653,7 @@ type ExternalReplyInfo struct {
 	// Available only if the original chat is a supergroup or a channel.
 	MessageID int `json:"message_id"`
 
-	// (Optional) ReactionOptions used for link preview generation for the original message,
+	// (Optional) PreviewOptions used for link preview generation for the original message,
 	// if it is a text message.
 	PreviewOptions *PreviewOptions `json:"link_preview_options"`
 

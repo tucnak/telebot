@@ -338,7 +338,7 @@ type Sticker struct {
 	SetName          string         `json:"set_name"`
 	PremiumAnimation *File          `json:"premium_animation"`
 	MaskPosition     *MaskPosition  `json:"mask_position"`
-	CustomEmoji      string         `json:"custom_emoji_id"`
+	CustomEmojiID    string         `json:"custom_emoji_id"`
 	Repaint          bool           `json:"needs_repainting"`
 }
 
