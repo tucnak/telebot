@@ -303,6 +303,53 @@ func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Messag
 	}
 }
 
+// SendPaid sends multiple instances of paid media as a single message.
+// To include the caption, make sure the first PaidInputtable of an album has it.
+func (b *Bot) SendPaid(to Recipient, stars int, a PaidAlbum, opts ...interface{}) (*Message, error) {
+	if to == nil {
+		return nil, ErrBadRecipient
+	}
+
+	params := map[string]string{
+		"chat_id":    to.Recipient(),
+		"star_count": strconv.Itoa(stars),
+	}
+	sendOpts := b.extractOptions(opts)
+
+	media := make([]string, len(a))
+	files := make(map[string]File)
+
+	for i, x := range a {
+		repr := x.MediaFile().process(strconv.Itoa(i), files)
+		if repr == "" {
+			return nil, fmt.Errorf("telebot: paid media entry #%d does not exist", i)
+		}
+
+		im := x.InputMedia()
+		im.Media = repr
+
+		if i == 0 {
+			params["caption"] = im.Caption
+			if im.CaptionAbove {
+				params["show_caption_above_media"] = "true"
+			}
+		}
+
+		data, _ := json.Marshal(im)
+		media[i] = string(data)
+	}
+
+	params["media"] = "[" + strings.Join(media, ",") + "]"
+	b.embedSendOptions(params, sendOpts)
+
+	data, err := b.sendFiles("sendPaidMedia", files, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMessage(data)
+}
+
 // SendAlbum sends multiple instances of media as a single message.
 // To include the caption, make sure the first Inputtable of an album has it.
 // From all existing options, it only supports tele.Silent.

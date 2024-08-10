@@ -64,7 +64,7 @@ type Message struct {
 
 	// (Optional) Information about the message that is being replied to,
 	// which may come from another chat or forum topic.
-	ExternalReplyInfo *ExternalReplyInfo `json:"external_reply"`
+	ExternalReply *ExternalReply `json:"external_reply"`
 
 	// (Optional) For replies that quote part of the original message,
 	// the quoted part of the message.
@@ -129,7 +129,7 @@ type Message struct {
 	Document *Document `json:"document"`
 
 	// Message contains paid media; information about the paid media
-	PaidMedia PaidMediaInfo `json:"paid_media"`
+	PaidMedia PaidMedias `json:"paid_media"`
 
 	// For a photo, all available sizes (thumbnails).
 	Photo *Photo `json:"photo"`
@@ -639,9 +639,9 @@ func (mo *MessageOrigin) Time() time.Time {
 	return time.Unix(mo.DateUnixtime, 0)
 }
 
-// ExternalReplyInfo contains information about a message that is being replied to,
+// ExternalReply contains information about a message that is being replied to,
 // which may come from another chat or forum topic.
-type ExternalReplyInfo struct {
+type ExternalReply struct {
 	// Origin of the message replied to by the given message.
 	Origin *MessageOrigin `json:"origin"`
 
@@ -666,9 +666,6 @@ type ExternalReplyInfo struct {
 	// (Optional) Message is a general file, information about the file.
 	Document *Document `json:"document"`
 
-	// Message contains paid media; information about the paid media
-	PaidMedia PaidMediaInfo `json:"paid_media"`
-
 	// (Optional) Message is a photo, available sizes of the photo.
 	Photo []Photo `json:"photo"`
 
@@ -686,9 +683,6 @@ type ExternalReplyInfo struct {
 
 	// (Optional) Message is a voice message, information about the file.
 	Voice *Voice `json:"voice"`
-
-	// (Optional) True, if the message media is covered by a spoiler animation.
-	HasMediaSpoiler bool `json:"has_media_spoiler"`
 
 	// (Optional) Message is a shared contact, information about the contact.
 	Contact *Contact `json:"contact"`
@@ -716,6 +710,12 @@ type ExternalReplyInfo struct {
 
 	// (Optional) A giveaway with public winners was completed.
 	GiveawayWinners *GiveawayWinners `json:"giveaway_winners"`
+
+	// Message contains paid media; information about the paid media
+	PaidMedia PaidMedias `json:"paid_media"`
+
+	// (Optional) True, if the message media is covered by a spoiler animation.
+	HasMediaSpoiler bool `json:"has_media_spoiler"`
 }
 
 // ReplyParams describes reply parameters for the message that is being sent.

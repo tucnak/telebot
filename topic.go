@@ -22,8 +22,8 @@ func (b *Bot) CreateTopic(chat *Chat, topic *Topic) (*Topic, error) {
 	if topic.IconColor != 0 {
 		params["icon_color"] = strconv.Itoa(topic.IconColor)
 	}
-	if topic.IconCustomEmoji != "" {
-		params["icon_custom_emoji_id"] = topic.IconCustomEmoji
+	if topic.IconCustomEmojiID != "" {
+		params["icon_custom_emoji_id"] = topic.IconCustomEmojiID
 	}
 
 	data, err := b.Raw("createForumTopic", params)
@@ -50,8 +50,8 @@ func (b *Bot) EditTopic(chat *Chat, topic *Topic) error {
 	if topic.Name != "" {
 		params["name"] = topic.Name
 	}
-	if topic.IconCustomEmoji != "" {
-		params["icon_custom_emoji_id"] = topic.IconCustomEmoji
+	if topic.IconCustomEmojiID != "" {
+		params["icon_custom_emoji_id"] = topic.IconCustomEmojiID
 	}
 
 	_, err := b.Raw("editForumTopic", params)

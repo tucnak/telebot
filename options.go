@@ -91,7 +91,7 @@ type SendOptions struct {
 	BusinessConnectionID string
 
 	// 	Unique identifier of the message effect to be added to the message; for private chats only
-	EffectID string `json:"message_effect_id"`
+	EffectID string
 }
 
 func (og *SendOptions) copy() *SendOptions {

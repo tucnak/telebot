@@ -34,20 +34,6 @@ type InputMedia struct {
 	HasSpoiler           bool     `json:"has_spoiler,omitempty"`
 }
 
-type PaidMediaInfo struct {
-	Stars     int         `json:"star_count"`
-	PaidMedia []PaidMedia `json:"paid_media"`
-}
-
-type PaidMedia struct {
-	Type     string `json:"type"`
-	Photo    *Photo `json:"photo,omitempty"`
-	Video    Video  `json:"video,omitempty"`
-	Width    int    `json:"width,omitempty"`
-	Height   int    `json:"height,omitempty"`
-	Duration int    `json:"duration,omitempty"`
-}
-
 // Inputtable is a generic type for all kinds of media you
 // can put into an album.
 type Inputtable interface {
@@ -116,6 +102,10 @@ func (p *Photo) InputMedia() InputMedia {
 	}
 }
 
+func (p *Photo) Paid() bool {
+	return true
+}
+
 // UnmarshalJSON is custom unmarshaller required to abstract
 // away the hassle of treating different thumbnail sizes.
 // Instead, Telebot chooses the hi-res one and just sticks to it.
@@ -177,6 +167,7 @@ func (a *Audio) InputMedia() InputMedia {
 		Title:     a.Title,
 		Performer: a.Performer,
 	}
+
 }
 
 // Document object represents a general file (as opposed to Photo or Audio).
@@ -247,6 +238,10 @@ func (v *Video) InputMedia() InputMedia {
 		HasSpoiler:   v.HasSpoiler,
 		CaptionAbove: v.CaptionAbove,
 	}
+}
+
+func (v *Video) Paid() bool {
+	return true
 }
 
 // Animation object represents a animation file.
@@ -414,3 +409,29 @@ var (
 	Slot = &Dice{Type: "🎰"}
 	Bowl = &Dice{Type: "🎳"}
 )
+
+// PaidInputtable is a generic type for all kinds of media you
+// can put into an album that are paid.
+type PaidInputtable interface {
+	Inputtable
+
+	// Paid shows if the media is paid.
+	Paid() bool
+}
+
+// PaidAlbum lets you group multiple paid media into a single message.
+type PaidAlbum []PaidInputtable
+
+type PaidMedias struct {
+	Stars     int         `json:"star_count"`
+	PaidMedia []PaidMedia `json:"paid_media"`
+}
+
+type PaidMedia struct {
+	Type     string `json:"type"`
+	Photo    *Photo `json:"photo"`    // photo
+	Video    *Video `json:"video"`    // video
+	Width    int    `json:"width"`    // preview only
+	Height   int    `json:"height"`   // preview only
+	Duration int    `json:"duration"` // preview only
+}
