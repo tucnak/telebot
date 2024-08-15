@@ -49,6 +49,7 @@ type TransactionPartner struct {
 
 	// (Optional) State of the transaction if the transaction is outgoing$$
 	Withdrawal RevenueWithdrawal `json:"withdrawal_state,omitempty"`
+	PaidMedia  []PaidMedia       `json:"paid_media"`
 }
 
 type RevenueWithdrawal struct {
