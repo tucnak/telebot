@@ -11,8 +11,8 @@ import (
 func CacheContext(cache tele.Cache) tele.MiddlewareFunc {
 	return func(next tele.HandlerFunc) tele.HandlerFunc {
 		return func(ctx tele.Context) error {
-			for _, key := range cache.Keys() {
-				value, err := cache.Get(key)
+			for _, key := range cache.Keys(tele.CacheUserContext) {
+				value, err := cache.Get(tele.CacheUserContext, key)
 				if err != nil {
 					log.Printf("err: %s was happened, %s -> %s was not got from cache", err, value, key)
 
@@ -25,7 +25,7 @@ func CacheContext(cache tele.Cache) tele.MiddlewareFunc {
 			defer func() {
 				for _, key := range ctx.Keys() {
 					value := ctx.Get(key)
-					err := cache.Set(key, value)
+					err := cache.Put(tele.CacheUserContext, key, value)
 					if err != nil {
 						log.Printf("err: %s was happened, %s -> %s was not stored from context", err, value, key)
 					}

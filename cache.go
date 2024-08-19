@@ -1,7 +1,14 @@
 package telebot
 
 import (
+	"errors"
 	"sync"
+)
+
+type CacheKind string
+
+const (
+	CacheUserContext CacheKind = "user_context"
 )
 
 // Cache is a provider for cache
@@ -10,10 +17,11 @@ import (
 // to store a cache of user state, inline results
 // for a Telegram bot.
 type Cache interface {
-	Get(key string) (interface{}, error)
-	Set(key string, value interface{}) error
+	Get(kind CacheKind, key string) (interface{}, error)
+	Put(kind CacheKind, key string, value interface{}) error
+	Clear(kind CacheKind, key string) error
 
-	Keys() []string
+	Keys(kind CacheKind) []string
 }
 
 // InMemoryCache is a provider of in memory cache.
@@ -21,37 +29,76 @@ type Cache interface {
 // Would be enabled by default
 type inMemoryCache struct {
 	lock sync.RWMutex
-	data map[string]interface{}
+	data map[CacheKind]map[string]interface{}
 
-	keys         []string // To maintain order of keys
-	currentIndex int      // To keep track of current index
+	keys map[CacheKind][]string // To maintain order of keys
 }
 
 func NewInMemoryCache() Cache {
 	return &inMemoryCache{}
 }
 
-func (m *inMemoryCache) Get(key string) (interface{}, error) {
+func (m *inMemoryCache) Get(kind CacheKind, key string) (interface{}, error) {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
-	return m.data[key], nil
+
+	if _, ok := m.data[kind]; !ok {
+		return nil, errors.New("telebot: cache kind is not found")
+	}
+
+	if _, ok := m.data[kind][key]; !ok {
+		return nil, errors.New("telebot: cache key is not found")
+	}
+
+	return m.data[kind][key], nil
 }
 
-func (m *inMemoryCache) Set(key string, value interface{}) error {
+func (m *inMemoryCache) Put(kind CacheKind, key string, value interface{}) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
-	if m.data == nil {
-		m.data = make(map[string]interface{})
+	if _, ok := m.data[kind]; !ok {
+		m.data[kind] = make(map[string]interface{})
+		m.keys[kind] = make([]string, 1)
 	}
-	m.data[key] = value
-	m.keys = append(m.keys, key) // Update the keys slice
+
+	m.data[kind][key] = value
+	m.keys[kind] = append(m.keys[kind], key) // Update the keys slice
 
 	return nil
 }
 
-func (m *inMemoryCache) Keys() []string {
+func (m *inMemoryCache) Clear(kind CacheKind, key string) error {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
-	return m.keys
+
+	if _, ok := m.data[kind]; !ok {
+		return errors.New("telebot: cache kind is not found")
+	}
+
+	if _, ok := m.data[kind][key]; !ok {
+		return errors.New("telebot: cache key not found")
+	}
+
+	delete(m.data[kind], key)     // delete value
+	keysRemove(m.keys[kind], key) // delete key
+
+	return nil
+}
+
+func (m *inMemoryCache) Keys(kind CacheKind) []string {
+	m.lock.RLock()
+	defer m.lock.RUnlock()
+
+	return m.keys[kind]
+}
+
+func keysRemove(keys []string, remove string) []string {
+	for i, k := range keys {
+		if k == remove {
+			return append(keys[:i], keys[i+1:]...)
+		}
+	}
+
+	return keys
 }
