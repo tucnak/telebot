@@ -99,10 +99,11 @@ By default, is in memory, can be implemented redis, mecmached, etc.
 // to store a cache of user state, inline results
 // for a Telegram bot.
 type Cache interface {
-	Get(key string) (interface{}, error)
-	Set(key string, value interface{}) error
+	Get(kind CacheKind, key string) (interface{}, error)
+	Set(kind CacheKind, key string, value interface{}) error
+	Clear(kind CacheKind, key string) error
 	
-	Keys() []string
+	Keys(kind CacheKind) []string
 }
 ```
 
