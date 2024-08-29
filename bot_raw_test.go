@@ -107,6 +107,15 @@ func TestExtractOk(t *testing.T) {
 		err:        ErrGroupMigrated,
 		MigratedTo: -100123456789,
 	}, extractOk(data))
+
+	data = []byte(`{
+		"ok": false,
+		"error_code": 400,
+		"description": "Bad Request: can't parse entities: Can't find end tag corresponding to start tag \"b\""
+	}`)
+	assert.Equal(t, &Error{Code: 400, Description: `Bad Request: can't parse entities: Can't find end tag corresponding to start tag "b"`},
+		extractOk(data))
+
 }
 
 func TestExtractMessage(t *testing.T) {
