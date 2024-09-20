@@ -36,11 +36,17 @@ func NewBot(pref Settings) (*Bot, error) {
 		pref.OnError = defaultOnError
 	}
 
+	testApiPath := ""
+	if pref.TestAPI {
+		testApiPath = "/test"
+	}
+
 	bot := &Bot{
-		Token:   pref.Token,
-		URL:     pref.URL,
-		Poller:  pref.Poller,
-		onError: pref.OnError,
+		Token:       pref.Token,
+		URL:         pref.URL,
+		TestApiPath: testApiPath,
+		Poller:      pref.Poller,
+		onError:     pref.OnError,
 
 		Updates:  make(chan Update, pref.Updates),
 		handlers: make(map[string]HandlerFunc),
@@ -68,12 +74,13 @@ func NewBot(pref Settings) (*Bot, error) {
 
 // Bot represents a separate Telegram bot instance.
 type Bot struct {
-	Me      *User
-	Token   string
-	URL     string
-	Updates chan Update
-	Poller  Poller
-	onError func(error, Context)
+	Me          *User
+	Token       string
+	URL         string
+	TestApiPath string
+	Updates     chan Update
+	Poller      Poller
+	onError     func(error, Context)
 
 	group       *Group
 	handlers    map[string]HandlerFunc
@@ -92,6 +99,9 @@ type Bot struct {
 type Settings struct {
 	URL   string
 	Token string
+
+	// TestAPI enables using the test API server.
+	TestAPI bool
 
 	// Updates channel capacity, defaulted to 100.
 	Updates int
@@ -957,7 +967,7 @@ func (b *Bot) File(file *File) (io.ReadCloser, error) {
 		return nil, err
 	}
 
-	url := b.URL + "/file/bot" + b.Token + "/" + f.FilePath
+	url := b.URL + "/file/bot" + b.Token + b.TestApiPath + "/" + f.FilePath
 	file.FilePath = f.FilePath // saving file path
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
