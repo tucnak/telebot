@@ -70,7 +70,11 @@ type (
 
 // New parses the given layout file.
 func New(path string, funcs ...template.FuncMap) (*Layout, error) {
-	return NewFromFS(os.DirFS("."), path, funcs...)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	return rawNew(data, funcs...)
 }
 
 // NewFromFS parses the layout from the given fs.FS. It allows to read layout
@@ -80,7 +84,10 @@ func NewFromFS(fsys fs.FS, path string, funcs ...template.FuncMap) (*Layout, err
 	if err != nil {
 		return nil, err
 	}
+	return rawNew(data, funcs...)
+}
 
+func rawNew(data []byte, funcs ...template.FuncMap) (*Layout, error) {
 	lt := Layout{
 		ctxs:  make(map[tele.Context]string),
 		funcs: make(template.FuncMap),
