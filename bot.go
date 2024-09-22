@@ -950,6 +950,25 @@ func (b *Bot) Download(file *File, localFilename string) error {
 	return nil
 }
 
+// DownloadToWriter stream the file from Telegram servers to an io.Writer interface,
+// This can be used for cases that you want to get the file from one server,
+// and directly upload it to another server without saving it locally.
+// Maximum file size to download is 20 MB.
+func (b *Bot) DownloadToWriter(file *File, writer io.Writer) error {
+	reader, err := b.File(file)
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
+	_, err = io.Copy(writer, reader)
+	if err != nil {
+		return wrapError(err)
+	}
+
+	return nil
+}
+
 // File gets a file from Telegram servers.
 func (b *Bot) File(file *File) (io.ReadCloser, error) {
 	f, err := b.FileByID(file.FileID)
