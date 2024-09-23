@@ -32,13 +32,26 @@ func TestLayout(t *testing.T) {
 	assert.Equal(t, &tele.LongPoller{}, pref.Poller)
 	assert.Equal(t, pref, ltfs.Settings())
 
-	assert.ElementsMatch(t, []tele.Command{{
+	assert.Equal(t, []tele.Command{{
 		Text:        "start",
 		Description: "Start the bot",
 	}, {
 		Text:        "help",
 		Description: "How to use the bot",
+	}, {
+		Text:        "settings",
+		Description: "{{ text `cmd_settings` }}",
 	}}, lt.Commands())
+	assert.Equal(t, []tele.Command{{
+		Text:        "start",
+		Description: "Start the bot",
+	}, {
+		Text:        "help",
+		Description: "How to use the bot",
+	}, {
+		Text:        "settings",
+		Description: "Settings",
+	}}, lt.CommandsLocale("en"))
 
 	assert.Equal(t, "string", lt.String("str"))
 	assert.Equal(t, 123, lt.Int("num"))

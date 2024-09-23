@@ -6,6 +6,7 @@ settings:
 commands:
   /start: Start the bot
   /help: How to use the bot
+  /settings: "{{ text `cmd_settings` }}"
 
 config:
   str: string
