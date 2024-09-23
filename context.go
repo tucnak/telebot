@@ -180,6 +180,9 @@ type Context interface {
 
 	// Set saves data in the context.
 	Set(key string, val interface{})
+
+	// Keys retrieves store keys
+	Keys() []string
 }
 
 // nativeContext is a native implementation of the Context interface.
@@ -569,4 +572,16 @@ func (c *nativeContext) Get(key string) interface{} {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 	return c.store[key]
+}
+
+func (c *nativeContext) Keys() []string {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+
+	keys := make([]string, 0, len(c.store))
+	for k := range c.store {
+		keys = append(keys, k)
+	}
+
+	return keys
 }
