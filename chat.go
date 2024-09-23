@@ -411,6 +411,33 @@ func (b *Bot) CreateInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInvit
 	return &resp.Result, nil
 }
 
+// CreateChatSubscriptionInviteLink creates a subscription invite link for a channel chat.
+func (b *Bot) CreateChatSubscriptionInviteLink(chat Recipient, subscriptionPeriod, subscriptionPrice int, link *ChatInviteLink) (*ChatInviteLink, error) {
+	params := map[string]string{
+		"chat_id":             chat.Recipient(),
+		"subscription_period": strconv.Itoa(subscriptionPeriod),
+		"subscription_price":  strconv.Itoa(subscriptionPrice),
+	}
+
+	if link != nil {
+		params["name"] = link.Name
+	}
+
+	data, err := b.Raw("createChatSubscriptionInviteLink", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result ChatInviteLink `json:"result"`
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+
+	return &resp.Result, nil
+}
+
 // EditInviteLink edits a non-primary invite link created by the bot.
 func (b *Bot) EditInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error) {
 	params := map[string]string{
@@ -431,6 +458,31 @@ func (b *Bot) EditInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteL
 	}
 
 	data, err := b.Raw("editChatInviteLink", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result ChatInviteLink `json:"result"`
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+
+	return &resp.Result, nil
+}
+
+// EditChatSubscriptionInviteLink edits a subscription invite link created by the bot.
+func (b *Bot) EditChatSubscriptionInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error) {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+	if link != nil {
+		params["invite_link"] = link.InviteLink
+		params["name"] = link.Name
+	}
+
+	data, err := b.Raw("editChatSubscriptionInviteLink", params)
 	if err != nil {
 		return nil, err
 	}
