@@ -1,0 +1,58 @@
+run:
+  modules-download-mode: readonly
+  issues-exit-code: 0
+  timeout: 5m
+
+linters:
+  enable-all: true
+  disable:
+    # TODO: enable one by one
+    - goconst
+    - nilerr
+    - maintidx
+    - whitespace
+    - prealloc
+    - godox
+    - gocyclo
+    - ifshort
+    - wastedassign
+    - gofumpt
+    - lll
+    - nestif
+    - errchkjson
+    - exportloopref
+    - errorlint
+    - gosimple
+    - tenv
+    - ineffassign
+    - gocritic
+    - gocognit
+    - ireturn
+    - forbidigo
+    - containedctx
+    - tagliatelle
+    - cyclop
+    - errcheck
+    - exhaustivestruct
+    - forcetypeassert
+    - funlen
+    - gochecknoglobals
+    - gochecknoinits
+    - goerr113
+    - godot
+    - gomnd
+    - gosec
+    - revive
+    - varnamelen
+    - wrapcheck
+    - noctx
+    - staticcheck
+    - stylecheck
+    - paralleltest
+    - golint      
+    - interfacer 
+    - maligned    
+    - nlreturn    
+    - scopelint   
+    - testpackage 
+    - wsl
