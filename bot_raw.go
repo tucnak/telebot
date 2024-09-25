@@ -330,14 +330,11 @@ func extractOk(data []byte) error {
 			err:        NewError(e.Code, e.Description),
 			RetryAfter: int(retryAfter.(float64)),
 		}
-	case http.StatusBadRequest:
+	default:
 		err = &Error{
 			Code:        e.Code,
 			Description: e.Description,
 		}
-
-	default:
-		err = fmt.Errorf("telegram: %s (%d)", e.Description, e.Code)
 	}
 
 	return err
