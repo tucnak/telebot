@@ -331,7 +331,10 @@ func extractOk(data []byte) error {
 			RetryAfter: int(retryAfter.(float64)),
 		}
 	default:
-		err = fmt.Errorf("telegram: %s (%d)", e.Description, e.Code)
+		err = &Error{
+			Code:        e.Code,
+			Description: e.Description,
+		}
 	}
 
 	return err
