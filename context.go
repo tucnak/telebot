@@ -424,12 +424,12 @@ func (c *nativeContext) Args() []string {
 }
 
 func (c *nativeContext) Send(what interface{}, opts ...interface{}) error {
-	c.inheritOpts(opts)
+	opts = c.inheritOpts(opts)
 	_, err := c.b.Send(c.Recipient(), what, opts...)
 	return err
 }
 
-func (c *nativeContext) inheritOpts(opts ...interface{}) {
+func (c *nativeContext) inheritOpts(opts ...interface{}) []interface{} {
 	var (
 		ignoreThread bool
 	)
@@ -449,6 +449,8 @@ func (c *nativeContext) inheritOpts(opts ...interface{}) {
 	case !ignoreThread && c.Message() != nil && c.Message().ThreadID != 0:
 		opts = append(opts, Topic{ThreadID: c.Message().ThreadID})
 	}
+
+	return opts
 }
 
 func (c *nativeContext) SendAlbum(a Album, opts ...interface{}) error {
@@ -461,7 +463,7 @@ func (c *nativeContext) Reply(what interface{}, opts ...interface{}) error {
 	if msg == nil {
 		return ErrBadContext
 	}
-	c.inheritOpts(opts)
+	opts = c.inheritOpts(opts)
 	_, err := c.b.Reply(msg, what, opts...)
 	return err
 }
@@ -481,7 +483,7 @@ func (c *nativeContext) ForwardTo(to Recipient, opts ...interface{}) error {
 }
 
 func (c *nativeContext) Edit(what interface{}, opts ...interface{}) error {
-	c.inheritOpts(opts)
+	opts = c.inheritOpts(opts)
 
 	if c.u.InlineResult != nil {
 		_, err := c.b.Edit(c.u.InlineResult, what, opts...)
@@ -495,7 +497,7 @@ func (c *nativeContext) Edit(what interface{}, opts ...interface{}) error {
 }
 
 func (c *nativeContext) EditCaption(caption string, opts ...interface{}) error {
-	c.inheritOpts(opts)
+	opts = c.inheritOpts(opts)
 
 	if c.u.InlineResult != nil {
 		_, err := c.b.EditCaption(c.u.InlineResult, caption, opts...)
