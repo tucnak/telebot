@@ -454,6 +454,8 @@ func (c *nativeContext) inheritOpts(opts ...interface{}) []interface{} {
 }
 
 func (c *nativeContext) SendAlbum(a Album, opts ...interface{}) error {
+	opts = c.inheritOpts(opts)
+
 	_, err := c.b.SendAlbum(c.Recipient(), a, opts...)
 	return err
 }
