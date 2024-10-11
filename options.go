@@ -34,6 +34,9 @@ const (
 
 	// RemoveKeyboard = ReplyMarkup.RemoveKeyboard
 	RemoveKeyboard
+
+	// IgnoreThread is used to ignore the thread when responding to a message via context.
+	IgnoreThread
 )
 
 // Placeholder is used to set input field placeholder as a send option.
@@ -149,6 +152,8 @@ func (b *Bot) extractOptions(how []interface{}) *SendOptions {
 			opts.ParseMode = opt
 		case Entities:
 			opts.Entities = opt
+		case Topic:
+			opts.ThreadID = opt.ThreadID
 		default:
 			panic("telebot: unsupported send-option")
 		}
