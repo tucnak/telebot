@@ -357,6 +357,94 @@ type Message struct {
 	WriteAccessAllowed *WriteAccessAllowed `json:"write_access_allowed,omitempty"`
 }
 
+func (m *Message) String() string {
+	switch true {
+	case m.PinnedMessage != nil:
+		return OnPinned
+	case m.Text != "":
+		return OnText
+	case m.Contact != nil:
+		return OnContact
+	case m.Location != nil:
+		return OnLocation
+	case m.Venue != nil:
+		return OnVenue
+	case m.Game != nil:
+		return OnGame
+	case m.Dice != nil:
+		return OnDice
+	case m.Invoice != nil:
+		return OnInvoice
+	case m.Payment != nil:
+		return OnPayment
+
+	case m.TopicCreated != nil:
+		return OnTopicCreated
+	case m.TopicReopened != nil:
+		return OnTopicReopened
+	case m.TopicClosed != nil:
+		return OnTopicClosed
+	case m.TopicEdited != nil:
+		return OnTopicEdited
+	case m.GeneralTopicHidden != nil:
+		return OnGeneralTopicHidden
+	case m.GeneralTopicUnhidden != nil:
+		return OnGeneralTopicUnhidden
+	case m.WriteAccessAllowed != nil:
+		return OnWriteAccessAllowed
+
+	case m.GroupCreated || m.SuperGroupCreated:
+		return OnAddedToGroup
+	case m.UserJoined != nil:
+		return OnUserJoined
+	case m.UsersJoined != nil:
+		return OnUserJoined
+	case m.UserLeft != nil:
+		return OnUserLeft
+
+	case m.UserShared != nil:
+		return OnUserShared
+	case m.ChatShared != nil:
+		return OnChatShared
+
+	case m.NewGroupTitle != "":
+		return OnNewGroupTitle
+	case m.NewGroupPhoto != nil:
+		return OnNewGroupTitle
+	case m.GroupPhotoDeleted:
+		return OnGroupPhotoDeleted
+
+	case m.GroupCreated:
+		return OnGroupCreated
+	case m.SuperGroupCreated:
+		return OnSuperGroupCreated
+	case m.ChannelCreated:
+		return OnChannelCreated
+
+	case m.MigrateTo != 0:
+		return OnMigration
+
+	case m.VideoChatStarted != nil:
+		return OnVideoChatStarted
+	case m.VideoChatEnded != nil:
+		return OnVideoChatEnded
+	case m.VideoChatParticipants != nil:
+		return OnVideoChatParticipants
+	case m.VideoChatScheduled != nil:
+		return OnVideoChatScheduled
+
+	case m.WebAppData != nil:
+		return OnWebApp
+
+	case m.ProximityAlert != nil:
+		return OnProximityAlert
+	case m.AutoDeleteTimer != nil:
+		return OnAutoDeleteTimer
+	default:
+		return ""
+	}
+}
+
 // MessageEntity object represents "special" parts of text messages,
 // including hashtags, usernames, URLs, etc.
 type MessageEntity struct {
