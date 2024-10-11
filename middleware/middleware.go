@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"
 
-	tele "gopkg.in/telebot.v3"
+	tele "gopkg.in/telebot.v4"
 )
 
 // AutoRespond returns a middleware that automatically responds

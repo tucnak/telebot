@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
-	tele "gopkg.in/telebot.v3"
+	tele "gopkg.in/telebot.v4"
 )
 
 // Config represents typed map interface related to the "config" section in layout.
