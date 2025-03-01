@@ -369,7 +369,9 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 		im.Media = repr
 
 		if len(sendOpts.Entities) > 0 {
-			im.Entities = sendOpts.Entities
+			if len(im.Caption) > 0 {
+				im.Entities = sendOpts.Entities
+			}
 		} else {
 			im.ParseMode = sendOpts.ParseMode
 		}
