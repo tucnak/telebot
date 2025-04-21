@@ -12,7 +12,6 @@ type User struct {
 
 	FirstName           string   `json:"first_name"`
 	LastName            string   `json:"last_name"`
-	IsForum             bool     `json:"is_forum"`
 	Username            string   `json:"username"`
 	LanguageCode        string   `json:"language_code"`
 	IsBot               bool     `json:"is_bot"`
@@ -68,6 +67,7 @@ type Chat struct {
 	NoVoiceAndVideo                bool                 `json:"has_restricted_voice_and_video_messages"`
 	HasHiddenMembers               bool                 `json:"has_hidden_members,omitempty"`
 	AggressiveAntiSpam             bool                 `json:"has_aggressive_anti_spam_enabled,omitempty"`
+	IsForum                        bool                 `json:"is_forum"`
 	StatusCustomEmojiID            string               `json:"emoji_status_custom_emoji_id"`
 	EmojiExpirationUnixtime        int64                `json:"emoji_status_expiration_date"`
 	BackgroundCustomEmojiID        string               `json:"background_custom_emoji_id"`
