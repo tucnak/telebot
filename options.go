@@ -120,6 +120,8 @@ func (b *Bot) extractOptions(how []interface{}) *SendOptions {
 			}
 		case *ReplyParams:
 			opts.ReplyParams = opt
+		case *Topic:
+			opts.ThreadID = opt.ThreadID
 		case Option:
 			switch opt {
 			case NoPreview:
@@ -152,8 +154,6 @@ func (b *Bot) extractOptions(how []interface{}) *SendOptions {
 			opts.ParseMode = opt
 		case Entities:
 			opts.Entities = opt
-		case Topic:
-			opts.ThreadID = opt.ThreadID
 		default:
 			panic("telebot: unsupported send-option")
 		}
