@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strconv"
+
 )
 
 // Recipient is any possible endpoint you can send
@@ -29,7 +30,9 @@ func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"caption": p.Caption,
 	}
 	b.embedSendOptions(params, opt)
-
+	if p.ProtectContent {
+		params["protect_content"] = "true"
+	}
 	msg, err := b.sendMedia(p, params, nil)
 	if err != nil {
 		return nil, err
@@ -138,7 +141,6 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"file_name": v.FileName,
 	}
 	b.embedSendOptions(params, opt)
-
 	if v.Duration != 0 {
 		params["duration"] = strconv.Itoa(v.Duration)
 	}
@@ -150,6 +152,9 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	}
 	if v.Streaming {
 		params["supports_streaming"] = "true"
+	}
+	if v.ProtectContent {
+		params["protect_content"] = "true"
 	}
 
 	msg, err := b.sendMedia(v, params, thumbnailToFilemap(v.Thumbnail))

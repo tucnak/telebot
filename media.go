@@ -3,6 +3,7 @@ package telebot
 import (
 	"encoding/json"
 	"math"
+
 )
 
 // Media is a generic type for all kinds of media that includes File.
@@ -75,6 +76,7 @@ type Photo struct {
 	Caption      string `json:"caption,omitempty"`
 	HasSpoiler   bool   `json:"has_spoiler,omitempty"`
 	CaptionAbove bool   `json:"show_caption_above_media,omitempty"`
+	ProtectContent bool   `json:"protect_content,omitempty"`
 }
 
 type photoSize struct {
@@ -209,13 +211,14 @@ type Video struct {
 	Duration int `json:"duration,omitempty"`
 
 	// (Optional)
-	Caption      string `json:"caption,omitempty"`
-	Thumbnail    *Photo `json:"thumbnail,omitempty"`
-	Streaming    bool   `json:"supports_streaming,omitempty"`
-	MIME         string `json:"mime_type,omitempty"`
-	FileName     string `json:"file_name,omitempty"`
-	HasSpoiler   bool   `json:"has_spoiler,omitempty"`
-	CaptionAbove bool   `json:"show_caption_above_media,omitempty"`
+	Caption        string `json:"caption,omitempty"`
+	Thumbnail      *Photo `json:"thumbnail,omitempty"`
+	Streaming      bool   `json:"supports_streaming,omitempty"`
+	MIME           string `json:"mime_type,omitempty"`
+	FileName       string `json:"file_name,omitempty"`
+	HasSpoiler     bool   `json:"has_spoiler,omitempty"`
+	CaptionAbove   bool   `json:"show_caption_above_media,omitempty"`
+	ProtectContent bool   `json:"protect_content,omitempty"`
 }
 
 func (v *Video) MediaType() string {
