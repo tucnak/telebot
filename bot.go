@@ -178,17 +178,7 @@ var (
 // Middleware usage:
 //
 //	b.Handle("/ban", onBan, middleware.Whitelist(ids...))
-//
-// Flow usage:
-//
-//	b.Handle("/lang", func(m ...tele.MiddlewareFunc) *tele.Flow {
-//		return b.
-//			Begin("lang_choose").
-//			Handle("lang_choose", b.OnLangChoose).
-//			Handle("lang_chosen", b.OnLangChosen).
-//			Transite("lang_choose", "lang_chosen", func(c tele.Context, u tele.Update) bool { return u.Callback != nil })
-//	})
-func (b *Bot) Handle(endpoint interface{}, handler interface{}, m ...MiddlewareFunc) {
+func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
 	end := extractEndpoint(endpoint)
 	if end == "" {
 		panic("telebot: unsupported endpoint")
@@ -198,22 +188,39 @@ func (b *Bot) Handle(endpoint interface{}, handler interface{}, m ...MiddlewareF
 		m = appendMiddleware(b.group.middleware, m)
 	}
 
-	switch v := handler.(type) {
-	case func(ctx Context) error:
-		b.handlers[end] = func(ctx Context) error {
-			return applyMiddleware(v, m...)(ctx)
-		}
-	case HandlerFunc:
-		b.handlers[end] = func(ctx Context) error {
-			return applyMiddleware(v, m...)(ctx)
-		}
-	case FlowFunc:
-		b.flowManager.Register(end, v())
-	case *Flow:
-		b.flowManager.Register(end, v)
-	default:
-		panic("telebot: unsupported handler")
+	b.handlers[end] = func(c Context) error {
+		return applyMiddleware(h, m...)(c)
 	}
+}
+
+// Flow lets you set the flow for some command name or
+// one of the supported endpoints. It also applies middleware
+// if such passed to the function.
+//
+// Example:
+//
+//	b.Flow("/lang", b.
+//	 	Begin("lang_choose").
+//	 	Handle("lang_choose", b.OnLangChoose).
+//	 	Handle("lang_chosen", b.OnLangChosen).
+//	 	Transite("lang_choose", "lang_chosen", func(c tele.Context, u tele.Update) bool { return u.Callback != nil }),
+//	)
+//
+// Middleware usage:
+//
+//	b.Flow("/lang", b.Begin("lang_choose"), middleware.Whitelist(ids...))
+func (b *Bot) Flow(endpoint interface{}, f *Flow, m ...MiddlewareFunc) {
+	end := extractEndpoint(endpoint)
+	if end == "" {
+		panic("telebot: unsupported endpoint")
+	}
+
+	if len(b.group.middleware) > 0 {
+		m = appendMiddleware(b.group.middleware, m)
+	}
+
+	f.Use(m...)
+	b.flowManager.RegisterAt(end, f)
 }
 
 // Trigger executes the registered handler by the endpoint.

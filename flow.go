@@ -44,12 +44,11 @@ type Flow struct {
 //	     Handle("lang_chosen", b.OnLangChosen).
 //	     OnUpdate(tele.OnCallback, "lang_chosen", func(c tele.Context) error { return nil }).
 //	     Transite("lang_choose", "lang_chosen", func(c tele.Context, u tele.Update) bool { return u.Callback != nil }).
-func (b *Bot) Begin(step string, m ...MiddlewareFunc) *Flow {
+func (b *Bot) Begin(step string) *Flow {
 	return &Flow{
-		Bot:         b,
-		steps:       make(map[string]interface{}),
-		current:     step,
-		middlewares: appendMiddleware(b.group.middleware, m),
+		Bot:     b,
+		steps:   make(map[string]interface{}),
+		current: step,
 	}
 }
 
@@ -100,7 +99,7 @@ func (f *Flow) Enter(m ...MiddlewareFunc) func(c Context) error {
 }
 
 // OnUpdate registers a handler for a specific update at a specific step, with optional middleware.
-func (f *Flow) OnUpdate(update string, step string, handler HandlerFunc, m ...MiddlewareFunc) *Flow {
+func (f *Flow) OnUpdate(update string, step string, handler HandlerFunc, m ...MiddlewareFunc) {
 	if len(f.middlewares) > 0 {
 		m = append(f.middlewares, m...)
 	}
@@ -114,36 +113,25 @@ func (f *Flow) OnUpdate(update string, step string, handler HandlerFunc, m ...Mi
 	}
 
 	f.processors[step][update] = applyMiddleware(handler, m...)
-
-	return f
 }
 
-// Handle registers a handler or a sub-flow for a specific step, with optional middleware.
-func (f *Flow) Handle(step string, handler interface{}, m ...MiddlewareFunc) *Flow {
+// Handle registers a handler for a specific step, with optional middleware.
+func (f *Flow) Handle(step string, h HandlerFunc, m ...MiddlewareFunc) {
 	if len(f.middlewares) > 0 {
 		m = append(f.middlewares, m...)
 	}
 
-	switch h := handler.(type) {
-	case func(c Context) error:
-		f.steps[step] = applyMiddleware(h, m...)
-	case HandlerFunc:
-		f.steps[step] = applyMiddleware(h, m...)
-	case func(m ...MiddlewareFunc) *Flow:
-		newFlow := h(appendMiddleware(f.middlewares, m)...)
+	f.steps[step] = applyMiddleware(h, m...)
+}
 
-		f.steps[step] = newFlow
-		f.flowManager.Register(step, newFlow)
-	case FlowFunc:
-		newFlow := h(appendMiddleware(f.middlewares, m)...)
-
-		f.steps[step] = newFlow
-		f.flowManager.Register(step, newFlow)
-	default:
-		panic("telebot: invalid handler")
+// Subflow registers a sub-flow for a specific step, with optional middleware.
+func (f *Flow) Subflow(next *Flow, m ...MiddlewareFunc) {
+	if len(f.middlewares) > 0 {
+		m = append(f.middlewares, m...)
 	}
 
-	return f
+	next.Use(m...)
+	f.flowManager.Register(next)
 }
 
 // Transite registers a transition function between two steps.
@@ -193,8 +181,8 @@ func (fm *FlowManager) Get(name string) *Flow {
 	return fm.flows[name]
 }
 
-// Register registers a new flow by its endpoint.
-func (fm *FlowManager) Register(endpoint string, f *Flow) {
+// RegisterAt registers a new flow by its endpoint.
+func (fm *FlowManager) RegisterAt(endpoint string, f *Flow) {
 	fm.mu.Lock()
 	defer fm.mu.Unlock()
 
@@ -202,11 +190,23 @@ func (fm *FlowManager) Register(endpoint string, f *Flow) {
 		fm.flows = make(map[string]*Flow)
 	}
 
-	if f.current != endpoint {
-		fm.flows[f.current] = f
+	if endpoint == "" {
+		panic("telebot: empty endpoint")
 	}
 
 	fm.flows[endpoint] = f
+}
+
+// Register registers a new flow.
+func (fm *FlowManager) Register(f *Flow) {
+	fm.mu.Lock()
+	defer fm.mu.Unlock()
+
+	if fm.flows == nil {
+		fm.flows = make(map[string]*Flow)
+	}
+
+	fm.flows[f.current] = f
 }
 
 // Close removes the flow associated with a user if it's completed.
