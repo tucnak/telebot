@@ -1,7 +1,5 @@
 package telebot
 
-import "strings"
-
 // Update object represents an incoming update.
 type Update struct {
 	ID int `json:"update_id"`
@@ -84,28 +82,6 @@ func (b *Bot) ProcessContext(c Context) {
 	u := c.Update()
 
 	switch true {
-	case b.flowManager.IsFollowed(c.Recipient()): // handle flow
-		if u.Callback != nil {
-			b.handleCallback(u)
-		}
-
-		if h := b.flowManager.MakeProcessing(c, u); h != nil {
-			if err := applyMiddleware(h, b.group.middleware...)(c); err != nil {
-				b.OnError(err, c)
-				return
-			}
-		}
-
-		if b.flowManager.Close(c.Recipient()) {
-			return
-		}
-
-		f := b.flowManager.MakeTransition(c, u)
-		if f != nil {
-			b.runHandler(f.Enter(b.group.middleware...), c)
-
-			return
-		}
 	case u.ChannelPost != nil:
 		m := u.ChannelPost
 
@@ -123,18 +99,14 @@ func (b *Bot) ProcessContext(c Context) {
 			return
 		}
 
-		if handler, ok := b.handlers["\f"+unique]; ok {
-			b.runHandler(handler, c)
+		handler, ok := b.handlers["\f"+unique]
+		if !ok {
 			return
 		}
 
-		f := b.flowManager.Get(unique)
-		if f != nil {
-			b.flowManager.Start(c, f)
-
-			b.runHandler(f.Enter(b.group.middleware...), c)
-			return
-		}
+		b.runHandler(handler, c)
+	case u.Message != nil:
+		b.handleMessage(c, u.Message)
 	case u.String() != "": // processing all other handlers
 		b.handle(OnQuery, c)
 		return
@@ -142,6 +114,9 @@ func (b *Bot) ProcessContext(c Context) {
 }
 
 func (b *Bot) handle(end string, c Context) bool {
+	// flow satisfaction
+	b.handleFlow(c, end)
+
 	handler, ok := b.handlers[end]
 	if !ok {
 		return false
@@ -168,6 +143,15 @@ func (b *Bot) handleCallback(u Update) (string, bool) {
 	u.Callback.Data = payload
 
 	return unique, true
+}
+
+func (b *Bot) handleFlow(c Context, end string) {
+	if !b.flowManager.Contains(end) {
+		b.flowManager.Close(c.Recipient())
+		return
+	}
+
+	b.advanceFlow(c, end)
 }
 
 func (b *Bot) handleMedia(c Context) bool {
@@ -219,32 +203,6 @@ func (b *Bot) handleMessage(c Context, m *Message) {
 		// Filtering malicious messages
 		if m.Text[0] == '\a' {
 			return
-		}
-
-		match := cmdRx.FindAllStringSubmatch(m.Text, -1)
-		if match != nil {
-			// Syntax: "</command>@<bot> <payload>"
-			command, botName := match[0][1], match[0][3]
-
-			if botName != "" && !strings.EqualFold(b.Me.Username, botName) {
-				return
-			}
-
-			m.Payload = match[0][5]
-
-			if b.flowManager.IsRegistred(command) {
-				f := b.flowManager.Get(command)
-
-				b.flowManager.Start(c, f)
-				b.runHandler(f.Enter(b.group.middleware...), c)
-				defer b.flowManager.Close(c.Recipient())
-
-				return
-			}
-
-			if b.handle(command, c) {
-				return
-			}
 		}
 
 		// 1:1 satisfaction
