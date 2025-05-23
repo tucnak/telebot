@@ -21,6 +21,7 @@ go get -u gopkg.in/telebot.v4
 	- [Editable](#editable)
 	- [Keyboards](#keyboards)
 	- [Inline mode](#inline-mode)
+    - [Flow](#flow)
 * [Contributing](#contributing)
 * [Donate](#donate)
 * [License](#license)
@@ -463,6 +464,99 @@ b.Handle(tele.OnQuery, func(c tele.Context) error {
 There's not much to talk about really. It also supports some form of authentication
 through deep-linking. For that, use fields `SwitchPMText` and `SwitchPMParameter`
 of `QueryResponse`.
+
+## Flow
+
+Flows in Telebot allow you to manage multi-step conversations by defining steps (handlers), transitions between these steps, and optional middleware to process updates in a structured way.
+
+### Basic Concepts
+
+* **Step** — a named handler function that processes user input at a particular point in the conversation.
+* **Transition** — a condition function that controls when the flow moves from one step to another.
+* **Flow** — a collection of steps and transitions that represent a conversational flow.
+* **Context** — the current state and data for a user interaction.
+
+### How to Create a New Flow
+
+1. **Initialize a Flow**
+
+Use the `BeginFlow` method on your bot instance to start a new flow from a specified initial step.
+
+```go
+flow := bot.BeginFlow("start_step", func(c Context) error {
+    // initial handler logic here
+    return nil
+})
+```
+
+2. **Add Steps**
+
+Register handlers for other steps in the flow using `Handle`. You can optionally add middleware functions to preprocess or postprocess the context.
+
+```go
+flow.Handle("start_step", handleStart)
+flow.Handle("next_step", handleNext, middleware1, middleware2)
+```
+
+3. **Define Transitions**
+
+Use `Transite` to register transition functions that define when the flow should move from one step to another.
+
+```go
+flow.Transite("start_step", "next_step", func(c Context) bool {
+    // Return true if transition condition is met
+    return c.Message().Text == "go"
+})
+```
+
+4. **Handle Specific Updates**
+
+You can register handlers for specific update types at certain steps with `OnUpdate`.
+
+```go
+flow.OnUpdate("callback_query", "next_step", func(c Context) error {
+    // process callback query here
+    return nil
+})
+```
+
+5. **Using Middleware**
+
+Middlewares are optional functions applied to handlers or updates for additional processing (logging, authorization, etc).
+
+```go
+flow.Handle("step", handler, middlewareFunc)
+flow.OnUpdate("message", "step", updateHandler, middlewareFunc)
+```
+
+### Example: Simple Language Selection Flow
+
+```go
+flow := bot.BeginFlow("choose_lang", func(c Context) error {
+    return c.Send("Please choose your language")
+})
+
+flow.Handle("choose_lang", func(c Context) error {
+    // process language choice
+    return nil
+})
+
+flow.Handle("lang_chosen", func(c Context) error {
+    return c.Send("Thank you for choosing")
+})
+
+flow.Transite("choose_lang", "lang_chosen", func(c Context) bool {
+    return c.Callback() != nil // transition on callback
+})
+```
+
+### Important Notes
+
+* Transitions cannot point back to the current step.
+* All steps used in transitions must be registered via `Handle` or `OnUpdate`.
+* You can combine multiple middleware functions, which are applied in order.
+* The flow automatically manages the current step and moves forward when transitions are satisfied.
+* Use `FlowManager` to register and manage multiple flows concurrently.
 
 # Contributing
 
