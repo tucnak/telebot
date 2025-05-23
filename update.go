@@ -379,10 +379,6 @@ func (b *Bot) handle(end string, c Context) bool {
 	return false
 }
 
-func (b *Bot) handleFlow(c Context, end string) {
-
-}
-
 func (b *Bot) handleMedia(c Context) bool {
 	var (
 		m     = c.Message()
