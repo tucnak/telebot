@@ -28,8 +28,11 @@ func (b *Bot) BeginFlow(end string, h HandlerFunc) *Flow {
 	return &Flow{
 		steps: make(map[string]HandlerFunc),
 
-		begin:   h,
-		current: end,
+		begin: func(c Context) error {
+			return applyMiddleware(h, b.group.middleware...)(c)
+		},
+		current:     end,
+		middlewares: b.group.middleware,
 	}
 }
 
