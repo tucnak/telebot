@@ -421,7 +421,7 @@ func (b *Bot) runHandler(h HandlerFunc, c Context) {
 		state := c.Get("flow:state")
 		switch state {
 		case FlowRepeat:
-			// залишаємо поточний крок
+			// nothing do
 		case FlowEnd:
 			b.flowManager.Close(c.Recipient())
 		default:
