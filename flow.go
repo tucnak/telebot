@@ -179,10 +179,6 @@ func (f *Flow) Transite(step, next string, t TransitionFunc) {
 		panic(fmt.Sprintf("step %s not found in registry", next))
 	}
 
-	if step == f.current && len(f.transitions) == 0 {
-		panic(fmt.Sprintf("flow cannot be continue from start", step))
-	}
-
 	if next == f.current {
 		panic(fmt.Sprintf("transition cannot be continue from %s", f.current))
 	}
