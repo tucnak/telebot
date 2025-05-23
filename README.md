@@ -515,12 +515,24 @@ You can register handlers for specific update types at certain steps with `OnUpd
 
 ```go
 flow.OnUpdate("callback_query", "next_step", func(c Context) error {
+// process callback query here
+return nil
+})
+```
+
+5. **Handle Flow State**
+
+You can repeat steps on flow and end the flow on every step.
+
+```go
+flow.OnUpdate("callback_query", "next_step", func(c Context) error {
     // process callback query here
+	c.Set(tele.FlowStateName, tele.FlowEnd)
     return nil
 })
 ```
 
-5. **Using Middleware**
+6. **Using Middleware**
 
 Middlewares are optional functions applied to handlers or updates for additional processing (logging, authorization, etc).
 

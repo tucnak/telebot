@@ -20,7 +20,7 @@ import (
 // With OnUpdate Example:
 //
 //	b.
-//	     Begin(b.OnLangChoose).
+//	     Begin("lang_choose", b.OnLangChoose).
 //	     Handle("lang_chosen", b.OnLangChosen).
 //	     OnUpdate(tele.OnCallback, "lang_chosen", func(c tele.Context) error { return nil }).
 //	     Transite("lang_choose", "lang_chosen", func(c tele.Context, u tele.Update) bool { return u.Callback != nil }).
@@ -69,6 +69,8 @@ func (b *Bot) hasActiveFlow(user Recipient) bool {
 	_, exists := b.flowManager.store[user.Recipient()]
 	return exists
 }
+
+const FlowStateName = "flow.state"
 
 type FlowState int
 
@@ -239,7 +241,7 @@ func (fm *FlowManager) Close(r Recipient) bool {
 	fm.mu.Lock()
 	defer fm.mu.Unlock()
 
-	if flow, exists := fm.store[r.Recipient()]; exists && flow.IsLast() {
+	if _, exists := fm.store[r.Recipient()]; exists {
 		delete(fm.store, r.Recipient())
 		return true
 	}

@@ -418,7 +418,7 @@ func (b *Bot) runHandler(h HandlerFunc, c Context) {
 			return
 		}
 
-		state := c.Get("flow:state")
+		state := c.Get(FlowStateName)
 		switch state {
 		case FlowRepeat:
 			// nothing do
