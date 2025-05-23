@@ -1,8 +1,6 @@
 package telebot
 
-import (
-	"strings"
-)
+import "strings"
 
 // Update object represents an incoming update.
 type Update struct {
