@@ -509,6 +509,9 @@ flow.Transite("start_step", "next_step", func(c Context) bool {
 })
 ```
 
+```go
+flow.Transite("start_step", "next_step", flow.NoConditionTransition)
+```
 4. **Handle Specific Updates**
 
 You can register handlers for specific update types at certain steps with `OnUpdate`.

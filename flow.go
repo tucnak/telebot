@@ -95,6 +95,8 @@ type Flow struct {
 // TransitionFunc defines a function to determine whether a transition to the next step is possible.
 type TransitionFunc func(c Context) bool
 
+var NoConditionTransition = func(c Context) bool { return true }
+
 func (f *Flow) Contains(endpoint interface{}) bool {
 	end := extractEndpoint(endpoint)
 	if end == "" {
