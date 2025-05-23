@@ -2,7 +2,6 @@ package telebot
 
 import (
 	"fmt"
-	"strings"
 	"sync"
 )
 
@@ -42,7 +41,6 @@ func (b *Bot) advanceFlow(c Context, endpoint string) (flow *Flow, skip bool) {
 		return
 	}
 
-	// begin requested flow
 	if f, exists := b.flowManager.flows[endpoint]; exists {
 		b.flowManager.mu.Lock()
 		defer b.flowManager.mu.Unlock()
@@ -52,21 +50,14 @@ func (b *Bot) advanceFlow(c Context, endpoint string) (flow *Flow, skip bool) {
 		}
 
 		b.flowManager.store[u.Recipient()] = cloneFlow(f)
-		return
+		return b.flowManager.store[u.Recipient()], false
 	}
 
-	// skip updates
-	if !strings.HasPrefix(endpoint, "\a") {
-		return
-	}
-
-	// forward started flow
-	if f, exists := b.flowManager.store[u.Recipient()]; exists && f.Forward(c) {
+	if f, exists := b.flowManager.store[u.Recipient()]; exists {
 		return f, false
 	}
 
-	b.flowManager.Close(c.Recipient())
-
+	b.flowManager.Close(u)
 	return
 }
 
@@ -78,6 +69,14 @@ func (b *Bot) hasActiveFlow(user Recipient) bool {
 	_, exists := b.flowManager.store[user.Recipient()]
 	return exists
 }
+
+type FlowState int
+
+const (
+	FlowContinue FlowState = iota
+	FlowRepeat
+	FlowEnd
+)
 
 // Flow represents the flow of steps and transitions in a bot's conversation.
 type Flow struct {

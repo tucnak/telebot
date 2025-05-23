@@ -415,6 +415,19 @@ func (b *Bot) runHandler(h HandlerFunc, c Context) {
 	f := func() {
 		if err := h(c); err != nil {
 			b.OnError(err, c)
+			return
+		}
+
+		state := c.Get("flow:state")
+		switch state {
+		case FlowRepeat:
+			// залишаємо поточний крок
+		case FlowEnd:
+			b.flowManager.Close(c.Recipient())
+		default:
+			if f := b.flowManager.store[c.Recipient().Recipient()]; f != nil {
+				f.Forward(c)
+			}
 		}
 	}
 	if b.synchronous {
