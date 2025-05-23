@@ -1,6 +1,8 @@
 package telebot
 
-import "strings"
+import (
+	"strings"
+)
 
 // Update object represents an incoming update.
 type Update struct {
@@ -360,22 +362,25 @@ func (b *Bot) ProcessContext(c Context) {
 
 func (b *Bot) handle(end string, c Context) bool {
 	// flow satisfaction
-	b.handleFlow(c, end)
+	f, skiped := b.advanceFlow(c, end)
+	if !skiped {
+		if handler := f.ProcessUpdate(end); handler != nil {
+			b.runHandler(handler, c)
+			return true
+		}
+	}
 
+	// handle handler by endpoint
 	if handler, ok := b.handlers[end]; ok {
 		b.runHandler(handler, c)
 		return true
 	}
+
 	return false
 }
 
 func (b *Bot) handleFlow(c Context, end string) {
-	if !b.flowManager.Contains(end) {
-		b.flowManager.Close(c.Recipient())
-		return
-	}
 
-	b.advanceFlow(c, end)
 }
 
 func (b *Bot) handleMedia(c Context) bool {

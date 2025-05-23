@@ -205,8 +205,8 @@ func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
 //	 	Handle("lang_chosen", b.OnLangChosen).
 //	 	Transite("lang_choose", "lang_chosen", func(c tele.Context, u tele.Update) bool { return u.Callback != nil }),
 //	)
-func (b *Bot) Flow(endpoint interface{}, f *Flow) {
-	end := extractEndpoint(endpoint)
+func (b *Bot) HandleFlow(f *Flow) {
+	end := extractEndpoint(f.current)
 	if end == "" {
 		panic("telebot: unsupported endpoint")
 	}

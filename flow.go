@@ -1,6 +1,8 @@
 package telebot
 
 import (
+	"fmt"
+	"strings"
 	"sync"
 )
 
@@ -23,32 +25,28 @@ import (
 //	     Handle("lang_chosen", b.OnLangChosen).
 //	     OnUpdate(tele.OnCallback, "lang_chosen", func(c tele.Context) error { return nil }).
 //	     Transite("lang_choose", "lang_chosen", func(c tele.Context, u tele.Update) bool { return u.Callback != nil }).
-func (b *Bot) Begin(h HandlerFunc) *Flow {
+func (b *Bot) BeginFlow(end string, h HandlerFunc) *Flow {
 	return &Flow{
-		Bot:   b,
-		steps: make(map[string]interface{}),
+		steps: make(map[string]HandlerFunc),
 
-		begin: h,
+		begin:   h,
+		current: end,
 	}
 }
 
-func (b *Bot) advanceFlow(c Context, endpoint string) {
-	b.flowManager.mu.Lock()
-	defer b.flowManager.mu.Unlock()
+func (b *Bot) advanceFlow(c Context, endpoint string) (flow *Flow, skip bool) {
+	skip = true
 
 	u := c.Recipient()
 	if u == nil {
 		return
 	}
 
-	// forward started flow
-	if f, exists := b.flowManager.store[u.Recipient()]; exists {
-		f.Forward(c)
-		return
-	}
-
 	// begin requested flow
 	if f, exists := b.flowManager.flows[endpoint]; exists {
+		b.flowManager.mu.Lock()
+		defer b.flowManager.mu.Unlock()
+
 		if b.flowManager.store == nil {
 			b.flowManager.store = make(map[string]*Flow)
 		}
@@ -56,6 +54,20 @@ func (b *Bot) advanceFlow(c Context, endpoint string) {
 		b.flowManager.store[u.Recipient()] = cloneFlow(f)
 		return
 	}
+
+	// skip updates
+	if !strings.HasPrefix(endpoint, "\a") {
+		return
+	}
+
+	// forward started flow
+	if f, exists := b.flowManager.store[u.Recipient()]; exists && f.Forward(c) {
+		return f, false
+	}
+
+	b.flowManager.Close(c.Recipient())
+
+	return
 }
 
 // hasActiveFlow checks if a user is associated with an active flow.
@@ -69,13 +81,11 @@ func (b *Bot) hasActiveFlow(user Recipient) bool {
 
 // Flow represents the flow of steps and transitions in a bot's conversation.
 type Flow struct {
-	*Bot
-
 	begin   HandlerFunc // handler to begin the flow
 	current string      // Current step in the flow.
 
-	steps       map[string]interface{}               // Registered steps in the flow.
-	processors  map[string]map[string]HandlerFunc    // Handlers for updates specific to a step.
+	steps       map[string]HandlerFunc               // Registered steps in the flow.
+	processors  map[string]map[string]HandlerFunc    // Handlers for specific updates to a step.
 	transitions map[string]map[string]TransitionFunc // Transition functions between steps.
 
 	middlewares []MiddlewareFunc
@@ -90,19 +100,27 @@ func (f *Flow) Contains(endpoint interface{}) bool {
 		return false
 	}
 
-	_, exists := f.steps[end]
-	return exists
+	if _, exists := f.steps[end]; exists {
+		return true
+	}
+
+	if _, exists := f.processors[end]; exists {
+		return true
+	}
+
+	return false
 }
 
 // Forward moves the flow to the next step if a transition function returns true.
-func (f *Flow) Forward(c Context) {
+func (f *Flow) Forward(c Context) bool {
 	possibleTransitions := f.transitions[f.current]
 	for nextStep, transition := range possibleTransitions {
 		if transition(c) {
 			f.current = nextStep
-			return
+			return true
 		}
 	}
+	return false
 }
 
 // IsLast checks if the current step is the last one in the flow.
@@ -136,14 +154,12 @@ func (f *Flow) Handle(step string, h HandlerFunc, m ...MiddlewareFunc) {
 	f.steps[step] = applyMiddleware(h, m...)
 }
 
-// Subflow registers a sub-flow for a specific step, with optional middleware.
-func (f *Flow) Subflow(next *Flow, m ...MiddlewareFunc) {
-	if len(f.middlewares) > 0 {
-		m = append(f.middlewares, m...)
+func (f *Flow) ProcessUpdate(update string) HandlerFunc {
+	if f.processors[f.current] == nil {
+		return nil
 	}
 
-	next.Use(m...)
-	f.flowManager.Register(next)
+	return f.processors[f.current][update]
 }
 
 // Transite registers a transition function between two steps.
@@ -154,6 +170,22 @@ func (f *Flow) Transite(step, next string, t TransitionFunc) {
 
 	if f.transitions[step] == nil {
 		f.transitions[step] = make(map[string]TransitionFunc)
+	}
+
+	if !f.Contains(step) && step != f.current {
+		panic(fmt.Sprintf("step %s not found in registry", step))
+	}
+
+	if !f.Contains(next) {
+		panic(fmt.Sprintf("step %s not found in registry", next))
+	}
+
+	if step == f.current && len(f.transitions) == 0 {
+		panic(fmt.Sprintf("flow cannot be continue from start", step))
+	}
+
+	if next == f.current {
+		panic(fmt.Sprintf("transition cannot be continue from %s", f.current))
 	}
 
 	f.transitions[step][next] = t
