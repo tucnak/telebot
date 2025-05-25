@@ -425,18 +425,24 @@ func (b *Bot) runHandler(h HandlerFunc, c Context) {
 		case FlowEnd:
 			b.flowManager.Close(c.Recipient())
 		default:
-			if f := b.flowManager.store[c.Recipient().Recipient()]; f != nil {
-				for {
-					if !f.Forward(c) {
-						break
-					}
+			f := b.flowManager.store[c.Recipient().Recipient()]
+			if f == nil {
+				break
+			}
 
-					handler, exists := f.steps[f.current]
-					if !exists {
-						break
-					}
+			for {
+				if !f.Forward(c) {
+					break
+				}
 
-					handler(c)
+				handler, exists := f.steps[f.current]
+				if !exists {
+					break
+				}
+
+				if err := handler(c); err != nil {
+					b.OnError(err, c)
+					return
 				}
 			}
 		}
