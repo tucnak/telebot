@@ -374,6 +374,14 @@ func (b *Bot) handle(end string, c Context) bool {
 		return true
 	}
 
+	// flow satisfaction
+	if f != nil && f.Forward(c) {
+		if handler := f.ProcessUpdate(end); handler != nil {
+			b.runHandler(handler, c)
+			return true
+		}
+	}
+
 	return false
 }
 
@@ -418,33 +426,8 @@ func (b *Bot) runHandler(h HandlerFunc, c Context) {
 			return
 		}
 
-		state := c.Get(FlowStateName)
-		switch state {
-		case FlowRepeat:
-			// nothing do
-		case FlowEnd:
+		if state := c.Get(FlowStateName); state == FlowEnd {
 			b.flowManager.Close(c.Recipient())
-		default:
-			f := b.flowManager.store[c.Recipient().Recipient()]
-			if f == nil {
-				break
-			}
-
-			for {
-				if !f.Forward(c) {
-					break
-				}
-
-				handler, exists := f.steps[f.current]
-				if !exists {
-					break
-				}
-
-				if err := handler(c); err != nil {
-					b.OnError(err, c)
-					return
-				}
-			}
 		}
 	}
 	if b.synchronous {
