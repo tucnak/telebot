@@ -90,6 +90,9 @@ type Context interface {
 	// In the case when no related data presented, returns an empty string.
 	Text() string
 
+	// ThreadID returns the current message thread ID.
+	ThreadID() int
+
 	// Entities returns the message entities, whether it's media caption's or the text's.
 	// In the case when no entities presented, returns a nil.
 	Entities() Entities
@@ -423,6 +426,15 @@ func (c *nativeContext) Args() []string {
 	return nil
 }
 
+func (c *nativeContext) ThreadID() int {
+	switch {
+	case c.Message() != nil:
+		return c.Message().ThreadID
+	default:
+		return 0
+	}
+}
+
 func (c *nativeContext) Send(what interface{}, opts ...interface{}) error {
 	opts = c.inheritOpts(opts...)
 	_, err := c.b.Send(c.Recipient(), what, opts...)
@@ -450,8 +462,8 @@ func (c *nativeContext) inheritOpts(opts ...interface{}) []interface{} {
 	}
 
 	switch {
-	case !ignoreThread && c.Message() != nil && c.Message().ThreadID != 0:
-		opts = append(opts, &Topic{ThreadID: c.Message().ThreadID})
+	case !ignoreThread && c.ThreadID() != 0:
+		opts = append(opts, &Topic{ThreadID: c.ThreadID()})
 	}
 
 	return opts
@@ -551,7 +563,7 @@ func (c *nativeContext) DeleteAfter(d time.Duration) *time.Timer {
 }
 
 func (c *nativeContext) Notify(action ChatAction) error {
-	return c.b.Notify(c.Recipient(), action)
+	return c.b.Notify(c.Recipient(), action, c.ThreadID())
 }
 
 func (c *nativeContext) Ship(what ...interface{}) error {
