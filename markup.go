@@ -86,6 +86,7 @@ type Btn struct {
 	Text            string          `json:"text,omitempty"`
 	URL             string          `json:"url,omitempty"`
 	Data            string          `json:"callback_data,omitempty"`
+	CopyText        *CopyText       `json:"copy_text,omitempty"`
 	InlineQuery     string          `json:"switch_inline_query,omitempty"`
 	InlineQueryChat string          `json:"switch_inline_query_current_chat,omitempty"`
 	Login           *Login          `json:"login_url,omitempty"`
@@ -210,6 +211,10 @@ func (r *ReplyMarkup) WebApp(text string, app *WebApp) Btn {
 	return Btn{Text: text, WebApp: app}
 }
 
+func (r *ReplyMarkup) Copy(text string, copy *CopyText) Btn {
+	return Btn{Text: text, CopyText: copy}
+}
+
 // ReplyButton represents a button displayed in reply-keyboard.
 //
 // Set either Contact or Location to true in order to request
@@ -279,6 +284,11 @@ type RecipientShared struct {
 
 }
 
+// This object represents an inline keyboard button that copies specified text to the clipboard.
+type CopyText struct {
+	Text string `json:"text"`
+}
+
 // InlineButton represents a button displayed in the message.
 type InlineButton struct {
 	// Unique slagish name for this kind of button,
@@ -292,6 +302,7 @@ type InlineButton struct {
 	Data                  string             `json:"callback_data,omitempty"`
 	InlineQuery           string             `json:"switch_inline_query,omitempty"`
 	InlineQueryChat       string             `json:"switch_inline_query_current_chat"`
+	CopyText              *CopyText          `json:"copy_text,omitempty"`
 	InlineQueryChosenChat *SwitchInlineQuery `json:"switch_inline_query_chosen_chat,omitempty"`
 	Login                 *Login             `json:"login_url,omitempty"`
 	WebApp                *WebApp            `json:"web_app,omitempty"`
@@ -353,6 +364,7 @@ func (b Btn) Inline() *InlineButton {
 		Data:            b.Data,
 		InlineQuery:     b.InlineQuery,
 		InlineQueryChat: b.InlineQueryChat,
+		CopyText:        b.CopyText,
 		Login:           b.Login,
 		WebApp:          b.WebApp,
 	}
