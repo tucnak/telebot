@@ -23,7 +23,6 @@ func TestBotBeginFlow(t *testing.T) {
 func TestFlowTransite(t *testing.T) {
 	flow := &Flow{
 		current:     "start",
-		steps:       map[string]HandlerFunc{"start": nil, "step1": nil},
 		transitions: make(map[string]map[string]TransitionFunc),
 	}
 
@@ -166,7 +165,6 @@ func TestFlowIsLast(t *testing.T) {
 func TestFlowHandle(t *testing.T) {
 	t.Run("Basic handler without middleware", func(t *testing.T) {
 		flow := &Flow{
-			steps:      make(map[string]HandlerFunc),
 			processors: make(map[string]map[string]HandlerFunc),
 			current:    "step",
 		}
@@ -177,13 +175,7 @@ func TestFlowHandle(t *testing.T) {
 			return nil
 		}
 
-		flow.Handle("step", handler)
-		flow.OnUpdate("update_type", "step", handler)
-
-		stepHandler := flow.steps["step"]
-		require.NotNil(t, stepHandler)
-		_ = stepHandler(nil)
-		assert.True(t, handlerCalled)
+		flow.Handle("update_type", "step", handler)
 
 		handlerCalled = false
 		updateHandler := flow.ProcessUpdate("update_type")
@@ -193,47 +185,10 @@ func TestFlowHandle(t *testing.T) {
 
 		assert.Nil(t, flow.ProcessUpdate("unknown"))
 	})
-
-	t.Run("Handler with middleware", func(t *testing.T) {
-		flow := &Flow{
-			steps:       make(map[string]HandlerFunc),
-			middlewares: []MiddlewareFunc{},
-			current:     "step",
-		}
-
-		handlerCalled := false
-		middlewareCalled := false
-
-		handler := func(c Context) error {
-			handlerCalled = true
-			return nil
-		}
-
-		middleware := func(next HandlerFunc) HandlerFunc {
-			return func(c Context) error {
-				middlewareCalled = true
-				return next(c)
-			}
-		}
-
-		// Додаємо middleware до Flow
-		flow.middlewares = append(flow.middlewares, middleware)
-
-		flow.Handle("step", handler)
-
-		stepHandler := flow.steps["step"]
-		require.NotNil(t, stepHandler)
-
-		_ = stepHandler(nil)
-
-		assert.True(t, middlewareCalled, "middleware should be called")
-		assert.True(t, handlerCalled, "handler should be called")
-	})
 }
 
 func TestFlowContains(t *testing.T) {
 	flow := &Flow{
-		steps:      map[string]HandlerFunc{"a": nil},
 		processors: map[string]map[string]HandlerFunc{"b": {"x": nil}},
 	}
 

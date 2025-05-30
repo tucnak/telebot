@@ -514,10 +514,10 @@ flow.Transite("start_step", "next_step", flow.NoConditionTransition)
 ```
 4. **Handle Specific Updates**
 
-You can register handlers for specific update types at certain steps with `OnUpdate`.
+You can register handlers for specific update types at certain steps with `Handle`.
 
 ```go
-flow.OnUpdate("callback_query", "next_step", func(c Context) error {
+flow.Handle("callback_query", "next_step", func(c Context) error {
 // process callback query here
 return nil
 })
@@ -528,7 +528,7 @@ return nil
 You can repeat steps on flow and end the flow on every step.
 
 ```go
-flow.OnUpdate("callback_query", "next_step", func(c Context) error {
+flow.Handle("callback_query", "next_step", func(c Context) error {
     // process callback query here
 	c.Set(tele.FlowStateName, tele.FlowEnd)
     return nil
@@ -541,7 +541,7 @@ Middlewares are optional functions applied to handlers or updates for additional
 
 ```go
 flow.Handle("step", handler, middlewareFunc)
-flow.OnUpdate("message", "step", updateHandler, middlewareFunc)
+flow.Handle("message", "step", updateHandler, middlewareFunc)
 ```
 
 ### Example: Simple Language Selection Flow
@@ -568,7 +568,7 @@ flow.Transite("choose_lang", "lang_chosen", func(c Context) bool {
 ### Important Notes
 
 * Transitions cannot point back to the current step.
-* All steps used in transitions must be registered via `Handle` or `OnUpdate`.
+* All steps used in transitions must be registered via `Handle` or `Handle`.
 * You can combine multiple middleware functions, which are applied in order.
 * The flow automatically manages the current step and moves forward when transitions are satisfied.
 * Use `FlowManager` to register and manage multiple flows concurrently.

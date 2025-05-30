@@ -17,17 +17,15 @@ import (
 //	     Handle("lang_chosen", b.OnLangChosen).
 //	     Transite("lang_choose", "lang_chosen", func(c tele.Context, u tele.Update) bool { return u.Callback != nil }).
 //
-// With OnUpdate Example:
+// With Handle Example:
 //
 //	b.
 //	     Begin("lang_choose", b.OnLangChoose).
 //	     Handle("lang_chosen", b.OnLangChosen).
-//	     OnUpdate(tele.OnCallback, "lang_chosen", func(c tele.Context) error { return nil }).
+//	     Handle(tele.OnCallback, "lang_chosen", func(c tele.Context) error { return nil }).
 //	     Transite("lang_choose", "lang_chosen", func(c tele.Context, u tele.Update) bool { return u.Callback != nil }).
 func (b *Bot) BeginFlow(end string, h HandlerFunc) *Flow {
 	return &Flow{
-		steps: make(map[string]HandlerFunc),
-
 		begin: func(c Context) error {
 			return applyMiddleware(h, b.group.middleware...)(c)
 		},
@@ -88,7 +86,6 @@ type Flow struct {
 	begin   HandlerFunc // handler to begin the flow
 	current string      // Current step in the flow.
 
-	steps       map[string]HandlerFunc               // Registered steps in the flow.
 	processors  map[string]map[string]HandlerFunc    // Handlers for specific updates to a step.
 	transitions map[string]map[string]TransitionFunc // Transition functions between steps.
 
@@ -104,10 +101,6 @@ func (f *Flow) Contains(endpoint interface{}) bool {
 	end := extractEndpoint(endpoint)
 	if end == "" {
 		return false
-	}
-
-	if _, exists := f.steps[end]; exists {
-		return true
 	}
 
 	if _, exists := f.processors[end]; exists {
@@ -134,8 +127,8 @@ func (f *Flow) IsLast() bool {
 	return f.transitions[f.current] == nil
 }
 
-// OnUpdate registers a handler for a specific update at a specific step, with optional middleware.
-func (f *Flow) OnUpdate(update string, step string, handler HandlerFunc, m ...MiddlewareFunc) {
+// Handle registers a handler for a specific update at a specific step, with optional middleware.
+func (f *Flow) Handle(update string, step string, handler HandlerFunc, m ...MiddlewareFunc) {
 	if len(f.middlewares) > 0 {
 		m = append(f.middlewares, m...)
 	}
@@ -149,15 +142,6 @@ func (f *Flow) OnUpdate(update string, step string, handler HandlerFunc, m ...Mi
 	}
 
 	f.processors[step][update] = applyMiddleware(handler, m...)
-}
-
-// Handle registers a handler for a specific step, with optional middleware.
-func (f *Flow) Handle(step string, h HandlerFunc, m ...MiddlewareFunc) {
-	if len(f.middlewares) > 0 {
-		m = append(f.middlewares, m...)
-	}
-
-	f.steps[step] = applyMiddleware(h, m...)
 }
 
 func (f *Flow) ProcessUpdate(update string) HandlerFunc {

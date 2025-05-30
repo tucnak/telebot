@@ -428,6 +428,7 @@ func (b *Bot) runHandler(h HandlerFunc, c Context) {
 
 		if state := c.Get(FlowStateName); state == FlowEnd {
 			b.flowManager.Close(c.Recipient())
+			return
 		}
 	}
 	if b.synchronous {
