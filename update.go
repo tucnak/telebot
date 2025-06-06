@@ -361,7 +361,7 @@ func (b *Bot) ProcessContext(c Context) {
 func (b *Bot) handle(end string, c Context) bool {
 	// flow satisfaction
 	f, skiped := b.advanceFlow(c, end)
-	if !skiped {
+	if !skiped && f.Forward(c) {
 		if handler := f.ProcessUpdate(end); handler != nil {
 			b.runHandler(handler, c)
 			return true
@@ -372,14 +372,6 @@ func (b *Bot) handle(end string, c Context) bool {
 	if handler, ok := b.handlers[end]; ok {
 		b.runHandler(handler, c)
 		return true
-	}
-
-	// flow satisfaction
-	if f != nil && f.Forward(c) {
-		if handler := f.ProcessUpdate(end); handler != nil {
-			b.runHandler(handler, c)
-			return true
-		}
 	}
 
 	return false

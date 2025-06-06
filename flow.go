@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+const FlowBeginProcessor = "begin"
+
 // Begin initializes a new flow from a specified step,
 // applying optional middleware.
 //
@@ -24,17 +26,18 @@ import (
 //	     Handle("lang_chosen", b.OnLangChosen).
 //	     Handle(tele.OnCallback, "lang_chosen", func(c tele.Context) error { return nil }).
 //	     Transite("lang_choose", "lang_chosen", func(c tele.Context, u tele.Update) bool { return u.Callback != nil }).
-func (b *Bot) BeginFlow(end string, h HandlerFunc) *Flow {
+func (b *Bot) BeginFlow(h HandlerFunc) *Flow {
 	return &Flow{
-		begin: func(c Context) error {
-			return applyMiddleware(h, b.group.middleware...)(c)
-		},
-		current:     end,
+		begin:       func(c Context) error { return applyMiddleware(h, b.group.middleware...)(c) },
 		middlewares: b.group.middleware,
 	}
 }
 
 func (b *Bot) advanceFlow(c Context, endpoint string) (flow *Flow, skip bool) {
+	// todo advanceFlow має займатись лише рекомендацією flow
+	// запуском flow вже має займатись інший метод, який буде робити перший крок і слідкувати за виконанням кроків
+	// кожен степ відбувається під час handler'у якусь дії
+
 	skip = true
 
 	u := c.Recipient()
@@ -84,7 +87,7 @@ const (
 // Flow represents the flow of steps and transitions in a bot's conversation.
 type Flow struct {
 	begin   HandlerFunc // handler to begin the flow
-	current string      // Current step in the flow.
+	current string      // Current step in the flow
 
 	processors  map[string]map[string]HandlerFunc    // Handlers for specific updates to a step.
 	transitions map[string]map[string]TransitionFunc // Transition functions between steps.
@@ -119,6 +122,12 @@ func (f *Flow) Forward(c Context) bool {
 			return true
 		}
 	}
+
+	if f.current == "" {
+		f.current = FlowBeginProcessor
+		return true
+	}
+
 	return false
 }
 
@@ -162,7 +171,7 @@ func (f *Flow) Transite(step, next string, t TransitionFunc) {
 		f.transitions[step] = make(map[string]TransitionFunc)
 	}
 
-	if !f.Contains(step) && step != f.current {
+	if !f.Contains(step) {
 		panic(fmt.Sprintf("step %s not found in registry", step))
 	}
 
@@ -175,6 +184,27 @@ func (f *Flow) Transite(step, next string, t TransitionFunc) {
 	}
 
 	f.transitions[step][next] = t
+}
+
+// FirstTransite registers a transition function to process from begin.
+func (f *Flow) FirstTransite(next string, t TransitionFunc) {
+	if f.transitions == nil {
+		f.transitions = make(map[string]map[string]TransitionFunc)
+	}
+
+	if f.transitions[FlowBeginProcessor] == nil {
+		f.transitions[FlowBeginProcessor] = make(map[string]TransitionFunc)
+	}
+
+	if !f.Contains(next) {
+		panic(fmt.Sprintf("step %s not found in registry", next))
+	}
+
+	if next == f.current {
+		panic(fmt.Sprintf("transition cannot be continue from %s", f.current))
+	}
+
+	f.transitions[FlowBeginProcessor][next] = t
 }
 
 // FlowManager manages multiple flows and stores active ones.
