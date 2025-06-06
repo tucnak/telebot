@@ -34,12 +34,6 @@ func (b *Bot) BeginFlow(h HandlerFunc) *Flow {
 }
 
 func (b *Bot) advanceFlow(c Context, endpoint string) (flow *Flow, skip bool) {
-	// todo advanceFlow має займатись лише рекомендацією flow
-	// запуском flow вже має займатись інший метод, який буде робити перший крок і слідкувати за виконанням кроків
-	// кожен степ відбувається під час handler'у якусь дії
-
-	skip = true
-
 	u := c.Recipient()
 	if u == nil {
 		return
