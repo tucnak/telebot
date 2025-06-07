@@ -63,6 +63,9 @@ type SendOptions struct {
 	// See ReplyMarkup struct definition.
 	ReplyMarkup *ReplyMarkup
 
+	// See PreviewOptions struct definition.
+	PreviewOptions *PreviewOptions
+
 	// For text messages, disables previews for links in this message.
 	DisableWebPagePreview bool
 
@@ -102,6 +105,9 @@ func (og *SendOptions) copy() *SendOptions {
 	if cp.ReplyMarkup != nil {
 		cp.ReplyMarkup = cp.ReplyMarkup.copy()
 	}
+	if cp.PreviewOptions != nil {
+		cp.PreviewOptions = cp.PreviewOptions.copy()
+	}
 	return &cp
 }
 
@@ -122,6 +128,8 @@ func (b *Bot) extractOptions(how []interface{}) *SendOptions {
 			opts.ReplyParams = opt
 		case *Topic:
 			opts.ThreadID = opt.ThreadID
+		case *PreviewOptions:
+			opts.PreviewOptions = opt
 		case Option:
 			switch opt {
 			case NoPreview:
@@ -204,6 +212,11 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 		params["reply_markup"] = string(replyMarkup)
 	}
 
+	if opt.PreviewOptions != nil {
+		previewOptions, _ := json.Marshal(opt.PreviewOptions)
+		params["link_preview_options"] = string(previewOptions)
+	}
+
 	if opt.Protected {
 		params["protect_content"] = "true"
 	}
@@ -268,6 +281,11 @@ type PreviewOptions struct {
 	// (Optional) True, if the link preview must be shown above the message text;
 	// otherwise, the link preview will be shown below the message text.
 	AboveText bool `json:"show_above_text"`
+}
+
+func (og *PreviewOptions) copy() *PreviewOptions {
+	cp := *og
+	return &cp
 }
 
 func embedMessages(params map[string]string, msgs []Editable) {
