@@ -395,6 +395,26 @@ func (g *Game) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	return extractMessage(data)
 }
 
+func (c *Contact) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
+	params := map[string]string{
+		"chat_id":      to.Recipient(),
+		"phone_number": c.PhoneNumber,
+		"first_name":   c.FirstName,
+	}
+	if c.LastName != "" {
+		params["last_name"] = c.LastName
+	}
+	if c.VCard != "" {
+		params["vcard"] = c.VCard
+	}
+	b.embedSendOptions(params, opt)
+	data, err := b.Raw("sendContact", params)
+	if err != nil {
+		return nil, err
+	}
+	return extractMessage(data)
+}
+
 func thumbnailToFilemap(thumb *Photo) map[string]File {
 	if thumb != nil {
 		return map[string]File{"thumbnail": thumb.File}
