@@ -85,6 +85,8 @@ type Bot struct {
 
 	stopMu     sync.RWMutex
 	stopClient chan struct{}
+
+	stopSignal chan struct{}
 }
 
 // Settings represents a utility struct for passing certain
@@ -227,6 +229,9 @@ func (b *Bot) Start() {
 	go func() {
 		b.Poller.Poll(b, b.Updates, stop)
 		close(stopConfirm)
+		if b.stopSignal != nil {
+			close(b.stopSignal)
+		}
 	}()
 
 	for {
@@ -256,6 +261,13 @@ func (b *Bot) Stop() {
 	confirm := make(chan struct{})
 	b.stop <- confirm
 	<-confirm
+}
+
+func (b *Bot) GetStopSignal() chan struct{} {
+	if b.stopSignal == nil {
+		b.stopSignal = make(chan struct{})
+	}
+	return b.stopSignal
 }
 
 // NewMarkup simply returns newly created markup instance.

@@ -79,6 +79,9 @@ func TestNewBot(t *testing.T) {
 	assert.Equal(t, pref.Poller, b.Poller)
 	assert.Equal(t, 50, cap(b.Updates))
 	assert.Equal(t, ModeHTML, b.parseMode)
+	assert.Nil(t, b.stopSignal)
+	assert.NotNil(t, b.GetStopSignal())
+	assert.NotNil(t, b.stopSignal)
 }
 
 func TestBotHandle(t *testing.T) {
