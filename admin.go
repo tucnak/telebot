@@ -137,7 +137,9 @@ func (b *Bot) Ban(chat *Chat, member *ChatMember, revokeMessages ...bool) error 
 }
 
 // Unban will unban user from chat, who would have thought eh?
-// forBanned does nothing if the user is not banned.
+// By default, it kicks the user if it is not banned, because it ensures
+// the user is not a chat member but is able to join it.
+// forBanned = true should be provided to ignore users that are not banned.
 func (b *Bot) Unban(chat *Chat, user *User, forBanned ...bool) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
