@@ -395,6 +395,25 @@ func (g *Game) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	return extractMessage(data)
 }
 
+// Send delivers checklist through bot b to recipient.
+// Works only with a business connection.
+func (c *Checklist) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
+	params := map[string]string{
+		"chat_id": to.Recipient(),
+	}
+	b.embedSendOptions(params, opt)
+
+	opts, _ := json.Marshal(c)
+	params["checklist"] = string(opts)
+
+	data, err := b.Raw("sendChecklist", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMessage(data)
+}
+
 func thumbnailToFilemap(thumb *Photo) map[string]File {
 	if thumb != nil {
 		return map[string]File{"thumbnail": thumb.File}

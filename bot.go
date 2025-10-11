@@ -521,6 +521,8 @@ func (b *Bot) CopyMany(to Recipient, msgs []Editable, opts ...*SendOptions) ([]M
 //	b.Edit(m, tele.Location{42.1337, 69.4242})
 //	b.Edit(c, "edit inline message from the callback")
 //	b.Edit(r, "edit message from chosen inline result")
+//
+// b.Edit(b, &tele.Checklist{...}, &tele.SendOptions{BusinessConnectionID: c.Update().BusinessMessage.BusinessConnectionID})
 func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Message, error) {
 	var (
 		method string
@@ -530,6 +532,8 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 	switch v := what.(type) {
 	case *ReplyMarkup:
 		return b.EditReplyMarkup(msg, v)
+	case *Checklist:
+		return b.EditCheckList(msg, v, opts...)
 	case Inputtable:
 		return b.EditMedia(msg, v, opts...)
 	case string:
@@ -603,6 +607,28 @@ func (b *Bot) EditReplyMarkup(msg Editable, markup *ReplyMarkup) (*Message, erro
 	params["reply_markup"] = string(data)
 
 	data, err := b.Raw("editMessageReplyMarkup", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMessage(data)
+}
+
+// EditCheckList edits checklist of already sent message.
+func (b *Bot) EditCheckList(msg Editable, checklist *Checklist, opt ...interface{}) (*Message, error) {
+	msgID, chatID := msg.MessageSig()
+	params := map[string]string{
+		"chat_id":    strconv.FormatInt(chatID, 10),
+		"message_id": msgID,
+	}
+
+	opts, _ := json.Marshal(checklist)
+	params["checklist"] = string(opts)
+
+	sendOpts := b.extractOptions(opt)
+	b.embedSendOptions(params, sendOpts)
+
+	data, err := b.Raw("editMessageChecklist", params)
 	if err != nil {
 		return nil, err
 	}

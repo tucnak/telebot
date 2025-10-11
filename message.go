@@ -355,6 +355,15 @@ type Message struct {
 
 	// Service message: the user allowed the bot added to the attachment menu to write messages
 	WriteAccessAllowed *WriteAccessAllowed `json:"write_access_allowed,omitempty"`
+
+	// (Optional) Message is a checklist
+	Checklist *Checklist `json:"checklist,omitempty"`
+
+	// (Optional) Service message: some tasks in a checklist were marked as done or not done
+	ChecklistTasksDone ChecklistTasksDone `json:"checklist_tasks_done,omitempty"`
+
+	// (Optional) Service message: tasks were added to a checklist
+	ChecklistTasksAdded ChecklistTasksAdded `json:"checklist_tasks_added,omitempty"`
 }
 
 // MessageEntity object represents "special" parts of text messages,
