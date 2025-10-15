@@ -212,3 +212,52 @@ func (b *Bot) RefundStars(to Recipient, chargeID string) error {
 
 	return nil
 }
+
+// StarsSubscription contains information about Telegram Stars subscription.
+type StarsSubscription struct {
+	UserID      string `json:"user_id"`
+	ChargeID    string `json:"charge_id"`
+	Amount      int    `json:"amount"`
+	Period      int    `json:"subscription_period"`
+	InvoiceSlug string `json:"invoice_slug"`
+	BotCanceled bool   `json:"bot_canceled"`
+	EndDate     int64  `json:"end_date"`
+}
+
+// CreateStarsSubscriptionInvoiceLink a link for a Telegram Stars subscription invoice.
+func (b *Bot) CreateStarsSubscriptionInvoiceLink(i Invoice) (string, error) {
+	params := i.params()
+	params["currency"] = Stars
+	params["subscription_period"] = strconv.Itoa(30 * 24 * 60 * 60) // 30 days
+	data, err := b.Raw("createInvoiceLink", params)
+	if err != nil {
+		return "", err
+	}
+	var resp struct {
+		Result string
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return "", wrapError(err)
+	}
+	return resp.Result, nil
+}
+
+// CancelStarsSubscription cancels user's Telegram Stars subscription.
+func (b *Bot) CancelStarsSubscription(recipient Recipient, chargeID string, isCanceled bool) (bool, error) {
+	params := map[string]string{
+		"user_id":                    recipient.Recipient(),
+		"telegram_payment_charge_id": chargeID,
+		"is_canceled":                strconv.FormatBool(isCanceled),
+	}
+	data, err := b.Raw("editUserStarSubscription", params)
+	if err != nil {
+		return false, err
+	}
+	var resp struct {
+		Result bool
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return false, wrapError(err)
+	}
+	return resp.Result, nil
+}
