@@ -1,6 +1,7 @@
 package telebot
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -16,7 +17,7 @@ import (
 
 // NewBot does try to build a Bot with token `token`, which
 // is a secret API key assigned to particular bot.
-func NewBot(pref Settings) (*Bot, error) {
+func NewBot(ctx context.Context, pref Settings) (*Bot, error) {
 	if pref.Updates == 0 {
 		pref.Updates = 100
 	}
@@ -55,7 +56,7 @@ func NewBot(pref Settings) (*Bot, error) {
 	if pref.Offline {
 		bot.Me = &User{}
 	} else {
-		user, err := bot.getMe()
+		user, err := bot.getMe(ctx)
 		if err != nil {
 			return nil, err
 		}

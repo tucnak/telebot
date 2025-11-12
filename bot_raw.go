@@ -212,19 +212,32 @@ func (b *Bot) sendMedia(media Media, params map[string]string, files map[string]
 	return extractMessage(data)
 }
 
-func (b *Bot) getMe() (*User, error) {
-	data, err := b.Raw("getMe", nil)
-	if err != nil {
-		return nil, err
-	}
+func (b *Bot) getMe(ctx context.Context) (*User, error) {
+	url := b.URL + "/bot" + b.Token + "/getMe"
 
-	var resp struct {
-		Result *User
-	}
-	if err := json.Unmarshal(data, &resp); err != nil {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, nil)
+	if err != nil {
 		return nil, wrapError(err)
 	}
-	return resp.Result, nil
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := b.client.Do(req)
+	if err != nil {
+		return nil, wrapError(err)
+	}
+	defer resp.Body.Close()
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, wrapError(err)
+	}
+	var respStruct struct {
+		Result *User
+	}
+	if err := json.Unmarshal(data, &respStruct); err != nil {
+		return nil, wrapError(err)
+	}
+	return respStruct.Result, nil
 }
 
 func (b *Bot) getUpdates(offset, limit int, timeout time.Duration, allowed []string) ([]Update, error) {

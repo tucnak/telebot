@@ -25,7 +25,6 @@ func (p *testPoller) Poll(b *Bot, updates chan Update, stop chan struct{}) {
 			updates <- upd
 		case <-stop:
 			return
-		default:
 		}
 	}
 }
@@ -37,7 +36,7 @@ func TestMiddlewarePoller(t *testing.T) {
 	pref := defaultSettings()
 	pref.Offline = true
 
-	b, err := NewBot(pref)
+	b, err := NewBot(t.Context(), pref)
 	if err != nil {
 		t.Fatal(err)
 	}

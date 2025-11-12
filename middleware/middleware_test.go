@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,7 +10,7 @@ import (
 	tele "gopkg.in/telebot.v4"
 )
 
-var b, _ = tele.NewBot(tele.Settings{Offline: true})
+var b, _ = tele.NewBot(context.Background(), tele.Settings{Offline: true})
 
 func TestRecover(t *testing.T) {
 	onError := func(err error, c tele.Context) {
