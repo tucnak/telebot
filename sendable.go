@@ -184,6 +184,11 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 
 // Send delivers animation through bot b to recipient.
 func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
+	// file_name is required, without it animation sends as a document
+	if a.FileName == "" && a.File.OnDisk() {
+		a.FileName = filepath.Base(a.File.FileLocal)
+	}
+
 	params := map[string]string{
 		"chat_id":   to.Recipient(),
 		"caption":   a.Caption,
@@ -199,11 +204,6 @@ func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 	}
 	if a.Height != 0 {
 		params["height"] = strconv.Itoa(a.Height)
-	}
-
-	// file_name is required, without it animation sends as a document
-	if params["file_name"] == "" && a.File.OnDisk() {
-		params["file_name"] = filepath.Base(a.File.FileLocal)
 	}
 
 	msg, err := b.sendMedia(a, params, thumbnailToFilemap(a.Thumbnail))
