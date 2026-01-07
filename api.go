@@ -77,6 +77,7 @@ type API interface {
 	Restrict(chat *Chat, member *ChatMember) error
 	RevokeInviteLink(chat Recipient, link string) (*ChatInviteLink, error)
 	Send(to Recipient, what interface{}, opts ...interface{}) (*Message, error)
+	SendMessageDraft(to Recipient, draftID int, text string, opts ...interface{}) error
 	SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, error)
 	SendPaid(to Recipient, stars int, a PaidAlbum, opts ...interface{}) (*Message, error)
 	SetAdminTitle(chat *Chat, user *User, title string) error

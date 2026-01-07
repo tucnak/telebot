@@ -300,6 +300,18 @@ func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Messag
 	}
 }
 
+// SendMessageDraft streams a partial message to a user while the message is being
+// generated. Supported only for bots with forum topic mode enabled in private chats.
+// The draftID must be non-zero; changes of drafts with the same ID are animated.
+func (b *Bot) SendMessageDraft(to Recipient, draftID int, text string, opts ...interface{}) error {
+	if to == nil {
+		return ErrBadRecipient
+	}
+
+	sendOpts := b.extractOptions(opts)
+	return b.sendMessageDraft(to, draftID, text, sendOpts)
+}
+
 // SendPaid sends multiple instances of paid media as a single message.
 // To include the caption, make sure the first PaidInputtable of an album has it.
 func (b *Bot) SendPaid(to Recipient, stars int, a PaidAlbum, opts ...interface{}) (*Message, error) {

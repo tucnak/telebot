@@ -191,6 +191,18 @@ func (b *Bot) sendText(to Recipient, text string, opt *SendOptions) (*Message, e
 	return extractMessage(data)
 }
 
+func (b *Bot) sendMessageDraft(to Recipient, draftID int, text string, opt *SendOptions) error {
+	params := map[string]string{
+		"chat_id":  to.Recipient(),
+		"draft_id": strconv.Itoa(draftID),
+		"text":     text,
+	}
+	b.embedSendOptions(params, opt)
+
+	_, err := b.Raw("sendMessageDraft", params)
+	return err
+}
+
 func (b *Bot) sendMedia(media Media, params map[string]string, files map[string]File) (*Message, error) {
 	kind := media.MediaType()
 	what := "send" + strings.Title(kind)
