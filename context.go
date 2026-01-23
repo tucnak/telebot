@@ -341,6 +341,8 @@ func (c *nativeContext) Sender() *User {
 		if b := c.u.BoostRemoved; b.Source != nil {
 			return b.Source.Booster
 		}
+	case c.u.MessageReaction != nil:
+		return c.u.MessageReaction.User
 	}
 	return nil
 }
@@ -355,6 +357,11 @@ func (c *nativeContext) Chat() *Chat {
 		return c.u.ChatMember.Chat
 	case c.u.ChatJoinRequest != nil:
 		return c.u.ChatJoinRequest.Chat
+	case c.u.MessageReaction != nil:
+		return c.u.MessageReaction.Chat
+	case c.u.MessageReactionCount != nil:
+		return c.u.MessageReactionCount.Chat
+
 	default:
 		return nil
 	}
