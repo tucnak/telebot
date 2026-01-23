@@ -361,6 +361,14 @@ func (b *Bot) ProcessContext(c Context) {
 		b.handle(OnPurchasedPaidMedia, c)
 		return
 	}
+	if u.MessageReaction != nil {
+		b.handle(OnMessageReaction, c)
+		return
+	}
+	if u.MessageReactionCount != nil {
+		b.handle(OnMessageReactionCount, c)
+		return
+	}
 }
 
 func (b *Bot) handle(end string, c Context) bool {

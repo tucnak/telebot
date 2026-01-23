@@ -121,6 +121,8 @@ const (
 	OnEditedBusinessMessage   = "\aedited_business_message"
 	OnDeletedBusinessMessages = "\adeleted_business_messages"
 	OnPurchasedPaidMedia      = "\apurchased_paid_media"
+	OnMessageReaction         = "\amessage_reaction"
+	OnMessageReactionCount    = "\amessage_reaction_count"
 )
 
 // ChatAction is a client-side status indicating bot activity.
