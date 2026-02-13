@@ -1,6 +1,7 @@
 package telebot
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -23,6 +24,14 @@ func TestBtn(t *testing.T) {
 	assert.Equal(t, &InlineButton{Text: "T", InlineQueryChat: "q"}, r.QueryChat("T", "q").Inline())
 	assert.Equal(t, &InlineButton{Text: "T", Login: &Login{Text: "T"}}, r.Login("T", &Login{Text: "T"}).Inline())
 	assert.Equal(t, &InlineButton{Text: "T", WebApp: &WebApp{URL: "url"}}, r.WebApp("T", &WebApp{URL: "url"}).Inline())
+
+	btn := Btn{
+		Text:              "Styled",
+		IconCustomEmojiID: "emoji-id",
+		Style:             ButtonStyleSuccess,
+	}
+	assert.Equal(t, &ReplyButton{Text: "Styled", IconCustomEmojiID: "emoji-id", Style: ButtonStyleSuccess}, btn.Reply())
+	assert.Equal(t, &InlineButton{Text: "Styled", IconCustomEmojiID: "emoji-id", Style: ButtonStyleSuccess}, btn.Inline())
 }
 
 func TestOptions(t *testing.T) {
@@ -62,4 +71,57 @@ func TestOptions(t *testing.T) {
 	data, err := PollQuiz.MarshalJSON()
 	require.NoError(t, err)
 	assert.Equal(t, []byte(`{"type":"quiz"}`), data)
+}
+
+func TestReplyButtonJSONWithStyleAndCustomEmoji(t *testing.T) {
+	btn := ReplyButton{
+		Text:              "A",
+		IconCustomEmojiID: "emoji-id",
+		Style:             ButtonStylePrimary,
+	}
+
+	raw, err := json.Marshal(btn)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{"text":"A","icon_custom_emoji_id":"emoji-id","style":"primary"}`, string(raw))
+}
+
+func TestInlineButtonJSONWithStyleAndCustomEmoji(t *testing.T) {
+	btn := InlineButton{
+		Text:              "A",
+		IconCustomEmojiID: "emoji-id",
+		Style:             ButtonStyleDanger,
+		Data:              "payload",
+	}
+
+	raw, err := json.Marshal(btn)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{"text":"A","icon_custom_emoji_id":"emoji-id","style":"danger","callback_data":"payload","switch_inline_query_current_chat":""}`, string(raw))
+}
+
+func TestInlineButtonWithKeepsStyleAndCustomEmoji(t *testing.T) {
+	base := &InlineButton{
+		Unique:            "u",
+		Text:              "A",
+		IconCustomEmojiID: "emoji-id",
+		Style:             ButtonStylePrimary,
+		URL:               "https://example.com",
+		InlineQuery:       "q",
+		InlineQueryChat:   "qc",
+		Login:             &Login{URL: "https://login"},
+		Data:              "old",
+	}
+
+	got := base.With("new")
+
+	assert.Equal(t, &InlineButton{
+		Unique:            "u",
+		Text:              "A",
+		IconCustomEmojiID: "emoji-id",
+		Style:             ButtonStylePrimary,
+		URL:               "https://example.com",
+		InlineQuery:       "q",
+		InlineQueryChat:   "qc",
+		Login:             &Login{URL: "https://login"},
+		Data:              "new",
+	}, got)
 }
