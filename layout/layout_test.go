@@ -96,9 +96,10 @@ func TestLayout(t *testing.T) {
 	assert.Equal(t, &tele.ReplyMarkup{
 		InlineKeyboard: [][]tele.InlineButton{{
 			{
-				Unique: "stop",
-				Text:   "Stop",
-				Data:   "1",
+				Unique:            "stop",
+				Text:              "Stop",
+				Data:              "1",
+				IconCustomEmojiID: "5972282179776940830",
 			},
 		}},
 	}, lt.MarkupLocale("en", "inline", 1))

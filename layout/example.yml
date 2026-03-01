@@ -38,6 +38,7 @@ buttons:
     unique: stop
     text: Stop
     data: '{{.}}'
+    icon_custom_emoji_id: 5972282179776940830
 
   # Callback data
   pay:
