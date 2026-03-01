@@ -84,7 +84,9 @@ type API interface {
 	SendPaidMedia(to Recipient, stars int, a PaidAlbum, opts ...interface{}) (*Message, error)
 	SendGift(to Recipient, giftID string, opts ...interface{}) error
 	SavePreparedInlineMessage(user Recipient, result Result, opts ...interface{}) (*PreparedInlineMessage, error)
+	SendDraft(to Recipient, draftID int, text string, opts ...interface{}) error
 	SetAdminTitle(chat *Chat, user *User, title string) error
+	SetMemberTag(chat *Chat, user *User, tag string) error
 	SetCommands(opts ...interface{}) error
 	SetCustomEmojiStickerSetThumb(name, id string) error
 	SetDefaultRights(rights Rights, forChannels bool) error

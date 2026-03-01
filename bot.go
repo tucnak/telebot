@@ -300,6 +300,37 @@ func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Messag
 	}
 }
 
+// SendDraft streams a partial message to a user while the message is being generated.
+// draftID must be non-zero; changes of drafts with the same identifier are animated.
+func (b *Bot) SendDraft(to Recipient, draftID int, text string, opts ...interface{}) error {
+	if to == nil {
+		return ErrBadRecipient
+	}
+
+	sendOpts := b.extractOptions(opts)
+
+	params := map[string]string{
+		"chat_id":  to.Recipient(),
+		"draft_id": strconv.Itoa(draftID),
+		"text":     text,
+	}
+
+	if sendOpts.ThreadID != 0 {
+		params["message_thread_id"] = strconv.Itoa(sendOpts.ThreadID)
+	}
+	if sendOpts.ParseMode != ModeDefault {
+		params["parse_mode"] = sendOpts.ParseMode
+	}
+	if len(sendOpts.Entities) > 0 {
+		delete(params, "parse_mode")
+		entities, _ := json.Marshal(sendOpts.Entities)
+		params["entities"] = string(entities)
+	}
+
+	_, err := b.Raw("sendMessageDraft", params)
+	return err
+}
+
 // SendPaidMedia sends multiple instances of paid media as a single message.
 // To include the caption, make sure the first PaidInputtable of an album has it.
 func (b *Bot) SendPaidMedia(to Recipient, stars int, a PaidAlbum, opts ...interface{}) (*Message, error) {
