@@ -82,22 +82,22 @@ func (r *ReplyMarkup) copy() *ReplyMarkup {
 
 // Btn is a constructor button, which will later become either a reply, or an inline button.
 type Btn struct {
-	Unique            string          `json:"unique,omitempty"`
-	Text              string          `json:"text,omitempty"`
-	IconCustomEmojiID string          `json:"icon_custom_emoji_id,omitempty"`
-	Style             ButtonStyle     `json:"style,omitempty"`
-	URL               string          `json:"url,omitempty"`
-	Data              string          `json:"callback_data,omitempty"`
-	InlineQuery       string          `json:"switch_inline_query,omitempty"`
-	InlineQueryChat   string          `json:"switch_inline_query_current_chat,omitempty"`
-	Login             *Login          `json:"login_url,omitempty"`
-	WebApp            *WebApp         `json:"web_app,omitempty"`
-	Contact           bool            `json:"request_contact,omitempty"`
-	Location          bool            `json:"request_location,omitempty"`
-	Poll              PollType        `json:"request_poll,omitempty"`
-	User              *ReplyRecipient `json:"request_user,omitempty"`
-	Chat              *ReplyRecipient `json:"request_chat,omitempty"`
-	CopyText          *CopyTextButton `json:"copy_text,omitempty"`
+	Unique            string          `json:"unique,omitempty" yaml:"unique,omitempty"`
+	Text              string          `json:"text,omitempty" yaml:"text,omitempty"`
+	IconCustomEmojiID string          `json:"icon_custom_emoji_id,omitempty" yaml:"icon_custom_emoji_id,omitempty"`
+	Style             ButtonStyle     `json:"style,omitempty" yaml:"style,omitempty"`
+	URL               string          `json:"url,omitempty" yaml:"url,omitempty"`
+	Data              string          `json:"callback_data,omitempty" yaml:"callback_data,omitempty"`
+	InlineQuery       string          `json:"switch_inline_query,omitempty" yaml:"switch_inline_query,omitempty"`
+	InlineQueryChat   string          `json:"switch_inline_query_current_chat,omitempty" yaml:"switch_inline_query_current_chat,omitempty"`
+	Login             *Login          `json:"login_url,omitempty" yaml:"login_url,omitempty"`
+	WebApp            *WebApp         `json:"web_app,omitempty" yaml:"web_app,omitempty"`
+	Contact           bool            `json:"request_contact,omitempty" yaml:"request_contact,omitempty"`
+	Location          bool            `json:"request_location,omitempty" yaml:"request_location,omitempty"`
+	Poll              PollType        `json:"request_poll,omitempty" yaml:"request_poll,omitempty"`
+	User              *ReplyRecipient `json:"request_user,omitempty" yaml:"request_user,omitempty"`
+	Chat              *ReplyRecipient `json:"request_chat,omitempty" yaml:"request_chat,omitempty"`
+	CopyText          *CopyTextButton `json:"copy_text,omitempty" yaml:"copy_text,omitempty"`
 }
 
 // Row represents an array of buttons, a row.
