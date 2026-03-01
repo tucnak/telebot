@@ -329,6 +329,9 @@ type Message struct {
 	// added by the user.
 	SenderBoosts int `json:"sender_boost_count"`
 
+	// (Optional) Tag or custom title of the sender of the message; for supergroups only.
+	SenderTag string `json:"sender_tag,omitempty"`
+
 	// Service message: forum topic created
 	TopicCreated *Topic `json:"forum_topic_created,omitempty"`
 
@@ -411,6 +414,7 @@ const (
 	EntityCustomEmoji   EntityType = "custom_emoji"
 	EntityBlockquote    EntityType = "blockquote"
 	EntityEBlockquote   EntityType = "expandable_blockquote"
+	EntityDateTime      EntityType = "date_time"
 )
 
 // Entities are used to set message's text entities as a send option.

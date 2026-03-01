@@ -82,20 +82,22 @@ func (r *ReplyMarkup) copy() *ReplyMarkup {
 
 // Btn is a constructor button, which will later become either a reply, or an inline button.
 type Btn struct {
-	Unique          string          `json:"unique,omitempty"`
-	Text            string          `json:"text,omitempty"`
-	URL             string          `json:"url,omitempty"`
-	Data            string          `json:"callback_data,omitempty"`
-	InlineQuery     string          `json:"switch_inline_query,omitempty"`
-	InlineQueryChat string          `json:"switch_inline_query_current_chat,omitempty"`
-	Login           *Login          `json:"login_url,omitempty"`
-	WebApp          *WebApp         `json:"web_app,omitempty"`
-	Contact         bool            `json:"request_contact,omitempty"`
-	Location        bool            `json:"request_location,omitempty"`
-	Poll            PollType        `json:"request_poll,omitempty"`
-	User            *ReplyRecipient `json:"request_user,omitempty"`
-	Chat            *ReplyRecipient `json:"request_chat,omitempty"`
-	CopyText        *CopyTextButton `json:"copy_text,omitempty"`
+	Unique            string          `json:"unique,omitempty" yaml:"unique,omitempty"`
+	Text              string          `json:"text,omitempty" yaml:"text,omitempty"`
+	IconCustomEmojiID string          `json:"icon_custom_emoji_id,omitempty" yaml:"icon_custom_emoji_id,omitempty"`
+	Style             ButtonStyle     `json:"style,omitempty" yaml:"style,omitempty"`
+	URL               string          `json:"url,omitempty" yaml:"url,omitempty"`
+	Data              string          `json:"callback_data,omitempty" yaml:"callback_data,omitempty"`
+	InlineQuery       string          `json:"switch_inline_query,omitempty" yaml:"switch_inline_query,omitempty"`
+	InlineQueryChat   string          `json:"switch_inline_query_current_chat,omitempty" yaml:"switch_inline_query_current_chat,omitempty"`
+	Login             *Login          `json:"login_url,omitempty" yaml:"login_url,omitempty"`
+	WebApp            *WebApp         `json:"web_app,omitempty" yaml:"web_app,omitempty"`
+	Contact           bool            `json:"request_contact,omitempty" yaml:"request_contact,omitempty"`
+	Location          bool            `json:"request_location,omitempty" yaml:"request_location,omitempty"`
+	Poll              PollType        `json:"request_poll,omitempty" yaml:"request_poll,omitempty"`
+	User              *ReplyRecipient `json:"request_user,omitempty" yaml:"request_user,omitempty"`
+	Chat              *ReplyRecipient `json:"request_chat,omitempty" yaml:"request_chat,omitempty"`
+	CopyText          *CopyTextButton `json:"copy_text,omitempty" yaml:"copy_text,omitempty"`
 }
 
 // Row represents an array of buttons, a row.
@@ -220,7 +222,9 @@ func (r *ReplyMarkup) CopyText(text, copyText string) Btn {
 // Set either Contact or Location to true in order to request
 // sensitive info, such as user's phone number or current location.
 type ReplyButton struct {
-	Text string `json:"text"`
+	Text              string      `json:"text"`
+	IconCustomEmojiID string      `json:"icon_custom_emoji_id,omitempty"`
+	Style             ButtonStyle `json:"style,omitempty"`
 
 	Contact  bool            `json:"request_contact,omitempty"`
 	Location bool            `json:"request_location,omitempty"`
@@ -293,6 +297,8 @@ type InlineButton struct {
 	Unique string `json:"unique,omitempty"`
 
 	Text                  string             `json:"text"`
+	IconCustomEmojiID     string             `json:"icon_custom_emoji_id,omitempty"`
+	Style                 ButtonStyle        `json:"style,omitempty"`
 	URL                   string             `json:"url,omitempty"`
 	Data                  string             `json:"callback_data,omitempty"`
 	InlineQuery           string             `json:"switch_inline_query,omitempty"`
@@ -325,13 +331,15 @@ func (t *InlineButton) MarshalJSON() ([]byte, error) {
 // With returns a copy of the button with data.
 func (t *InlineButton) With(data string) *InlineButton {
 	return &InlineButton{
-		Unique:          t.Unique,
-		Text:            t.Text,
-		URL:             t.URL,
-		InlineQuery:     t.InlineQuery,
-		InlineQueryChat: t.InlineQueryChat,
-		Login:           t.Login,
-		Data:            data,
+		Unique:            t.Unique,
+		Text:              t.Text,
+		IconCustomEmojiID: t.IconCustomEmojiID,
+		Style:             t.Style,
+		URL:               t.URL,
+		InlineQuery:       t.InlineQuery,
+		InlineQueryChat:   t.InlineQueryChat,
+		Login:             t.Login,
+		Data:              data,
 	}
 }
 
@@ -341,27 +349,31 @@ func (b Btn) Reply() *ReplyButton {
 	}
 
 	return &ReplyButton{
-		Text:     b.Text,
-		Contact:  b.Contact,
-		Location: b.Location,
-		Poll:     b.Poll,
-		User:     b.User,
-		Chat:     b.Chat,
-		WebApp:   b.WebApp,
+		Text:              b.Text,
+		IconCustomEmojiID: b.IconCustomEmojiID,
+		Style:             b.Style,
+		Contact:           b.Contact,
+		Location:          b.Location,
+		Poll:              b.Poll,
+		User:              b.User,
+		Chat:              b.Chat,
+		WebApp:            b.WebApp,
 	}
 }
 
 func (b Btn) Inline() *InlineButton {
 	return &InlineButton{
-		Unique:          b.Unique,
-		Text:            b.Text,
-		URL:             b.URL,
-		Data:            b.Data,
-		InlineQuery:     b.InlineQuery,
-		InlineQueryChat: b.InlineQueryChat,
-		Login:           b.Login,
-		WebApp:          b.WebApp,
-		CopyText:        b.CopyText,
+		Unique:            b.Unique,
+		Text:              b.Text,
+		IconCustomEmojiID: b.IconCustomEmojiID,
+		Style:             b.Style,
+		URL:               b.URL,
+		Data:              b.Data,
+		InlineQuery:       b.InlineQuery,
+		InlineQueryChat:   b.InlineQueryChat,
+		Login:             b.Login,
+		WebApp:            b.WebApp,
+		CopyText:          b.CopyText,
 	}
 }
 
@@ -380,6 +392,14 @@ type Login struct {
 type CopyTextButton struct {
 	Text string `json:"text"`
 }
+
+type ButtonStyle string
+
+const (
+	ButtonStylePrimary ButtonStyle = "primary"
+	ButtonStyleSuccess ButtonStyle = "success"
+	ButtonStyleDanger  ButtonStyle = "danger"
+)
 
 // MenuButton describes the bot's menu button in a private chat.
 type MenuButton struct {

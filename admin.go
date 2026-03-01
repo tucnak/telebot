@@ -39,6 +39,8 @@ type Rights struct {
 	CanPostStories   bool `json:"can_post_stories"`
 	CanEditStories   bool `json:"can_edit_stories"`
 	CanDeleteStories bool `json:"can_delete_stories"`
+	CanManageTags    bool `json:"can_manage_tags"`
+	CanEditTag       bool `json:"can_edit_tag"`
 
 	// Independent defines whether the chat permissions are set independently.
 	// If not, the can_send_other_messages and can_add_web_page_previews permissions
@@ -113,6 +115,7 @@ func AdminRights() Rights {
 		CanPostStories:      true,
 		CanEditStories:      true,
 		CanDeleteStories:    true,
+		CanManageTags:       true,
 	}
 }
 
@@ -256,6 +259,20 @@ func (b *Bot) SetAdminTitle(chat *Chat, user *User, title string) error {
 	}
 
 	_, err := b.Raw("setChatAdministratorCustomTitle", params)
+	return err
+}
+
+// SetMemberTag sets a tag for a regular member in a group or a supergroup.
+// The bot must be an administrator with the can_manage_tags right.
+// A tag should be 0-16 characters length, emoji are not allowed.
+func (b *Bot) SetMemberTag(chat *Chat, user *User, tag string) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+		"user_id": user.Recipient(),
+		"tag":     tag,
+	}
+
+	_, err := b.Raw("setChatMemberTag", params)
 	return err
 }
 

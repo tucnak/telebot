@@ -139,6 +139,9 @@ type ChatMember struct {
 
 	JoinToSend    string `json:"join_to_send_messages"`
 	JoinByRequest string `json:"join_by_request"`
+
+	// (Optional) Tag of the member; for regular and restricted members only.
+	Tag string `json:"tag,omitempty"`
 }
 
 // MemberStatus is one's chat status.
