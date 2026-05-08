@@ -66,11 +66,13 @@ type API interface {
 	MyShortDescription(language string) (*BotInfo, error)
 	Notify(to Recipient, action ChatAction, threadID ...int) error
 	Pin(msg Editable, opts ...interface{}) error
+	ProfileAudiosOf(user *User, offset, limit int) (*UserProfileAudios, error)
 	ProfilePhotosOf(user *User) ([]Photo, error)
 	Promote(chat *Chat, member *ChatMember) error
 	React(to Recipient, msg Editable, r Reactions) error
 	RefundStars(to Recipient, chargeID string) error
 	EditUserStarSubscription(user Recipient, chargeID string, isCanceled bool) error
+	RemoveMyProfilePhoto() error
 	RemoveWebhook(dropPending ...bool) error
 	ReopenGeneralTopic(chat *Chat) error
 	ReopenTopic(chat *Chat, topic *Topic) error
@@ -81,10 +83,12 @@ type API interface {
 	RevokeInviteLink(chat Recipient, link string) (*ChatInviteLink, error)
 	Send(to Recipient, what interface{}, opts ...interface{}) (*Message, error)
 	SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, error)
+	SendDraft(to Recipient, draftID int, text string, opts ...interface{}) error
 	SendPaidMedia(to Recipient, stars int, a PaidAlbum, opts ...interface{}) (*Message, error)
 	SendGift(to Recipient, giftID string, opts ...interface{}) error
 	SavePreparedInlineMessage(user Recipient, result Result, opts ...interface{}) (*PreparedInlineMessage, error)
 	SetAdminTitle(chat *Chat, user *User, title string) error
+	SetMemberTag(chat *Chat, user *User, tag string) error
 	SetCommands(opts ...interface{}) error
 	SetCustomEmojiStickerSetThumb(name, id string) error
 	SetDefaultRights(rights Rights, forChannels bool) error
@@ -96,6 +100,7 @@ type API interface {
 	SetMenuButton(chat *User, mb interface{}) error
 	SetMyDescription(desc, language string) error
 	SetMyName(name, language string) error
+	SetMyProfilePhoto(photo InputProfilePhoto) error
 	SetMyShortDescription(desc, language string) error
 	SetStickerEmojis(sticker string, emojis []string) error
 	SetStickerKeywords(sticker string, keywords []string) error

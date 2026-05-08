@@ -228,6 +228,23 @@ type Video struct {
 
 	// Bot API 8.3: (Optional) Point in time (Unix timestamp) when the video starts
 	StartTimestamp int64 `json:"start_timestamp,omitempty"`
+
+	// Bot API 9.4: (Optional) List of available qualities of the video.
+	Qualities []VideoQuality `json:"qualities,omitempty"`
+}
+
+// VideoQuality represents a video file of a specific quality.
+type VideoQuality struct {
+	FileID       string `json:"file_id"`
+	FileUniqueID string `json:"file_unique_id"`
+	Width        int    `json:"width"`
+	Height       int    `json:"height"`
+
+	// Codec used to encode the video, for example, "h264", "h265", or "av01".
+	Codec string `json:"codec"`
+
+	// (Optional) File size in bytes.
+	FileSize int64 `json:"file_size,omitempty"`
 }
 
 func (v *Video) MediaType() string {

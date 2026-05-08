@@ -153,6 +153,14 @@ func (b *Bot) ProcessContext(c Context) {
 			b.handle(OnWriteAccessAllowed, c)
 			return
 		}
+		if m.ChatOwnerLeft != nil {
+			b.handle(OnChatOwnerLeft, c)
+			return
+		}
+		if m.ChatOwnerChanged != nil {
+			b.handle(OnChatOwnerChanged, c)
+			return
+		}
 
 		wasAdded := (m.UserJoined != nil && m.UserJoined.ID == b.Me.ID) ||
 			(m.UsersJoined != nil && isUserInList(b.Me, m.UsersJoined))

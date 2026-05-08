@@ -76,6 +76,8 @@ const (
 	OnGeneralTopicHidden   = "\ageneral_topic_hidden"
 	OnGeneralTopicUnhidden = "\ageneral_topic_unhidden"
 	OnWriteAccessAllowed   = "\awrite_access_allowed"
+	OnChatOwnerLeft        = "\achat_owner_left"
+	OnChatOwnerChanged     = "\achat_owner_changed"
 
 	OnAddedToGroup      = "\aadded_to_group"
 	OnUserJoined        = "\auser_joined"

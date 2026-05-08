@@ -300,6 +300,43 @@ func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Messag
 	}
 }
 
+// SendDraft streams a partial message to a user while the message is being generated.
+// The streamed draft is ephemeral and acts as a temporary 30-second preview — once
+// the output is finalized, you must call Send with the complete message to persist it.
+// draftID must be non-zero; updates with the same identifier are animated client-side.
+// Pass an empty text to show a "Thinking…" placeholder.
+//
+// Only ParseMode, Entities and ThreadID send options are honored; other fields
+// are not accepted by sendMessageDraft.
+func (b *Bot) SendDraft(to Recipient, draftID int, text string, opts ...interface{}) error {
+	if to == nil {
+		return ErrBadRecipient
+	}
+
+	sendOpts := b.extractOptions(opts)
+
+	params := map[string]string{
+		"chat_id":  to.Recipient(),
+		"draft_id": strconv.Itoa(draftID),
+		"text":     text,
+	}
+
+	if sendOpts != nil {
+		if sendOpts.ThreadID != 0 {
+			params["message_thread_id"] = strconv.Itoa(sendOpts.ThreadID)
+		}
+		if len(sendOpts.Entities) > 0 {
+			entities, _ := json.Marshal(sendOpts.Entities)
+			params["entities"] = string(entities)
+		} else if sendOpts.ParseMode != ModeDefault {
+			params["parse_mode"] = sendOpts.ParseMode
+		}
+	}
+
+	_, err := b.Raw("sendMessageDraft", params)
+	return err
+}
+
 // SendPaidMedia sends multiple instances of paid media as a single message.
 // To include the caption, make sure the first PaidInputtable of an album has it.
 func (b *Bot) SendPaidMedia(to Recipient, stars int, a PaidAlbum, opts ...interface{}) (*Message, error) {
@@ -1188,6 +1225,40 @@ func (b *Bot) ProfilePhotosOf(user *User) ([]Photo, error) {
 	return resp.Result.Photos, nil
 }
 
+// UserProfileAudios represents the audios displayed on a user's profile.
+type UserProfileAudios struct {
+	TotalCount int     `json:"total_count"`
+	Audios     []Audio `json:"audios"`
+}
+
+// ProfileAudiosOf returns a list of profile audios for a user.
+// offset is the sequential number of the first audio to be returned (0 to start).
+// limit caps the number of audios; values 1-100 are accepted (0 means default 100).
+func (b *Bot) ProfileAudiosOf(user *User, offset, limit int) (*UserProfileAudios, error) {
+	params := map[string]string{
+		"user_id": user.Recipient(),
+	}
+	if offset > 0 {
+		params["offset"] = strconv.Itoa(offset)
+	}
+	if limit > 0 {
+		params["limit"] = strconv.Itoa(limit)
+	}
+
+	data, err := b.Raw("getUserProfileAudios", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result UserProfileAudios `json:"result"`
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return &resp.Result, nil
+}
+
 // ChatMemberOf returns information about a member of a chat.
 func (b *Bot) ChatMemberOf(chat, user Recipient) (*ChatMember, error) {
 	params := map[string]string{
@@ -1345,6 +1416,69 @@ func (b *Bot) SetMyShortDescription(desc, language string) error {
 // MyShortDescription the current bot short description for the given user language.
 func (b *Bot) MyShortDescription(language string) (*BotInfo, error) {
 	return b.botInfo(language, "getMyShortDescription")
+}
+
+// InputProfilePhoto describes a profile photo to set. Bot API 9.4.
+// Implemented by *InputProfilePhotoStatic and *InputProfilePhotoAnimated.
+type InputProfilePhoto interface {
+	inputProfilePhoto(files map[string]File) ([]byte, error)
+}
+
+// InputProfilePhotoStatic is a static profile photo in the .JPG format.
+type InputProfilePhotoStatic struct {
+	File
+}
+
+func (p *InputProfilePhotoStatic) inputProfilePhoto(files map[string]File) ([]byte, error) {
+	repr := p.File.process("photo", files)
+	if repr == "" {
+		return nil, fmt.Errorf("telebot: profile photo file does not exist")
+	}
+	return json.Marshal(struct {
+		Type  string `json:"type"`
+		Photo string `json:"photo"`
+	}{Type: "static", Photo: repr})
+}
+
+// InputProfilePhotoAnimated is an animated profile photo in the MPEG4 format.
+type InputProfilePhotoAnimated struct {
+	File
+
+	// (Optional) Timestamp in seconds of the frame that will be used
+	// as the static profile photo. Defaults to 0.0.
+	MainFrameTimestamp float64
+}
+
+func (p *InputProfilePhotoAnimated) inputProfilePhoto(files map[string]File) ([]byte, error) {
+	repr := p.File.process("animation", files)
+	if repr == "" {
+		return nil, fmt.Errorf("telebot: profile animation file does not exist")
+	}
+	return json.Marshal(struct {
+		Type               string  `json:"type"`
+		Animation          string  `json:"animation"`
+		MainFrameTimestamp float64 `json:"main_frame_timestamp,omitempty"`
+	}{Type: "animated", Animation: repr, MainFrameTimestamp: p.MainFrameTimestamp})
+}
+
+// SetMyProfilePhoto changes the profile photo of the bot.
+func (b *Bot) SetMyProfilePhoto(photo InputProfilePhoto) error {
+	files := make(map[string]File)
+	data, err := photo.inputProfilePhoto(files)
+	if err != nil {
+		return err
+	}
+
+	_, err = b.sendFiles("setMyProfilePhoto", files, map[string]string{
+		"photo": string(data),
+	})
+	return err
+}
+
+// RemoveMyProfilePhoto removes the profile photo of the bot.
+func (b *Bot) RemoveMyProfilePhoto() error {
+	_, err := b.Raw("removeMyProfilePhoto", nil)
+	return err
 }
 
 func (b *Bot) StarTransactions(offset, limit int) ([]StarTransaction, error) {
