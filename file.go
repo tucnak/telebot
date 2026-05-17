@@ -3,6 +3,7 @@ package telebot
 import (
 	"io"
 	"os"
+	"path/filepath"
 )
 
 // File object represents any sort of file.
@@ -36,7 +37,15 @@ type File struct {
 //		photo := &tele.Photo{File: tele.FromDisk("chicken.jpg")}
 //
 func FromDisk(filename string) File {
-	return File{FileLocal: filename}
+	return File{
+		FileLocal: filename,
+		// Default the multipart filename to the base name on disk so
+		// Telegram doesn't fall back to application/octet-stream and
+		// surface the upload as a generic document. Callers that
+		// explicitly set the media's FileName override this further
+		// down the pipeline.
+		fileName: filepath.Base(filename),
+	}
 }
 
 // FromURL constructs a new file on provided HTTP URL.
