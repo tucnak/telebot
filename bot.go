@@ -26,6 +26,16 @@ func NewBot(pref Settings) (*Bot, error) {
 		client = &http.Client{Timeout: time.Minute}
 	}
 
+	storage := pref.StateStorage
+	if storage == nil {
+		storage = NewMemoryStorage()
+	}
+
+	cleanupPeriod := pref.CleanupPeriod
+	if cleanupPeriod == 0 {
+		cleanupPeriod = time.Hour
+	}
+
 	if pref.URL == "" {
 		pref.URL = DefaultApiURL
 	}
@@ -50,6 +60,9 @@ func NewBot(pref Settings) (*Bot, error) {
 		verbose:     pref.Verbose,
 		parseMode:   pref.ParseMode,
 		client:      client,
+
+		stateStorage:  storage,
+		cleanupPeriod: cleanupPeriod,
 	}
 
 	if pref.Offline {
@@ -85,6 +98,9 @@ type Bot struct {
 
 	stopMu     sync.RWMutex
 	stopClient chan struct{}
+
+	stateStorage  StateStorage
+	cleanupPeriod time.Duration
 }
 
 // Settings represents a utility struct for passing certain
@@ -122,6 +138,13 @@ type Settings struct {
 
 	// Offline allows to create a bot without network for testing purposes.
 	Offline bool
+
+	// StateStorage is used to store user FSM states and related data.
+	StateStorage StateStorage
+
+	// CleanupPeriod defines how often inactive users states
+	// should be removed from the storage.
+	CleanupPeriod time.Duration
 }
 
 var defaultOnError = func(err error, c Context) {
@@ -224,10 +247,15 @@ func (b *Bot) Start() {
 	stop := make(chan struct{})
 	stopConfirm := make(chan struct{})
 
+	cleanupStop := make(chan struct{})
+
 	go func() {
 		b.Poller.Poll(b, b.Updates, stop)
 		close(stopConfirm)
 	}()
+
+	// Start cleanup state storage
+	go StartCleanup(b.stateStorage, b.cleanupPeriod, cleanupStop)
 
 	for {
 		select {
@@ -237,6 +265,7 @@ func (b *Bot) Start() {
 			// call to stop polling
 		case confirm := <-b.stop:
 			close(stop)
+			close(cleanupStop)
 			<-stopConfirm
 			close(confirm)
 			return
@@ -266,7 +295,7 @@ func (b *Bot) NewMarkup() *ReplyMarkup {
 // NewContext returns a new native context object,
 // field by the passed update.
 func (b *Bot) NewContext(u Update) Context {
-	return NewContext(b, u)
+	return NewContext(b, u, b.stateStorage)
 }
 
 // Send accepts 2+ arguments, starting with destination chat, followed by
