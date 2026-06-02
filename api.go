@@ -11,6 +11,7 @@ type API interface {
 	AddStickerToSet(of Recipient, name string, sticker InputSticker) error
 	AdminsOf(chat *Chat) ([]ChatMember, error)
 	Answer(query *Query, resp *QueryResponse) error
+	AnswerGuest(msg *Message, result Result) (*SentGuestMessage, error)
 	AnswerWebApp(query *Query, r Result) (*WebAppMessage, error)
 	ApproveJoinRequest(chat Recipient, user *User) error
 	Ban(chat *Chat, member *ChatMember, revokeMessages ...bool) error

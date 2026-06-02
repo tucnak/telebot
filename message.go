@@ -25,6 +25,12 @@ type Message struct {
 	// Sender of the message, sent on behalf of a chat.
 	SenderChat *Chat `json:"sender_chat"`
 
+	// The user that called the bot in guest mode.
+	GuestUser *User `json:"guest_bot_caller_user"`
+
+	// The chat that called the bot in guest mode.
+	GuestChat *Chat `json:"guest_bot_caller_chat"`
+
 	// For forwarded messages, sender of the original message.
 	OriginalSender *User `json:"forward_from"`
 
@@ -184,6 +190,9 @@ type Message struct {
 	// business account that is independent from any potential bot chat which might
 	// share the same identifier.
 	BusinessConnectionID string `json:"business_connection_id"`
+
+	// Unique identifier for answering the guest query.
+	GuestQueryID string `json:"guest_query_id"`
 
 	// (Optional) The bot that actually sent the message on behalf of the business account.
 	// Available only for outgoing messages sent on behalf of the connected business account.

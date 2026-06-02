@@ -122,6 +122,7 @@ const (
 	OnBusinessMessage         = "\abusiness_message"
 	OnEditedBusinessMessage   = "\aedited_business_message"
 	OnDeletedBusinessMessages = "\adeleted_business_messages"
+	OnGuestMessage            = "\aguest_message"
 	OnPurchasedPaidMedia      = "\apurchased_paid_media"
 )
 

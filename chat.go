@@ -24,6 +24,7 @@ type User struct {
 	CanJoinGroups        bool `json:"can_join_groups"`
 	CanReadMessages      bool `json:"can_read_all_group_messages"`
 	SupportsInline       bool `json:"supports_inline_queries"`
+	SupportsGuest        bool `json:"supports_guest_queries"`
 	CanConnectToBusiness bool `json:"can_connect_to_business"`
 	HasMainWebApp        bool `json:"has_main_web_app"`
 
