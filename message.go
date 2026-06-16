@@ -194,6 +194,9 @@ type Message struct {
 	// Unique identifier for answering the guest query.
 	GuestQueryID string `json:"guest_query_id"`
 
+	// (Optional) For a rich message, the rich formatted content (Bot API 10.1).
+	RichMessage *RichMessage `json:"rich_message,omitempty"`
+
 	// (Optional) The bot that actually sent the message on behalf of the business account.
 	// Available only for outgoing messages sent on behalf of the connected business account.
 	BusinessBot *User `json:"sender_business_bot"`

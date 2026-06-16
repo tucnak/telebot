@@ -592,6 +592,13 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 	case string:
 		method = "editMessageText"
 		params["text"] = v
+	case *InputRichMessage:
+		method = "editMessageText"
+		data, err := json.Marshal(v)
+		if err != nil {
+			return nil, err
+		}
+		params["rich_message"] = string(data)
 	case Location:
 		method = "editMessageLiveLocation"
 		params["latitude"] = fmt.Sprintf("%f", v.Lat)
@@ -624,6 +631,12 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 
 	sendOpts := b.extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
+
+	// Rich content carries its own markup; text parse options never apply.
+	if _, ok := params["rich_message"]; ok {
+		delete(params, "parse_mode")
+		delete(params, "entities")
+	}
 
 	data, err := b.Raw(method, params)
 	if err != nil {
