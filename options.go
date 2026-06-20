@@ -37,6 +37,9 @@ const (
 
 	// IgnoreThread is used to ignore the thread when responding to a message via context.
 	IgnoreThread
+
+	// HasSpoiler = SendOptions.HasSpoiler
+	HasSpoiler
 )
 
 // Placeholder is used to set input field placeholder as a send option.
@@ -155,6 +158,8 @@ func (b *Bot) extractOptions(how []interface{}) *SendOptions {
 				opts.ReplyMarkup.RemoveKeyboard = true
 			case Protected:
 				opts.Protected = true
+			case HasSpoiler:
+				opts.HasSpoiler = true
 			default:
 				panic("telebot: unsupported flag-option")
 			}
