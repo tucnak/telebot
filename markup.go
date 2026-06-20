@@ -311,7 +311,7 @@ type InlineButton struct {
 	URL                   string             `json:"url,omitempty"`
 	Data                  string             `json:"callback_data,omitempty"`
 	InlineQuery           string             `json:"switch_inline_query,omitempty"`
-	InlineQueryChat       string             `json:"switch_inline_query_current_chat"`
+	InlineQueryChat       string             `json:"switch_inline_query_current_chat,omitempty"`
 	InlineQueryChosenChat *SwitchInlineQuery `json:"switch_inline_query_chosen_chat,omitempty"`
 	Login                 *Login             `json:"login_url,omitempty"`
 	WebApp                *WebApp            `json:"web_app,omitempty"`
