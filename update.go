@@ -42,8 +42,10 @@ func (b *Bot) ProcessUpdate(u Update) {
 // A started bot calls this function automatically.
 func (b *Bot) ProcessContext(c Context) {
 	u := c.Update()
+	b.handle(OnAny, c)
 
 	if u.Message != nil {
+		b.handle(OnMessage, c)
 		m := u.Message
 
 		if m.PinnedMessage != nil {
@@ -257,6 +259,16 @@ func (b *Bot) ProcessContext(c Context) {
 			b.handle(OnAutoDeleteTimer, c)
 			return
 		}
+	}
+
+	if u.MessageReaction != nil {
+		b.handle(OnReaction, c)
+		return
+	}
+
+	if u.MessageReactionCount != nil {
+		b.handle(OnReactionCount, c)
+		return
 	}
 
 	if u.EditedMessage != nil {

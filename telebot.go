@@ -44,10 +44,13 @@ const DefaultApiURL = "https://api.telegram.org"
 // an "alert" character \a.
 const (
 	// Basic message handlers.
+	OnMessage              = "\amessage"
 	OnText                 = "\atext"
 	OnForward              = "\aforward"
 	OnReply                = "\areply"
 	OnEdited               = "\aedited"
+	OnReaction             = "\areaction"
+	OnReactionCount        = "\areaction_count"
 	OnPhoto                = "\aphoto"
 	OnAudio                = "\aaudio"
 	OnAnimation            = "\aanimation"
@@ -124,6 +127,8 @@ const (
 	OnDeletedBusinessMessages = "\adeleted_business_messages"
 	OnGuestMessage            = "\aguest_message"
 	OnPurchasedPaidMedia      = "\apurchased_paid_media"
+
+	OnAny = "\aany"
 )
 
 // ChatAction is a client-side status indicating bot activity.
