@@ -25,8 +25,9 @@ type Sendable interface {
 // Send delivers media through bot b to recipient.
 func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id": to.Recipient(),
-		"caption": p.Caption,
+		"chat_id":       to.Recipient(),
+		"caption":       p.Caption,
+		"caption_above": strconv.FormatBool(p.CaptionAbove),
 	}
 	b.embedSendOptions(params, opt)
 
@@ -133,9 +134,10 @@ func (s *Sticker) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 // Send delivers media through bot b to recipient.
 func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id":   to.Recipient(),
-		"caption":   v.Caption,
-		"file_name": v.FileName,
+		"chat_id":       to.Recipient(),
+		"caption":       v.Caption,
+		"caption_above": strconv.FormatBool(v.CaptionAbove),
+		"file_name":     v.FileName,
 	}
 	b.embedSendOptions(params, opt)
 
@@ -185,9 +187,10 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 // Send delivers animation through bot b to recipient.
 func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
-		"chat_id":   to.Recipient(),
-		"caption":   a.Caption,
-		"file_name": a.FileName,
+		"chat_id":       to.Recipient(),
+		"caption":       a.Caption,
+		"caption_above": strconv.FormatBool(a.CaptionAbove),
+		"file_name":     a.FileName,
 	}
 	b.embedSendOptions(params, opt)
 
