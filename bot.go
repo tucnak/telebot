@@ -467,6 +467,7 @@ func (b *Bot) Reply(to *Message, what interface{}, opts ...interface{}) (*Messag
 		sendOpts = &SendOptions{}
 	}
 
+	sendOpts.ThreadID = 0 // thread id ruins api call if replying to a message from a thread that doesn't exist anymore (like if topics were turned off)
 	sendOpts.ReplyTo = to
 	return b.Send(to.Chat, what, sendOpts)
 }
