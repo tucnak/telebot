@@ -13,10 +13,11 @@ type HandlerFunc func(Context) error
 
 // NewContext returns a new native context object,
 // field by the passed update.
-func NewContext(b API, u Update) Context {
+func NewContext(b API, u Update, s StateStorage) Context {
 	return &nativeContext{
-		b: b,
-		u: u,
+		b:       b,
+		u:       u,
+		storage: s,
 	}
 }
 
@@ -190,15 +191,29 @@ type Context interface {
 
 	// Set saves data in the context.
 	Set(key string, val interface{})
+
+	// SetState updates the current user state.
+	SetState(state string)
+
+	// ClearState removes the current user state
+	// and all associated state data.
+	ClearState()
+
+	// SetData stores state-related data by key.
+	SetData(key string, value interface{})
+
+	// GetData returns state-related data by key.
+	GetData(key string) interface{}
 }
 
 // nativeContext is a native implementation of the Context interface.
 // "context" is taken by context package, maybe there is a better name.
 type nativeContext struct {
-	b     API
-	u     Update
-	lock  sync.RWMutex
-	store map[string]interface{}
+	b       API
+	u       Update
+	lock    sync.RWMutex
+	store   map[string]interface{}
+	storage StateStorage
 }
 
 func (c *nativeContext) Bot() API {
@@ -638,4 +653,40 @@ func (c *nativeContext) Get(key string) interface{} {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 	return c.store[key]
+}
+
+func (c *nativeContext) SetState(state string) {
+	sender := c.Sender()
+	if sender == nil {
+		return
+	}
+
+	c.storage.SetState(sender.ID, state)
+}
+
+func (c *nativeContext) ClearState() {
+	sender := c.Sender()
+	if sender == nil {
+		return
+	}
+
+	c.storage.Delete(sender.ID)
+}
+
+func (c *nativeContext) SetData(key string, value interface{}) {
+	sender := c.Sender()
+	if sender == nil {
+		return
+	}
+
+	c.storage.SetData(sender.ID, key, value)
+}
+
+func (c *nativeContext) GetData(key string) interface{} {
+	sender := c.Sender()
+	if sender == nil {
+		return nil
+	}
+
+	return c.storage.GetData(sender.ID, key)
 }

@@ -77,6 +77,15 @@ func (b *Bot) ProcessContext(c Context) {
 				}
 			}
 
+			// Route messages from users with active state to the state handler
+			sender := m.Sender
+			if sender != nil {
+				if state, ok := b.stateStorage.GetState(sender.ID); ok {
+					b.handle(OnState(state), c)
+					return
+				}
+			}
+
 			// 1:1 satisfaction
 			if b.handle(m.Text, c) {
 				return
