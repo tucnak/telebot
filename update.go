@@ -377,10 +377,21 @@ func (b *Bot) ProcessContext(c Context) {
 }
 
 func (b *Bot) handle(end string, c Context) bool {
+	// flow satisfaction
+	f, skiped := b.advanceFlow(c, end)
+	if !skiped && f.Forward(c) {
+		if handler := f.ProcessUpdate(end); handler != nil {
+			b.runHandler(handler, c)
+			return true
+		}
+	}
+
+	// handle handler by endpoint
 	if handler, ok := b.handlers[end]; ok {
 		b.runHandler(handler, c)
 		return true
 	}
+
 	return false
 }
 
@@ -422,6 +433,12 @@ func (b *Bot) runHandler(h HandlerFunc, c Context) {
 	f := func() {
 		if err := h(c); err != nil {
 			b.OnError(err, c)
+			return
+		}
+
+		if state := c.Get(FlowStateName); state == FlowEnd {
+			b.flowManager.Close(c.Recipient())
+			return
 		}
 	}
 	if b.synchronous {

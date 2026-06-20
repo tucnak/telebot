@@ -46,6 +46,8 @@ func NewBot(pref Settings) (*Bot, error) {
 		handlers: make(map[string]HandlerFunc),
 		stop:     make(chan chan struct{}),
 
+		flowManager: &FlowManager{},
+
 		synchronous: pref.Synchronous,
 		verbose:     pref.Verbose,
 		parseMode:   pref.ParseMode,
@@ -74,6 +76,8 @@ type Bot struct {
 	Updates chan Update
 	Poller  Poller
 	onError func(error, Context)
+
+	flowManager *FlowManager
 
 	group       *Group
 	handlers    map[string]HandlerFunc
@@ -187,6 +191,28 @@ func (b *Bot) Handle(endpoint interface{}, h HandlerFunc, m ...MiddlewareFunc) {
 	b.handlers[end] = func(c Context) error {
 		return applyMiddleware(h, m...)(c)
 	}
+}
+
+// Flow lets you set the flow for some command name or
+// one of the supported endpoints. It also applies middleware
+// if such passed to the function.
+//
+// Example:
+//
+//	b.HandleFlow("/lang", b.
+//	 	Begin("lang_choose", b.OnLangChoose).
+//	 	Handle("lang_chosen", b.OnLangChosen).
+//	 	Transite("lang_choose", "lang_chosen", func(c tele.Context, u tele.Update) bool { return u.Callback != nil }),
+//	)
+func (b *Bot) HandleFlow(endpoint interface{}, f *Flow) {
+	end := extractEndpoint(endpoint)
+	if end == "" {
+		panic("telebot: unsupported endpoint")
+	}
+
+	b.flowManager.RegisterAt(end, f)
+
+	b.Handle(end, f.begin)
 }
 
 // Trigger executes the registered handler by the endpoint.
