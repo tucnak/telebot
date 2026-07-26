@@ -157,6 +157,10 @@ func (h *Webhook) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 
 // The handler simply reads the update from the body of the requests
 // and writes them to the update channel.
+//
+// Updates are forwarded over a channel, so the raw body cannot travel with
+// them and Context.Body stays empty here. Call Bot.ProcessUpdate(u, body)
+// from your own HTTP handler if you need it.
 func (h *Webhook) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.SecretToken != "" && r.Header.Get("X-Telegram-Bot-Api-Secret-Token") != h.SecretToken {
 		h.bot.debug(fmt.Errorf("invalid secret token in request"))

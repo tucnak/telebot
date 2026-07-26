@@ -20,8 +20,22 @@ func NewContext(b API, u Update) Context {
 	}
 }
 
+// NewContextWithBody is NewContext carrying the raw payload the update was
+// decoded from, which Context.Body then exposes to handlers.
+func NewContextWithBody(b API, u Update, body []byte) Context {
+	return &nativeContext{
+		b:    b,
+		u:    u,
+		body: body,
+	}
+}
+
 // Context wraps an update and represents the context of current event.
 type Context interface {
+	// Body returns the raw payload the update was decoded from.
+	// Only populated when the caller passed it in, e.g. via ProcessUpdate.
+	Body() []byte
+
 	// Bot returns the bot instance.
 	Bot() API
 
@@ -197,8 +211,13 @@ type Context interface {
 type nativeContext struct {
 	b     API
 	u     Update
+	body  []byte
 	lock  sync.RWMutex
 	store map[string]interface{}
+}
+
+func (c *nativeContext) Body() []byte {
+	return c.body
 }
 
 func (c *nativeContext) Bot() API {

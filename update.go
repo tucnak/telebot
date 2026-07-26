@@ -34,8 +34,15 @@ type Update struct {
 
 // ProcessUpdate processes a single incoming update.
 // A started bot calls this function automatically.
-func (b *Bot) ProcessUpdate(u Update) {
-	b.ProcessContext(b.NewContext(u))
+//
+// An optional body carries the raw payload the update was decoded from,
+// which handlers can read back via Context.Body.
+func (b *Bot) ProcessUpdate(u Update, body ...[]byte) {
+	c := b.NewContext(u)
+	if len(body) > 0 && body[0] != nil {
+		c = NewContextWithBody(b, u, body[0])
+	}
+	b.ProcessContext(c)
 }
 
 // ProcessContext processes the given context.
