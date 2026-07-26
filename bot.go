@@ -53,7 +53,18 @@ func NewBot(pref Settings) (*Bot, error) {
 	}
 
 	if pref.Offline {
-		bot.Me = &User{}
+		// Derive the bot ID from the token so that offline tests can rely on
+		// b.Me.ID (e.g. UserJoined checks). Left as 0 for malformed tokens.
+		var botID int64
+		if pos := strings.IndexByte(bot.Token, ':'); pos > 0 {
+			v, err := strconv.ParseInt(bot.Token[:pos], 10, 64)
+			if err != nil || v <= 0 {
+				bot.debug(fmt.Errorf("cannot derive bot ID from token: %q", bot.Token[:pos]))
+			} else {
+				botID = v
+			}
+		}
+		bot.Me = &User{ID: botID}
 	} else {
 		user, err := bot.getMe()
 		if err != nil {
