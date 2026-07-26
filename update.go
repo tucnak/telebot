@@ -45,6 +45,29 @@ func (b *Bot) ProcessUpdate(u Update, body ...[]byte) {
 	b.ProcessContext(c)
 }
 
+// ProcessUpdateReply is ProcessUpdate for webhook servers: the first Bot API
+// call a handler makes is returned instead of being sent, to be written into
+// the response of Telegram's request. See WebhookReply.
+//
+// The returned reply is nil when the handler produced no call to answer with.
+func (b *Bot) ProcessUpdateReply(u Update, body ...[]byte) *WebhookReply {
+	var raw []byte
+	if len(body) > 0 {
+		raw = body[0]
+	}
+
+	c := &nativeContext{u: u, body: raw, webhookReplies: true}
+
+	// The handler reaches the bot through the context, so it is given a copy
+	// carrying this update's reply slot. Everything else stays shared, and
+	// the mutexes are left behind rather than copied.
+	c.b = b.forContext(c)
+
+	b.ProcessContext(c)
+
+	return c.webhookReply()
+}
+
 // ProcessContext processes the given context.
 // A started bot calls this function automatically.
 func (b *Bot) ProcessContext(c Context) {

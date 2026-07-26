@@ -20,6 +20,15 @@ import (
 // It also handles API errors, so you only need to unwrap
 // result field from json data.
 func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
+	// Answering inside the webhook response saves a round trip, but only one
+	// call fits and its result is unreadable, so it is claimed at most once
+	// per update and everything after it falls through to a real request.
+	if c := b.replyCtx; c != nil {
+		if params, ok := payload.(map[string]string); ok && c.takeWebhookReply(method, params) {
+			return nil, ErrWebhookReply
+		}
+	}
+
 	url := b.URL + "/bot" + b.Token + "/" + method
 
 	var buf bytes.Buffer
@@ -34,9 +43,7 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 	defer cancel()
 
 	go func() {
-		b.stopMu.RLock()
-		stopCh := b.stopClient
-		b.stopMu.RUnlock()
+		stopCh := b.stopSignal()
 
 		select {
 		case <-stopCh:

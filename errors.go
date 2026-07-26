@@ -68,6 +68,12 @@ func NewError(code int, msgs ...string) *Error {
 	return err
 }
 
+// ErrWebhookReply reports that a call was answered inside the webhook
+// response instead of being sent as a request. Telegram does not report the
+// result of such a call, so there is no Message to return. Context methods
+// treat it as success; it only surfaces through the Bot API methods.
+var ErrWebhookReply = errors.New("telebot: answered in the webhook response")
+
 // General errors
 var (
 	ErrTooLarge     = NewError(400, "Request Entity Too Large")
