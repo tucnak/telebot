@@ -204,6 +204,13 @@ func (b *Bot) Trigger(endpoint interface{}, c Context) error {
 	return handler(c)
 }
 
+// Self returns the bot user, resolved once at startup. Unlike the getMe
+// API method it performs no request; it exists so code holding the API
+// interface can reach what Bot.Me exposes as a field.
+func (b *Bot) Self() *User {
+	return b.Me
+}
+
 // Start brings bot into motion by consuming incoming
 // updates (see Bot.Updates channel).
 func (b *Bot) Start() {
@@ -809,13 +816,17 @@ func (b *Bot) EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*M
 //   - If the bot is an administrator of a group, it can delete any message there.
 //   - If the bot has can_delete_messages permission in a supergroup or a
 //     channel, it can delete any message there.
-func (b *Bot) Delete(msg Editable) error {
+func (b *Bot) Delete(msg Editable, opts ...interface{}) error {
 	msgID, chatID := msg.MessageSig()
 
 	params := map[string]string{
 		"chat_id":    strconv.FormatInt(chatID, 10),
 		"message_id": msgID,
 	}
+
+	// deleteMessage takes no send options. Accepted for symmetry with the
+	// other Editable methods and for the webhook-reply flags added below.
+	_ = opts
 
 	_, err := b.Raw("deleteMessage", params)
 	return err

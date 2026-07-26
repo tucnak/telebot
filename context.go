@@ -162,7 +162,7 @@ type Context interface {
 
 	// Delete removes the current message.
 	// See Delete from bot.go.
-	Delete() error
+	Delete(opts ...interface{}) error
 
 	// DeleteAfter waits for the duration to elapse and then removes the
 	// message. It handles an error automatically using b.OnError callback.
@@ -576,12 +576,12 @@ func (c *nativeContext) EditOrReply(what interface{}, opts ...interface{}) error
 	return err
 }
 
-func (c *nativeContext) Delete() error {
+func (c *nativeContext) Delete(opts ...interface{}) error {
 	msg := c.Message()
 	if msg == nil {
 		return ErrBadContext
 	}
-	return c.b.Delete(msg)
+	return c.b.Delete(msg, opts...)
 }
 
 func (c *nativeContext) DeleteAfter(d time.Duration) *time.Timer {
