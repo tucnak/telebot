@@ -286,9 +286,20 @@ func (b *Bot) ProcessContext(c Context) {
 			match := cbackRx.FindAllStringSubmatch(data, -1)
 			if match != nil {
 				unique, payload := match[0][1], match[0][3]
-				if handler, ok := b.handlers["\f"+unique]; ok {
+				// A slash-prefixed unique addresses a command handler directly,
+				// which lets buttons and commands share one handler.
+				endpoint := "\f" + unique
+				if len(unique) > 1 && unique[0] == '/' {
+					endpoint = unique
+				}
+				if handler, ok := b.handlers[endpoint]; ok {
 					u.Callback.Unique = unique
 					u.Callback.Data = payload
+					// Command handlers have no reason to call Respond, so the
+					// client would spin until the callback times out.
+					if endpoint == unique {
+						handler = withAutoRespond(handler)
+					}
 					b.runHandler(handler, c)
 					return
 				}
@@ -416,6 +427,17 @@ func (b *Bot) handleMedia(c Context) bool {
 	}
 
 	return true
+}
+
+// withAutoRespond acknowledges the callback after the handler is done,
+// so the client stops showing the loading indicator. Errors are ignored:
+// the handler may have already responded itself.
+func withAutoRespond(h HandlerFunc) HandlerFunc {
+	return func(c Context) error {
+		err := h(c)
+		_ = c.Respond()
+		return err
+	}
 }
 
 func (b *Bot) runHandler(h HandlerFunc, c Context) {
