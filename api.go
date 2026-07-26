@@ -7,6 +7,16 @@ import "io"
 type API interface {
 	Raw(method string, payload interface{}) ([]byte, error)
 
+	// Self returns the bot user resolved at startup. Unlike the getMe API
+	// method it performs no request. Exposed here because handlers only ever
+	// see the interface, which cannot carry the Bot.Me field.
+	Self() *User
+
+	// Trigger dispatches to a registered handler. This is local routing
+	// rather than a Bot API method; it lives here so handlers can reach it
+	// through Context.Bot.
+	Trigger(endpoint interface{}, c Context) error
+
 	Accept(query *PreCheckoutQuery, errorMessage ...string) error
 	AddStickerToSet(of Recipient, name string, sticker InputSticker) error
 	AdminsOf(chat *Chat) ([]ChatMember, error)
@@ -34,7 +44,7 @@ type API interface {
 	CustomEmojiStickers(ids []string) ([]Sticker, error)
 	DeclineJoinRequest(chat Recipient, user *User) error
 	DefaultRights(forChannels bool) (*Rights, error)
-	Delete(msg Editable) error
+	Delete(msg Editable, opts ...interface{}) error
 	DeleteCommands(opts ...interface{}) error
 	DeleteGroupPhoto(chat *Chat) error
 	DeleteGroupStickerSet(chat *Chat) error

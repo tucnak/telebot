@@ -20,8 +20,22 @@ func NewContext(b API, u Update) Context {
 	}
 }
 
+// NewContextWithBody is NewContext carrying the raw payload the update was
+// decoded from, which Context.Body then exposes to handlers.
+func NewContextWithBody(b API, u Update, body []byte) Context {
+	return &nativeContext{
+		b:    b,
+		u:    u,
+		body: body,
+	}
+}
+
 // Context wraps an update and represents the context of current event.
 type Context interface {
+	// Body returns the raw payload the update was decoded from.
+	// Only populated when the caller passed it in, e.g. via ProcessUpdate.
+	Body() []byte
+
 	// Bot returns the bot instance.
 	Bot() API
 
@@ -148,7 +162,7 @@ type Context interface {
 
 	// Delete removes the current message.
 	// See Delete from bot.go.
-	Delete() error
+	Delete(opts ...interface{}) error
 
 	// DeleteAfter waits for the duration to elapse and then removes the
 	// message. It handles an error automatically using b.OnError callback.
@@ -197,8 +211,19 @@ type Context interface {
 type nativeContext struct {
 	b     API
 	u     Update
+	body  []byte
 	lock  sync.RWMutex
 	store map[string]interface{}
+
+	// webhookReplies enables answering the first Bot API call inside the
+	// webhook response; reply holds it once claimed. Both are per-update,
+	// which is what keeps concurrent updates from overwriting each other.
+	webhookReplies bool
+	reply          *WebhookReply
+}
+
+func (c *nativeContext) Body() []byte {
+	return c.body
 }
 
 func (c *nativeContext) Bot() API {
@@ -451,6 +476,15 @@ func (c *nativeContext) ThreadID() int {
 func (c *nativeContext) Send(what interface{}, opts ...interface{}) error {
 	opts = c.inheritOpts(opts...)
 	_, err := c.b.Send(c.Recipient(), what, opts...)
+	return sent(err)
+}
+
+// sent absorbs ErrWebhookReply: from a handler's point of view a call
+// answered inside the webhook response was delivered, not failed.
+func sent(err error) error {
+	if errors.Is(err, ErrWebhookReply) {
+		return nil
+	}
 	return err
 }
 
@@ -486,7 +520,7 @@ func (c *nativeContext) SendAlbum(a Album, opts ...interface{}) error {
 	opts = c.inheritOpts(opts...)
 
 	_, err := c.b.SendAlbum(c.Recipient(), a, opts...)
-	return err
+	return sent(err)
 }
 
 func (c *nativeContext) Reply(what interface{}, opts ...interface{}) error {
@@ -496,12 +530,12 @@ func (c *nativeContext) Reply(what interface{}, opts ...interface{}) error {
 	}
 	opts = c.inheritOpts(opts...)
 	_, err := c.b.Reply(msg, what, opts...)
-	return err
+	return sent(err)
 }
 
 func (c *nativeContext) Forward(msg Editable, opts ...interface{}) error {
 	_, err := c.b.Forward(c.Recipient(), msg, opts...)
-	return err
+	return sent(err)
 }
 
 func (c *nativeContext) ForwardTo(to Recipient, opts ...interface{}) error {
@@ -510,7 +544,7 @@ func (c *nativeContext) ForwardTo(to Recipient, opts ...interface{}) error {
 		return ErrBadContext
 	}
 	_, err := c.b.Forward(to, msg, opts...)
-	return err
+	return sent(err)
 }
 
 func (c *nativeContext) Edit(what interface{}, opts ...interface{}) error {
@@ -518,11 +552,11 @@ func (c *nativeContext) Edit(what interface{}, opts ...interface{}) error {
 
 	if c.u.InlineResult != nil {
 		_, err := c.b.Edit(c.u.InlineResult, what, opts...)
-		return err
+		return sent(err)
 	}
 	if c.u.Callback != nil {
 		_, err := c.b.Edit(c.u.Callback, what, opts...)
-		return err
+		return sent(err)
 	}
 	return ErrBadContext
 }
@@ -532,11 +566,11 @@ func (c *nativeContext) EditCaption(caption string, opts ...interface{}) error {
 
 	if c.u.InlineResult != nil {
 		_, err := c.b.EditCaption(c.u.InlineResult, caption, opts...)
-		return err
+		return sent(err)
 	}
 	if c.u.Callback != nil {
 		_, err := c.b.EditCaption(c.u.Callback, caption, opts...)
-		return err
+		return sent(err)
 	}
 	return ErrBadContext
 }
@@ -557,12 +591,12 @@ func (c *nativeContext) EditOrReply(what interface{}, opts ...interface{}) error
 	return err
 }
 
-func (c *nativeContext) Delete() error {
+func (c *nativeContext) Delete(opts ...interface{}) error {
 	msg := c.Message()
 	if msg == nil {
 		return ErrBadContext
 	}
-	return c.b.Delete(msg)
+	return sent(c.b.Delete(msg, opts...))
 }
 
 func (c *nativeContext) DeleteAfter(d time.Duration) *time.Timer {
@@ -576,28 +610,28 @@ func (c *nativeContext) DeleteAfter(d time.Duration) *time.Timer {
 }
 
 func (c *nativeContext) Notify(action ChatAction) error {
-	return c.b.Notify(c.Recipient(), action, c.ThreadID())
+	return sent(c.b.Notify(c.Recipient(), action, c.ThreadID()))
 }
 
 func (c *nativeContext) Ship(what ...interface{}) error {
 	if c.u.ShippingQuery == nil {
 		return errors.New("telebot: context shipping query is nil")
 	}
-	return c.b.Ship(c.u.ShippingQuery, what...)
+	return sent(c.b.Ship(c.u.ShippingQuery, what...))
 }
 
 func (c *nativeContext) Accept(errorMessage ...string) error {
 	if c.u.PreCheckoutQuery == nil {
 		return errors.New("telebot: context pre checkout query is nil")
 	}
-	return c.b.Accept(c.u.PreCheckoutQuery, errorMessage...)
+	return sent(c.b.Accept(c.u.PreCheckoutQuery, errorMessage...))
 }
 
 func (c *nativeContext) Respond(resp ...*CallbackResponse) error {
 	if c.u.Callback == nil {
 		return errors.New("telebot: context callback is nil")
 	}
-	return c.b.Respond(c.u.Callback, resp...)
+	return sent(c.b.Respond(c.u.Callback, resp...))
 }
 
 func (c *nativeContext) RespondText(text string) error {
@@ -612,7 +646,7 @@ func (c *nativeContext) Answer(resp *QueryResponse) error {
 	if c.u.Query == nil {
 		return errors.New("telebot: context inline query is nil")
 	}
-	return c.b.Answer(c.u.Query, resp)
+	return sent(c.b.Answer(c.u.Query, resp))
 }
 
 func (c *nativeContext) AnswerGuest(result Result) error {

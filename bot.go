@@ -75,8 +75,17 @@ type Bot struct {
 	Poller  Poller
 	onError func(error, Context)
 
-	group       *Group
-	handlers    map[string]HandlerFunc
+	group    *Group
+	handlers map[string]HandlerFunc
+
+	// replyCtx is set only on the per-update view returned by forContext,
+	// never on the shared instance, so concurrent updates cannot see each
+	// other's webhook reply.
+	replyCtx *nativeContext
+	// shared points at the instance owning the mutex-guarded state; nil on
+	// that instance itself.
+	shared *Bot
+
 	synchronous bool
 	verbose     bool
 	parseMode   ParseMode
@@ -202,6 +211,55 @@ func (b *Bot) Trigger(endpoint interface{}, c Context) error {
 	}
 
 	return handler(c)
+}
+
+// Self returns the bot user, resolved once at startup. Unlike the getMe
+// API method it performs no request; it exists so code holding the API
+// interface can reach what Bot.Me exposes as a field.
+func (b *Bot) Self() *User {
+	return b.Me
+}
+
+// forContext returns a view of the bot bound to one update's webhook reply.
+// Everything is shared with the original except that binding; the mutex and
+// the channel it guards are reached through shared rather than copied.
+func (b *Bot) forContext(c *nativeContext) *Bot {
+	owner := b
+	if b.shared != nil {
+		owner = b.shared
+	}
+
+	return &Bot{
+		Me:          b.Me,
+		Token:       b.Token,
+		URL:         b.URL,
+		Updates:     b.Updates,
+		Poller:      b.Poller,
+		onError:     b.onError,
+		group:       b.group,
+		handlers:    b.handlers,
+		replyCtx:    c,
+		shared:      owner,
+		synchronous: b.synchronous,
+		verbose:     b.verbose,
+		parseMode:   b.parseMode,
+		stop:        b.stop,
+		client:      b.client,
+	}
+}
+
+// stopSignal returns the channel closed when the bot is stopping, reading it
+// from whichever instance owns the guarded state.
+func (b *Bot) stopSignal() chan struct{} {
+	owner := b
+	if b.shared != nil {
+		owner = b.shared
+	}
+
+	owner.stopMu.RLock()
+	defer owner.stopMu.RUnlock()
+
+	return owner.stopClient
 }
 
 // Start brings bot into motion by consuming incoming
@@ -809,13 +867,17 @@ func (b *Bot) EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*M
 //   - If the bot is an administrator of a group, it can delete any message there.
 //   - If the bot has can_delete_messages permission in a supergroup or a
 //     channel, it can delete any message there.
-func (b *Bot) Delete(msg Editable) error {
+func (b *Bot) Delete(msg Editable, opts ...interface{}) error {
 	msgID, chatID := msg.MessageSig()
 
 	params := map[string]string{
 		"chat_id":    strconv.FormatInt(chatID, 10),
 		"message_id": msgID,
 	}
+
+	// deleteMessage takes no send options. Accepted for symmetry with the
+	// other Editable methods and for the webhook-reply flags added below.
+	_ = opts
 
 	_, err := b.Raw("deleteMessage", params)
 	return err
