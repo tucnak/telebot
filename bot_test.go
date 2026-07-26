@@ -3,7 +3,6 @@ package telebot
 import (
 	"errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -611,7 +610,7 @@ func TestBot(t *testing.T) {
 		require.NoError(t, err)
 		defer resp.Body.Close()
 
-		file, err := ioutil.TempFile("", "")
+		file, err := os.CreateTemp("", "")
 		require.NoError(t, err)
 
 		_, err = io.Copy(file, resp.Body)
