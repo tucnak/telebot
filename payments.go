@@ -43,6 +43,11 @@ type Payment struct {
 	Order            Order  `json:"order_info"`
 	TelegramChargeID string `json:"telegram_payment_charge_id"`
 	ProviderChargeID string `json:"provider_payment_charge_id"`
+
+	// Bot API 8.0: Star subscriptions
+	SubscriptionExpirationDate int64 `json:"subscription_expiration_date,omitempty"`
+	IsRecurring                bool  `json:"is_recurring,omitempty"`
+	IsFirstRecurring           bool  `json:"is_first_recurring,omitempty"`
 }
 
 type RefundedPayment struct {
@@ -103,6 +108,12 @@ type Invoice struct {
 	SendPhoneNumber     bool `json:"send_phone_number_to_provider"`
 	SendEmail           bool `json:"send_email_to_provider"`
 	Flexible            bool `json:"is_flexible"`
+
+	// Bot API 8.0: Star subscriptions
+	SubscriptionPeriod int `json:"subscription_period,omitempty"`
+
+	// Bot API 8.0: Business connection support
+	BusinessConnectionID string `json:"business_connection_id,omitempty"`
 }
 
 func (i Invoice) params() map[string]string {
@@ -149,6 +160,14 @@ func (i Invoice) params() map[string]string {
 
 		data, _ := json.Marshal(amounts)
 		params["suggested_tip_amounts"] = string(data)
+	}
+	// Bot API 8.0: Star subscriptions
+	if i.SubscriptionPeriod > 0 {
+		params["subscription_period"] = strconv.Itoa(i.SubscriptionPeriod)
+	}
+	// Bot API 8.0: Business connection support
+	if i.BusinessConnectionID != "" {
+		params["business_connection_id"] = i.BusinessConnectionID
 	}
 	return params
 }
@@ -211,4 +230,70 @@ func (b *Bot) RefundStars(to Recipient, chargeID string) error {
 	}
 
 	return nil
+}
+
+// EditUserStarSubscription allows the bot to cancel or re-enable extension of a subscription paid in Telegram Stars.
+func (b *Bot) EditUserStarSubscription(user Recipient, chargeID string, isCanceled bool) error {
+	params := map[string]string{
+		"user_id":                    user.Recipient(),
+		"telegram_payment_charge_id": chargeID,
+		"is_canceled":                strconv.FormatBool(isCanceled),
+	}
+
+	_, err := b.Raw("editUserStarSubscription", params)
+	return err
+}
+
+// VerifyUser verifies a user with the specified level and requirements.
+func (b *Bot) VerifyUser(user Recipient, level VerificationLevel, requirements *VerificationRequirements) error {
+	params := map[string]string{
+		"user_id": user.Recipient(),
+		"level":   string(level),
+	}
+
+	if requirements != nil {
+		if data, err := json.Marshal(requirements); err == nil {
+			params["requirements"] = string(data)
+		}
+	}
+
+	_, err := b.Raw("verifyUser", params)
+	return err
+}
+
+// VerifyChat verifies a chat with the specified level and requirements.
+func (b *Bot) VerifyChat(chat *Chat, level VerificationLevel, requirements *VerificationRequirements) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+		"level":   string(level),
+	}
+
+	if requirements != nil {
+		if data, err := json.Marshal(requirements); err == nil {
+			params["requirements"] = string(data)
+		}
+	}
+
+	_, err := b.Raw("verifyChat", params)
+	return err
+}
+
+// RemoveUserVerification removes verification from a user.
+func (b *Bot) RemoveUserVerification(user Recipient) error {
+	params := map[string]string{
+		"user_id": user.Recipient(),
+	}
+
+	_, err := b.Raw("removeUserVerification", params)
+	return err
+}
+
+// RemoveChatVerification removes verification from a chat.
+func (b *Bot) RemoveChatVerification(chat *Chat) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+
+	_, err := b.Raw("removeChatVerification", params)
+	return err
 }

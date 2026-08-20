@@ -21,6 +21,7 @@ var AllowedUpdates = []string{
 	"chat_join_request",
 	"chat_boost",
 	"removed_chat_boost",
+	"guest_message",
 }
 
 // Poller is a provider of Updates.
@@ -59,6 +60,7 @@ type LongPoller struct {
 	// 		pre_checkout_query
 	// 		poll
 	// 		poll_answer
+	// 		guest_message
 	//
 	AllowedUpdates []string `yaml:"allowed_updates"`
 }

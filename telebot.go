@@ -10,7 +10,7 @@
 //	)
 //
 //	func main() {
-//		b, err := tele.NewBot(tele.Settings{
+//		b, err := tele.NewBot(ctx, tele.Settings{
 //			Token:  "...",
 //			Poller: &tele.LongPoller{Timeout: 10 * time.Second},
 //		})
@@ -76,6 +76,8 @@ const (
 	OnGeneralTopicHidden   = "\ageneral_topic_hidden"
 	OnGeneralTopicUnhidden = "\ageneral_topic_unhidden"
 	OnWriteAccessAllowed   = "\awrite_access_allowed"
+	OnChatOwnerLeft        = "\achat_owner_left"
+	OnChatOwnerChanged     = "\achat_owner_changed"
 
 	OnAddedToGroup      = "\aadded_to_group"
 	OnUserJoined        = "\auser_joined"
@@ -120,6 +122,8 @@ const (
 	OnBusinessMessage         = "\abusiness_message"
 	OnEditedBusinessMessage   = "\aedited_business_message"
 	OnDeletedBusinessMessages = "\adeleted_business_messages"
+	OnGuestMessage            = "\aguest_message"
+	OnPurchasedPaidMedia      = "\apurchased_paid_media"
 )
 
 // ChatAction is a client-side status indicating bot activity.

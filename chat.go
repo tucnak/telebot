@@ -12,7 +12,6 @@ type User struct {
 
 	FirstName           string   `json:"first_name"`
 	LastName            string   `json:"last_name"`
-	IsForum             bool     `json:"is_forum"`
 	Username            string   `json:"username"`
 	LanguageCode        string   `json:"language_code"`
 	IsBot               bool     `json:"is_bot"`
@@ -25,8 +24,13 @@ type User struct {
 	CanJoinGroups        bool `json:"can_join_groups"`
 	CanReadMessages      bool `json:"can_read_all_group_messages"`
 	SupportsInline       bool `json:"supports_inline_queries"`
+	SupportsGuest        bool `json:"supports_guest_queries"`
 	CanConnectToBusiness bool `json:"can_connect_to_business"`
 	HasMainWebApp        bool `json:"has_main_web_app"`
+
+	// Bot API 9.4: (Optional) True, if the bot allows users to create
+	// and delete topics in private chats.
+	AllowsUsersToCreateTopics bool `json:"allows_users_to_create_topics,omitempty"`
 }
 
 // Recipient returns user ID (see Recipient interface).
@@ -68,6 +72,7 @@ type Chat struct {
 	NoVoiceAndVideo                bool                 `json:"has_restricted_voice_and_video_messages"`
 	HasHiddenMembers               bool                 `json:"has_hidden_members,omitempty"`
 	AggressiveAntiSpam             bool                 `json:"has_aggressive_anti_spam_enabled,omitempty"`
+	IsForum                        bool                 `json:"is_forum"`
 	StatusCustomEmojiID            string               `json:"emoji_status_custom_emoji_id"`
 	EmojiExpirationUnixtime        int64                `json:"emoji_status_expiration_date"`
 	BackgroundCustomEmojiID        string               `json:"background_custom_emoji_id"`
@@ -139,6 +144,9 @@ type ChatMember struct {
 
 	JoinToSend    string `json:"join_to_send_messages"`
 	JoinByRequest string `json:"join_by_request"`
+
+	// Bot API 9.5: (Optional) Tag of the member; for regular and restricted members only.
+	Tag string `json:"tag,omitempty"`
 }
 
 // MemberStatus is one's chat status.
@@ -284,6 +292,84 @@ type Birthdate struct {
 
 	// (Optional) Year of the user's birth
 	Year int `json:"year"`
+}
+
+// ChatFullInfo object contains full information about a chat.
+type ChatFullInfo struct {
+	ID int64 `json:"id"`
+
+	// See ChatType and consts.
+	Type ChatType `json:"type"`
+
+	// Won't be there for ChatPrivate.
+	Title string `json:"title"`
+
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Username  string `json:"username"`
+
+	// (Optional) Bio of the chat
+	Bio string `json:"bio,omitempty"`
+
+	// (Optional) Chat photo
+	Photo *ChatPhoto `json:"photo,omitempty"`
+
+	// (Optional) Description of the chat
+	Description string `json:"description,omitempty"`
+
+	// (Optional) Invite link for the chat
+	InviteLink string `json:"invite_link,omitempty"`
+
+	// (Optional) Pinned message
+	PinnedMessage *Message `json:"pinned_message,omitempty"`
+
+	// (Optional) Default chat member permissions
+	Permissions *Rights `json:"permissions,omitempty"`
+
+	// (Optional) The minimum allowed delay between consecutive messages sent by each user
+	SlowMode int `json:"slow_mode_delay,omitempty"`
+
+	// (Optional) The time after which all messages sent to the chat will be automatically deleted
+	MessageAutoDeleteTime int `json:"message_auto_delete_time,omitempty"`
+
+	// (Optional) True, if new members of the chat can be anonymous
+	HasAnonymousMembers bool `json:"has_anonymous_members,omitempty"`
+
+	// (Optional) True, if reactions are available in the chat
+	HasAggressiveAntiSpam bool `json:"has_aggressive_anti_spam_enabled,omitempty"`
+
+	// (Optional) True, if anti-spam checks are enabled in the chat
+	HasHiddenMembers bool `json:"has_hidden_members,omitempty"`
+
+	// (Optional) True, if the chat has protected content
+	HasProtectedContent bool `json:"has_protected_content,omitempty"`
+
+	// (Optional) True, if non-administrators can only get the list of bots and administrators in the chat
+	HasVisibleHistory bool `json:"has_visible_history,omitempty"`
+
+	// (Optional) True, if messages from the chat can't be forwarded to other chats
+	NoMessagesToOther bool `json:"has_restricted_voice_and_video_messages,omitempty"`
+
+	// (Optional) For supergroups, name of group sticker set
+	StickerSetName string `json:"sticker_set_name,omitempty"`
+
+	// (Optional) True, if the bot can change the group sticker set
+	CanSetStickerSet bool `json:"can_set_sticker_set,omitempty"`
+
+	// (Optional) Custom emoji sticker set name
+	CustomEmojiStickerSet string `json:"custom_emoji_sticker_set_name,omitempty"`
+
+	// (Optional) Chat location
+	Location *ChatLocation `json:"location,omitempty"`
+
+	// (Optional) Identifier of the linked chat
+	LinkedChatID int64 `json:"linked_chat_id,omitempty"`
+
+	// Bot API 8.3: True, if the chat can be gifted with Telegram Stars gifts
+	CanSendGift bool `json:"can_send_gift"`
+
+	// Bot API 9.4: For private chats, the first audio added to the profile of the user.
+	FirstProfileAudio *Audio `json:"first_profile_audio,omitempty"`
 }
 
 type ChatBackground struct {

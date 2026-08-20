@@ -13,7 +13,7 @@ func TestFile(t *testing.T) {
 
 	assert.True(t, f.OnDisk())
 	assert.True(t, (&File{FileID: "1"}).InCloud())
-	assert.Equal(t, File{FileLocal: "telebot.go"}, f)
+	assert.Equal(t, File{FileLocal: "telebot.go", fileName: "telebot.go"}, f)
 	assert.Equal(t, File{FileURL: "http://"}, g)
 	assert.Equal(t, File{FileReader: io.Reader(nil)}, FromReader(io.Reader(nil)))
 

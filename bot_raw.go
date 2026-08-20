@@ -20,6 +20,12 @@ import (
 // It also handles API errors, so you only need to unwrap
 // result field from json data.
 func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
+	return b.RawWithContext(context.Background(), method, payload)
+}
+
+// RawWithContext is Raw with a caller-provided context, so the request can be
+// cancelled from the outside as well as by Stop.
+func (b *Bot) RawWithContext(ctx context.Context, method string, payload interface{}) ([]byte, error) {
 	url := b.URL + "/bot" + b.Token + "/" + method
 
 	var buf bytes.Buffer
@@ -30,7 +36,7 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 	// Cancel the request immediately without waiting for the timeout
 	// when bot is about to stop.
 	// This may become important if doing long polling with long timeout.
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	go func() {
@@ -213,31 +219,18 @@ func (b *Bot) sendMedia(media Media, params map[string]string, files map[string]
 }
 
 func (b *Bot) getMe(ctx context.Context) (*User, error) {
-	url := b.URL + "/bot" + b.Token + "/getMe"
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, nil)
+	data, err := b.RawWithContext(ctx, "getMe", nil)
 	if err != nil {
-		return nil, wrapError(err)
+		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := b.client.Do(req)
-	if err != nil {
-		return nil, wrapError(err)
-	}
-	defer resp.Body.Close()
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, wrapError(err)
-	}
-	var respStruct struct {
+	var resp struct {
 		Result *User
 	}
-	if err := json.Unmarshal(data, &respStruct); err != nil {
+	if err := json.Unmarshal(data, &resp); err != nil {
 		return nil, wrapError(err)
 	}
-	return respStruct.Result, nil
+	return resp.Result, nil
 }
 
 func (b *Bot) getUpdates(offset, limit int, timeout time.Duration, allowed []string) ([]Update, error) {

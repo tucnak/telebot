@@ -3,6 +3,7 @@ package telebot
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -263,7 +264,37 @@ func ErrIs(s string, err error) bool {
 	return errors.Is(err, Err(s))
 }
 
-// wrapError returns new wrapped telebot-related error.
+// wrapError returns new wrapped telebot-related error with any bot
+// token in the underlying error's message replaced by `<token>`. The
+// stdlib http client puts the full request URL (which contains
+// `/bot<TOKEN>/<method>`) in transport errors, so without redacting
+// the token here it can end up in user logs, monitoring systems, and
+// crash reports. See #770.
 func wrapError(err error) error {
-	return fmt.Errorf("telebot: %w", err)
+	return fmt.Errorf("telebot: %w", redactToken(err))
 }
+
+var botTokenRe = regexp.MustCompile(`/bot\d+:[A-Za-z0-9_-]+`)
+
+// redactToken returns err with the bot token portion of any embedded
+// `/bot<id>:<secret>` path replaced by `/bot<token>`. The wrapped chain
+// is preserved with errors.Is / errors.As.
+func redactToken(err error) error {
+	if err == nil {
+		return nil
+	}
+	msg := err.Error()
+	redacted := botTokenRe.ReplaceAllString(msg, "/bot<token>")
+	if redacted == msg {
+		return err
+	}
+	return &redactedError{msg: redacted, wrapped: err}
+}
+
+type redactedError struct {
+	msg     string
+	wrapped error
+}
+
+func (e *redactedError) Error() string { return e.msg }
+func (e *redactedError) Unwrap() error { return e.wrapped }

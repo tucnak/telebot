@@ -11,6 +11,7 @@ type API interface {
 	AddStickerToSet(of Recipient, name string, sticker InputSticker) error
 	AdminsOf(chat *Chat) ([]ChatMember, error)
 	Answer(query *Query, resp *QueryResponse) error
+	AnswerGuest(msg *Message, result Result) (*SentGuestMessage, error)
 	AnswerWebApp(query *Query, r Result) (*WebAppMessage, error)
 	ApproveJoinRequest(chat Recipient, user *User) error
 	Ban(chat *Chat, member *ChatMember, revokeMessages ...bool) error
@@ -18,6 +19,7 @@ type API interface {
 	BusinessConnection(id string) (*BusinessConnection, error)
 	ChatByID(id int64) (*Chat, error)
 	ChatByUsername(name string) (*Chat, error)
+	ChatFullInfo(chat Recipient) (*ChatFullInfo, error)
 	ChatMemberOf(chat, user Recipient) (*ChatMember, error)
 	Close() (bool, error)
 	CloseGeneralTopic(chat *Chat) error
@@ -53,6 +55,7 @@ type API interface {
 	Forward(to Recipient, msg Editable, opts ...interface{}) (*Message, error)
 	ForwardMany(to Recipient, msgs []Editable, opts ...*SendOptions) ([]Message, error)
 	GameScores(user Recipient, msg Editable) ([]GameHighScore, error)
+	GetAvailableGifts() ([]Gift, error)
 	HideGeneralTopic(chat *Chat) error
 	InviteLink(chat *Chat) (string, error)
 	Leave(chat Recipient) error
@@ -64,10 +67,13 @@ type API interface {
 	MyShortDescription(language string) (*BotInfo, error)
 	Notify(to Recipient, action ChatAction, threadID ...int) error
 	Pin(msg Editable, opts ...interface{}) error
+	ProfileAudiosOf(user *User, offset, limit int) (*UserProfileAudios, error)
 	ProfilePhotosOf(user *User) ([]Photo, error)
 	Promote(chat *Chat, member *ChatMember) error
 	React(to Recipient, msg Editable, r Reactions) error
 	RefundStars(to Recipient, chargeID string) error
+	EditUserStarSubscription(user Recipient, chargeID string, isCanceled bool) error
+	RemoveMyProfilePhoto() error
 	RemoveWebhook(dropPending ...bool) error
 	ReopenGeneralTopic(chat *Chat) error
 	ReopenTopic(chat *Chat, topic *Topic) error
@@ -78,8 +84,12 @@ type API interface {
 	RevokeInviteLink(chat Recipient, link string) (*ChatInviteLink, error)
 	Send(to Recipient, what interface{}, opts ...interface{}) (*Message, error)
 	SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, error)
-	SendPaid(to Recipient, stars int, a PaidAlbum, opts ...interface{}) (*Message, error)
+	SendDraft(to Recipient, draftID int, text string, opts ...interface{}) error
+	SendPaidMedia(to Recipient, stars int, a PaidAlbum, opts ...interface{}) (*Message, error)
+	SendGift(to Recipient, giftID string, opts ...interface{}) error
+	SavePreparedInlineMessage(user Recipient, result Result, opts ...interface{}) (*PreparedInlineMessage, error)
 	SetAdminTitle(chat *Chat, user *User, title string) error
+	SetMemberTag(chat *Chat, user *User, tag string) error
 	SetCommands(opts ...interface{}) error
 	SetCustomEmojiStickerSetThumb(name, id string) error
 	SetDefaultRights(rights Rights, forChannels bool) error
@@ -91,6 +101,7 @@ type API interface {
 	SetMenuButton(chat *User, mb interface{}) error
 	SetMyDescription(desc, language string) error
 	SetMyName(name, language string) error
+	SetMyProfilePhoto(photo InputProfilePhoto) error
 	SetMyShortDescription(desc, language string) error
 	SetStickerEmojis(sticker string, emojis []string) error
 	SetStickerKeywords(sticker string, keywords []string) error
@@ -98,6 +109,7 @@ type API interface {
 	SetStickerPosition(sticker string, position int) error
 	SetStickerSetThumb(of Recipient, set *StickerSet) error
 	SetStickerSetTitle(s StickerSet) error
+	SetUserEmojiStatus(user Recipient, emojiStatusCustomEmojiID string, expirationDate ...int64) error
 	SetWebhook(w *Webhook) error
 	Ship(query *ShippingQuery, what ...interface{}) error
 	StarTransactions(offset, limit int) ([]StarTransaction, error)

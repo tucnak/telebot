@@ -151,8 +151,17 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	if v.Streaming {
 		params["supports_streaming"] = "true"
 	}
+	if v.StartTimestamp != 0 {
+		params["start_timestamp"] = strconv.FormatInt(v.StartTimestamp, 10)
+	}
 
-	msg, err := b.sendMedia(v, params, thumbnailToFilemap(v.Thumbnail))
+	// Prepare files map with thumbnail and cover
+	files := thumbnailToFilemap(v.Thumbnail)
+	if v.Cover != nil {
+		files["cover"] = v.Cover.File
+	}
+
+	msg, err := b.sendMedia(v, params, files)
 	if err != nil {
 		return nil, err
 	}

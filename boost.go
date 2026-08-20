@@ -56,6 +56,10 @@ type BoostSource struct {
 	// (Optional) True, if the giveaway was completed, but there was
 	// no user to win the prize.
 	Unclaimed bool `json:"is_unclaimed,omitempty"`
+
+	// (Optional) The number of Telegram Stars to be split between giveaway winners;
+	// for Telegram Star giveaways only.
+	PrizeStarCount int `json:"prize_star_count,omitempty"`
 }
 
 // BoostAdded represents a service message about a user boosting a chat.

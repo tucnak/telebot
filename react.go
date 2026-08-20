@@ -41,9 +41,9 @@ type Reactions struct {
 	Big bool `json:"is_big"`
 }
 
-// React changes the chosen reactions on a message. Service messages can't be
-// reacted to. Automatically forwarded messages from a channel to its discussion group have
+// React changes the chosen reactions on a message. Automatically forwarded messages from a channel to its discussion group have
 // the same available reactions as messages in the channel.
+// Bot API 8.3+: Reactions are now allowed on most service messages.
 func (b *Bot) React(to Recipient, msg Editable, r Reactions) error {
 	if to == nil {
 		return ErrBadRecipient

@@ -32,6 +32,10 @@ type Giveaway struct {
 	// (Optional) The number of months the Telegram Premium subscription won from
 	// the giveaway will be active for.
 	PremiumMonthCount int `json:"premium_subscription_month_count"`
+
+	// (Optional) The number of Telegram Stars to be split between giveaway winners;
+	// for Telegram Star giveaways only.
+	PrizeStarCount int `json:"prize_star_count,omitempty"`
 }
 
 // SelectionDate returns the moment of when winners of the giveaway were selected in local time.
@@ -77,6 +81,10 @@ type GiveawayWinners struct {
 
 	// (Optional) Description of additional giveaway prize.
 	PrizeDescription string `json:"prize_description"`
+
+	// (Optional) The number of Telegram Stars to be split between giveaway winners;
+	// for Telegram Star giveaways only.
+	PrizeStarCount int `json:"prize_star_count,omitempty"`
 }
 
 // SelectionDate returns the moment of when winners of the giveaway
@@ -86,8 +94,11 @@ func (g *GiveawayWinners) SelectionDate() time.Time {
 }
 
 // GiveawayCreated represents a service message about the creation of a scheduled giveaway.
-// Currently holds no information.
-type GiveawayCreated struct{}
+type GiveawayCreated struct {
+	// (Optional) The number of Telegram Stars to be split between giveaway winners;
+	// for Telegram Star giveaways only.
+	PrizeStarCount int `json:"prize_star_count,omitempty"`
+}
 
 // GiveawayCompleted represents a service message about the completion of a
 // giveaway without public winners.
@@ -100,4 +111,8 @@ type GiveawayCompleted struct {
 
 	// (Optional) Message with the giveaway that was completed, if it wasn't deleted.
 	Message *Message `json:"giveaway_message"`
+
+	// (Optional) True, if the giveaway is a Telegram Star giveaway.
+	// Otherwise, currently, the giveaway is a Telegram Premium giveaway.
+	IsStarGiveaway bool `json:"is_star_giveaway,omitempty"`
 }

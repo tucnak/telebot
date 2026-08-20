@@ -3,6 +3,7 @@ package telebot
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 )
 
 // Query is an incoming inline query. When the user sends
@@ -178,4 +179,46 @@ func inferIQR(result Result) error {
 	}
 
 	return nil
+}
+
+// SavePreparedInlineMessage stores a message that can be sent by a user of a Mini App.
+func (b *Bot) SavePreparedInlineMessage(user Recipient, result Result, opts ...interface{}) (*PreparedInlineMessage, error) {
+	params := map[string]string{
+		"user_id": user.Recipient(),
+	}
+
+	for _, opt := range opts {
+		switch v := opt.(type) {
+		case bool:
+			params["allow_user_chats"] = strconv.FormatBool(v)
+		case *SendOptions:
+			// Handle additional options if needed
+		}
+	}
+
+	if result != nil {
+		result.Process(b)
+		if err := inferIQR(result); err != nil {
+			return nil, err
+		}
+
+		data, err := json.Marshal(result)
+		if err != nil {
+			return nil, err
+		}
+		params["result"] = string(data)
+	}
+
+	data, err := b.Raw("savePreparedInlineMessage", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result *PreparedInlineMessage
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return resp.Result, nil
 }

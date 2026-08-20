@@ -24,6 +24,7 @@ _testmain.go
 *.prof
 
 .idea
+.vscode
 .DS_Store
 coverage.txt
 
@@ -31,4 +32,8 @@ coverage.txt
 *.zip
 .terraform*
 terraform*
-/examples/awslambdaechobot/awslambdaechobot
+
+# Claude Code
+.claude/
+CLAUDE.md
+AGENTS.md

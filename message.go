@@ -25,6 +25,12 @@ type Message struct {
 	// Sender of the message, sent on behalf of a chat.
 	SenderChat *Chat `json:"sender_chat"`
 
+	// The user that called the bot in guest mode.
+	GuestUser *User `json:"guest_bot_caller_user"`
+
+	// The chat that called the bot in guest mode.
+	GuestChat *Chat `json:"guest_bot_caller_chat"`
+
 	// For forwarded messages, sender of the original message.
 	OriginalSender *User `json:"forward_from"`
 
@@ -185,6 +191,12 @@ type Message struct {
 	// share the same identifier.
 	BusinessConnectionID string `json:"business_connection_id"`
 
+	// Unique identifier for answering the guest query.
+	GuestQueryID string `json:"guest_query_id"`
+
+	// (Optional) For a rich message, the rich formatted content (Bot API 10.1).
+	RichMessage *RichMessage `json:"rich_message,omitempty"`
+
 	// (Optional) The bot that actually sent the message on behalf of the business account.
 	// Available only for outgoing messages sent on behalf of the connected business account.
 	BusinessBot *User `json:"sender_business_bot"`
@@ -329,6 +341,10 @@ type Message struct {
 	// added by the user.
 	SenderBoosts int `json:"sender_boost_count"`
 
+	// Bot API 9.5: (Optional) Tag or custom title of the sender of the message;
+	// for supergroups only.
+	SenderTag string `json:"sender_tag,omitempty"`
+
 	// Service message: forum topic created
 	TopicCreated *Topic `json:"forum_topic_created,omitempty"`
 
@@ -355,6 +371,25 @@ type Message struct {
 
 	// Service message: the user allowed the bot added to the attachment menu to write messages
 	WriteAccessAllowed *WriteAccessAllowed `json:"write_access_allowed,omitempty"`
+
+	// Bot API 9.4: Service message: chat owner has left.
+	ChatOwnerLeft *ChatOwnerLeft `json:"chat_owner_left,omitempty"`
+
+	// Bot API 9.4: Service message: chat owner has changed.
+	ChatOwnerChanged *ChatOwnerChanged `json:"chat_owner_changed,omitempty"`
+}
+
+// ChatOwnerLeft describes a service message about the chat owner leaving the chat.
+type ChatOwnerLeft struct {
+	// (Optional) The user who will become the new owner of the chat
+	// if the previous owner does not return to the chat.
+	NewOwner *User `json:"new_owner,omitempty"`
+}
+
+// ChatOwnerChanged describes a service message about an ownership change in the chat.
+type ChatOwnerChanged struct {
+	// The new owner of the chat.
+	NewOwner *User `json:"new_owner"`
 }
 
 // MessageEntity object represents "special" parts of text messages,
@@ -381,7 +416,19 @@ type MessageEntity struct {
 	Language string `json:"language,omitempty"`
 
 	// (Optional) For EntityCustomEmoji entity type only.
-	CustomEmojiID string `json:"custom_emoji_id"`
+	CustomEmojiID string `json:"custom_emoji_id,omitempty"`
+
+	// (Optional) For EntityHashtag and EntityCashtag entity types only.
+	// Username of the chat where the hashtag or cashtag search should be performed.
+	ChatUsername string `json:"chat_username,omitempty"`
+
+	// Bot API 9.5: (Optional) For EntityDateTime only,
+	// the Unix time associated with the entity.
+	UnixTime int64 `json:"unix_time,omitempty"`
+
+	// Bot API 9.5: (Optional) For EntityDateTime only,
+	// the string that defines the formatting of the date and time.
+	DateTimeFormat string `json:"date_time_format,omitempty"`
 }
 
 // EntityType is a MessageEntity type.
@@ -407,6 +454,7 @@ const (
 	EntityCustomEmoji   EntityType = "custom_emoji"
 	EntityBlockquote    EntityType = "blockquote"
 	EntityEBlockquote   EntityType = "expandable_blockquote"
+	EntityDateTime      EntityType = "date_time"
 )
 
 // Entities are used to set message's text entities as a send option.

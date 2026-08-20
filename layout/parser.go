@@ -195,7 +195,7 @@ func (lt *Layout) UnmarshalYAML(data []byte) error {
 			}
 
 			markup.inline = new(bool)
-			markup.Markup.keyboard = tmpl
+			markup.keyboard = tmpl
 			lt.markups[k] = markup.Markup
 		}
 	}

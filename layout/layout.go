@@ -137,7 +137,7 @@ var builtinFuncs = template.FuncMap{
 // Usage:
 //
 //	lt, err := layout.New("bot.yml")
-//	b, err := tele.NewBot(lt.Settings())
+//	b, err := tele.NewBot(ctx, lt.Settings())
 //	// That's all!
 func (lt *Layout) Settings() tele.Settings {
 	if lt.pref == nil {

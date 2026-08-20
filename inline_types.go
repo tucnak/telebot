@@ -84,9 +84,6 @@ type ArticleResult struct {
 	// Optional. URL of the result.
 	URL string `json:"url,omitempty"`
 
-	// Optional. Pass True, if you don't want the URL to be shown in the message.
-	HideURL bool `json:"hide_url,omitempty"`
-
 	// Optional. Short description of the result.
 	Description string `json:"description,omitempty"`
 
@@ -392,4 +389,14 @@ type StickerResult struct {
 
 	// If Cache != "", it'll be used instead
 	Cache string `json:"sticker_file_id,omitempty"`
+}
+
+// PreparedInlineMessage describes an inline message to be sent by a user of a Mini App.
+type PreparedInlineMessage struct {
+	// Unique identifier of the prepared message
+	ID string `json:"id"`
+
+	// Expiration date of the prepared message, in Unix time.
+	// Expired prepared messages can no longer be used.
+	ExpirationDate int64 `json:"expiration_date"`
 }

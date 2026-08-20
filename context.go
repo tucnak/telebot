@@ -73,6 +73,9 @@ type Context interface {
 	// BoostRemoved returns the boost removed from a chat instance.
 	BoostRemoved() *BoostRemoved
 
+	// PurchasedPaidMedia returns the purchased paid media instance.
+	PurchasedPaidMedia() *PaidMediaPurchased
+
 	// Sender returns the current recipient, depending on the context type.
 	// Returns nil if user is not presented.
 	Sender() *User
@@ -168,6 +171,10 @@ type Context interface {
 	// See Answer from bot.go.
 	Answer(resp *QueryResponse) error
 
+	// AnswerGuest sends a response to the current guest message.
+	// See AnswerGuest from guest.go.
+	AnswerGuest(result Result) error
+
 	// Respond sends a response for the current callback query.
 	// See Respond from bot.go.
 	Respond(resp ...*CallbackResponse) error
@@ -206,6 +213,8 @@ func (c *nativeContext) Message() *Message {
 	switch {
 	case c.u.Message != nil:
 		return c.u.Message
+	case c.u.GuestMessage != nil:
+		return c.u.GuestMessage
 	case c.u.Callback != nil:
 		return c.u.Callback.Message
 	case c.u.EditedMessage != nil:
@@ -302,6 +311,10 @@ func (c *nativeContext) Boost() *BoostUpdated {
 
 func (c *nativeContext) BoostRemoved() *BoostRemoved {
 	return c.u.BoostRemoved
+}
+
+func (c *nativeContext) PurchasedPaidMedia() *PaidMediaPurchased {
+	return c.u.PurchasedPaidMedia
 }
 
 func (c *nativeContext) Sender() *User {
@@ -600,6 +613,14 @@ func (c *nativeContext) Answer(resp *QueryResponse) error {
 		return errors.New("telebot: context inline query is nil")
 	}
 	return c.b.Answer(c.u.Query, resp)
+}
+
+func (c *nativeContext) AnswerGuest(result Result) error {
+	if c.u.GuestMessage == nil {
+		return errors.New("telebot: context guest message is nil")
+	}
+	_, err := c.b.AnswerGuest(c.u.GuestMessage, result)
+	return err
 }
 
 func (c *nativeContext) Set(key string, value interface{}) {

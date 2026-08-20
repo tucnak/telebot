@@ -19,11 +19,13 @@ func TestStickerSet(t *testing.T) {
 	input := []InputSticker{
 		{
 			File:     FromURL("https://placehold.co/512/000000/FFFFFF/png"),
+			Format:   StickerStatic,
 			Emojis:   []string{"🤖"},
 			Keywords: []string{"telebot", "robot", "bot"},
 		},
 		{
 			File:     FromURL("https://placehold.co/512/000000/999999/png"),
+			Format:   StickerStatic,
 			Emojis:   []string{"🤖"},
 			Keywords: []string{"telebot", "robot", "bot"},
 		},
