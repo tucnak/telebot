@@ -23,7 +23,7 @@ func TestWebhook_Poll(t *testing.T) {
 		pref.Offline = true
 		pref.Poller = webhook
 
-		b, err := NewBot(pref)
+		b, err := NewBot(t.Context(), pref)
 		require.NoError(t, err)
 
 		var wg sync.WaitGroup
@@ -51,7 +51,7 @@ func TestWebhook_Poll(t *testing.T) {
 		pref.Offline = true
 		pref.Poller = webhook
 
-		b, err := NewBot(pref)
+		b, err := NewBot(t.Context(), pref)
 		require.NoError(t, err)
 
 		var wg sync.WaitGroup
@@ -77,7 +77,7 @@ func TestWebhook_ServeHTTP(t *testing.T) {
 
 	pref := defaultSettings()
 	pref.Offline = true
-	b, err := NewBot(pref)
+	b, err := NewBot(t.Context(), pref)
 	require.NoError(t, err)
 
 	dest := make(chan Update, 1)

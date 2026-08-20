@@ -6,11 +6,11 @@
 //
 //	import (
 //		"time"
-//		tele "gopkg.in/telebot.v4"
+//		tele "github.com/maxbolgarin/telebot/v4"
 //	)
 //
 //	func main() {
-//		b, err := tele.NewBot(tele.Settings{
+//		b, err := tele.NewBot(ctx, tele.Settings{
 //			Token:  "...",
 //			Poller: &tele.LongPoller{Timeout: 10 * time.Second},
 //		})

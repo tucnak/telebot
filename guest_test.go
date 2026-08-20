@@ -11,7 +11,7 @@ import (
 )
 
 func TestGuestMessageUpdate(t *testing.T) {
-	b, err := NewBot(Settings{Synchronous: true, Offline: true})
+	b, err := NewBot(t.Context(), Settings{Synchronous: true, Offline: true})
 	require.NoError(t, err)
 
 	b.Handle(OnText, func(c Context) error {
@@ -88,7 +88,7 @@ func TestAnswerGuest(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	b, err := NewBot(Settings{
+	b, err := NewBot(t.Context(), Settings{
 		Offline:   true,
 		Token:     "token",
 		URL:       srv.URL,

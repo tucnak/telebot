@@ -1,6 +1,7 @@
 package telebot
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -16,7 +17,7 @@ import (
 
 // NewBot does try to build a Bot with token `token`, which
 // is a secret API key assigned to particular bot.
-func NewBot(pref Settings) (*Bot, error) {
+func NewBot(ctx context.Context, pref Settings) (*Bot, error) {
 	if pref.Updates == 0 {
 		pref.Updates = 100
 	}
@@ -55,7 +56,7 @@ func NewBot(pref Settings) (*Bot, error) {
 	if pref.Offline {
 		bot.Me = &User{}
 	} else {
-		user, err := bot.getMe()
+		user, err := bot.getMe(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -85,6 +86,8 @@ type Bot struct {
 
 	stopMu     sync.RWMutex
 	stopClient chan struct{}
+
+	stopSignal chan struct{}
 }
 
 // Settings represents a utility struct for passing certain
@@ -227,6 +230,9 @@ func (b *Bot) Start() {
 	go func() {
 		b.Poller.Poll(b, b.Updates, stop)
 		close(stopConfirm)
+		if b.stopSignal != nil {
+			close(b.stopSignal)
+		}
 	}()
 
 	for {
@@ -256,6 +262,13 @@ func (b *Bot) Stop() {
 	confirm := make(chan struct{})
 	b.stop <- confirm
 	<-confirm
+}
+
+func (b *Bot) GetStopSignal() chan struct{} {
+	if b.stopSignal == nil {
+		b.stopSignal = make(chan struct{})
+	}
+	return b.stopSignal
 }
 
 // NewMarkup simply returns newly created markup instance.

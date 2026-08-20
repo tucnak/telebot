@@ -1,6 +1,7 @@
 package telebot
 
 import (
+	"context"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -37,23 +38,23 @@ func defaultSettings() Settings {
 }
 
 func newTestBot() (*Bot, error) {
-	return NewBot(defaultSettings())
+	return NewBot(context.Background(), defaultSettings())
 }
 
 func TestNewBot(t *testing.T) {
 	var pref Settings
-	_, err := NewBot(pref)
+	_, err := NewBot(t.Context(), pref)
 	assert.Error(t, err)
 
 	pref.Token = "BAD TOKEN"
-	_, err = NewBot(pref)
+	_, err = NewBot(t.Context(), pref)
 	assert.Error(t, err)
 
 	pref.URL = "BAD URL"
-	_, err = NewBot(pref)
+	_, err = NewBot(t.Context(), pref)
 	assert.Error(t, err)
 
-	b, err := NewBot(Settings{Offline: true})
+	b, err := NewBot(t.Context(), Settings{Offline: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,13 +73,16 @@ func TestNewBot(t *testing.T) {
 	pref.ParseMode = ModeHTML
 	pref.Offline = true
 
-	b, err = NewBot(pref)
+	b, err = NewBot(t.Context(), pref)
 	require.NoError(t, err)
 	assert.Equal(t, client, b.client)
 	assert.Equal(t, pref.URL, b.URL)
 	assert.Equal(t, pref.Poller, b.Poller)
 	assert.Equal(t, 50, cap(b.Updates))
 	assert.Equal(t, ModeHTML, b.parseMode)
+	assert.Nil(t, b.stopSignal)
+	assert.NotNil(t, b.GetStopSignal())
+	assert.NotNil(t, b.stopSignal)
 }
 
 func TestBotHandle(t *testing.T) {
@@ -115,7 +119,7 @@ func TestBotStart(t *testing.T) {
 	pref := defaultSettings()
 	pref.Poller = &LongPoller{}
 
-	b, err := NewBot(pref)
+	b, err := NewBot(t.Context(), pref)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -131,7 +135,7 @@ func TestBotStart(t *testing.T) {
 		tp.updates <- Update{Message: &Message{Text: "/start"}}
 	}()
 
-	b, err = NewBot(pref)
+	b, err = NewBot(t.Context(), pref)
 	require.NoError(t, err)
 	b.Poller = tp
 
@@ -151,7 +155,7 @@ func TestBotStart(t *testing.T) {
 }
 
 func TestBotProcessUpdate(t *testing.T) {
-	b, err := NewBot(Settings{Synchronous: true, Offline: true})
+	b, err := NewBot(t.Context(), Settings{Synchronous: true, Offline: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -376,7 +380,7 @@ func TestBotProcessUpdate(t *testing.T) {
 }
 
 func TestBotOnError(t *testing.T) {
-	b, err := NewBot(Settings{Synchronous: true, Offline: true})
+	b, err := NewBot(t.Context(), Settings{Synchronous: true, Offline: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -417,7 +421,7 @@ func TestBotMiddleware(t *testing.T) {
 			}
 		}
 
-		b, err := NewBot(Settings{Synchronous: true, Offline: true})
+		b, err := NewBot(t.Context(), Settings{Synchronous: true, Offline: true})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -470,7 +474,7 @@ func TestBotMiddleware(t *testing.T) {
 	}
 
 	t.Run("combining with global middleware", func(t *testing.T) {
-		b, err := NewBot(Settings{Synchronous: true, Offline: true})
+		b, err := NewBot(t.Context(), Settings{Synchronous: true, Offline: true})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -487,7 +491,7 @@ func TestBotMiddleware(t *testing.T) {
 	})
 
 	t.Run("combining with group middleware", func(t *testing.T) {
-		b, err := NewBot(Settings{Synchronous: true, Offline: true})
+		b, err := NewBot(t.Context(), Settings{Synchronous: true, Offline: true})
 		if err != nil {
 			t.Fatal(err)
 		}

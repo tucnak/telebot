@@ -130,6 +130,8 @@ func (b *Bot) extractOptions(how []interface{}) *SendOptions {
 			opts.ReplyParams = opt
 		case *Topic:
 			opts.ThreadID = opt.ThreadID
+		case *ThreadIDOption:
+			opts.ThreadID = opt.ThreadID
 		case Option:
 			switch opt {
 			case NoPreview:
@@ -298,4 +300,16 @@ func embedMessages(params map[string]string, msgs []Editable) {
 
 	params["message_ids"] = string(data)
 	params["chat_id"] = strconv.FormatInt(chatID, 10)
+}
+
+// ThreadIDOption represents a message thread ID option for sending messages
+// to specific threads in supergroups or channels.
+type ThreadIDOption struct {
+	ThreadID int
+}
+
+// MessageThreadID creates a ThreadIDOption for sending messages to a specific
+// message thread in a supergroup or channel.
+func MessageThreadID(threadID int) *ThreadIDOption {
+	return &ThreadIDOption{ThreadID: threadID}
 }
