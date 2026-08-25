@@ -308,7 +308,7 @@ func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Messag
 //
 // Only ParseMode, Entities and ThreadID send options are honored; other fields
 // are not accepted by sendMessageDraft.
-func (b *Bot) SendDraft(to Recipient, draftID int, text string, opts ...interface{}) error {
+func (b *Bot) SendDraft(to Recipient, draftID int64, text string, opts ...interface{}) error {
 	if to == nil {
 		return ErrBadRecipient
 	}
@@ -317,13 +317,19 @@ func (b *Bot) SendDraft(to Recipient, draftID int, text string, opts ...interfac
 
 	params := map[string]string{
 		"chat_id":  to.Recipient(),
-		"draft_id": strconv.Itoa(draftID),
+		"draft_id": strconv.FormatInt(draftID, 10),
 		"text":     text,
 	}
 
 	if sendOpts != nil {
 		if sendOpts.ThreadID != 0 {
 			params["message_thread_id"] = strconv.Itoa(sendOpts.ThreadID)
+		}
+		if sendOpts.CanStop {
+			params["can_stop"] = "true"
+		}
+		if sendOpts.KeepOnStop {
+			params["keep_on_stop"] = "true"
 		}
 		if len(sendOpts.Entities) > 0 {
 			entities, _ := json.Marshal(sendOpts.Entities)

@@ -24,8 +24,10 @@ const (
 	RichBlockAudioType     = "audio"
 	RichBlockPhotoType     = "photo"
 	RichBlockVideoType     = "video"
-	RichBlockVoiceNote     = "voice_note"
-	RichBlockThinking      = "thinking"
+	RichBlockVoiceNote                = "voice_note"
+	RichBlockThinking                 = "thinking"
+	RichBlockExpandableBlockQuotation = "expandable_blockquote"
+	RichBlockDocument                 = "document"
 )
 
 // RichBlock is a single block of a received RichMessage (Bot API 10.1). It is a
@@ -70,9 +72,10 @@ type RichBlock struct {
 	// Cells are the rows-by-columns of a "table" block.
 	Cells [][]RichBlockTableCell `json:"cells,omitempty"`
 
-	// IsBordered and IsStriped style a "table" block.
+	// IsBordered, IsStriped and IsCompact style a "table" block.
 	IsBordered bool `json:"is_bordered,omitempty"`
 	IsStriped  bool `json:"is_striped,omitempty"`
+	IsCompact  bool `json:"is_compact,omitempty"`
 
 	// Location, Zoom, Width and Height describe a "map" block.
 	Location *Location `json:"location,omitempty"`
@@ -86,6 +89,7 @@ type RichBlock struct {
 	Photo     []Photo    `json:"photo,omitempty"`
 	Video     *Video     `json:"video,omitempty"`
 	VoiceNote *Voice     `json:"voice_note,omitempty"`
+	Document  *Document  `json:"document,omitempty"`
 
 	// HasSpoiler marks an animation, photo or video block as a spoiler.
 	HasSpoiler bool `json:"has_spoiler,omitempty"`

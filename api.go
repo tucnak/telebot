@@ -84,7 +84,8 @@ type API interface {
 	RevokeInviteLink(chat Recipient, link string) (*ChatInviteLink, error)
 	Send(to Recipient, what interface{}, opts ...interface{}) (*Message, error)
 	SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, error)
-	SendDraft(to Recipient, draftID int, text string, opts ...interface{}) error
+	SendDraft(to Recipient, draftID int64, text string, opts ...interface{}) error
+	SendRichDraft(to Recipient, draftID int64, rich *InputRichMessage, opts ...interface{}) error
 	SendPaidMedia(to Recipient, stars int, a PaidAlbum, opts ...interface{}) (*Message, error)
 	SendGift(to Recipient, giftID string, opts ...interface{}) error
 	SavePreparedInlineMessage(user Recipient, result Result, opts ...interface{}) (*PreparedInlineMessage, error)
