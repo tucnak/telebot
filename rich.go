@@ -33,6 +33,19 @@ type InputRichMessage struct {
 	// (Optional) Pass true to skip automatic detection of URLs, email addresses,
 	// mentions, hashtags, cashtags, bot commands and phone numbers in the text.
 	SkipEntityDetection bool `json:"skip_entity_detection,omitempty"`
+
+	// (Optional) Content described using an array of InputRichBlock objects.
+	Blocks []InputRichBlock `json:"blocks,omitempty"`
+
+	// (Optional) Media files referenced by block content.
+	Media []InputRichMessageMedia `json:"media,omitempty"`
+}
+
+// InputRichMessageMedia associates an ID with a media file so that blocks
+// can reference it by ID.
+type InputRichMessageMedia struct {
+	ID    string     `json:"id"`
+	Media Inputtable `json:"-"`
 }
 
 // Send delivers the rich message through bot b to recipient via the
@@ -68,7 +81,7 @@ func (i *InputRichMessage) Send(b *Bot, to Recipient, opt *SendOptions) (*Messag
 // finalized you must Send the complete InputRichMessage to persist it. draftID
 // must be non-zero — updates sharing the same identifier are animated
 // client-side. Of the send options only ThreadID is honored.
-func (b *Bot) SendRichDraft(to Recipient, draftID int, rich *InputRichMessage, opts ...interface{}) error {
+func (b *Bot) SendRichDraft(to Recipient, draftID int64, rich *InputRichMessage, opts ...interface{}) error {
 	if to == nil {
 		return ErrBadRecipient
 	}
@@ -83,12 +96,20 @@ func (b *Bot) SendRichDraft(to Recipient, draftID int, rich *InputRichMessage, o
 
 	params := map[string]string{
 		"chat_id":      to.Recipient(),
-		"draft_id":     strconv.Itoa(draftID),
+		"draft_id":     strconv.FormatInt(draftID, 10),
 		"rich_message": string(data),
 	}
 
-	if sendOpts := b.extractOptions(opts); sendOpts != nil && sendOpts.ThreadID != 0 {
-		params["message_thread_id"] = strconv.Itoa(sendOpts.ThreadID)
+	if sendOpts := b.extractOptions(opts); sendOpts != nil {
+		if sendOpts.ThreadID != 0 {
+			params["message_thread_id"] = strconv.Itoa(sendOpts.ThreadID)
+		}
+		if sendOpts.CanStop {
+			params["can_stop"] = "true"
+		}
+		if sendOpts.KeepOnStop {
+			params["keep_on_stop"] = "true"
+		}
 	}
 
 	_, err = b.Raw("sendRichMessageDraft", params)

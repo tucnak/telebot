@@ -800,3 +800,11 @@ type ReplyParams struct {
 	// (Optional) Position of the quote in the original message in UTF-16 code units.
 	QuotePosition int `json:"quote_position"`
 }
+
+// MessageGenerationStopped is received when a user stops a message
+// generation in a private chat (Bot API 10.3).
+type MessageGenerationStopped struct {
+	Chat            Chat   `json:"chat"`
+	MessageThreadID int    `json:"message_thread_id,omitempty"`
+	DraftID         int64  `json:"draft_id,string"`
+}

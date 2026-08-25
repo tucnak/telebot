@@ -76,6 +76,9 @@ type Context interface {
 	// PurchasedPaidMedia returns the purchased paid media instance.
 	PurchasedPaidMedia() *PaidMediaPurchased
 
+	// GenerationStopped returns the generation stopped event if such presented.
+	GenerationStopped() *MessageGenerationStopped
+
 	// Sender returns the current recipient, depending on the context type.
 	// Returns nil if user is not presented.
 	Sender() *User
@@ -315,6 +318,10 @@ func (c *nativeContext) BoostRemoved() *BoostRemoved {
 
 func (c *nativeContext) PurchasedPaidMedia() *PaidMediaPurchased {
 	return c.u.PurchasedPaidMedia
+}
+
+func (c *nativeContext) GenerationStopped() *MessageGenerationStopped {
+	return c.u.StoppedMessageGeneration
 }
 
 func (c *nativeContext) Sender() *User {

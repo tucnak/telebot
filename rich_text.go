@@ -149,6 +149,19 @@ func (r *RichText) UnmarshalJSON(data []byte) error {
 	}
 }
 
+// MarshalJSON encodes a RichText back to the wire form indicated by Kind.
+func (r RichText) MarshalJSON() ([]byte, error) {
+	switch r.Kind {
+	case RichTextPlain:
+		return json.Marshal(r.Plain)
+	case RichTextArray:
+		return json.Marshal(r.Parts)
+	default: // RichTextEntity
+		type alias RichText
+		return json.Marshal(alias(r))
+	}
+}
+
 // String renders the RichText as plain text, recursively flattening arrays and
 // entities. Entities without textual content (anchors, dividers) contribute
 // nothing; custom emoji contribute their alternative text.
