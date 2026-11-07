@@ -22,6 +22,17 @@ type Sendable interface {
 	Send(*Bot, Recipient, *SendOptions) (*Message, error)
 }
 
+// embedMediaFlags writes the spoiler and caption-above flags a photo, video
+// or animation carries itself, beside any SendOptions.HasSpoiler.
+func embedMediaFlags(params map[string]string, spoiler, captionAbove bool) {
+	if spoiler {
+		params["has_spoiler"] = "true"
+	}
+	if captionAbove {
+		params["show_caption_above_media"] = "true"
+	}
+}
+
 // Send delivers media through bot b to recipient.
 func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 	params := map[string]string{
@@ -29,6 +40,7 @@ func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"caption": p.Caption,
 	}
 	b.embedSendOptions(params, opt)
+	embedMediaFlags(params, p.HasSpoiler, p.CaptionAbove)
 
 	msg, err := b.sendMedia(p, params, nil)
 	if err != nil {
@@ -138,6 +150,7 @@ func (v *Video) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"file_name": v.FileName,
 	}
 	b.embedSendOptions(params, opt)
+	embedMediaFlags(params, v.HasSpoiler, v.CaptionAbove)
 
 	if v.Duration != 0 {
 		params["duration"] = strconv.Itoa(v.Duration)
@@ -190,6 +203,7 @@ func (a *Animation) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 		"file_name": a.FileName,
 	}
 	b.embedSendOptions(params, opt)
+	embedMediaFlags(params, a.HasSpoiler, a.CaptionAbove)
 
 	if a.Duration != 0 {
 		params["duration"] = strconv.Itoa(a.Duration)
