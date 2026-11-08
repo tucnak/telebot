@@ -6,6 +6,7 @@ import "io"
 // with Telegram Bot API.
 type API interface {
 	Raw(method string, payload interface{}) ([]byte, error)
+	Trigger(endpoint interface{}, c Context) error
 
 	Accept(query *PreCheckoutQuery, errorMessage ...string) error
 	AddStickerToSet(of Recipient, name string, sticker InputSticker) error
