@@ -179,6 +179,11 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 		params["reply_to_message_id"] = strconv.Itoa(opt.ReplyTo.ID)
 	}
 
+	if opt.ReplyParams != nil {
+		replyParams, _ := json.Marshal(opt.ReplyParams)
+		params["reply_parameters"] = string(replyParams)
+	}
+
 	if opt.DisableWebPagePreview {
 		params["disable_web_page_preview"] = "true"
 	}
