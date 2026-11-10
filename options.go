@@ -103,6 +103,12 @@ type SendOptions struct {
 	// AllowPaidBroadcast allows the message to be sent to users who have not yet
 	// unlocked access to paid channels. Only for messages sent to channels.
 	AllowPaidBroadcast bool
+
+	// CanStop allows the user to stop generation (draft methods only).
+	CanStop bool `json:"-"`
+
+	// KeepOnStop keeps the draft visible after stop (draft methods only).
+	KeepOnStop bool `json:"-"`
 }
 
 func (og *SendOptions) copy() *SendOptions {

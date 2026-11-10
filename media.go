@@ -337,6 +337,14 @@ func (v *Voice) MediaFile() *File {
 	return &v.File
 }
 
+func (v *Voice) InputMedia() InputMedia {
+	return InputMedia{
+		Type:     v.MediaType(),
+		Caption:  v.Caption,
+		Duration: v.Duration,
+	}
+}
+
 // VideoNote represents a video message.
 type VideoNote struct {
 	File

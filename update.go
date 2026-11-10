@@ -30,6 +30,7 @@ type Update struct {
 	DeletedBusinessMessages *BusinessMessagesDeleted `json:"deleted_business_messages"`
 	GuestMessage            *Message                 `json:"guest_message"`
 	PurchasedPaidMedia      *PaidMediaPurchased      `json:"purchased_paid_media"`
+	StoppedMessageGeneration *MessageGenerationStopped `json:"stopped_message_generation,omitempty"`
 }
 
 // ProcessUpdate processes a single incoming update.
@@ -372,6 +373,10 @@ func (b *Bot) ProcessContext(c Context) {
 	}
 	if u.PurchasedPaidMedia != nil {
 		b.handle(OnPurchasedPaidMedia, c)
+		return
+	}
+	if u.StoppedMessageGeneration != nil {
+		b.handle(OnGenerationStopped, c)
 		return
 	}
 }
