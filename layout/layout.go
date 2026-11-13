@@ -11,7 +11,7 @@ import (
 	"text/template"
 
 	"github.com/goccy/go-yaml"
-	tele "gopkg.in/telebot.v4"
+	tele "github.com/maxbolgarin/telebot/v4"
 )
 
 type (
@@ -137,7 +137,7 @@ var builtinFuncs = template.FuncMap{
 // Usage:
 //
 //	lt, err := layout.New("bot.yml")
-//	b, err := tele.NewBot(lt.Settings())
+//	b, err := tele.NewBot(ctx, lt.Settings())
 //	// That's all!
 func (lt *Layout) Settings() tele.Settings {
 	if lt.pref == nil {

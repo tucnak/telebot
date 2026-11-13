@@ -21,7 +21,7 @@ func richBot(t *testing.T, result string, path *string, body *map[string]interfa
 	}))
 	t.Cleanup(srv.Close)
 
-	b, err := NewBot(Settings{
+	b, err := NewBot(t.Context(), Settings{
 		Offline:   true,
 		Token:     "token",
 		URL:       srv.URL,
@@ -94,7 +94,7 @@ func TestSendRichDraft(t *testing.T) {
 }
 
 func TestRichBadInput(t *testing.T) {
-	b, err := NewBot(Settings{Offline: true, Token: "token"})
+	b, err := NewBot(t.Context(), Settings{Offline: true, Token: "token"})
 	require.NoError(t, err)
 
 	_, err = b.Send(nil, &InputRichMessage{Markdown: "x"})

@@ -20,6 +20,12 @@ import (
 // It also handles API errors, so you only need to unwrap
 // result field from json data.
 func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
+	return b.RawWithContext(context.Background(), method, payload)
+}
+
+// RawWithContext is Raw with a caller-provided context, so the request can be
+// cancelled from the outside as well as by Stop.
+func (b *Bot) RawWithContext(ctx context.Context, method string, payload interface{}) ([]byte, error) {
 	url := b.URL + "/bot" + b.Token + "/" + method
 
 	var buf bytes.Buffer
@@ -30,7 +36,7 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 	// Cancel the request immediately without waiting for the timeout
 	// when bot is about to stop.
 	// This may become important if doing long polling with long timeout.
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	go func() {
@@ -212,8 +218,8 @@ func (b *Bot) sendMedia(media Media, params map[string]string, files map[string]
 	return extractMessage(data)
 }
 
-func (b *Bot) getMe() (*User, error) {
-	data, err := b.Raw("getMe", nil)
+func (b *Bot) getMe(ctx context.Context) (*User, error) {
+	data, err := b.RawWithContext(ctx, "getMe", nil)
 	if err != nil {
 		return nil, err
 	}
