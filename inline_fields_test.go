@@ -105,6 +105,11 @@ func TestForwardCopyVideoStartTimestamp(t *testing.T) {
 	_, err = b.Copy(ChatID(7), msg, int64(30))
 	require.NoError(t, err)
 	assert.Equal(t, "30", srv.Last().Params["video_start_timestamp"])
+
+	_, err = b.Copy(ChatID(7), msg, &SendOptions{Caption: "new", CaptionAbove: true, Entities: Entities{{Type: EntityBold, Length: 3}}})
+	require.NoError(t, err)
+	assert.Equal(t, map[string]string{"chat_id": "7", "from_chat_id": "2", "message_id": "1", "caption": "new",
+		"show_caption_above_media": "true", "caption_entities": `[{"type":"bold","offset":0,"length":3}]`}, srv.Last().Params)
 }
 
 func TestMessageIsForwardedAndInaccessible(t *testing.T) {

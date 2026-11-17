@@ -136,8 +136,13 @@ type SendOptions struct {
 	RemoveCaption bool
 
 	// CaptionAbove shows an edited caption above the media. Used only when
-	// editing a caption; when sending media, set the media's CaptionAbove.
+	// editing a caption or copying with a new one; when sending media, set
+	// the media's CaptionAbove.
 	CaptionAbove bool
+
+	// Caption replaces the caption of a copied message, with ParseMode or
+	// Entities for its formatting. Used only by Copy.
+	Caption string
 }
 
 func (og *SendOptions) copy() *SendOptions {

@@ -572,7 +572,8 @@ func (b *Bot) ForwardMany(to Recipient, msgs []Editable, opts ...*SendOptions) (
 }
 
 // Copy behaves just like Forward() but the copied message doesn't have a link to the original message (see Bots API).
-// An int64 option is the timestamp, in seconds, a copied video starts from.
+// An int64 option is the timestamp, in seconds, a copied video starts from;
+// SendOptions.Caption gives the copy a new caption.
 //
 // This function will panic upon nil Editable.
 //
@@ -590,7 +591,14 @@ func (b *Bot) Copy(to Recipient, msg Editable, opts ...interface{}) (*Message, e
 	}
 
 	opts, start := videoStartTimestamp(opts)
-	b.embedSendOptions(params, b.extractOptions(opts))
+	sendOpts := b.extractOptions(opts)
+	if sendOpts.Caption != "" {
+		params["caption"] = sendOpts.Caption
+	}
+	b.embedSendOptions(params, sendOpts)
+	if sendOpts.CaptionAbove {
+		params["show_caption_above_media"] = "true"
+	}
 	if start > 0 {
 		params["video_start_timestamp"] = strconv.FormatInt(start, 10)
 	}
