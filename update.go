@@ -174,6 +174,10 @@ func (b *Bot) ProcessContext(c Context) {
 			b.handle(OnCommunityChatRemoved, c)
 			return
 		}
+		if m.CommunityChatJoined != nil {
+			b.handle(OnCommunityChatJoined, c)
+			return
+		}
 
 		wasAdded := (m.UserJoined != nil && m.UserJoined.ID == b.Me.ID) ||
 			(m.UsersJoined != nil && isUserInList(b.Me, m.UsersJoined))

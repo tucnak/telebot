@@ -23,3 +23,12 @@ type CommunityChatAdded struct {
 //
 // Bot API: CommunityChatRemoved.
 type CommunityChatRemoved struct{}
+
+// CommunityChatJoined is a service message about a user joining the chat
+// from a community (Bot API 10.3).
+//
+// Bot API: CommunityChatJoined.
+type CommunityChatJoined struct {
+	// The community from which the chat was joined.
+	Community Community `json:"community"`
+}

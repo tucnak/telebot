@@ -65,3 +65,19 @@ func TestSubscriptionUpdate(t *testing.T) {
 	assert.Equal(t, int64(7), sender.ID)
 	assert.Contains(t, AllowedUpdates, "subscription")
 }
+
+func TestCommunityChatJoined(t *testing.T) {
+	b, _ := newFakeBot(t)
+
+	var got *Message
+	b.Handle(OnCommunityChatJoined, func(c Context) error { got = c.Message(); return nil })
+
+	var u Update
+	require.NoError(t, json.Unmarshal([]byte(`{"update_id":1,"message":{"message_id":1,"date":1,
+		"chat":{"id":-100,"type":"supergroup"},"from":{"id":7},
+		"community_chat_joined":{"community":{"id":9,"name":"Makers"}}}}`), &u))
+	b.ProcessUpdate(u)
+
+	require.NotNil(t, got)
+	assert.Equal(t, "Makers", got.CommunityChatJoined.Community.Name)
+}

@@ -80,6 +80,7 @@ const (
 	OnChatOwnerChanged     = "\achat_owner_changed"
 	OnCommunityChatAdded   = "\acommunity_chat_added"
 	OnCommunityChatRemoved = "\acommunity_chat_removed"
+	OnCommunityChatJoined  = "\acommunity_chat_joined"
 
 	OnAddedToGroup      = "\aadded_to_group"
 	OnUserJoined        = "\auser_joined"

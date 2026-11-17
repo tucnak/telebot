@@ -393,6 +393,9 @@ type Message struct {
 
 	// Service message: the chat or the bot was removed from a community.
 	CommunityChatRemoved *CommunityChatRemoved `json:"community_chat_removed,omitempty"`
+
+	// Service message: a user joined the chat from a community.
+	CommunityChatJoined *CommunityChatJoined `json:"community_chat_joined,omitempty"`
 }
 
 // ChatOwnerLeft describes a service message about the chat owner leaving the chat.
