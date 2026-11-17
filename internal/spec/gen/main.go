@@ -2,7 +2,7 @@
 // machine-readable spec vendored next to it.
 //
 //	curl -sL https://core.telegram.org/bots/api -o /tmp/api.html
-//	go run ./internal/botapispec/gen /tmp/api.html > internal/botapispec/api.json
+//	go run ./internal/spec/gen /tmp/api.html > internal/spec/api.json
 package main
 
 import (
@@ -13,7 +13,7 @@ import (
 	"regexp"
 	"strings"
 
-	"gopkg.in/telebot.v4/internal/botapispec"
+	"gopkg.in/telebot.v4/internal/spec"
 )
 
 var (
@@ -50,16 +50,16 @@ func main() {
 	}
 	doc := string(raw)
 
-	spec := botapispec.Spec{}
+	api := spec.Spec{}
 	if m := reVersion.FindStringSubmatch(doc); m != nil {
-		spec.Version = m[1]
+		api.Version = m[1]
 	}
 	if m := reDate.FindStringSubmatch(doc); m != nil {
-		spec.ReleaseDate = m[1]
+		api.ReleaseDate = m[1]
 	}
 
 	start := strings.Index(doc, `name="getting-updates"`)
-	if start < 0 || spec.Version == "" {
+	if start < 0 || api.Version == "" {
 		fmt.Fprintln(os.Stderr, "gen: unexpected page layout")
 		os.Exit(1)
 	}
@@ -102,7 +102,7 @@ func main() {
 			desc = append(desc, text(p[1]))
 		}
 
-		var fields []botapispec.Field
+		var fields []spec.Field
 		if t := reTable.FindStringSubmatch(body); t != nil {
 			heads := reHead.FindAllStringSubmatch(t[1], -1)
 			for _, row := range reRow.FindAllStringSubmatch(t[1], -1) {
@@ -110,7 +110,7 @@ func main() {
 				if len(cells) == 0 {
 					continue
 				}
-				f := botapispec.Field{Name: text(cells[0][1]), Type: text(cells[1][1])}
+				f := spec.Field{Name: text(cells[0][1]), Type: text(cells[1][1])}
 				if len(heads) == 4 { // Parameter, Type, Required, Description
 					f.Required = text(cells[2][1]) == "Yes"
 					f.Description = text(cells[3][1])
@@ -123,7 +123,7 @@ func main() {
 		}
 
 		if first := name[0]; first >= 'a' && first <= 'z' {
-			spec.Methods = append(spec.Methods, botapispec.Method{
+			api.Methods = append(api.Methods, spec.Method{
 				Name:        name,
 				Section:     section(h[0]),
 				Description: strings.Join(desc, "\n"),
@@ -132,7 +132,7 @@ func main() {
 			continue
 		}
 
-		typ := botapispec.Type{
+		typ := spec.Type{
 			Name:        name,
 			Section:     section(h[0]),
 			Description: strings.Join(desc, "\n"),
@@ -145,13 +145,13 @@ func main() {
 				}
 			}
 		}
-		spec.Types = append(spec.Types, typ)
+		api.Types = append(api.Types, typ)
 	}
 
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetEscapeHTML(false)
 	enc.SetIndent("", "  ")
-	if err := enc.Encode(spec); err != nil {
+	if err := enc.Encode(api); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

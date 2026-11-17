@@ -1,6 +1,6 @@
-// Package botapispec holds the machine-readable Bot API spec that telebot
+// Package spec holds the machine-readable Bot API spec that telebot
 // implements, generated from https://core.telegram.org/bots/api by ./gen.
-package botapispec
+package spec
 
 import (
 	_ "embed"

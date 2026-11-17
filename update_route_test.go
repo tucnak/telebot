@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/telebot.v4/internal/botapispec"
+	"gopkg.in/telebot.v4/internal/spec"
 )
 
 // TestEveryUpdateIsRouted checks that each field of the Bot API Update
@@ -48,9 +48,9 @@ func TestEveryUpdateIsRouted(t *testing.T) {
 		"stopped_message_generation": {OnGenerationStopped, `{"chat":{"id":1},"draft_id":1}`},
 	}
 
-	spec, err := botapispec.Load()
+	api, err := spec.Load()
 	require.NoError(t, err)
-	for _, ty := range spec.Types {
+	for _, ty := range api.Types {
 		if ty.Name != "Update" {
 			continue
 		}
