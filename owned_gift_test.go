@@ -48,7 +48,7 @@ func TestOwnedGifts(t *testing.T) {
 func TestGiftMethods(t *testing.T) {
 	b, srv := newFakeBot(t)
 
-	require.NoError(t, b.ConvertGiftToStars("bc", "og1"))
+	require.NoError(t, b.ConvertGift("bc", "og1"))
 	assert.Equal(t, map[string]string{"business_connection_id": "bc", "owned_gift_id": "og1"}, srv.Last().Params)
 
 	require.NoError(t, b.UpgradeGift("bc", "og1", true, 25))

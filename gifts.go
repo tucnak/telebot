@@ -450,11 +450,11 @@ func (b *Bot) ChatGifts(chat Recipient, q GiftQuery) (*OwnedGifts, error) {
 	return b.ownedGifts("getChatGifts", map[string]interface{}{"chat_id": chat.Recipient()}, q)
 }
 
-// ConvertGiftToStars converts a regular gift of the business account to
+// ConvertGift converts a regular gift of the business account to
 // Telegram Stars (Bot API 9.0).
 //
 // Bot API: convertGiftToStars.
-func (b *Bot) ConvertGiftToStars(connectionID, ownedGiftID string) error {
+func (b *Bot) ConvertGift(connectionID, ownedGiftID string) error {
 	_, err := b.Raw("convertGiftToStars", map[string]string{
 		"business_connection_id": connectionID,
 		"owned_gift_id":          ownedGiftID,

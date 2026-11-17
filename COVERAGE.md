@@ -140,7 +140,7 @@ A method's "unseen parameters" are parameters that the functions calling it, and
 | [getUserGifts](https://core.telegram.org/bots/api#getusergifts) | `Bot.UserGifts` |  |
 | [getChatGifts](https://core.telegram.org/bots/api#getchatgifts) | `Bot.ChatGifts` |  |
 | [getUniqueGift](https://core.telegram.org/bots/api#getuniquegift) | `Bot.UniqueGift` |  |
-| [convertGiftToStars](https://core.telegram.org/bots/api#convertgifttostars) | `Bot.ConvertGiftToStars` |  |
+| [convertGiftToStars](https://core.telegram.org/bots/api#convertgifttostars) | `Bot.ConvertGift` |  |
 | [upgradeGift](https://core.telegram.org/bots/api#upgradegift) | `Bot.UpgradeGift` |  |
 | [transferGift](https://core.telegram.org/bots/api#transfergift) | `Bot.TransferGift` |  |
 | [deleteBusinessAccountGift](https://core.telegram.org/bots/api#deletebusinessaccountgift) | `Bot.DeleteBusinessGift` |  |

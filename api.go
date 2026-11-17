@@ -32,7 +32,7 @@ type API interface {
 	CloseGeneralTopic(chat *Chat) error
 	CloseTopic(chat *Chat, topic *Topic) error
 	Commands(opts ...interface{}) ([]Command, error)
-	ConvertGiftToStars(connectionID, ownedGiftID string) error
+	ConvertGift(connectionID, ownedGiftID string) error
 	Copy(to Recipient, msg Editable, opts ...interface{}) (*Message, error)
 	CopyMany(to Recipient, msgs []Editable, opts ...*SendOptions) ([]Message, error)
 	CreateInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error)
