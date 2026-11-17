@@ -150,3 +150,25 @@ func TestRawFilesErrorHidesToken(t *testing.T) {
 	assert.Contains(t, err.Error(), "127.0.0.1:1", "the error still describes the request")
 	assert.NotContains(t, err.Error(), srv.Token)
 }
+
+func TestFileErrorHidesToken(t *testing.T) {
+	const tok = "123456:secret-token"
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/file/") {
+			// Drop the connection so the client error carries the URL.
+			conn, _, _ := w.(http.Hijacker).Hijack()
+			conn.Close()
+			return
+		}
+		w.Write([]byte(`{"ok":true,"result":{"file_id":"f","file_path":"photos/a.jpg"}}`))
+	}))
+	defer srv.Close()
+
+	b, err := NewBot(Settings{URL: srv.URL, Token: tok, Offline: true})
+	require.NoError(t, err)
+
+	_, err = b.File(&File{FileID: "f"})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "photos/a.jpg")
+	assert.NotContains(t, err.Error(), "secret-token")
+}
