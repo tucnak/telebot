@@ -1,7 +1,10 @@
 package telebot
 
 import (
+	"bytes"
 	"encoding/json"
+	"log"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -49,6 +52,20 @@ func TestManagedBotMethods(t *testing.T) {
 	tok, err = b.ReplaceManagedBotToken(bot)
 	require.NoError(t, err)
 	assert.Equal(t, "99:new", tok)
+
+	// Verbose logging never prints a managed bot's token.
+	var logged bytes.Buffer
+	log.SetOutput(&logged)
+	defer log.SetOutput(os.Stderr)
+	b.verbose = true
+	_, err = b.ManagedBotToken(bot)
+	require.NoError(t, err)
+	_, err = b.ReplaceManagedBotToken(bot)
+	require.NoError(t, err)
+	b.verbose = false
+	assert.Contains(t, logged.String(), "replaceManagedBotToken")
+	assert.Contains(t, logged.String(), "<redacted>")
+	assert.NotContains(t, logged.String(), "99:")
 
 	srv.Reply("getManagedBotAccessSettings", json.RawMessage(`{"is_access_restricted":true,"added_users":[{"id":5}]}`))
 	settings, err := b.ManagedBotAccessSettings(bot)

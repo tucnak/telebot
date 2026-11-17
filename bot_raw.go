@@ -375,6 +375,11 @@ func extractMessage(data []byte) (*Message, error) {
 }
 
 func verbose(method string, payload interface{}, data []byte) {
+	// The result of these methods is the token of a managed bot.
+	if (method == "getManagedBotToken" || method == "replaceManagedBotToken") && extractOk(data) == nil {
+		data = []byte(`{"ok":true,"result":"<redacted>"}`)
+	}
+
 	body, _ := json.Marshal(payload)
 	body = bytes.ReplaceAll(body, []byte(`\"`), []byte(`"`))
 	body = bytes.ReplaceAll(body, []byte(`"{`), []byte(`{`))
