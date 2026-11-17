@@ -441,10 +441,10 @@ type Message struct {
 	TopicEdited *Topic `json:"forum_topic_edited,omitempty"`
 
 	// Service message: general forum topic hidden
-	GeneralTopicHidden *struct{} `json:"general_topic_hidden,omitempty"`
+	GeneralTopicHidden *struct{} `json:"general_forum_topic_hidden,omitempty"`
 
 	// Service message: general forum topic unhidden
-	GeneralTopicUnhidden *struct{} `json:"general_topic_unhidden,omitempty"`
+	GeneralTopicUnhidden *struct{} `json:"general_forum_topic_unhidden,omitempty"`
 
 	// Service message: represents spoiler information about the message.
 	HasMediaSpoiler bool `json:"has_media_spoiler,omitempty"`

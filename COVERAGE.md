@@ -213,7 +213,7 @@ A method's "unseen parameters" are parameters whose name appears nowhere in tele
 | [User](https://core.telegram.org/bots/api#user) | `User` |  |
 | [Chat](https://core.telegram.org/bots/api#chat) | `Chat` |  |
 | [ChatFullInfo](https://core.telegram.org/bots/api#chatfullinfo) | `Chat`, `ChatFullInfo` | active_usernames, join_to_send_messages, join_by_request, rating, unique_gift_colors, paid_message_star_count |
-| [Message](https://core.telegram.org/bots/api#message) | `Message` | paid_star_count, passport_data, general_forum_topic_hidden, general_forum_topic_unhidden, paid_message_price_changed |
+| [Message](https://core.telegram.org/bots/api#message) | `Message` | paid_star_count, passport_data, paid_message_price_changed |
 | [MessageId](https://core.telegram.org/bots/api#messageid) | **missing** |  |
 | [InaccessibleMessage](https://core.telegram.org/bots/api#inaccessiblemessage) | **missing** |  |
 | [MaybeInaccessibleMessage](https://core.telegram.org/bots/api#maybeinaccessiblemessage) | **missing** |  |
