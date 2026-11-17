@@ -1,10 +1,10 @@
-// Package teletest is a fake Telegram Bot API server for offline tests.
+// Package fakeapi is a fake Telegram Bot API server for offline tests.
 //
 // It records every request a bot makes and answers each method with a reply
 // you choose, so a test can drive a bot without a real token or network and
 // then check exactly what the bot sent:
 //
-//	srv := teletest.NewServer(t)
+//	srv := fakeapi.NewServer(t)
 //	srv.Reply("sendMessage", map[string]interface{}{
 //		"message_id": 1,
 //		"chat":       map[string]interface{}{"id": 42, "type": "private"},
@@ -22,7 +22,7 @@
 //
 // The package does not import telebot, so it works with any client that
 // speaks the Bot API over HTTP.
-package teletest
+package fakeapi
 
 import (
 	"encoding/json"
@@ -87,7 +87,7 @@ type File struct {
 func (r Request) JSON(t TB, name string, v interface{}) {
 	t.Helper()
 	if err := json.Unmarshal([]byte(r.Params[name]), v); err != nil {
-		t.Errorf("teletest: %s: parameter %s: %v", r.Method, name, err)
+		t.Errorf("fakeapi: %s: parameter %s: %v", r.Method, name, err)
 	}
 }
 
@@ -125,7 +125,7 @@ func (s *Server) Reply(method string, result interface{}) {
 	default:
 		var err error
 		if raw, err = json.Marshal(result); err != nil {
-			panic(fmt.Sprintf("teletest: reply for %s: %v", method, err))
+			panic(fmt.Sprintf("fakeapi: reply for %s: %v", method, err))
 		}
 	}
 	body, _ := json.Marshal(map[string]interface{}{"ok": true, "result": json.RawMessage(raw)})
@@ -206,7 +206,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		body, _ := json.Marshal(map[string]interface{}{
-			"ok": false, "error_code": 400, "description": "teletest: " + err.Error(),
+			"ok": false, "error_code": 400, "description": "fakeapi: " + err.Error(),
 		})
 		w.Write(body)
 		return

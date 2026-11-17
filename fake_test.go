@@ -4,13 +4,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"gopkg.in/telebot.v4/teletest"
+	"gopkg.in/telebot.v4/internal/fakeapi"
 )
 
 // newFakeBot returns an offline bot wired to a fake Bot API server.
-func newFakeBot(t *testing.T) (*Bot, *teletest.Server) {
+func newFakeBot(t *testing.T) (*Bot, *fakeapi.Server) {
 	t.Helper()
-	srv := teletest.NewServer(t)
+	srv := fakeapi.NewServer(t)
 	b, err := NewBot(Settings{
 		URL:         srv.URL,
 		Token:       srv.Token,

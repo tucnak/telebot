@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"gopkg.in/telebot.v4/teletest"
+	"gopkg.in/telebot.v4/internal/fakeapi"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -138,7 +138,7 @@ func TestRawFiles(t *testing.T) {
 }
 
 func TestRawFilesErrorHidesToken(t *testing.T) {
-	srv := teletest.NewServer(t)
+	srv := fakeapi.NewServer(t)
 	url := srv.URL
 	b, err := NewBot(Settings{URL: url, Token: srv.Token, Offline: true})
 	require.NoError(t, err)

@@ -1,4 +1,4 @@
-package teletest_test
+package fakeapi_test
 
 import (
 	"fmt"
@@ -6,10 +6,10 @@ import (
 	"testing"
 
 	tele "gopkg.in/telebot.v4"
-	"gopkg.in/telebot.v4/teletest"
+	"gopkg.in/telebot.v4/internal/fakeapi"
 )
 
-func newBot(t *testing.T, srv *teletest.Server) *tele.Bot {
+func newBot(t *testing.T, srv *fakeapi.Server) *tele.Bot {
 	b, err := tele.NewBot(tele.Settings{URL: srv.URL, Token: srv.Token, Offline: true})
 	if err != nil {
 		t.Fatal(err)
@@ -18,7 +18,7 @@ func newBot(t *testing.T, srv *teletest.Server) *tele.Bot {
 }
 
 func TestServerRecordsJSON(t *testing.T) {
-	srv := teletest.NewServer(t)
+	srv := fakeapi.NewServer(t)
 	srv.Reply("sendMessage", map[string]interface{}{
 		"message_id": 7,
 		"chat":       map[string]interface{}{"id": 42, "type": "private"},
@@ -39,7 +39,7 @@ func TestServerRecordsJSON(t *testing.T) {
 }
 
 func TestServerRecordsMultipart(t *testing.T) {
-	srv := teletest.NewServer(t)
+	srv := fakeapi.NewServer(t)
 	srv.Reply("sendDocument", map[string]interface{}{"message_id": 1, "chat": map[string]interface{}{"id": 42}})
 
 	doc := &tele.Document{File: tele.FromReader(strings.NewReader("data")), FileName: "a.txt", Caption: "c"}
@@ -57,7 +57,7 @@ func TestServerRecordsMultipart(t *testing.T) {
 }
 
 func TestServerErrorsAndQueue(t *testing.T) {
-	srv := teletest.NewServer(t)
+	srv := fakeapi.NewServer(t)
 	srv.ReplyError("getChat", 400, "Bad Request: chat not found")
 	srv.Reply("getChat", map[string]interface{}{"id": 1, "type": "private"})
 
@@ -81,7 +81,7 @@ func TestServerErrorsAndQueue(t *testing.T) {
 }
 
 func TestServerRejectsWrongToken(t *testing.T) {
-	srv := teletest.NewServer(t)
+	srv := fakeapi.NewServer(t)
 	b, err := tele.NewBot(tele.Settings{URL: srv.URL, Token: "1:other", Offline: true})
 	if err != nil {
 		t.Fatal(err)
