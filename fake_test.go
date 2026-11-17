@@ -21,3 +21,6 @@ func newFakeBot(t *testing.T) (*Bot, *teletest.Server) {
 	require.NoError(t, err)
 	return b, srv
 }
+
+// Bot implements every method of API.
+var _ API = (*Bot)(nil)
