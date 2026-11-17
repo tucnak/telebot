@@ -55,9 +55,11 @@ type Poll struct {
 	// received polls with one correct option.
 	CorrectOptions []int `json:"correct_option_ids,omitempty"`
 
-	// Bot API 9.6: voters can change their answers. Telegram allows it by
-	// default for regular polls; this sends it only when true.
-	AllowsRevoting bool `json:"allows_revoting,omitempty"`
+	// Bot API 9.6: voters can change their answers. Unless told otherwise,
+	// Telegram allows it in regular polls and forbids it in quizzes: when
+	// sending, AllowsRevoting allows it and DisallowRevoting forbids it.
+	AllowsRevoting   bool `json:"allows_revoting,omitempty"`
+	DisallowRevoting bool `json:"-"`
 
 	// Bot API 9.6: description of the poll, 0-1024 characters, with its
 	// parse mode (when sending) or entities.

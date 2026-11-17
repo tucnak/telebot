@@ -436,6 +436,9 @@ func (p *Poll) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 			params[key] = "true"
 		}
 	}
+	if p.DisallowRevoting {
+		params["allows_revoting"] = "false"
+	}
 	if len(p.CountryCodes) > 0 {
 		data, _ := json.Marshal(p.CountryCodes)
 		params["country_codes"] = string(data)

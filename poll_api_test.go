@@ -79,6 +79,18 @@ func TestSendQuizSingleCorrectOption(t *testing.T) {
 	_, err = b.Send(ChatID(-100), regular)
 	require.NoError(t, err)
 	assert.NotContains(t, srv.Last().Params, "correct_option_ids")
+	assert.NotContains(t, srv.Last().Params, "allows_revoting", "Telegram's default applies")
+
+	// Regular polls allow revoting by default, so forbidding it is explicit.
+	regular.DisallowRevoting = true
+	_, err = b.Send(ChatID(-100), regular)
+	require.NoError(t, err)
+	assert.Equal(t, "false", srv.Last().Params["allows_revoting"])
+
+	poll.AllowsRevoting = true
+	_, err = b.Send(ChatID(-100), poll)
+	require.NoError(t, err)
+	assert.Equal(t, "true", srv.Last().Params["allows_revoting"])
 }
 
 func TestReceivePoll96(t *testing.T) {
