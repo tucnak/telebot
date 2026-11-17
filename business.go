@@ -2,6 +2,7 @@ package telebot
 
 import (
 	"encoding/json"
+	"strconv"
 	"time"
 )
 
@@ -25,7 +26,12 @@ type BusinessConnection struct {
 	Unixtime int64 `json:"date"`
 
 	// True, if the bot can act on behalf of the business account in chats that were active in the last 24 hours
+	//
+	// Deprecated: Telegram no longer sends it; use Rights.CanReply.
 	CanReply bool `json:"can_reply"`
+
+	// Bot API 9.0: (Optional) Rights of the bot in the business account.
+	Rights *BusinessBotRights `json:"rights,omitempty"`
 
 	// True, if the connection is active
 	Enabled bool `json:"is_enabled"`
@@ -134,6 +140,198 @@ func (b *Bot) DeleteBusinessAccountGift(connectionID, ownedGiftID string) error 
 	_, err := b.Raw("deleteBusinessAccountGift", map[string]string{
 		"business_connection_id": connectionID,
 		"owned_gift_id":          ownedGiftID,
+	})
+	return err
+}
+
+// BusinessBotRights are the rights of a business bot (Bot API 9.0).
+//
+// Bot API: BusinessBotRights.
+type BusinessBotRights struct {
+	CanReply                   bool `json:"can_reply,omitempty"`
+	CanReadMessages            bool `json:"can_read_messages,omitempty"`
+	CanDeleteSentMessages      bool `json:"can_delete_sent_messages,omitempty"`
+	CanDeleteAllMessages       bool `json:"can_delete_all_messages,omitempty"`
+	CanEditName                bool `json:"can_edit_name,omitempty"`
+	CanEditBio                 bool `json:"can_edit_bio,omitempty"`
+	CanEditProfilePhoto        bool `json:"can_edit_profile_photo,omitempty"`
+	CanEditUsername            bool `json:"can_edit_username,omitempty"`
+	CanChangeGiftSettings      bool `json:"can_change_gift_settings,omitempty"`
+	CanViewGiftsAndStars       bool `json:"can_view_gifts_and_stars,omitempty"`
+	CanConvertGiftsToStars     bool `json:"can_convert_gifts_to_stars,omitempty"`
+	CanTransferAndUpgradeGifts bool `json:"can_transfer_and_upgrade_gifts,omitempty"`
+	CanTransferStars           bool `json:"can_transfer_stars,omitempty"`
+	CanManageStories           bool `json:"can_manage_stories,omitempty"`
+}
+
+// AcceptedGiftTypes are the types of gifts a user or chat accepts
+// (Bot API 9.0).
+//
+// Bot API: AcceptedGiftTypes.
+type AcceptedGiftTypes struct {
+	UnlimitedGifts      bool `json:"unlimited_gifts"`
+	LimitedGifts        bool `json:"limited_gifts"`
+	UniqueGifts         bool `json:"unique_gifts"`
+	PremiumSubscription bool `json:"premium_subscription"`
+	GiftsFromChannels   bool `json:"gifts_from_channels"`
+}
+
+// ReadBusinessMessage marks msg, received in a chat active in the last 24
+// hours, as read on behalf of the business account (Bot API 9.0).
+//
+// Bot API: readBusinessMessage.
+func (b *Bot) ReadBusinessMessage(connectionID string, msg Editable) error {
+	msgID, chatID := msg.MessageSig()
+	_, err := b.Raw("readBusinessMessage", map[string]string{
+		"business_connection_id": connectionID,
+		"chat_id":                strconv.FormatInt(chatID, 10),
+		"message_id":             msgID,
+	})
+	return err
+}
+
+// DeleteBusinessMessages deletes 1-100 messages of one chat on behalf of the
+// business account (Bot API 9.0).
+//
+// Bot API: deleteBusinessMessages.
+func (b *Bot) DeleteBusinessMessages(connectionID string, msgs []Editable) error {
+	ids := make([]json.Number, len(msgs))
+	for i, m := range msgs {
+		id, _ := m.MessageSig()
+		ids[i] = json.Number(id)
+	}
+	data, err := json.Marshal(ids)
+	if err != nil {
+		return err
+	}
+	_, err = b.Raw("deleteBusinessMessages", map[string]string{
+		"business_connection_id": connectionID,
+		"message_ids":            string(data),
+	})
+	return err
+}
+
+// SetBusinessAccountName changes the first and last name of the business
+// account (Bot API 9.0).
+//
+// Bot API: setBusinessAccountName.
+func (b *Bot) SetBusinessAccountName(connectionID, firstName, lastName string) error {
+	params := map[string]string{
+		"business_connection_id": connectionID,
+		"first_name":             firstName,
+	}
+	if lastName != "" {
+		params["last_name"] = lastName
+	}
+	_, err := b.Raw("setBusinessAccountName", params)
+	return err
+}
+
+// SetBusinessAccountUsername changes the username of the business account;
+// an empty username removes it (Bot API 9.0).
+//
+// Bot API: setBusinessAccountUsername.
+func (b *Bot) SetBusinessAccountUsername(connectionID, username string) error {
+	_, err := b.Raw("setBusinessAccountUsername", map[string]string{
+		"business_connection_id": connectionID,
+		"username":               username,
+	})
+	return err
+}
+
+// SetBusinessAccountBio changes the bio of the business account; an empty
+// bio removes it (Bot API 9.0).
+//
+// Bot API: setBusinessAccountBio.
+func (b *Bot) SetBusinessAccountBio(connectionID, bio string) error {
+	_, err := b.Raw("setBusinessAccountBio", map[string]string{
+		"business_connection_id": connectionID,
+		"bio":                    bio,
+	})
+	return err
+}
+
+// SetBusinessAccountProfilePhoto changes the profile photo of the business
+// account; with public, the public photo shown when the main one is hidden
+// (Bot API 9.0).
+//
+// Bot API: setBusinessAccountProfilePhoto.
+func (b *Bot) SetBusinessAccountProfilePhoto(connectionID string, photo InputProfilePhoto, public bool) error {
+	files := make(map[string]File)
+	data, err := photo.inputProfilePhoto(files)
+	if err != nil {
+		return err
+	}
+	params := map[string]string{
+		"business_connection_id": connectionID,
+		"photo":                  string(data),
+	}
+	if public {
+		params["is_public"] = "true"
+	}
+	_, err = b.sendFiles("setBusinessAccountProfilePhoto", files, params)
+	return err
+}
+
+// RemoveBusinessAccountProfilePhoto removes the profile photo of the
+// business account, or with public its public photo (Bot API 9.0).
+//
+// Bot API: removeBusinessAccountProfilePhoto.
+func (b *Bot) RemoveBusinessAccountProfilePhoto(connectionID string, public bool) error {
+	params := map[string]string{"business_connection_id": connectionID}
+	if public {
+		params["is_public"] = "true"
+	}
+	_, err := b.Raw("removeBusinessAccountProfilePhoto", params)
+	return err
+}
+
+// SetBusinessAccountGiftSettings changes which gifts the business account
+// accepts and whether the gift button is always shown (Bot API 9.0).
+//
+// Bot API: setBusinessAccountGiftSettings.
+func (b *Bot) SetBusinessAccountGiftSettings(connectionID string, showGiftButton bool, types AcceptedGiftTypes) error {
+	data, err := json.Marshal(types)
+	if err != nil {
+		return err
+	}
+	_, err = b.Raw("setBusinessAccountGiftSettings", map[string]string{
+		"business_connection_id": connectionID,
+		"show_gift_button":       strconv.FormatBool(showGiftButton),
+		"accepted_gift_types":    string(data),
+	})
+	return err
+}
+
+// BusinessAccountStarBalance returns the Telegram Stars of the business
+// account (Bot API 9.0).
+//
+// Bot API: getBusinessAccountStarBalance.
+func (b *Bot) BusinessAccountStarBalance(connectionID string) (*StarAmount, error) {
+	data, err := b.Raw("getBusinessAccountStarBalance", map[string]string{
+		"business_connection_id": connectionID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result *StarAmount
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return resp.Result, nil
+}
+
+// TransferBusinessAccountStars moves 1-10000 Telegram Stars from the business
+// account to the bot (Bot API 9.0).
+//
+// Bot API: transferBusinessAccountStars.
+func (b *Bot) TransferBusinessAccountStars(connectionID string, stars int) error {
+	_, err := b.Raw("transferBusinessAccountStars", map[string]string{
+		"business_connection_id": connectionID,
+		"star_count":             strconv.Itoa(stars),
 	})
 	return err
 }

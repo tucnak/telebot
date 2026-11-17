@@ -1607,11 +1607,15 @@ func (b *Bot) MyShortDescription(language string) (*BotInfo, error) {
 
 // InputProfilePhoto describes a profile photo to set. Bot API 9.4.
 // Implemented by *InputProfilePhotoStatic and *InputProfilePhotoAnimated.
+//
+// Bot API: InputProfilePhoto.
 type InputProfilePhoto interface {
 	inputProfilePhoto(files map[string]File) ([]byte, error)
 }
 
 // InputProfilePhotoStatic is a static profile photo in the .JPG format.
+//
+// Bot API: InputProfilePhotoStatic.
 type InputProfilePhotoStatic struct {
 	File
 }
@@ -1628,6 +1632,8 @@ func (p *InputProfilePhotoStatic) inputProfilePhoto(files map[string]File) ([]by
 }
 
 // InputProfilePhotoAnimated is an animated profile photo in the MPEG4 format.
+//
+// Bot API: InputProfilePhotoAnimated.
 type InputProfilePhotoAnimated struct {
 	File
 
