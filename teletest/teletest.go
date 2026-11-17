@@ -29,7 +29,6 @@ import (
 	"fmt"
 	"io"
 	"mime"
-	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -234,21 +233,33 @@ func decode(method string, r *http.Request) (Request, error) {
 	ctype, _, _ := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	switch ctype {
 	case "multipart/form-data":
-		if err := r.ParseMultipartForm(32 << 20); err != nil {
+		// Parts are read one by one rather than with ParseMultipartForm, which
+		// files a part with an empty filename under values.
+		mr, err := r.MultipartReader()
+		if err != nil {
 			return req, err
 		}
-		for k, v := range r.MultipartForm.Value {
-			req.Params[k] = v[0]
-		}
-		for k, fhs := range r.MultipartForm.File {
-			data, err := readFile(fhs[0])
+		for {
+			part, err := mr.NextPart()
+			if err == io.EOF {
+				break
+			}
 			if err != nil {
 				return req, err
 			}
-			if req.Files == nil {
-				req.Files = map[string]File{}
+			data, err := io.ReadAll(part)
+			if err != nil {
+				return req, err
 			}
-			req.Files[k] = File{Name: fhs[0].Filename, Data: data}
+			_, params, _ := mime.ParseMediaType(part.Header.Get("Content-Disposition"))
+			if name, isFile := params["filename"]; isFile {
+				if req.Files == nil {
+					req.Files = map[string]File{}
+				}
+				req.Files[part.FormName()] = File{Name: name, Data: data}
+			} else {
+				req.Params[part.FormName()] = string(data)
+			}
 		}
 
 	case "application/x-www-form-urlencoded":
@@ -284,13 +295,4 @@ func decode(method string, r *http.Request) (Request, error) {
 		}
 	}
 	return req, nil
-}
-
-func readFile(fh *multipart.FileHeader) ([]byte, error) {
-	f, err := fh.Open()
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	return io.ReadAll(f)
 }
