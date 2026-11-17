@@ -2,6 +2,7 @@ package telebot
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -78,7 +79,7 @@ func (b *Bot) tokenID() int64 {
 	}
 	id, err := strconv.ParseInt(b.Token[:pos], 10, 64)
 	if err != nil || id <= 0 {
-		b.debug(fmt.Errorf("cannot derive bot ID from token: %q", b.Token[:pos]))
+		b.debug(errors.New("telebot: cannot derive the bot ID from the token"))
 		return 0
 	}
 	return id
