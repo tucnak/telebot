@@ -71,7 +71,7 @@ type TransactionPartnerChat struct {
 // TransactionPartner describes the source or the recipient of a Telegram
 // Star transaction.
 //
-// Bot API: TransactionPartner, TransactionPartnerUser, TransactionPartnerFragment, TransactionPartnerTelegramAds, TransactionPartnerTelegramApi, TransactionPartnerOther.
+// Bot API: TransactionPartner, TransactionPartnerUser, TransactionPartnerChat, TransactionPartnerAffiliateProgram, TransactionPartnerFragment, TransactionPartnerTelegramAds, TransactionPartnerTelegramApi, TransactionPartnerOther.
 type TransactionPartner struct {
 	// Type of the state
 	Type    TransactionType `json:"type"`
@@ -89,6 +89,12 @@ type TransactionPartner struct {
 
 	// Bot API 8.1: Information about the affiliate program from which the transaction was made
 	Affiliate *AffiliateInfo `json:"affiliate,omitempty"`
+
+	// Bot API 8.1: for "affiliate_program" partners, the bot that sponsored
+	// the program, and the Stars the bot receives for each 1000 Stars the
+	// sponsor receives from referred users.
+	SponsorUser        *User `json:"sponsor_user,omitempty"`
+	CommissionPerMille int   `json:"commission_per_mille,omitempty"`
 
 	// Bot API 8.3: for "chat" partners, the chat.
 	Chat *Chat `json:"chat,omitempty"`

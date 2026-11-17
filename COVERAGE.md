@@ -608,8 +608,8 @@ A method's "unseen parameters" are parameters whose name appears nowhere in tele
 | [AffiliateInfo](https://core.telegram.org/bots/api#affiliateinfo) | `AffiliateInfo` |  |
 | [TransactionPartner](https://core.telegram.org/bots/api#transactionpartner) | `TransactionPartner` |  |
 | [TransactionPartnerUser](https://core.telegram.org/bots/api#transactionpartneruser) | `TransactionPartner` |  |
-| [TransactionPartnerChat](https://core.telegram.org/bots/api#transactionpartnerchat) | `TransactionPartnerChat` |  |
-| [TransactionPartnerAffiliateProgram](https://core.telegram.org/bots/api#transactionpartneraffiliateprogram) | `TransactionPartnerAffiliateProgram` |  |
+| [TransactionPartnerChat](https://core.telegram.org/bots/api#transactionpartnerchat) | `TransactionPartner`, `TransactionPartnerChat` |  |
+| [TransactionPartnerAffiliateProgram](https://core.telegram.org/bots/api#transactionpartneraffiliateprogram) | `TransactionPartner`, `TransactionPartnerAffiliateProgram` |  |
 | [TransactionPartnerFragment](https://core.telegram.org/bots/api#transactionpartnerfragment) | `TransactionPartner` |  |
 | [TransactionPartnerTelegramAds](https://core.telegram.org/bots/api#transactionpartnertelegramads) | `TransactionPartner` |  |
 | [TransactionPartnerTelegramApi](https://core.telegram.org/bots/api#transactionpartnertelegramapi) | `TransactionPartner` |  |

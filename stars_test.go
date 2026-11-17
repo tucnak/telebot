@@ -132,24 +132,20 @@ func TestStarTransactionNoNanostarAmount(t *testing.T) {
 	assert.Equal(t, 0.0, tx.NanostarAmountAsTON())
 }
 
-func TestTransactionPartnerAffiliateProgram(t *testing.T) {
-	jsonData := `{
-		"type": "affiliate_program",
-		"sponsor_user": {
-			"id": 987654,
-			"first_name": "Sponsor",
-			"is_bot": false
-		},
-		"commission_per_mille": 50
-	}`
+func TestStarTransactionsAffiliateProgram(t *testing.T) {
+	b, srv := newFakeBot(t)
+	srv.Reply("getStarTransactions", json.RawMessage(`{"transactions":[{"id":"tx","amount":5,"date":1700000000,
+		"source":{"type":"affiliate_program","sponsor_user":{"id":987654,"is_bot":true,"first_name":"Sponsor"},"commission_per_mille":50}}]}`))
 
-	var ap TransactionPartnerAffiliateProgram
-	err := json.Unmarshal([]byte(jsonData), &ap)
-	assert.NoError(t, err)
-	assert.Equal(t, TransactionTypeAffiliateProgram, ap.Type)
-	assert.Equal(t, 50, ap.CommissionPerMille)
-	assert.NotNil(t, ap.SponsorUser)
-	assert.Equal(t, int64(987654), ap.SponsorUser.ID)
+	txs, err := b.StarTransactions(0, 10)
+	require.NoError(t, err)
+	require.Len(t, txs, 1)
+
+	src := txs[0].Source
+	assert.Equal(t, TransactionTypeAffiliateProgram, src.Type)
+	assert.Equal(t, 50, src.CommissionPerMille)
+	require.NotNil(t, src.SponsorUser)
+	assert.Equal(t, int64(987654), src.SponsorUser.ID)
 }
 
 func TestAffiliateInfo(t *testing.T) {
