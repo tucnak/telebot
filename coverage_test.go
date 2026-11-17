@@ -359,10 +359,6 @@ var notBotAPITypes = map[string]bool{
 	"StoredMessage":    true, // Editable for stored messages
 	"WebhookEndpoint":  true, // Webhook settings
 	"WebhookTLS":       true, // Webhook settings
-
-	// Sent by VerifyUser and VerifyChat, but not part of the Bot API.
-	"VerificationInfo":         true,
-	"VerificationRequirements": true,
 }
 
 func sortedDecls(m map[string]*goDecl) []*goDecl {

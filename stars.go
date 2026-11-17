@@ -140,58 +140,6 @@ type TransactionPartnerAffiliateProgram struct {
 	CommissionPerMille int `json:"commission_per_mille"`
 }
 
-// VerificationLevel describes the verification level of a user or chat.
-type VerificationLevel string
-
-const (
-	VerificationLevelNone     VerificationLevel = "none"
-	VerificationLevelBasic    VerificationLevel = "basic"
-	VerificationLevelDetailed VerificationLevel = "detailed"
-	VerificationLevelFull     VerificationLevel = "full"
-)
-
-// VerificationRequirements describes the requirements for verification.
-type VerificationRequirements struct {
-	// (Optional) Whether the user needs to provide a phone number
-	RequirePhoneNumber bool `json:"require_phone_number,omitempty"`
-
-	// (Optional) Whether the user needs to provide their real name
-	RequireRealName bool `json:"require_real_name,omitempty"`
-
-	// (Optional) Whether the user needs to provide their date of birth
-	RequireBirthDate bool `json:"require_birth_date,omitempty"`
-
-	// (Optional) Whether the user needs to provide their address
-	RequireAddress bool `json:"require_address,omitempty"`
-
-	// (Optional) Whether the user needs to provide identification documents
-	RequireDocuments bool `json:"require_documents,omitempty"`
-
-	// (Optional) Custom verification requirements
-	CustomRequirements []string `json:"custom_requirements,omitempty"`
-}
-
-// VerificationInfo contains information about the verification status.
-type VerificationInfo struct {
-	// Verification level of the user or chat
-	Level VerificationLevel `json:"level"`
-
-	// (Optional) Date when verification was granted in Unix time
-	VerificationDate int64 `json:"verification_date,omitempty"`
-
-	// (Optional) Expiration date of verification in Unix time
-	ExpirationDate int64 `json:"expiration_date,omitempty"`
-
-	// (Optional) Information about the entity that verified this user or chat
-	VerifiedBy string `json:"verified_by,omitempty"`
-
-	// (Optional) Additional verification details
-	Details string `json:"details,omitempty"`
-
-	// (Optional) Whether the verification is currently active
-	IsActive bool `json:"is_active"`
-}
-
 // AffiliateInfo contains information about the affiliate program from which the transaction was made.
 //
 // Bot API: AffiliateInfo.
@@ -231,29 +179,6 @@ func (a *AffiliateInfo) NanostarAmountAsTON() float64 {
 // HasNanostarAmount returns whether the affiliate info has a nanostar amount.
 func (a *AffiliateInfo) HasNanostarAmount() bool {
 	return a.NanostarAmount > 0
-}
-
-// VerificationTime returns the date when verification was granted.
-func (v *VerificationInfo) VerificationTime() time.Time {
-	return time.Unix(v.VerificationDate, 0)
-}
-
-// ExpirationTime returns the expiration date of the verification.
-func (v *VerificationInfo) ExpirationTime() time.Time {
-	return time.Unix(v.ExpirationDate, 0)
-}
-
-// IsExpired returns whether the verification has expired.
-func (v *VerificationInfo) IsExpired() bool {
-	if v.ExpirationDate == 0 {
-		return false // No expiration date set
-	}
-	return time.Now().Unix() > v.ExpirationDate
-}
-
-// IsValid returns whether the verification is currently valid (active and not expired).
-func (v *VerificationInfo) IsValid() bool {
-	return v.IsActive && !v.IsExpired()
 }
 
 // Time returns the date of the transaction.

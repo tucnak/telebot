@@ -301,52 +301,6 @@ func (b *Bot) Verify(to Recipient, description string, opts ...interface{}) erro
 	return err
 }
 
-// VerifyUser verifies a user with the specified level and requirements.
-//
-// Deprecated: the Bot API has no level or requirements parameters, which
-// Telegram ignores, and this method cannot set a custom description. Use
-// Verify.
-//
-// Bot API: verifyUser.
-func (b *Bot) VerifyUser(user Recipient, level VerificationLevel, requirements *VerificationRequirements) error {
-	params := map[string]string{
-		"user_id": user.Recipient(),
-		"level":   string(level),
-	}
-
-	if requirements != nil {
-		if data, err := json.Marshal(requirements); err == nil {
-			params["requirements"] = string(data)
-		}
-	}
-
-	_, err := b.Raw("verifyUser", params)
-	return err
-}
-
-// VerifyChat verifies a chat with the specified level and requirements.
-//
-// Deprecated: the Bot API has no level or requirements parameters, which
-// Telegram ignores, and this method cannot set a custom description. Use
-// Verify.
-//
-// Bot API: verifyChat.
-func (b *Bot) VerifyChat(chat *Chat, level VerificationLevel, requirements *VerificationRequirements) error {
-	params := map[string]string{
-		"chat_id": chat.Recipient(),
-		"level":   string(level),
-	}
-
-	if requirements != nil {
-		if data, err := json.Marshal(requirements); err == nil {
-			params["requirements"] = string(data)
-		}
-	}
-
-	_, err := b.Raw("verifyChat", params)
-	return err
-}
-
 // RemoveUserVerification removes verification from a user.
 //
 // Bot API: removeUserVerification.
