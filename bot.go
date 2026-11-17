@@ -1362,6 +1362,28 @@ type UserProfileAudios struct {
 	Audios     []Audio `json:"audios"`
 }
 
+// PersonalChatMessages returns the last messages, up to limit (1-20), from
+// the personal chat of user, the chat added to their profile (Bot API 10.0).
+//
+// Bot API: getUserPersonalChatMessages.
+func (b *Bot) PersonalChatMessages(user Recipient, limit int) ([]Message, error) {
+	data, err := b.Raw("getUserPersonalChatMessages", map[string]string{
+		"user_id": user.Recipient(),
+		"limit":   strconv.Itoa(limit),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result []Message
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return resp.Result, nil
+}
+
 // ProfileAudiosOf returns a list of profile audios for a user.
 // offset is the sequential number of the first audio to be returned (0 to start).
 // limit caps the number of audios; values 1-100 are accepted (0 means default 100).

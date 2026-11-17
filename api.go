@@ -79,6 +79,7 @@ type API interface {
 	MyName(language string) (*BotInfo, error)
 	MyShortDescription(language string) (*BotInfo, error)
 	Notify(to Recipient, action ChatAction, threadID ...int) error
+	PersonalChatMessages(user Recipient, limit int) ([]Message, error)
 	Pin(msg Editable, opts ...interface{}) error
 	ProfileAudiosOf(user *User, offset, limit int) (*UserProfileAudios, error)
 	ProfilePhotosOf(user *User) ([]Photo, error)

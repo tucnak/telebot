@@ -70,3 +70,14 @@ func TestChatManagement100(t *testing.T) {
 	require.NoError(t, b.Restrict(&Chat{ID: -100}, &ChatMember{User: &User{ID: 7}, Rights: Rights{CanReactToMessages: true}}))
 	assert.Contains(t, srv.Last().Params["permissions"], `"can_react_to_messages":true`)
 }
+
+func TestPersonalChatMessages(t *testing.T) {
+	b, srv := newFakeBot(t)
+	srv.Reply("getUserPersonalChatMessages", json.RawMessage(`[{"message_id":4,"chat":{"id":-100,"type":"channel"},"text":"news"}]`))
+
+	msgs, err := b.PersonalChatMessages(&User{ID: 7}, 5)
+	require.NoError(t, err)
+	require.Len(t, msgs, 1)
+	assert.Equal(t, "news", msgs[0].Text)
+	assert.Equal(t, map[string]string{"user_id": "7", "limit": "5"}, srv.Last().Params)
+}
