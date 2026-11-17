@@ -139,4 +139,10 @@ func TestSendGift(t *testing.T) {
 	assert.Equal(t, "-100", req.Params["chat_id"])
 	assert.NotContains(t, req.Params, "user_id")
 	assert.JSONEq(t, `[{"type":"bold","offset":0,"length":2}]`, req.Params["text_entities"])
+
+	// A chat given by ID or username is a chat too.
+	require.NoError(t, b.SendGift(ChatID(-100), "g"))
+	assert.Equal(t, map[string]string{"chat_id": "-100", "gift_id": "g"}, srv.Last().Params)
+	require.NoError(t, b.SendGift(ChatID(7), "g"))
+	assert.Equal(t, map[string]string{"user_id": "7", "gift_id": "g"}, srv.Last().Params)
 }

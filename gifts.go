@@ -3,6 +3,7 @@ package telebot
 import (
 	"encoding/json"
 	"strconv"
+	"strings"
 )
 
 // Gift represents a gift that can be sent by the bot.
@@ -251,17 +252,13 @@ func (b *Bot) SendGift(to Recipient, giftID string, opts ...interface{}) error {
 		"gift_id": giftID,
 	}
 
-	// Check if recipient is a user or chat
-	switch to.(type) {
-	case *User:
-		// Send to user directly
-		params["user_id"] = to.Recipient()
-	case *Chat:
-		// Bot API 8.3: Send to chat member (requires additional chat_id parameter)
-		params["chat_id"] = to.Recipient()
-	default:
-		// Default to user_id for backward compatibility
-		params["user_id"] = to.Recipient()
+	// A user gets the gift by ID; a chat by ID, which is negative, or by
+	// username (Bot API 8.3).
+	recipient := to.Recipient()
+	if _, isChat := to.(*Chat); isChat || strings.HasPrefix(recipient, "-") || strings.HasPrefix(recipient, "@") {
+		params["chat_id"] = recipient
+	} else {
+		params["user_id"] = recipient
 	}
 
 	for _, opt := range opts {
