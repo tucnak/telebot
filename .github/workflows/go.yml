@@ -41,6 +41,7 @@ jobs:
       CHAT_ID: ${{ secrets.CHAT_ID }}
       USER_ID: ${{ secrets.USER_ID }}
       CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+      GROUP_ID: ${{ secrets.GROUP_ID }}
     steps:
       - uses: actions/checkout@v5
 
