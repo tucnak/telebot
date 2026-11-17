@@ -519,18 +519,18 @@ A method's "unseen parameters" are parameters whose name appears nowhere in tele
 | [RichBlockBlockQuotation](https://core.telegram.org/bots/api#richblockblockquotation) | `RichBlock` |  |
 | [RichBlockExpandableBlockQuotation](https://core.telegram.org/bots/api#richblockexpandableblockquotation) | **missing** |  |
 | [RichBlockPullQuotation](https://core.telegram.org/bots/api#richblockpullquotation) | `RichBlock` |  |
-| [RichBlockCollage](https://core.telegram.org/bots/api#richblockcollage) | `RichBlock` | caption |
-| [RichBlockSlideshow](https://core.telegram.org/bots/api#richblockslideshow) | `RichBlock` | caption |
-| [RichBlockTable](https://core.telegram.org/bots/api#richblocktable) | `RichBlock` | is_compact, caption |
+| [RichBlockCollage](https://core.telegram.org/bots/api#richblockcollage) | `RichBlock` |  |
+| [RichBlockSlideshow](https://core.telegram.org/bots/api#richblockslideshow) | `RichBlock` |  |
+| [RichBlockTable](https://core.telegram.org/bots/api#richblocktable) | `RichBlock` | is_compact |
 | [RichBlockDetails](https://core.telegram.org/bots/api#richblockdetails) | `RichBlock` |  |
-| [RichBlockMap](https://core.telegram.org/bots/api#richblockmap) | `RichBlock` | caption |
+| [RichBlockMap](https://core.telegram.org/bots/api#richblockmap) | `RichBlock` |  |
 | [RichBlockButtons](https://core.telegram.org/bots/api#richblockbuttons) | **missing** |  |
-| [RichBlockAnimation](https://core.telegram.org/bots/api#richblockanimation) | `RichBlock` | caption |
-| [RichBlockAudio](https://core.telegram.org/bots/api#richblockaudio) | `RichBlock` | caption |
+| [RichBlockAnimation](https://core.telegram.org/bots/api#richblockanimation) | `RichBlock` |  |
+| [RichBlockAudio](https://core.telegram.org/bots/api#richblockaudio) | `RichBlock` |  |
 | [RichBlockDocument](https://core.telegram.org/bots/api#richblockdocument) | **missing** |  |
-| [RichBlockPhoto](https://core.telegram.org/bots/api#richblockphoto) | `RichBlock` | caption |
-| [RichBlockVideo](https://core.telegram.org/bots/api#richblockvideo) | `RichBlock` | caption |
-| [RichBlockVoiceNote](https://core.telegram.org/bots/api#richblockvoicenote) | `RichBlock` | caption |
+| [RichBlockPhoto](https://core.telegram.org/bots/api#richblockphoto) | `RichBlock` |  |
+| [RichBlockVideo](https://core.telegram.org/bots/api#richblockvideo) | `RichBlock` |  |
+| [RichBlockVoiceNote](https://core.telegram.org/bots/api#richblockvoicenote) | `RichBlock` |  |
 | [RichBlockThinking](https://core.telegram.org/bots/api#richblockthinking) | `RichBlock` |  |
 | [InputRichBlockListItem](https://core.telegram.org/bots/api#inputrichblocklistitem) | **missing** |  |
 | [InputRichBlock](https://core.telegram.org/bots/api#inputrichblock) | **missing** |  |

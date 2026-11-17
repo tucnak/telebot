@@ -35,12 +35,13 @@ type goDecl struct {
 }
 
 type goPackage struct {
-	funcs   map[string]*goDecl
-	types   map[string]*goDecl
-	calls   map[string]map[string]bool // func name -> called names
-	tags    map[string][]string        // type name -> json tags, embedded types included
-	embeds  map[string][]string        // type name -> embedded type names
-	strings map[string]bool            // every string literal in the package
+	funcs     map[string]*goDecl
+	types     map[string]*goDecl
+	calls     map[string]map[string]bool // func name -> called names
+	tags      map[string][]string        // type name -> json tags of its fields
+	codecTags map[string][]string        // type name -> json tags in its (Un)MarshalJSON
+	embeds    map[string][]string        // type name -> embedded type names
+	strings   map[string]bool            // every string literal in the package
 }
 
 func parsePackage(t *testing.T) *goPackage {
@@ -62,12 +63,13 @@ func parsePackage(t *testing.T) *goPackage {
 	}
 
 	p := &goPackage{
-		funcs:   map[string]*goDecl{},
-		types:   map[string]*goDecl{},
-		calls:   map[string]map[string]bool{},
-		tags:    map[string][]string{},
-		embeds:  map[string][]string{},
-		strings: map[string]bool{},
+		funcs:     map[string]*goDecl{},
+		types:     map[string]*goDecl{},
+		calls:     map[string]map[string]bool{},
+		tags:      map[string][]string{},
+		codecTags: map[string][]string{},
+		embeds:    map[string][]string{},
+		strings:   map[string]bool{},
 	}
 
 	botAPI := func(doc *ast.CommentGroup) []string {
@@ -125,6 +127,18 @@ func parsePackage(t *testing.T) *goPackage {
 					})
 				}
 				p.calls[name] = calls
+
+				// Fields decoded or encoded by hand are declared in the
+				// structs of the type's (Un)MarshalJSON.
+				if d.Recv != nil && d.Body != nil && (d.Name.Name == "UnmarshalJSON" || d.Name.Name == "MarshalJSON") {
+					typ := name[:strings.Index(name, ".")]
+					ast.Inspect(d.Body, func(n ast.Node) bool {
+						if st, ok := n.(*ast.StructType); ok {
+							p.codecTags[typ] = append(p.codecTags[typ], jsonTags(st)...)
+						}
+						return true
+					})
+				}
 				if ast.IsExported(d.Name.Name) {
 					p.funcs[name] = &goDecl{name: name, botAPI: botAPI(d.Doc), file: file}
 				}
@@ -147,29 +161,39 @@ func parsePackage(t *testing.T) *goPackage {
 						continue
 					}
 					for _, fld := range st.Fields.List {
-						if len(fld.Names) == 0 {
-							typ := fld.Type
-							if star, ok := typ.(*ast.StarExpr); ok {
-								typ = star.X
-							}
-							if id, ok := typ.(*ast.Ident); ok {
-								p.embeds[ts.Name.Name] = append(p.embeds[ts.Name.Name], id.Name)
-							}
-						}
-						if fld.Tag == nil {
+						if len(fld.Names) != 0 {
 							continue
 						}
-						tag, _ := strconv.Unquote(fld.Tag.Value)
-						name := strings.Split(reflect.StructTag(tag).Get("json"), ",")[0]
-						if name != "" && name != "-" {
-							p.tags[ts.Name.Name] = append(p.tags[ts.Name.Name], name)
+						typ := fld.Type
+						if star, ok := typ.(*ast.StarExpr); ok {
+							typ = star.X
+						}
+						if id, ok := typ.(*ast.Ident); ok {
+							p.embeds[ts.Name.Name] = append(p.embeds[ts.Name.Name], id.Name)
 						}
 					}
+					p.tags[ts.Name.Name] = append(p.tags[ts.Name.Name], jsonTags(st)...)
 				}
 			}
 		}
 	}
 	return p
+}
+
+// jsonTags returns the json names of the fields of st.
+func jsonTags(st *ast.StructType) []string {
+	var names []string
+	for _, fld := range st.Fields.List {
+		if fld.Tag == nil {
+			continue
+		}
+		tag, _ := strconv.Unquote(fld.Tag.Value)
+		name := strings.Split(reflect.StructTag(tag).Get("json"), ",")[0]
+		if name != "" && name != "-" {
+			names = append(names, name)
+		}
+	}
+	return names
 }
 
 // reachesAPI reports which functions reach Bot.Raw or Bot.sendFiles, by
@@ -207,7 +231,7 @@ func (p *goPackage) allTags(name string, seen map[string]bool) []string {
 		return nil
 	}
 	seen[name] = true
-	tags := append([]string(nil), p.tags[name]...)
+	tags := append(append([]string(nil), p.tags[name]...), p.codecTags[name]...)
 	for _, e := range p.embeds[name] {
 		tags = append(tags, p.allTags(e, seen)...)
 	}
@@ -355,7 +379,9 @@ func renderCoverage(spec *botapispec.Spec, pkg *goPackage, byMethod, byType map[
 				}
 			}
 			for _, f := range ty.Fields {
-				if !have[f.Name] {
+				// The "type" discriminator of a union member is set by telebot.
+				discriminator := f.Name == "type" && (strings.Contains(f.Description, "always") || strings.Contains(f.Description, "must be"))
+				if !have[f.Name] && !discriminator {
 					missing = append(missing, f.Name)
 				}
 			}
