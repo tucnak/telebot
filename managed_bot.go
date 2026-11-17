@@ -134,12 +134,12 @@ type PreparedKeyboardButton struct {
 	ID string `json:"id"`
 }
 
-// SavePreparedKeyboardButton stores a keyboard button that user can use in a
+// PrepareButton stores a keyboard button that user can use in a
 // Mini App. The button must request users, a chat or a managed bot
 // (Bot API 9.6).
 //
 // Bot API: savePreparedKeyboardButton.
-func (b *Bot) SavePreparedKeyboardButton(user Recipient, button ReplyButton) (*PreparedKeyboardButton, error) {
+func (b *Bot) PrepareButton(user Recipient, button ReplyButton) (*PreparedKeyboardButton, error) {
 	data, err := json.Marshal(button)
 	if err != nil {
 		return nil, err

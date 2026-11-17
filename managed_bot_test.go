@@ -81,7 +81,7 @@ func TestManagedBotMethods(t *testing.T) {
 	assert.Equal(t, map[string]string{"user_id": "99", "is_access_restricted": "true", "added_user_ids": "[5,6]"}, srv.Last().Params)
 
 	srv.Reply("savePreparedKeyboardButton", json.RawMessage(`{"id":"pk1"}`))
-	pk, err := b.SavePreparedKeyboardButton(&User{ID: 7}, ReplyButton{
+	pk, err := b.PrepareButton(&User{ID: 7}, ReplyButton{
 		Text:       "Create a bot",
 		ManagedBot: &ReplyManagedBot{ID: 1, SuggestedName: "Helper", SuggestedUsername: "helper_ai"},
 	})

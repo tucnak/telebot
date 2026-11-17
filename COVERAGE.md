@@ -150,7 +150,7 @@ A method's "unseen parameters" are parameters that the functions calling it, and
 | [deleteStory](https://core.telegram.org/bots/api#deletestory) | `Bot.DeleteStory` |  |
 | [answerWebAppQuery](https://core.telegram.org/bots/api#answerwebappquery) | `Bot.AnswerWebApp` |  |
 | [savePreparedInlineMessage](https://core.telegram.org/bots/api#savepreparedinlinemessage) | `Bot.SavePreparedInlineMessage` |  |
-| [savePreparedKeyboardButton](https://core.telegram.org/bots/api#savepreparedkeyboardbutton) | `Bot.SavePreparedKeyboardButton` |  |
+| [savePreparedKeyboardButton](https://core.telegram.org/bots/api#savepreparedkeyboardbutton) | `Bot.PrepareButton` |  |
 | [editMessageText](https://core.telegram.org/bots/api#editmessagetext) | `Bot.Edit` |  |
 | [editMessageCaption](https://core.telegram.org/bots/api#editmessagecaption) | `Bot.EditCaption` |  |
 | [editMessageMedia](https://core.telegram.org/bots/api#editmessagemedia) | `Bot.EditMedia` |  |
