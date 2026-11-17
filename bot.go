@@ -916,7 +916,9 @@ func (b *Bot) Delete(msg Editable) error {
 // Bot API: deleteMessages.
 func (b *Bot) DeleteMany(msgs []Editable) error {
 	params := make(map[string]string)
-	embedMessages(params, "chat_id", msgs)
+	if err := embedMessages(params, "chat_id", msgs); err != nil {
+		return err
+	}
 
 	_, err := b.Raw("deleteMessages", params)
 	return err

@@ -2,8 +2,8 @@ package telebot
 
 import (
 	"encoding/json"
+	"errors"
 	"strconv"
-	"strings"
 )
 
 // Option is a shortcut flag type for certain message features
@@ -365,15 +365,20 @@ type PreviewOptions struct {
 
 // embedMessages sets message_ids to the IDs of msgs and chatKey to the chat
 // they are in.
-func embedMessages(params map[string]string, chatKey string, msgs []Editable) {
-	ids := make([]string, 0, len(msgs))
-
-	_, chatID := msgs[0].MessageSig()
-	for _, msg := range msgs {
-		msgID, _ := msg.MessageSig()
-		ids = append(ids, msgID)
+func embedMessages(params map[string]string, chatKey string, msgs []Editable) error {
+	if len(msgs) == 0 {
+		return errors.New("telebot: no messages given")
 	}
 
-	params["message_ids"] = "[" + strings.Join(ids, ",") + "]"
+	ids := make([]int, len(msgs))
+	for i, msg := range msgs {
+		msgID, _ := msg.MessageSig()
+		ids[i], _ = strconv.Atoi(msgID)
+	}
+	data, _ := json.Marshal(ids)
+	_, chatID := msgs[0].MessageSig()
+
+	params["message_ids"] = string(data)
 	params[chatKey] = strconv.FormatInt(chatID, 10)
+	return nil
 }

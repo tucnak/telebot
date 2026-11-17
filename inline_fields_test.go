@@ -67,6 +67,10 @@ func TestForwardCopyDeleteMany(t *testing.T) {
 
 	require.NoError(t, b.DeleteMany(msgs))
 	assert.Equal(t, map[string]string{"chat_id": "2", "message_ids": "[1,3]"}, srv.Last().Params)
+
+	assert.Error(t, b.DeleteMany(nil))
+	_, err = b.ForwardMany(ChatID(7), nil)
+	assert.Error(t, err)
 }
 
 func TestSavePreparedInlineMessage(t *testing.T) {
