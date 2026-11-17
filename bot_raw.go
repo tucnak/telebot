@@ -10,6 +10,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -376,6 +377,10 @@ func extractMessage(data []byte) (*Message, error) {
 	return resp.Result, nil
 }
 
+// secretParamRe matches the parameters that carry a secret: the webhook's
+// secret token and the token of a payment provider.
+var secretParamRe = regexp.MustCompile(`"(secret_token|provider_token)":\s*"[^"]*"`)
+
 func verbose(method string, payload interface{}, data []byte) {
 	// The result of these methods is the token of a managed bot.
 	if (method == "getManagedBotToken" || method == "replaceManagedBotToken") && extractOk(data) == nil {
@@ -386,6 +391,7 @@ func verbose(method string, payload interface{}, data []byte) {
 	body = bytes.ReplaceAll(body, []byte(`\"`), []byte(`"`))
 	body = bytes.ReplaceAll(body, []byte(`"{`), []byte(`{`))
 	body = bytes.ReplaceAll(body, []byte(`}"`), []byte(`}`))
+	body = secretParamRe.ReplaceAll(body, []byte(`"$1":"<redacted>"`))
 
 	indent := func(b []byte) string {
 		var buf bytes.Buffer

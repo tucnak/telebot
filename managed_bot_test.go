@@ -62,10 +62,14 @@ func TestManagedBotMethods(t *testing.T) {
 	require.NoError(t, err)
 	_, err = b.ReplaceManagedBotToken(bot)
 	require.NoError(t, err)
+	// Nor the secrets among the parameters of other methods.
+	require.NoError(t, b.SetWebhook(&Webhook{Endpoint: &WebhookEndpoint{PublicURL: "https://example.com"}, SecretToken: "hook-secret"}))
 	b.verbose = false
 	assert.Contains(t, logged.String(), "replaceManagedBotToken")
 	assert.Contains(t, logged.String(), "<redacted>")
 	assert.NotContains(t, logged.String(), "99:")
+	assert.Contains(t, logged.String(), "setWebhook")
+	assert.NotContains(t, logged.String(), "hook-secret")
 
 	srv.Reply("getManagedBotAccessSettings", json.RawMessage(`{"is_access_restricted":true,"added_users":[{"id":5}]}`))
 	settings, err := b.ManagedBotAccessSettings(bot)
