@@ -125,6 +125,10 @@ type SendOptions struct {
 	// an option on its own.
 	SuggestedPost *SuggestedPostParameters
 
+	// RemoveCaption copies messages without their captions. Used only by
+	// CopyMany.
+	RemoveCaption bool
+
 	// CaptionAbove shows an edited caption above the media. Used only when
 	// editing a caption; when sending media, set the media's CaptionAbove.
 	CaptionAbove bool
@@ -268,6 +272,10 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 
 	if opt.AllowPaidBroadcast {
 		params["allow_paid_broadcast"] = "true"
+	}
+
+	if opt.RemoveCaption {
+		params["remove_caption"] = "true"
 	}
 
 	if opt.DirectMessagesTopicID != 0 {

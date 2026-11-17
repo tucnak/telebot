@@ -1,0 +1,57 @@
+package telebot
+
+import (
+	"encoding/json"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestInlineResultFields(t *testing.T) {
+	b, srv := newFakeBot(t)
+
+	photo := &PhotoResult{URL: "https://example.com/p.jpg", ThumbURL: "https://example.com/t.jpg", Caption: "hi"}
+	photo.CaptionEntities = []MessageEntity{{Type: EntityBold, Length: 2}}
+	loc := &LocationResult{Location: Location{Lat: 1, Lng: 2}, Title: "L", ThumbWidth: 64, ThumbHeight: 48}
+	venue := &VenueResult{Location: Location{Lat: 1, Lng: 2}, Title: "V", Address: "A", GooglePlaceID: "gp"}
+	text := &ArticleResult{Title: "T"}
+	text.Content = &InputTextMessageContent{Text: "x", Entities: []MessageEntity{{Type: EntityItalic, Length: 1}}}
+	invoice := &ArticleResult{Title: "Buy"}
+	invoice.Content = &InputInvoiceMessageContent{Title: "Item", Description: "D", Payload: "p", Currency: "XTR",
+		Prices: []Price{{Label: "Item", Amount: 5}}, PhotoURL: "https://example.com/i.jpg"}
+
+	require.NoError(t, b.Answer(&Query{ID: "q"}, &QueryResponse{Results: Results{photo, loc, venue, text, invoice}}))
+
+	var results []map[string]interface{}
+	srv.Last().JSON(t, "results", &results)
+	require.Len(t, results, 5)
+	assert.Equal(t, []interface{}{map[string]interface{}{"type": "bold", "offset": 0.0, "length": 2.0}}, results[0]["caption_entities"])
+	assert.Equal(t, 64.0, results[1]["thumbnail_width"])
+	assert.Equal(t, "gp", results[2]["google_place_id"])
+	assert.Equal(t, map[string]interface{}{"message_text": "x", "entities": []interface{}{map[string]interface{}{"type": "italic", "offset": 0.0, "length": 1.0}}},
+		results[3]["input_message_content"])
+	content := results[4]["input_message_content"].(map[string]interface{})
+	assert.Equal(t, "XTR", content["currency"])
+	assert.Equal(t, "https://example.com/i.jpg", content["photo_url"])
+	assert.NotContains(t, content, "provider_token")
+}
+
+func TestInputMessageContentFields(t *testing.T) {
+	data, err := json.Marshal(&InputLocationMessageContent{Lat: 1, Lng: 2, HorizontalAccuracy: 5, LivePeriod: 60, Heading: 90, AlertRadius: 100})
+	require.NoError(t, err)
+	assert.JSONEq(t, `{"latitude":1,"longitude":2,"horizontal_accuracy":5,"live_period":60,"heading":90,"proximity_alert_radius":100}`, string(data))
+
+	data, err = json.Marshal(&InputContactMessageContent{PhoneNumber: "+1", FirstName: "A", VCard: "V"})
+	require.NoError(t, err)
+	assert.JSONEq(t, `{"phone_number":"+1","first_name":"A","vcard":"V"}`, string(data))
+}
+
+func TestCopyManyRemoveCaption(t *testing.T) {
+	b, srv := newFakeBot(t)
+	srv.Reply("copyMessages", json.RawMessage(`[{"message_id":9}]`))
+
+	_, err := b.CopyMany(ChatID(7), []Editable{&Message{ID: 1, Chat: &Chat{ID: 2}}}, &SendOptions{RemoveCaption: true})
+	require.NoError(t, err)
+	assert.Equal(t, "true", srv.Last().Params["remove_caption"])
+}

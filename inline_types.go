@@ -15,6 +15,10 @@ type ResultBase struct {
 	// bold, italic, fixed-width text or inline URLs in the media caption.
 	ParseMode ParseMode `json:"parse_mode,omitempty"`
 
+	// Optional. Entities of the caption, instead of ParseMode; for results
+	// with a caption.
+	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+
 	// Optional. Content of the message to be sent.
 	Content InputMessageContent `json:"input_message_content,omitempty"`
 
@@ -242,6 +246,10 @@ type LocationResult struct {
 
 	// Optional. Url of the thumbnail for the result.
 	ThumbURL string `json:"thumbnail_url,omitempty"`
+
+	// Optional. Thumbnail width and height.
+	ThumbWidth  int `json:"thumbnail_width,omitempty"`
+	ThumbHeight int `json:"thumbnail_height,omitempty"`
 }
 
 // Mpeg4GifResult represents a link to a video animation
@@ -334,6 +342,11 @@ type VenueResult struct {
 
 	// Optional. Foursquare identifier of the venue if known.
 	FoursquareID string `json:"foursquare_id,omitempty"`
+
+	// Optional. Foursquare type, and Google Places identifier and type.
+	FoursquareType  string `json:"foursquare_type,omitempty"`
+	GooglePlaceID   string `json:"google_place_id,omitempty"`
+	GooglePlaceType string `json:"google_place_type,omitempty"`
 
 	// Optional. URL of the thumbnail for the result.
 	ThumbURL string `json:"thumbnail_url,omitempty"`
