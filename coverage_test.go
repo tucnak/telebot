@@ -38,7 +38,8 @@ type goPackage struct {
 	funcs     map[string]*goDecl
 	types     map[string]*goDecl
 	calls     map[string]map[string]bool // func name -> called names
-	names     map[string]map[string]bool // func name -> string literals and identifiers in it
+	literals  map[string]map[string]bool // func name -> string literals in it
+	params    map[string][]string        // func name -> identifiers in its parameter types
 	results   map[string][]string        // func name -> identifiers in its result types
 	tags      map[string][]string        // type name -> json tags of its fields
 	codecTags map[string][]string        // type name -> json tags in its (Un)MarshalJSON
@@ -68,7 +69,8 @@ func parsePackage(t *testing.T) *goPackage {
 		funcs:     map[string]*goDecl{},
 		types:     map[string]*goDecl{},
 		calls:     map[string]map[string]bool{},
-		names:     map[string]map[string]bool{},
+		literals:  map[string]map[string]bool{},
+		params:    map[string][]string{},
 		results:   map[string][]string{},
 		tags:      map[string][]string{},
 		codecTags: map[string][]string{},
@@ -132,27 +134,18 @@ func parsePackage(t *testing.T) *goPackage {
 				}
 				p.calls[name] = calls
 
-				names := map[string]bool{}
+				literals := map[string]bool{}
 				ast.Inspect(d, func(n ast.Node) bool {
-					switch n := n.(type) {
-					case *ast.Ident:
-						names[n.Name] = true
-					case *ast.BasicLit:
-						if s, err := strconv.Unquote(n.Value); err == nil && n.Kind == gotoken.STRING {
-							names[s] = true
+					if lit, ok := n.(*ast.BasicLit); ok && lit.Kind == gotoken.STRING {
+						if s, err := strconv.Unquote(lit.Value); err == nil {
+							literals[s] = true
 						}
 					}
 					return true
 				})
-				p.names[name] = names
-				if d.Type.Results != nil {
-					ast.Inspect(d.Type.Results, func(n ast.Node) bool {
-						if id, ok := n.(*ast.Ident); ok {
-							p.results[name] = append(p.results[name], id.Name)
-						}
-						return true
-					})
-				}
+				p.literals[name] = literals
+				p.params[name] = identifiers(d.Type.Params)
+				p.results[name] = identifiers(d.Type.Results)
 
 				// Fields decoded or encoded by hand are declared in structs
 				// or named by string literals in the type's methods.
@@ -262,12 +255,12 @@ func (p *goPackage) reachesAPI() map[string]bool {
 	return reach
 }
 
-// params returns the names fn can send as request parameters: the string
+// sendable returns the names fn can send as request parameters: the string
 // literals in it and in the functions it calls, and the json tags of the
-// structs it names or gets from a function it calls, which it may pass as
+// structs it takes or gets from a function it calls, which it may pass as
 // the request. Calls are followed by name, as in reachesAPI, so it
 // over-approximates; a parameter it lacks is one fn has no way to send.
-func (p *goPackage) params(fn string) map[string]bool {
+func (p *goPackage) sendable(fn string) map[string]bool {
 	byName := p.byName()
 	out := map[string]bool{}
 	seen := map[string]bool{"Bot.Raw": true, "Bot.sendFiles": true}
@@ -277,8 +270,8 @@ func (p *goPackage) params(fn string) map[string]bool {
 			return
 		}
 		seen[fn] = true
-		for name := range p.names[fn] {
-			out[name] = true
+		for lit := range p.literals[fn] {
+			out[lit] = true
 		}
 		for c := range p.calls[fn] {
 			for _, target := range byName[c] {
@@ -288,8 +281,16 @@ func (p *goPackage) params(fn string) map[string]bool {
 	}
 	visit(fn)
 
+	// What fn returns, such as the sent Message, is not a request.
+	returned := map[string]bool{}
+	for _, typ := range p.results[fn] {
+		returned[typ] = true
+	}
 	var tags func(string)
 	tags = func(typ string) {
+		if returned[typ] {
+			return
+		}
 		for _, tag := range p.tags[typ] {
 			out[tag] = true
 		}
@@ -297,17 +298,34 @@ func (p *goPackage) params(fn string) map[string]bool {
 			tags(e)
 		}
 	}
-	for name := range p.names[fn] {
-		tags(name)
+	for _, typ := range p.params[fn] {
+		tags(typ)
 	}
 	for c := range p.calls[fn] {
 		for _, target := range byName[c] {
-			for _, name := range p.results[target] {
-				tags(name)
+			for _, typ := range p.results[target] {
+				tags(typ)
 			}
 		}
 	}
 	return out
+}
+
+// identifiers returns the identifiers in the types of fields.
+func identifiers(fields *ast.FieldList) []string {
+	var names []string
+	if fields == nil {
+		return nil
+	}
+	for _, f := range fields.List {
+		ast.Inspect(f.Type, func(n ast.Node) bool {
+			if id, ok := n.(*ast.Ident); ok {
+				names = append(names, id.Name)
+			}
+			return true
+		})
+	}
+	return names
 }
 
 // allTags returns the json tags of a type, following embedded structs.
@@ -466,7 +484,7 @@ func renderCoverage(api *spec.Spec, pkg *goPackage, byMethod, byType map[string]
 			methodsDone++
 			sent := map[string]bool{}
 			for _, fn := range names {
-				for prm := range pkg.params(fn) {
+				for prm := range pkg.sendable(fn) {
 					sent[prm] = true
 				}
 			}
