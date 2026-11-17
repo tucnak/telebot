@@ -67,3 +67,20 @@ func TestSendContact(t *testing.T) {
 	assert.Equal(t, map[string]string{"chat_id": "7", "phone_number": "+100", "first_name": "Ada", "vcard": "BEGIN:VCARD",
 		"disable_notification": "true"}, srv.Last().Params)
 }
+
+func TestSendPreviewOptions(t *testing.T) {
+	b, srv := newFakeBot(t)
+	srv.Reply("sendMessage", json.RawMessage(`{"message_id":1,"chat":{"id":7}}`))
+	srv.Reply("editMessageText", json.RawMessage(`{"message_id":1,"chat":{"id":7}}`))
+
+	msg, err := b.Send(ChatID(7), "see https://example.com", &PreviewOptions{URL: "https://example.org", AboveText: true})
+	require.NoError(t, err)
+	var opts PreviewOptions
+	srv.Last().JSON(t, "link_preview_options", &opts)
+	assert.Equal(t, PreviewOptions{URL: "https://example.org", AboveText: true}, opts)
+
+	_, err = b.Edit(msg, "edited", &SendOptions{PreviewOptions: &PreviewOptions{Disabled: true}})
+	require.NoError(t, err)
+	srv.Last().JSON(t, "link_preview_options", &opts)
+	assert.True(t, opts.Disabled)
+}

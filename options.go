@@ -125,6 +125,11 @@ type SendOptions struct {
 	// an option on its own.
 	SuggestedPost *SuggestedPostParameters
 
+	// PreviewOptions sets how the link preview of a text message is
+	// generated, when sending or editing it (Bot API 7.0). It can also be
+	// passed to Send as an option on its own.
+	PreviewOptions *PreviewOptions
+
 	// RemoveCaption copies messages without their captions. Used only by
 	// CopyMany.
 	RemoveCaption bool
@@ -161,6 +166,8 @@ func (b *Bot) extractOptions(how []interface{}) *SendOptions {
 			opts.Ephemeral = opt
 		case *SuggestedPostParameters:
 			opts.SuggestedPost = opt
+		case *PreviewOptions:
+			opts.PreviewOptions = opt
 		case *Topic:
 			opts.ThreadID = opt.ThreadID
 		case Option:
@@ -272,6 +279,11 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 
 	if opt.AllowPaidBroadcast {
 		params["allow_paid_broadcast"] = "true"
+	}
+
+	if opt.PreviewOptions != nil {
+		data, _ := json.Marshal(opt.PreviewOptions)
+		params["link_preview_options"] = string(data)
 	}
 
 	if opt.RemoveCaption {
