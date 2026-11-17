@@ -177,6 +177,10 @@ func (b *Bot) ProcessContext(c Context) {
 			b.handle(OnSuggestedPostRefunded, c)
 			return
 		}
+		if m.PaidMessagePriceChanged != nil {
+			b.handle(OnPaidMessagePriceChanged, c)
+			return
+		}
 		if m.ChecklistTasksDone != nil {
 			b.handle(OnChecklistTasksDone, c)
 			return

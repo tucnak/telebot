@@ -94,6 +94,17 @@ type Chat struct {
 	// ChatByID.
 	AcceptedGiftTypes *AcceptedGiftTypes `json:"accepted_gift_types,omitempty"`
 
+	// Returned only by ChatByID: all active usernames (6.0), whether users
+	// must join the supergroup to write (6.4) or be approved to join (6.4),
+	// the user's rating (9.3), the gift-based color scheme of the chat
+	// (9.3), and the Stars a user pays per message (9.0).
+	ActiveUsernames      []string          `json:"active_usernames,omitempty"`
+	JoinToSendMessages   bool              `json:"join_to_send_messages,omitempty"`
+	JoinByRequest        bool              `json:"join_by_request,omitempty"`
+	Rating               *UserRating       `json:"rating,omitempty"`
+	UniqueGiftColors     *UniqueGiftColors `json:"unique_gift_colors,omitempty"`
+	PaidMessageStarCount int               `json:"paid_message_star_count,omitempty"`
+
 	// Bot API 9.2: the supergroup is the direct messages chat of a channel,
 	// and ParentChat (returned only by ChatByID) is that channel.
 	IsDirectMessages bool  `json:"is_direct_messages,omitempty"`
@@ -820,4 +831,19 @@ func (b *Bot) DeleteGroupStickerSet(chat *Chat) error {
 
 	_, err := b.Raw("deleteChatStickerSet", params)
 	return err
+}
+
+// UserRating is the rating of a user based on their Telegram Star spending
+// (Bot API 9.3).
+//
+// Bot API: UserRating.
+type UserRating struct {
+	// Current level; higher is more trustworthy, negative is unreliable.
+	Level int `json:"level"`
+
+	// The rating, and the rating needed for the current and the next level;
+	// NextLevelRating is zero at the maximum level.
+	Rating             int `json:"rating"`
+	CurrentLevelRating int `json:"current_level_rating"`
+	NextLevelRating    int `json:"next_level_rating,omitempty"`
 }

@@ -355,6 +355,13 @@ type Message struct {
 	SuggestedPostPaid           *SuggestedPostPaid           `json:"suggested_post_paid,omitempty"`
 	SuggestedPostRefunded       *SuggestedPostRefunded       `json:"suggested_post_refunded,omitempty"`
 
+	// (Optional) Stars the sender paid to send the message (Bot API 9.0).
+	PaidStarCount int `json:"paid_star_count,omitempty"`
+
+	// Service message: the price of messages in the chat changed
+	// (Bot API 9.0).
+	PaidMessagePriceChanged *PaidMessagePriceChanged `json:"paid_message_price_changed,omitempty"`
+
 	// Service message: checklist tasks were marked as done or not done
 	// (Bot API 9.1).
 	ChecklistTasksDone *ChecklistTasksDone `json:"checklist_tasks_done,omitempty"`
@@ -964,4 +971,12 @@ type DirectMessagePriceChanged struct {
 
 	// (Optional) Stars users must pay for each direct message.
 	StarCount int `json:"direct_message_star_count,omitempty"`
+}
+
+// PaidMessagePriceChanged is a service message about a change in the Stars
+// users pay per message in a supergroup (Bot API 9.0).
+//
+// Bot API: PaidMessagePriceChanged.
+type PaidMessagePriceChanged struct {
+	StarCount int `json:"paid_message_star_count"`
 }
