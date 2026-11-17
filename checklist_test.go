@@ -45,8 +45,9 @@ func TestSendAndEditChecklist(t *testing.T) {
 func TestChecklistServiceMessages(t *testing.T) {
 	b, srv := newFakeBot(t)
 
+	// A checklist is not media: OnMedia handlers expect Message.Media().
 	var got []string
-	for _, ev := range []string{OnChecklist, OnChecklistTasksDone, OnChecklistTasksAdded, OnDirectMessagePriceChanged} {
+	for _, ev := range []string{OnMedia, OnChecklist, OnChecklistTasksDone, OnChecklistTasksAdded, OnDirectMessagePriceChanged} {
 		ev := ev
 		b.Handle(ev, func(c Context) error { got = append(got, ev); return nil })
 	}
@@ -62,6 +63,12 @@ func TestChecklistServiceMessages(t *testing.T) {
 		b.ProcessUpdate(u)
 	}
 	assert.Equal(t, []string{OnChecklist, OnChecklistTasksDone, OnChecklistTasksAdded, OnDirectMessagePriceChanged}, got)
+
+	delete(b.handlers, OnChecklist)
+	var u Update
+	require.NoError(t, json.Unmarshal([]byte(`{"update_id":1,"message":{"message_id":2,"date":1,"chat":{"id":7},"checklist":{"title":"T","tasks":[]}}}`), &u))
+	b.ProcessUpdate(u)
+	assert.Len(t, got, 4, "an unhandled checklist does not fall back to OnMedia")
 
 	srv.Reply("getMyStarBalance", json.RawMessage(`{"amount":12,"nanostar_amount":500}`))
 	bal, err := b.StarBalance()

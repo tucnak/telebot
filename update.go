@@ -101,6 +101,10 @@ func (b *Bot) ProcessContext(c Context) {
 			return
 		}
 
+		if m.Checklist != nil {
+			b.handle(OnChecklist, c)
+			return
+		}
 		if m.Contact != nil {
 			b.handle(OnContact, c)
 			return
@@ -532,8 +536,6 @@ func (b *Bot) handleMedia(c Context) bool {
 		fired = b.handle(OnVideo, c)
 	case m.VideoNote != nil:
 		fired = b.handle(OnVideoNote, c)
-	case m.Checklist != nil:
-		fired = b.handle(OnChecklist, c)
 	default:
 		return false
 	}
