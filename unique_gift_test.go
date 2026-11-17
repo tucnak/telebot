@@ -61,3 +61,20 @@ func TestGiftServiceMessages(t *testing.T) {
 	assert.True(t, ug.Gift.IsFromBlockchain)
 	assert.Equal(t, []int{8, 9}, ug.Gift.Colors.DarkThemeOtherColors)
 }
+
+func TestGetUniqueGift(t *testing.T) {
+	b, srv := newFakeBot(t)
+	srv.Reply("getUniqueGift", json.RawMessage(uniqueGiftJSON))
+
+	g, err := b.UniqueGift("Cake-7")
+	require.NoError(t, err)
+	assert.Equal(t, 7, g.Number)
+	assert.Equal(t, map[string]string{"name": "Cake-7"}, srv.Last().Params)
+}
+
+func TestDeleteBusinessAccountGift(t *testing.T) {
+	b, srv := newFakeBot(t)
+	require.NoError(t, b.DeleteBusinessAccountGift("bc", "og"))
+	assert.Equal(t, "deleteBusinessAccountGift", srv.Last().Method)
+	assert.Equal(t, map[string]string{"business_connection_id": "bc", "owned_gift_id": "og"}, srv.Last().Params)
+}

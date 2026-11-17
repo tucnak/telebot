@@ -36,6 +36,7 @@ type API interface {
 	DeclineJoinRequest(chat Recipient, user *User) error
 	DefaultRights(forChannels bool) (*Rights, error)
 	Delete(msg Editable) error
+	DeleteBusinessAccountGift(connectionID, ownedGiftID string) error
 	DeleteCommands(opts ...interface{}) error
 	DeleteEphemeral(msg *Message) error
 	DeleteGroupPhoto(chat *Chat) error
@@ -128,6 +129,7 @@ type API interface {
 	TopicIconStickers() ([]Sticker, error)
 	Unban(chat *Chat, user *User, forBanned ...bool) error
 	UnbanSenderChat(chat *Chat, sender Recipient) error
+	UniqueGift(name string) (*UniqueGift, error)
 	UnhideGeneralTopic(chat *Chat) error
 	Unpin(chat Recipient, messageID ...int) error
 	UnpinAll(chat Recipient) error

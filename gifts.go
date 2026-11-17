@@ -288,3 +288,22 @@ func (b *Bot) SendGift(to Recipient, giftID string, opts ...interface{}) error {
 	_, err := b.Raw("sendGift", params)
 	return err
 }
+
+// UniqueGift returns a unique gift by its name, as used in
+// https://t.me/nft/... links (Bot API 10.4).
+//
+// Bot API: getUniqueGift.
+func (b *Bot) UniqueGift(name string) (*UniqueGift, error) {
+	data, err := b.Raw("getUniqueGift", map[string]string{"name": name})
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result *UniqueGift
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return resp.Result, nil
+}

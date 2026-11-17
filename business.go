@@ -124,3 +124,16 @@ func (b *Bot) BusinessConnection(id string) (*BusinessConnection, error) {
 	}
 	return resp.Result, nil
 }
+
+// DeleteBusinessAccountGift deletes a regular gift owned by a managed
+// business account without converting it to Telegram Stars (Bot API 10.4).
+// It needs the can_convert_gifts_to_stars business bot right.
+//
+// Bot API: deleteBusinessAccountGift.
+func (b *Bot) DeleteBusinessAccountGift(connectionID, ownedGiftID string) error {
+	_, err := b.Raw("deleteBusinessAccountGift", map[string]string{
+		"business_connection_id": connectionID,
+		"owned_gift_id":          ownedGiftID,
+	})
+	return err
+}
