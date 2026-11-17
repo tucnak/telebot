@@ -55,6 +55,12 @@ func TestEditEphemeral(t *testing.T) {
 	assert.Contains(t, req.Params["reply_markup"], `"text":"ok"`)
 	assert.Equal(t, "33", req.Params["ephemeral_message_id"])
 
+	require.NoError(t, b.EditEphemeral(msg, "https://a.example", &PreviewOptions{URL: "https://b.example", AboveText: true}))
+	assert.JSONEq(t, `{"is_disabled":false,"url":"https://b.example","prefer_small_media":false,"prefer_large_media":false,"show_above_text":true}`,
+		srv.Last().Params["link_preview_options"])
+	require.NoError(t, b.EditEphemeral(msg, "https://a.example", NoPreview))
+	assert.Contains(t, srv.Last().Params["link_preview_options"], `"is_disabled":true`)
+
 	require.NoError(t, b.EditEphemeral(msg, &InputRichMessage{Markdown: "*x*"}, ModeHTML))
 	req = srv.Last()
 	assert.Equal(t, "editEphemeralMessageText", req.Method)

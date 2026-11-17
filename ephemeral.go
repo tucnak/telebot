@@ -51,7 +51,8 @@ func ephemeralParams(msg *Message) (map[string]string, error) {
 // EditEphemeral edits the text of an ephemeral message, or replaces it with
 // rich content when what is an *InputRichMessage. It also takes an
 // Inputtable, which it passes to EditEphemeralMedia, and a *ReplyMarkup,
-// which it passes to EditEphemeralReplyMarkup.
+// which it passes to EditEphemeralReplyMarkup. Of the options, the parse
+// mode, entities, link preview options and the inline keyboard apply.
 //
 // Telegram does not guarantee that the user sees the edit.
 //
@@ -84,7 +85,17 @@ func (b *Bot) EditEphemeral(msg *Message, what interface{}, opts ...interface{})
 		return ErrUnsupportedWhat
 	}
 
-	b.embedEphemeralOptions(params, b.extractOptions(opts))
+	sendOpts := b.extractOptions(opts)
+	b.embedEphemeralOptions(params, sendOpts)
+
+	preview := sendOpts.PreviewOptions
+	if preview == nil && sendOpts.DisableWebPagePreview {
+		preview = &PreviewOptions{Disabled: true}
+	}
+	if preview != nil {
+		data, _ := json.Marshal(preview)
+		params["link_preview_options"] = string(data)
+	}
 	if _, ok := params["rich_message"]; ok {
 		delete(params, "parse_mode")
 		delete(params, "entities")
