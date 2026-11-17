@@ -587,9 +587,10 @@ type AutoDeleteTimer struct {
 	Unixtime int `json:"message_auto_delete_time"`
 }
 
-// Inaccessible shows whether the message is InaccessibleMessage object.
+// Inaccessible shows whether the message is InaccessibleMessage object,
+// which Telegram marks with a zero date.
 func (m *Message) Inaccessible() bool {
-	return m.Sender == nil
+	return m.Unixtime == 0
 }
 
 // MessageSig satisfies Editable interface (see Editable.)
@@ -610,7 +611,7 @@ func (m *Message) LastEdited() time.Time {
 // IsForwarded says whether message is forwarded copy of another
 // message or not.
 func (m *Message) IsForwarded() bool {
-	return m.OriginalSender != nil || m.OriginalChat != nil
+	return m.Origin != nil || m.OriginalSender != nil || m.OriginalChat != nil
 }
 
 // IsReply says whether message is a reply to another message.

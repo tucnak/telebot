@@ -107,6 +107,18 @@ func TestForwardCopyVideoStartTimestamp(t *testing.T) {
 	assert.Equal(t, "30", srv.Last().Params["video_start_timestamp"])
 }
 
+func TestMessageIsForwardedAndInaccessible(t *testing.T) {
+	var fwd, post, gone Message
+	require.NoError(t, json.Unmarshal([]byte(`{"message_id":1,"date":5,"chat":{"id":2},"forward_origin":{"type":"hidden_user","date":4,"sender_user_name":"x"}}`), &fwd))
+	require.NoError(t, json.Unmarshal([]byte(`{"message_id":1,"date":5,"chat":{"id":-100,"type":"channel"}}`), &post))
+	require.NoError(t, json.Unmarshal([]byte(`{"message_id":1,"date":0,"chat":{"id":2}}`), &gone))
+
+	assert.True(t, fwd.IsForwarded())
+	assert.False(t, post.IsForwarded())
+	assert.False(t, post.Inaccessible(), "a channel post has no sender")
+	assert.True(t, gone.Inaccessible())
+}
+
 func TestRespondCacheTime(t *testing.T) {
 	b, srv := newFakeBot(t)
 	require.NoError(t, b.Respond(&Callback{ID: "c"}, &CallbackResponse{Text: "ok", CacheTime: 30}))
