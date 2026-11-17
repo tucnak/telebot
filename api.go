@@ -91,12 +91,12 @@ type API interface {
 	MyDescription(language string) (*BotInfo, error)
 	MyName(language string) (*BotInfo, error)
 	MyShortDescription(language string) (*BotInfo, error)
-	Notify(to Recipient, action ChatAction, threadID ...int) error
+	Notify(to Recipient, action ChatAction, opts ...interface{}) error
 	PersonalChatMessages(user Recipient, limit int) ([]Message, error)
 	Pin(msg Editable, opts ...interface{}) error
 	PostStory(connectionID string, story StoryParams) (*Story, error)
 	ProfileAudiosOf(user *User, offset, limit int) (*UserProfileAudios, error)
-	ProfilePhotosOf(user *User) ([]Photo, error)
+	ProfilePhotosOf(user *User, page ...int) ([]Photo, error)
 	Promote(chat *Chat, member *ChatMember) error
 	React(to Recipient, msg Editable, r Reactions) error
 	ReadBusinessMessage(connectionID string, msg Editable) error
@@ -167,7 +167,7 @@ type API interface {
 	UnbanSenderChat(chat *Chat, sender Recipient) error
 	UniqueGift(name string) (*UniqueGift, error)
 	UnhideGeneralTopic(chat *Chat) error
-	Unpin(chat Recipient, messageID ...int) error
+	Unpin(chat Recipient, opts ...interface{}) error
 	UnpinAll(chat Recipient) error
 	UnpinAllGeneralTopicMessages(chat *Chat) error
 	UnpinAllTopicMessages(chat *Chat, topic *Topic) error

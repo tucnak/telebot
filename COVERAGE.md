@@ -41,9 +41,9 @@ A method's "unseen parameters" are parameters that the functions calling it, and
 | [sendChecklist](https://core.telegram.org/bots/api#sendchecklist) | `Bot.Reply`, `Bot.Send`, `Checklist.Send` |  |
 | [sendDice](https://core.telegram.org/bots/api#senddice) | `Bot.Reply`, `Bot.Send` |  |
 | [sendMessageDraft](https://core.telegram.org/bots/api#sendmessagedraft) | `Bot.SendDraft` |  |
-| [sendChatAction](https://core.telegram.org/bots/api#sendchataction) | `Bot.Notify` | business_connection_id |
+| [sendChatAction](https://core.telegram.org/bots/api#sendchataction) | `Bot.Notify` |  |
 | [setMessageReaction](https://core.telegram.org/bots/api#setmessagereaction) | `Bot.React` |  |
-| [getUserProfilePhotos](https://core.telegram.org/bots/api#getuserprofilephotos) | `Bot.ProfilePhotosOf` | offset, limit |
+| [getUserProfilePhotos](https://core.telegram.org/bots/api#getuserprofilephotos) | `Bot.ProfilePhotosOf` |  |
 | [getUserProfileAudios](https://core.telegram.org/bots/api#getuserprofileaudios) | `Bot.ProfileAudiosOf` |  |
 | [setUserEmojiStatus](https://core.telegram.org/bots/api#setuseremojistatus) | `Bot.SetUserEmojiStatus` |  |
 | [getFile](https://core.telegram.org/bots/api#getfile) | `Bot.Download`, `Bot.File`, `Bot.FileByID` |  |
@@ -71,7 +71,7 @@ A method's "unseen parameters" are parameters that the functions calling it, and
 | [setChatTitle](https://core.telegram.org/bots/api#setchattitle) | `Bot.SetGroupTitle` |  |
 | [setChatDescription](https://core.telegram.org/bots/api#setchatdescription) | `Bot.SetGroupDescription` |  |
 | [pinChatMessage](https://core.telegram.org/bots/api#pinchatmessage) | `Bot.Pin` |  |
-| [unpinChatMessage](https://core.telegram.org/bots/api#unpinchatmessage) | `Bot.Unpin` | business_connection_id |
+| [unpinChatMessage](https://core.telegram.org/bots/api#unpinchatmessage) | `Bot.Unpin` |  |
 | [unpinAllChatMessages](https://core.telegram.org/bots/api#unpinallchatmessages) | `Bot.UnpinAll` |  |
 | [leaveChat](https://core.telegram.org/bots/api#leavechat) | `Bot.Leave` |  |
 | [getChat](https://core.telegram.org/bots/api#getchat) | `Bot.ChatByID`, `Bot.ChatByUsername`, `Bot.ChatFullInfo` |  |

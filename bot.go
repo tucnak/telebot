@@ -932,8 +932,11 @@ func (b *Bot) DeleteMany(msgs []Editable) error {
 // Currently, Telegram supports only a narrow range of possible
 // actions, these are aligned as constants of this package.
 //
+// Pass the ID of a thread as an int, or a *SendOptions with ThreadID and
+// BusinessConnectionID, to send the action there.
+//
 // Bot API: sendChatAction.
-func (b *Bot) Notify(to Recipient, action ChatAction, threadID ...int) error {
+func (b *Bot) Notify(to Recipient, action ChatAction, opts ...interface{}) error {
 	if to == nil {
 		return ErrBadRecipient
 	}
@@ -943,8 +946,18 @@ func (b *Bot) Notify(to Recipient, action ChatAction, threadID ...int) error {
 		"action":  string(action),
 	}
 
-	if len(threadID) > 0 {
-		params["message_thread_id"] = strconv.Itoa(threadID[0])
+	for _, opt := range opts {
+		switch v := opt.(type) {
+		case int:
+			params["message_thread_id"] = strconv.Itoa(v)
+		case *SendOptions:
+			if v.ThreadID != 0 {
+				params["message_thread_id"] = strconv.Itoa(v.ThreadID)
+			}
+			if v.BusinessConnectionID != "" {
+				params["business_connection_id"] = v.BusinessConnectionID
+			}
+		}
 	}
 
 	_, err := b.Raw("sendChatAction", params)
@@ -1254,16 +1267,26 @@ func (b *Bot) Pin(msg Editable, opts ...interface{}) error {
 	return err
 }
 
-// Unpin unpins a message in a supergroup or a channel.
-// It supports tb.Silent option.
+// Unpin unpins a message in a supergroup or a channel: the one with the
+// message ID passed as an int, or the most recent one. Pass a *SendOptions
+// with BusinessConnectionID to unpin on behalf of a business account, which
+// needs the message ID.
 //
 // Bot API: unpinChatMessage.
-func (b *Bot) Unpin(chat Recipient, messageID ...int) error {
+func (b *Bot) Unpin(chat Recipient, opts ...interface{}) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
 	}
-	if len(messageID) > 0 {
-		params["message_id"] = strconv.Itoa(messageID[0])
+
+	for _, opt := range opts {
+		switch v := opt.(type) {
+		case int:
+			params["message_id"] = strconv.Itoa(v)
+		case *SendOptions:
+			if v.BusinessConnectionID != "" {
+				params["business_connection_id"] = v.BusinessConnectionID
+			}
+		}
 	}
 
 	_, err := b.Raw("unpinChatMessage", params)
@@ -1345,12 +1368,19 @@ func (b *Bot) ChatFullInfo(chat Recipient) (*ChatFullInfo, error) {
 	return resp.Result, nil
 }
 
-// ProfilePhotosOf returns list of profile pictures for a user.
+// ProfilePhotosOf returns list of profile pictures for a user: up to 100,
+// or the page given by an offset and, after it, a limit of 1-100.
 //
 // Bot API: getUserProfilePhotos.
-func (b *Bot) ProfilePhotosOf(user *User) ([]Photo, error) {
+func (b *Bot) ProfilePhotosOf(user *User, page ...int) ([]Photo, error) {
 	params := map[string]string{
 		"user_id": user.Recipient(),
+	}
+	if len(page) > 0 {
+		params["offset"] = strconv.Itoa(page[0])
+	}
+	if len(page) > 1 {
+		params["limit"] = strconv.Itoa(page[1])
 	}
 
 	data, err := b.Raw("getUserProfilePhotos", params)

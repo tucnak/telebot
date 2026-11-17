@@ -107,3 +107,28 @@ func TestStopLiveLocation(t *testing.T) {
 	assert.Equal(t, ErrTrueResult, err)
 	assert.Equal(t, map[string]string{"inline_message_id": "inline"}, srv.Last().Params)
 }
+
+func TestNotifyUnpinProfilePhotosOptions(t *testing.T) {
+	b, srv := newFakeBot(t)
+
+	require.NoError(t, b.Notify(ChatID(7), Typing))
+	assert.Equal(t, map[string]string{"chat_id": "7", "action": "typing"}, srv.Last().Params)
+	require.NoError(t, b.Notify(ChatID(7), Typing, 5))
+	assert.Equal(t, "5", srv.Last().Params["message_thread_id"])
+	require.NoError(t, b.Notify(ChatID(7), Typing, &SendOptions{ThreadID: 5, BusinessConnectionID: "bc"}))
+	assert.Equal(t, map[string]string{"chat_id": "7", "action": "typing", "message_thread_id": "5", "business_connection_id": "bc"}, srv.Last().Params)
+
+	require.NoError(t, b.Unpin(ChatID(7)))
+	assert.Equal(t, map[string]string{"chat_id": "7"}, srv.Last().Params)
+	require.NoError(t, b.Unpin(ChatID(7), 3, &SendOptions{BusinessConnectionID: "bc"}))
+	assert.Equal(t, map[string]string{"chat_id": "7", "message_id": "3", "business_connection_id": "bc"}, srv.Last().Params)
+
+	srv.Reply("getUserProfilePhotos", json.RawMessage(`{"total_count":9,"photos":[[{"file_id":"s"},{"file_id":"l"}]]}`))
+	photos, err := b.ProfilePhotosOf(&User{ID: 7})
+	require.NoError(t, err)
+	require.Len(t, photos, 1)
+	assert.Equal(t, map[string]string{"user_id": "7"}, srv.Last().Params)
+	_, err = b.ProfilePhotosOf(&User{ID: 7}, 5, 2)
+	require.NoError(t, err)
+	assert.Equal(t, map[string]string{"user_id": "7", "offset": "5", "limit": "2"}, srv.Last().Params)
+}
