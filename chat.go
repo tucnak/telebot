@@ -33,6 +33,18 @@ type User struct {
 	// Bot API 9.4: (Optional) True, if the bot allows users to create
 	// and delete topics in private chats.
 	AllowsUsersToCreateTopics bool `json:"allows_users_to_create_topics,omitempty"`
+
+	// Bot API 9.3: (Optional) True, if the bot has forum topic mode enabled
+	// in private chats.
+	HasTopicsEnabled bool `json:"has_topics_enabled,omitempty"`
+
+	// Bot API 9.6: (Optional) True, if the bot can create and control other
+	// bots.
+	CanManageBots bool `json:"can_manage_bots,omitempty"`
+
+	// Bot API 10.1: (Optional) True, if the bot can be assigned to process
+	// join request queries.
+	SupportsJoinRequestQueries bool `json:"supports_join_request_queries,omitempty"`
 }
 
 // Recipient returns user ID (see Recipient interface).
@@ -103,6 +115,10 @@ type Chat struct {
 	// (Optional) The theme of the screen for sharing a link to the chat;
 	// returned only by ChatByID (Bot API 10.4).
 	ShareTheme *ChatShareTheme `json:"share_theme,omitempty"`
+
+	// (Optional) The bot that processes join request queries in the chat;
+	// returned only by ChatByID, to administrators (Bot API 10.1).
+	GuardBot *User `json:"guard_bot,omitempty"`
 }
 
 // Recipient returns chat ID (see Recipient interface).
@@ -266,6 +282,12 @@ type ChatJoinRequest struct {
 	// InviteLink is the chat invite link that was used by
 	//the user to send the join request, optional.
 	InviteLink *ChatInviteLink `json:"invite_link"`
+
+	// (Optional) Identifier of the join request query, for a bot assigned to
+	// process join requests. The bot must answer it with
+	// AnswerChatJoinRequestQuery, directly or after SendChatJoinRequestWebApp
+	// (Bot API 10.1).
+	QueryID string `json:"query_id,omitempty"`
 }
 
 // ChatInviteLink object represents an invite for a chat.
@@ -416,6 +438,10 @@ type ChatFullInfo struct {
 	// Bot API 10.4: (Optional) The theme of the screen for sharing a link to
 	// the chat.
 	ShareTheme *ChatShareTheme `json:"share_theme,omitempty"`
+
+	// Bot API 10.1: (Optional) The bot that processes join request queries in
+	// the chat; available to administrators only.
+	GuardBot *User `json:"guard_bot,omitempty"`
 }
 
 // ChatBackground is a chat background.
@@ -616,6 +642,41 @@ func (b *Bot) RevokeInviteLink(chat Recipient, link string) (*ChatInviteLink, er
 	}
 
 	return &resp.Result, nil
+}
+
+// Results of AnswerChatJoinRequestQuery.
+const (
+	JoinRequestApprove = "approve"
+	JoinRequestDecline = "decline"
+	JoinRequestQueue   = "queue"
+)
+
+// AnswerChatJoinRequestQuery resolves a join request query, the
+// ChatJoinRequest.QueryID received by a bot assigned to process join
+// requests. result is JoinRequestApprove, JoinRequestDecline, or
+// JoinRequestQueue to leave the decision to other administrators
+// (Bot API 10.1).
+//
+// Bot API: answerChatJoinRequestQuery.
+func (b *Bot) AnswerChatJoinRequestQuery(queryID, result string) error {
+	_, err := b.Raw("answerChatJoinRequestQuery", map[string]string{
+		"chat_join_request_query_id": queryID,
+		"result":                     result,
+	})
+	return err
+}
+
+// SendChatJoinRequestWebApp shows the user who sent a join request query a
+// Mini App at url before the bot decides; resolve the query afterwards with
+// AnswerChatJoinRequestQuery (Bot API 10.1).
+//
+// Bot API: sendChatJoinRequestWebApp.
+func (b *Bot) SendChatJoinRequestWebApp(queryID, url string) error {
+	_, err := b.Raw("sendChatJoinRequestWebApp", map[string]string{
+		"chat_join_request_query_id": queryID,
+		"web_app_url":                url,
+	})
+	return err
 }
 
 // ApproveJoinRequest approves a chat join request.
