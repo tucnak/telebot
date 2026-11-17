@@ -515,6 +515,7 @@ func (b *Bot) Reply(to *Message, what interface{}, opts ...interface{}) (*Messag
 }
 
 // Forward behaves just like Send() but of all options it only supports Silent (see Bots API).
+// An int64 option is the timestamp, in seconds, a forwarded video starts from.
 // This function will panic upon nil Editable.
 //
 // Bot API: forwardMessage.
@@ -530,15 +531,10 @@ func (b *Bot) Forward(to Recipient, msg Editable, opts ...interface{}) (*Message
 		"message_id":   msgID,
 	}
 
-	sendOpts := b.extractOptions(opts)
-	b.embedSendOptions(params, sendOpts)
-
-	// Check for video_start_timestamp option (Bot API 8.3)
-	for _, opt := range opts {
-		if ts, ok := opt.(int64); ok && ts > 0 {
-			params["video_start_timestamp"] = strconv.FormatInt(ts, 10)
-			break
-		}
+	opts, start := videoStartTimestamp(opts)
+	b.embedSendOptions(params, b.extractOptions(opts))
+	if start > 0 {
+		params["video_start_timestamp"] = strconv.FormatInt(start, 10)
 	}
 
 	data, err := b.Raw("forwardMessage", params)
@@ -547,6 +543,19 @@ func (b *Bot) Forward(to Recipient, msg Editable, opts ...interface{}) (*Message
 	}
 
 	return extractMessage(data)
+}
+
+// videoStartTimestamp takes the int64 option of Forward and Copy out of opts,
+// which extractOptions does not accept.
+func videoStartTimestamp(opts []interface{}) (rest []interface{}, start int64) {
+	for _, opt := range opts {
+		if ts, ok := opt.(int64); ok {
+			start = ts
+		} else {
+			rest = append(rest, opt)
+		}
+	}
+	return rest, start
 }
 
 // ForwardMany method forwards multiple messages of any kind.
@@ -563,6 +572,7 @@ func (b *Bot) ForwardMany(to Recipient, msgs []Editable, opts ...*SendOptions) (
 }
 
 // Copy behaves just like Forward() but the copied message doesn't have a link to the original message (see Bots API).
+// An int64 option is the timestamp, in seconds, a copied video starts from.
 //
 // This function will panic upon nil Editable.
 //
@@ -579,15 +589,10 @@ func (b *Bot) Copy(to Recipient, msg Editable, opts ...interface{}) (*Message, e
 		"message_id":   msgID,
 	}
 
-	sendOpts := b.extractOptions(opts)
-	b.embedSendOptions(params, sendOpts)
-
-	// Check for video_start_timestamp option (Bot API 8.3)
-	for _, opt := range opts {
-		if ts, ok := opt.(int64); ok && ts > 0 {
-			params["video_start_timestamp"] = strconv.FormatInt(ts, 10)
-			break
-		}
+	opts, start := videoStartTimestamp(opts)
+	b.embedSendOptions(params, b.extractOptions(opts))
+	if start > 0 {
+		params["video_start_timestamp"] = strconv.FormatInt(start, 10)
 	}
 
 	data, err := b.Raw("copyMessage", params)

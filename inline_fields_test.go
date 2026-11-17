@@ -91,6 +91,22 @@ func TestSavePreparedInlineMessage(t *testing.T) {
 	assert.Contains(t, req.Params["result"], `"type":"article"`)
 }
 
+func TestForwardCopyVideoStartTimestamp(t *testing.T) {
+	b, srv := newFakeBot(t)
+	srv.Reply("forwardMessage", json.RawMessage(`{"message_id":8,"chat":{"id":7}}`))
+	srv.Reply("copyMessage", json.RawMessage(`{"message_id":9}`))
+	msg := &Message{ID: 1, Chat: &Chat{ID: 2}}
+
+	_, err := b.Forward(ChatID(7), msg, Silent, int64(30))
+	require.NoError(t, err)
+	assert.Equal(t, map[string]string{"chat_id": "7", "from_chat_id": "2", "message_id": "1",
+		"disable_notification": "true", "video_start_timestamp": "30"}, srv.Last().Params)
+
+	_, err = b.Copy(ChatID(7), msg, int64(30))
+	require.NoError(t, err)
+	assert.Equal(t, "30", srv.Last().Params["video_start_timestamp"])
+}
+
 func TestRespondCacheTime(t *testing.T) {
 	b, srv := newFakeBot(t)
 	require.NoError(t, b.Respond(&Callback{ID: "c"}, &CallbackResponse{Text: "ok", CacheTime: 30}))
