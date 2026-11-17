@@ -323,7 +323,8 @@ func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Messag
 // draftID must be non-zero; updates with the same identifier are animated client-side.
 // Pass an empty text to show a "Thinking…" placeholder.
 //
-// Only ParseMode, Entities and ThreadID send options are honored; other fields
+// Only ParseMode, Entities, ThreadID, CanStop and KeepOnStop send options are
+// honored; other fields
 // are not accepted by sendMessageDraft.
 //
 // Bot API: sendMessageDraft.
@@ -350,6 +351,7 @@ func (b *Bot) SendDraft(to Recipient, draftID int, text string, opts ...interfac
 		} else if sendOpts.ParseMode != ModeDefault {
 			params["parse_mode"] = sendOpts.ParseMode
 		}
+		embedDraftStop(params, sendOpts)
 	}
 
 	_, err := b.Raw("sendMessageDraft", params)

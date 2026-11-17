@@ -109,6 +109,13 @@ type SendOptions struct {
 	// option on its own.
 	Ephemeral *EphemeralMessageParameters
 
+	// CanStop shows the user a button to stop a streamed draft; pressing it
+	// delivers OnGenerationStopped. KeepOnStop keeps the draft in the chat
+	// for a short time after it is stopped. Used only by SendDraft and
+	// SendRichDraft (Bot API 10.3).
+	CanStop    bool
+	KeepOnStop bool
+
 	// CaptionAbove shows an edited caption above the media. Used only when
 	// editing a caption; when sending media, set the media's CaptionAbove.
 	CaptionAbove bool
@@ -255,6 +262,16 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 	if opt.Ephemeral != nil {
 		data, _ := json.Marshal(opt.Ephemeral)
 		params["ephemeral_message_parameters"] = string(data)
+	}
+}
+
+// embedDraftStop adds the stop button options of the draft methods.
+func embedDraftStop(params map[string]string, opt *SendOptions) {
+	if opt.CanStop {
+		params["can_stop"] = "true"
+	}
+	if opt.KeepOnStop {
+		params["keep_on_stop"] = "true"
 	}
 }
 

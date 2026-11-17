@@ -76,7 +76,8 @@ func (i *InputRichMessage) Send(b *Bot, to Recipient, opt *SendOptions) (*Messag
 // ephemeral and acts as a temporary 30-second preview; once the output is
 // finalized you must Send the complete InputRichMessage to persist it. draftID
 // must be non-zero — updates sharing the same identifier are animated
-// client-side. Of the send options only ThreadID is honored.
+// client-side. Of the send options only ThreadID, CanStop and KeepOnStop are
+// honored.
 //
 // Bot API: sendRichMessageDraft.
 func (b *Bot) SendRichDraft(to Recipient, draftID int, rich *InputRichMessage, opts ...interface{}) error {
@@ -98,8 +99,11 @@ func (b *Bot) SendRichDraft(to Recipient, draftID int, rich *InputRichMessage, o
 		"rich_message": data,
 	}
 
-	if sendOpts := b.extractOptions(opts); sendOpts != nil && sendOpts.ThreadID != 0 {
-		params["message_thread_id"] = strconv.Itoa(sendOpts.ThreadID)
+	if sendOpts := b.extractOptions(opts); sendOpts != nil {
+		if sendOpts.ThreadID != 0 {
+			params["message_thread_id"] = strconv.Itoa(sendOpts.ThreadID)
+		}
+		embedDraftStop(params, sendOpts)
 	}
 
 	_, err = b.sendFiles("sendRichMessageDraft", files, params)
@@ -177,4 +181,19 @@ func (t RichMessageButton) wire() RichMessageButton {
 		}
 	}
 	return t
+}
+
+// MessageGenerationStopped is received when a user presses the stop button of
+// a draft sent with the CanStop option (Bot API 10.3).
+//
+// Bot API: MessageGenerationStopped.
+type MessageGenerationStopped struct {
+	// Chat in which the message is generated.
+	Chat *Chat `json:"chat"`
+
+	// (Optional) Message thread in which the message is generated.
+	ThreadID int `json:"message_thread_id,omitempty"`
+
+	// The draft that was stopped, as passed to SendDraft or SendRichDraft.
+	DraftID int `json:"draft_id"`
 }

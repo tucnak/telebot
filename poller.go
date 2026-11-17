@@ -23,6 +23,7 @@ var AllowedUpdates = []string{
 	"removed_chat_boost",
 	"guest_message",
 	"subscription",
+	"stopped_message_generation",
 }
 
 // Poller is a provider of Updates.

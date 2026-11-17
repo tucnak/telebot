@@ -79,6 +79,9 @@ type Context interface {
 	// Subscription returns the change to a user's payment subscription.
 	Subscription() *BotSubscriptionUpdated
 
+	// GenerationStopped returns the draft whose generation the user stopped.
+	GenerationStopped() *MessageGenerationStopped
+
 	// Sender returns the current recipient, depending on the context type.
 	// Returns nil if user is not presented.
 	Sender() *User
@@ -324,6 +327,10 @@ func (c *nativeContext) Subscription() *BotSubscriptionUpdated {
 	return c.u.Subscription
 }
 
+func (c *nativeContext) GenerationStopped() *MessageGenerationStopped {
+	return c.u.GenerationStopped
+}
+
 func (c *nativeContext) Sender() *User {
 	switch {
 	case c.u.Callback != nil:
@@ -370,6 +377,8 @@ func (c *nativeContext) Chat() *Chat {
 		return c.u.ChatMember.Chat
 	case c.u.ChatJoinRequest != nil:
 		return c.u.ChatJoinRequest.Chat
+	case c.u.GenerationStopped != nil:
+		return c.u.GenerationStopped.Chat
 	default:
 		return nil
 	}
