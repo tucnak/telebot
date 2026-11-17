@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"gopkg.in/telebot.v4/teletest"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -117,4 +118,35 @@ func TestExtractMessage(t *testing.T) {
 	data = []byte(`{"ok":true,"result":{"foo":"bar"}}`)
 	_, err = extractMessage(data)
 	require.NoError(t, err)
+}
+
+func TestRawFiles(t *testing.T) {
+	b, srv := newFakeBot(t)
+
+	_, err := b.RawFiles("setChatPhoto", map[string]string{"chat_id": "-100"},
+		map[string]File{"photo": FromReader(strings.NewReader("jpg"))})
+	require.NoError(t, err)
+	req := srv.Last()
+	assert.Equal(t, "setChatPhoto", req.Method)
+	assert.Equal(t, "-100", req.Params["chat_id"])
+	assert.Equal(t, "jpg", string(req.Files["photo"].Data))
+
+	_, err = b.RawFiles("sendDocument", nil, map[string]File{"document": {FileID: "abc"}})
+	require.NoError(t, err)
+	assert.Equal(t, map[string]string{"document": "abc"}, srv.Last().Params)
+	assert.Empty(t, srv.Last().Files)
+}
+
+func TestRawFilesErrorHidesToken(t *testing.T) {
+	srv := teletest.NewServer(t)
+	url := srv.URL
+	b, err := NewBot(Settings{URL: url, Token: srv.Token, Offline: true})
+	require.NoError(t, err)
+
+	// A server that is gone makes the transport fail with the request URL.
+	b.URL = "http://127.0.0.1:1"
+	_, err = b.RawFiles("sendDocument", nil, map[string]File{"document": FromReader(strings.NewReader("x"))})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "127.0.0.1:1", "the error still describes the request")
+	assert.NotContains(t, err.Error(), srv.Token)
 }

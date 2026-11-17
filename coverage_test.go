@@ -292,7 +292,7 @@ func TestCoverage(t *testing.T) {
 	// Every exported Bot method that calls the Bot API says which method(s).
 	reach := pkg.reachesAPI()
 	for _, f := range sortedDecls(pkg.funcs) {
-		if strings.HasPrefix(f.name, "Bot.") && reach[f.name] && f.botAPI == nil && f.name != "Bot.Raw" {
+		if strings.HasPrefix(f.name, "Bot.") && reach[f.name] && f.botAPI == nil && f.name != "Bot.Raw" && f.name != "Bot.RawFiles" {
 			t.Errorf("%s: %s calls the Bot API but its doc comment has no \"Bot API:\" line", f.file, f.name)
 		}
 	}

@@ -6,6 +6,7 @@ import "io"
 // with Telegram Bot API.
 type API interface {
 	Raw(method string, payload interface{}) ([]byte, error)
+	RawFiles(method string, params map[string]string, files map[string]File) ([]byte, error)
 
 	Accept(query *PreCheckoutQuery, errorMessage ...string) error
 	AddStickerToSet(of Recipient, name string, sticker InputSticker) error

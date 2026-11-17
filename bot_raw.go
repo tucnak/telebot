@@ -70,6 +70,23 @@ func (b *Bot) Raw(method string, payload interface{}) ([]byte, error) {
 	return data, extractOk(data)
 }
 
+// RawFiles calls any Bot API method like Raw, uploading files with it. Each
+// file is sent under its key: a file ID or URL as that parameter's value, a
+// local file or reader as a multipart upload. To reference an upload from a
+// JSON parameter, as InputMedia does, give it the key you name in
+// "attach://<key>". The request is plain JSON when nothing is uploaded.
+//
+//	b.RawFiles("setChatPhoto", map[string]string{"chat_id": "-100123"},
+//		map[string]tele.File{"photo": tele.FromDisk("logo.jpg")})
+//
+// Errors never contain the bot token.
+func (b *Bot) RawFiles(method string, params map[string]string, files map[string]File) ([]byte, error) {
+	if params == nil {
+		params = make(map[string]string)
+	}
+	return b.sendFiles(method, files, params)
+}
+
 func (b *Bot) sendFiles(method string, files map[string]File, params map[string]string) ([]byte, error) {
 	rawFiles := make(map[string]interface{})
 	for name, f := range files {
