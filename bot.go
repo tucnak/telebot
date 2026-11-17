@@ -1074,6 +1074,9 @@ func (b *Bot) Answer(query *Query, resp *QueryResponse) error {
 // Bot API: answerWebAppQuery.
 func (b *Bot) AnswerWebApp(query *Query, r Result) (*WebAppMessage, error) {
 	r.Process(b)
+	if err := inferIQR(r); err != nil {
+		return nil, err
+	}
 
 	params := map[string]interface{}{
 		"web_app_query_id": query.ID,
