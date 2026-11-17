@@ -10,6 +10,7 @@ import (
 
 func TestInlineResultFields(t *testing.T) {
 	b, srv := newFakeBot(t)
+	b.parseMode = ModeHTML // not sent where entities are given
 
 	photo := &PhotoResult{URL: "https://example.com/p.jpg", ThumbURL: "https://example.com/t.jpg", Caption: "hi"}
 	photo.CaptionEntities = []MessageEntity{{Type: EntityBold, Length: 2}}
@@ -27,6 +28,8 @@ func TestInlineResultFields(t *testing.T) {
 	srv.Last().JSON(t, "results", &results)
 	require.Len(t, results, 5)
 	assert.Equal(t, []interface{}{map[string]interface{}{"type": "bold", "offset": 0.0, "length": 2.0}}, results[0]["caption_entities"])
+	assert.NotContains(t, results[0], "parse_mode")
+	assert.Equal(t, "HTML", results[1]["parse_mode"])
 	assert.Equal(t, 64.0, results[1]["thumbnail_width"])
 	assert.Equal(t, "gp", results[2]["google_place_id"])
 	assert.Equal(t, map[string]interface{}{"message_text": "x", "entities": []interface{}{map[string]interface{}{"type": "italic", "offset": 0.0, "length": 1.0}}},

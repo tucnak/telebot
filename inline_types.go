@@ -51,15 +51,18 @@ func (r *ResultBase) SetReplyMarkup(markup *ReplyMarkup) {
 	r.ReplyMarkup = markup
 }
 
+// Process fills in the bot's default parse mode, unless entities are given,
+// over which Telegram would prefer the parse mode.
 func (r *ResultBase) Process(b *Bot) {
-	if r.ParseMode == ModeDefault {
-		r.ParseMode = b.parseMode
+	mode := r.ParseMode
+	if mode == ModeDefault {
+		mode = b.parseMode
 	}
-	if r.Content != nil {
-		c, ok := r.Content.(*InputTextMessageContent)
-		if ok && c.ParseMode == ModeDefault {
-			c.ParseMode = r.ParseMode
-		}
+	if len(r.CaptionEntities) == 0 {
+		r.ParseMode = mode
+	}
+	if c, ok := r.Content.(*InputTextMessageContent); ok && c.ParseMode == ModeDefault && len(c.Entities) == 0 {
+		c.ParseMode = mode
 	}
 	if r.ReplyMarkup != nil {
 		processButtons(r.ReplyMarkup.InlineKeyboard)
