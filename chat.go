@@ -99,6 +99,10 @@ type Chat struct {
 	// (Optional) The TON wallet card of a private chat's user; returned only
 	// by ChatByID (Bot API 10.4).
 	TonWalletCard *TonWalletCard `json:"ton_wallet_card,omitempty"`
+
+	// (Optional) The theme of the screen for sharing a link to the chat;
+	// returned only by ChatByID (Bot API 10.4).
+	ShareTheme *ChatShareTheme `json:"share_theme,omitempty"`
 }
 
 // Recipient returns chat ID (see Recipient interface).
@@ -408,6 +412,10 @@ type ChatFullInfo struct {
 
 	// Bot API 10.4: (Optional) The TON wallet card of a private chat's user.
 	TonWalletCard *TonWalletCard `json:"ton_wallet_card,omitempty"`
+
+	// Bot API 10.4: (Optional) The theme of the screen for sharing a link to
+	// the chat.
+	ShareTheme *ChatShareTheme `json:"share_theme,omitempty"`
 }
 
 // ChatBackground is a chat background.

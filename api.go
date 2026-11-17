@@ -119,6 +119,7 @@ type API interface {
 	SetStickerSetTitle(s StickerSet) error
 	SetUserEmojiStatus(user Recipient, emojiStatusCustomEmojiID string, expirationDate ...int64) error
 	SetWebhook(w *Webhook) error
+	ShareThemeBackdrops() ([]ChatShareThemeBackdrop, error)
 	Ship(query *ShippingQuery, what ...interface{}) error
 	StarTransactions(offset, limit int) ([]StarTransaction, error)
 	StickerSet(name string) (*StickerSet, error)
