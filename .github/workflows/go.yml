@@ -2,16 +2,66 @@ name: Go
 
 on: [push, pull_request]
 
+permissions:
+  contents: read
+
 jobs:
-  build:
+  test:
+    name: Offline tests (Go ${{ matrix.go }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go: ['1.16', 'oldstable', 'stable']
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.16
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
 
-    - name: Test
-      run: export TELEBOT_SECRET=${{ secrets.TELEBOT_SECRET }} && export CHAT_ID=${{ secrets.CHAT_ID }} && export USER_ID=${{ secrets.USER_ID }} && go test -v ./...
+      - name: Format
+        if: matrix.go == 'stable'
+        run: test -z "$(gofmt -l .)" || { gofmt -l .; exit 1; }
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test -race ./...
+
+  live:
+    name: Live tests
+    # Secrets are not passed to pull requests from forks, so this job only
+    # runs for pushes and same-repository pull requests.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    env:
+      TELEBOT_SECRET: ${{ secrets.TELEBOT_SECRET }}
+      CHAT_ID: ${{ secrets.CHAT_ID }}
+      USER_ID: ${{ secrets.USER_ID }}
+      CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Check the bot token
+        id: token
+        run: |
+          if [ -z "$TELEBOT_SECRET" ]; then
+            echo "::notice::TELEBOT_SECRET is not set, live tests skipped"
+            exit 0
+          fi
+          code=$(curl -s -o /dev/null -w '%{http_code}' "https://api.telegram.org/bot${TELEBOT_SECRET}/getMe")
+          if [ "$code" != 200 ]; then
+            echo "::warning::Telegram rejected TELEBOT_SECRET (HTTP $code), live tests skipped"
+            exit 0
+          fi
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Test
+        if: steps.token.outputs.ok == 'true'
+        run: go test -v ./...
