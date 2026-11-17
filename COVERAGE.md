@@ -310,7 +310,7 @@ A method's "unseen parameters" are parameters whose name appears nowhere in tele
 | [TonWalletTransfer](https://core.telegram.org/bots/api#tonwallettransfer) | `TonWalletTransfer` |  |
 | [GiveawayCreated](https://core.telegram.org/bots/api#giveawaycreated) | `GiveawayCreated` |  |
 | [Giveaway](https://core.telegram.org/bots/api#giveaway) | `Giveaway` |  |
-| [GiveawayWinners](https://core.telegram.org/bots/api#giveawaywinners) | `GiveawayWinners` | giveaway_message_id |
+| [GiveawayWinners](https://core.telegram.org/bots/api#giveawaywinners) | `GiveawayWinners` |  |
 | [GiveawayCompleted](https://core.telegram.org/bots/api#giveawaycompleted) | `GiveawayCompleted` |  |
 | [LinkPreviewOptions](https://core.telegram.org/bots/api#linkpreviewoptions) | `PreviewOptions` |  |
 | [SuggestedPostPrice](https://core.telegram.org/bots/api#suggestedpostprice) | `SuggestedPostPrice` |  |

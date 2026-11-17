@@ -54,7 +54,7 @@ type GiveawayWinners struct {
 	Chat *Chat `json:"chat"`
 
 	// Identifier of the message with the giveaway in the chat.
-	MessageID int `json:"message_id"`
+	MessageID int `json:"giveaway_message_id"`
 
 	// Point in time (Unix timestamp) when winners of the giveaway were selected.
 	SelectionUnixtime int64 `json:"winners_selection_date"`

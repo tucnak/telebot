@@ -51,6 +51,7 @@ func TestGiveawayWinnersPrizeStarCount(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 3, gw.WinnerCount)
 	assert.Equal(t, 150, gw.PrizeStarCount)
+	assert.Equal(t, 456, gw.MessageID)
 }
 
 func TestGiveawayCompletedIsStarGiveaway(t *testing.T) {
