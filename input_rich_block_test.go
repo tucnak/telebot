@@ -137,8 +137,10 @@ func TestSendRichMedia(t *testing.T) {
 	// A voice note is input media in rich messages only.
 	_, err = b.Edit(&Message{ID: 1, Chat: &Chat{ID: 2}}, &Voice{File: File{FileID: "v"}})
 	assert.Equal(t, ErrUnsupportedWhat, err)
-	_, err = b.Send(ChatID(2), &InputRichMessage{Media: []InputRichMessageMedia{{ID: "s", Media: &Sticker{File: File{FileID: "s"}}}}})
-	assert.Error(t, err)
+	for _, media := range []Media{&Sticker{File: File{FileID: "s"}}, &LivePhoto{File: File{FileID: "l"}}} {
+		_, err = b.Send(ChatID(2), &InputRichMessage{Media: []InputRichMessageMedia{{ID: "m", Media: media}}})
+		assert.Error(t, err, media.MediaType())
+	}
 }
 
 func TestSendRichDraftBlocks(t *testing.T) {

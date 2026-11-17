@@ -326,6 +326,8 @@ func (e *richEncoder) media(m Media) (*InputMedia, error) {
 		// Only rich messages take a voice note as input media, so Voice is
 		// not an Inputtable.
 		im = InputMedia{Type: "voice_note", Caption: v.Caption, Duration: v.Duration}
+	case *LivePhoto:
+		return nil, errors.New("telebot: unsupported rich message media")
 	case Inputtable:
 		im = v.InputMedia()
 	default:
