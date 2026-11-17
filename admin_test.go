@@ -44,6 +44,7 @@ func TestEmbedRights(t *testing.T) {
 		"can_edit_stories":          false,
 		"can_delete_stories":        false,
 		"can_manage_tags":           false,
+		"can_react_to_messages":     false,
 		"can_send_welcome_messages": false,
 		"can_edit_tag":              false,
 	}

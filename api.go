@@ -9,7 +9,7 @@ type API interface {
 
 	Accept(query *PreCheckoutQuery, errorMessage ...string) error
 	AddStickerToSet(of Recipient, name string, sticker InputSticker) error
-	AdminsOf(chat *Chat) ([]ChatMember, error)
+	AdminsOf(chat *Chat, returnBots ...bool) ([]ChatMember, error)
 	Answer(query *Query, resp *QueryResponse) error
 	AnswerChatJoinRequestQuery(queryID, result string) error
 	AnswerGuest(msg *Message, result Result) (*SentGuestMessage, error)
@@ -38,11 +38,13 @@ type API interface {
 	DefaultRights(forChannels bool) (*Rights, error)
 	Delete(msg Editable) error
 	DeleteBusinessAccountGift(connectionID, ownedGiftID string) error
+	DeleteAllReactions(chat, actor Recipient) error
 	DeleteCommands(opts ...interface{}) error
 	DeleteEphemeral(msg *Message) error
 	DeleteGroupPhoto(chat *Chat) error
 	DeleteGroupStickerSet(chat *Chat) error
 	DeleteMany(msgs []Editable) error
+	DeleteReaction(msg Editable, actor Recipient) error
 	DeleteSticker(sticker string) error
 	DeleteStickerSet(name string) error
 	DeleteTopic(chat *Chat, topic *Topic) error

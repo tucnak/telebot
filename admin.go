@@ -48,6 +48,10 @@ type Rights struct {
 	// Bot API 9.5: restricted member permission (ChatPermissions).
 	CanEditTag bool `json:"can_edit_tag"`
 
+	// Bot API 10.0: restricted member permission to react to messages
+	// (ChatPermissions).
+	CanReactToMessages bool `json:"can_react_to_messages"`
+
 	// Bot API 10.3: administrator right to manage the chat's welcome
 	// messages, or for bots, to send them.
 	CanSendWelcomeMessages bool `json:"can_send_welcome_messages"`
@@ -229,10 +233,16 @@ func (b *Bot) Promote(chat *Chat, member *ChatMember) error {
 // If the chat is a group or a supergroup and
 // no administrators were appointed, only the creator will be returned.
 //
+// Bots other than this one are left out unless returnBots is true
+// (Bot API 10.0).
+//
 // Bot API: getChatAdministrators.
-func (b *Bot) AdminsOf(chat *Chat) ([]ChatMember, error) {
+func (b *Bot) AdminsOf(chat *Chat, returnBots ...bool) ([]ChatMember, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
+	}
+	if len(returnBots) > 0 && returnBots[0] {
+		params["return_bots"] = "true"
 	}
 
 	data, err := b.Raw("getChatAdministrators", params)

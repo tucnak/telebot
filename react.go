@@ -2,6 +2,7 @@ package telebot
 
 import (
 	"encoding/json"
+	"strconv"
 )
 
 const (
@@ -69,5 +70,46 @@ func (b *Bot) React(to Recipient, msg Editable, r Reactions) error {
 	}
 
 	_, err := b.Raw("setMessageReaction", params)
+	return err
+}
+
+// reactionActor adds the user_id or actor_chat_id of who added reactions.
+func reactionActor(params map[string]string, actor Recipient) {
+	if chat, ok := actor.(*Chat); ok {
+		params["actor_chat_id"] = chat.Recipient()
+	} else if actor != nil {
+		params["user_id"] = actor.Recipient()
+	}
+}
+
+// DeleteReaction removes the reaction that actor, a *User or a *Chat, added
+// to msg in a group or supergroup. The bot needs the can_delete_messages
+// right (Bot API 10.0).
+//
+// Bot API: deleteMessageReaction.
+func (b *Bot) DeleteReaction(msg Editable, actor Recipient) error {
+	msgID, chatID := msg.MessageSig()
+	params := map[string]string{
+		"chat_id":    strconv.FormatInt(chatID, 10),
+		"message_id": msgID,
+	}
+	reactionActor(params, actor)
+
+	_, err := b.Raw("deleteMessageReaction", params)
+	return err
+}
+
+// DeleteAllReactions removes up to 10000 recent reactions that actor, a
+// *User or a *Chat, added in a group or supergroup. The bot needs the
+// can_delete_messages right (Bot API 10.0).
+//
+// Bot API: deleteAllMessageReactions.
+func (b *Bot) DeleteAllReactions(chat, actor Recipient) error {
+	params := map[string]string{
+		"chat_id": chat.Recipient(),
+	}
+	reactionActor(params, actor)
+
+	_, err := b.Raw("deleteAllMessageReactions", params)
 	return err
 }
