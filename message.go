@@ -162,6 +162,9 @@ type Message struct {
 	// For a video, information about it.
 	Video *Video `json:"video"`
 
+	// (Optional) Message is a live photo (Bot API 10.0).
+	LivePhoto *LivePhoto `json:"live_photo,omitempty"`
+
 	// For an animation, information about it.
 	Animation *Animation `json:"animation"`
 
@@ -793,6 +796,9 @@ type ExternalReply struct {
 
 	// (Optional) Message is a video, information about the video.
 	Video *Video `json:"video"`
+
+	// (Optional) Message is a live photo (Bot API 10.0).
+	LivePhoto *LivePhoto `json:"live_photo,omitempty"`
 
 	// (Optional) Message is a video note, information about the video message.
 	Note *VideoNote `json:"video_note"`

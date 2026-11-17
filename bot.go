@@ -299,7 +299,7 @@ func (b *Bot) NewContext(u Update) Context {
 //   - Option (a shortcut flag for popular options)
 //   - ParseMode (HTML, Markdown, etc)
 //
-// Bot API: sendMessage, sendPhoto, sendAudio, sendDocument, sendVideo, sendAnimation, sendVoice, sendVideoNote, sendSticker, sendLocation, sendVenue, sendInvoice, sendPoll, sendDice, sendGame, sendRichMessage, sendWidget, sendSharedWidget.
+// Bot API: sendMessage, sendPhoto, sendAudio, sendDocument, sendVideo, sendAnimation, sendVoice, sendVideoNote, sendSticker, sendLocation, sendVenue, sendInvoice, sendPoll, sendDice, sendGame, sendRichMessage, sendWidget, sendSharedWidget, sendLivePhoto.
 func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
@@ -384,6 +384,9 @@ func (b *Bot) SendPaidMedia(to Recipient, stars int, a PaidAlbum, opts ...interf
 
 		im := x.InputMedia()
 		im.Media = repr
+		if err := embedStill(x, &im, strconv.Itoa(i)+"s", files); err != nil {
+			return nil, err
+		}
 
 		if i == 0 {
 			params["caption"] = im.Caption
@@ -433,6 +436,9 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 
 		im := x.InputMedia()
 		im.Media = repr
+		if err := embedStill(x, &im, strconv.Itoa(i)+"s", files); err != nil {
+			return nil, err
+		}
 
 		if len(sendOpts.Entities) > 0 {
 			im.Entities = sendOpts.Entities
@@ -463,7 +469,10 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 	}
 
 	for attachName := range files {
-		i, _ := strconv.Atoi(attachName)
+		i, err := strconv.Atoi(attachName)
+		if err != nil || i >= len(resp.Result) {
+			continue // the static photo of a live photo
+		}
 		r := resp.Result[i]
 
 		var newID string
@@ -476,6 +485,8 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 			newID = r.Audio.FileID
 		case r.Document != nil:
 			newID = r.Document.FileID
+		case r.LivePhoto != nil:
+			newID = r.LivePhoto.FileID
 		}
 
 		a[i].MediaFile().FileID = newID
@@ -487,7 +498,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 // Reply behaves just like Send() with an exception of "reply-to" indicator.
 // This function will panic upon nil Message.
 //
-// Bot API: sendMessage, sendPhoto, sendAudio, sendDocument, sendVideo, sendAnimation, sendVoice, sendVideoNote, sendSticker, sendLocation, sendVenue, sendInvoice, sendPoll, sendDice, sendGame, sendRichMessage, sendWidget, sendSharedWidget.
+// Bot API: sendMessage, sendPhoto, sendAudio, sendDocument, sendVideo, sendAnimation, sendVoice, sendVideoNote, sendSticker, sendLocation, sendVenue, sendInvoice, sendPoll, sendDice, sendGame, sendRichMessage, sendWidget, sendSharedWidget, sendLivePhoto.
 func (b *Bot) Reply(to *Message, what interface{}, opts ...interface{}) (*Message, error) {
 	sendOpts := b.extractOptions(opts)
 	if sendOpts == nil {
@@ -840,6 +851,9 @@ func encodeEditMedia(media Inputtable, sendOpts *SendOptions) (string, map[strin
 
 	im := media.InputMedia()
 	im.Media = repr
+	if err := embedStill(media, &im, "still", files); err != nil {
+		return "", nil, err
+	}
 
 	if sendOpts != nil {
 		if len(sendOpts.Entities) > 0 {

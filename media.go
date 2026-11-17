@@ -17,7 +17,7 @@ type Media interface {
 // InputMedia represents a composite InputMedia struct that is
 // used by Telebot in sending and editing media methods.
 //
-// Bot API: InputMedia, InputMediaAnimation, InputMediaAudio, InputMediaDocument, InputMediaPhoto, InputMediaVideo, InputMediaVoiceNote.
+// Bot API: InputMedia, InputMediaAnimation, InputMediaAudio, InputMediaDocument, InputMediaPhoto, InputMediaVideo, InputMediaVoiceNote, InputMediaLivePhoto, InputPaidMediaPhoto, InputPaidMediaVideo, InputPaidMediaLivePhoto.
 type InputMedia struct {
 	Type                 string   `json:"type"`
 	Media                string   `json:"media"`
@@ -40,6 +40,9 @@ type InputMedia struct {
 
 	// Bot API 8.3: (Optional) Point in time (Unix timestamp) when the video starts (for InputMediaVideo)
 	StartTimestamp int64 `json:"start_timestamp,omitempty"`
+
+	// Bot API 10.0: the static photo of an InputMediaLivePhoto.
+	Photo string `json:"photo,omitempty"`
 }
 
 // Inputtable is a generic type for all kinds of media you
@@ -507,7 +510,7 @@ type PaidMedias struct {
 // PaidMedia is one paid media item: a photo, a video, or a preview of media
 // not yet bought.
 //
-// Bot API: PaidMedia, PaidMediaPhoto, PaidMediaPreview, PaidMediaVideo.
+// Bot API: PaidMedia, PaidMediaPhoto, PaidMediaPreview, PaidMediaVideo, PaidMediaLivePhoto.
 type PaidMedia struct {
 	Type     string `json:"type"`
 	Photo    *Photo `json:"photo"`    // photo
@@ -522,6 +525,9 @@ type PaidMedia struct {
 
 	// Bot API 8.3: (Optional) Point in time (Unix timestamp) when the video starts (for paid video media)
 	StartTimestamp int64 `json:"start_timestamp,omitempty"`
+
+	// Bot API 10.0: the live photo, for paid live photo media.
+	LivePhoto *LivePhoto `json:"live_photo,omitempty"`
 }
 
 // PaidMediaPurchased contains information about paid media purchased by a user.

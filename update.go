@@ -466,6 +466,8 @@ func (b *Bot) handleMedia(c Context) bool {
 		fired = b.handle(OnVideo, c)
 	case m.VideoNote != nil:
 		fired = b.handle(OnVideoNote, c)
+	case m.LivePhoto != nil:
+		fired = b.handle(OnLivePhoto, c)
 	default:
 		return false
 	}

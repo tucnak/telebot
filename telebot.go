@@ -55,6 +55,7 @@ const (
 	OnSticker              = "\asticker"
 	OnVideo                = "\avideo"
 	OnVoice                = "\avoice"
+	OnLivePhoto            = "\alive_photo"
 	OnVideoNote            = "\avideo_note"
 	OnContact              = "\acontact"
 	OnLocation             = "\alocation"
