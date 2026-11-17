@@ -518,8 +518,9 @@ func (g *Game) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 }
 
 func thumbnailToFilemap(thumb *Photo) map[string]File {
+	files := make(map[string]File)
 	if thumb != nil {
-		return map[string]File{"thumbnail": thumb.File}
+		files["thumbnail"] = thumb.File
 	}
-	return nil
+	return files
 }

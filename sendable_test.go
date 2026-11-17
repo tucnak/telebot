@@ -111,3 +111,12 @@ func TestSendMediaReturnedAsAnotherKind(t *testing.T) {
 		assert.Equal(t, "d", msg.Document.FileID, method)
 	}
 }
+
+func TestSendVideoCoverWithoutThumbnail(t *testing.T) {
+	b, srv := newFakeBot(t)
+	srv.Reply("sendVideo", json.RawMessage(`{"message_id":1,"chat":{"id":2},"video":{"file_id":"v"}}`))
+
+	_, err := b.Send(ChatID(2), &Video{File: File{FileID: "v"}, Cover: &Photo{File: File{FileID: "c"}}})
+	require.NoError(t, err)
+	assert.Equal(t, "c", srv.Last().Params["cover"])
+}
