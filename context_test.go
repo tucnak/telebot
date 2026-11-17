@@ -33,3 +33,15 @@ func TestContextBusinessMessage(t *testing.T) {
 		assert.Equal(t, int64(5), c.Sender().ID, kind)
 	}
 }
+
+func TestContextSendIgnoreThread(t *testing.T) {
+	b, srv := newFakeBot(t)
+	srv.Reply("sendMessage", json.RawMessage(`{"message_id":1,"chat":{"id":7}}`))
+
+	c := b.NewContext(Update{Message: &Message{ID: 1, ThreadID: 9, TopicMessage: true, Chat: &Chat{ID: 7}}})
+	require.NoError(t, c.Send("in the thread"))
+	assert.Equal(t, "9", srv.Last().Params["message_thread_id"])
+
+	require.NoError(t, c.Send("outside it", IgnoreThread))
+	assert.NotContains(t, srv.Last().Params, "message_thread_id")
+}

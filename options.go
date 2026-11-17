@@ -196,6 +196,8 @@ func (b *Bot) extractOptions(how []interface{}) *SendOptions {
 				opts.ReplyMarkup.RemoveKeyboard = true
 			case Protected:
 				opts.Protected = true
+			case IgnoreThread:
+				// Only Context reads it, to leave its thread out.
 			default:
 				panic("telebot: unsupported flag-option")
 			}
