@@ -241,7 +241,8 @@ func (b *Bot) GetAvailableGifts() ([]Gift, error) {
 }
 
 // SendGift sends a gift to the given user or chat member. The gift can't be converted to Telegram Stars by the user.
-// Additional text can be passed as a string option. PayForUpgrade can be passed as a bool to pay for upgrading the gift.
+// Additional text can be passed as a string option, with a ParseMode or *SendOptions for its formatting.
+// PayForUpgrade can be passed as a bool to pay for upgrading the gift.
 // For Bot API 8.3+, you can pass a chat as the first parameter to send gifts to specific chat members.
 //
 // Bot API: sendGift.
@@ -266,8 +267,13 @@ func (b *Bot) SendGift(to Recipient, giftID string, opts ...interface{}) error {
 	for _, opt := range opts {
 		switch v := opt.(type) {
 		case string:
-			// Text for the gift
-			params["text"] = v
+			// ParseMode is a string too, so its values are not gift text.
+			switch v {
+			case ModeHTML, ModeMarkdown, ModeMarkdownV2:
+				params["text_parse_mode"] = v
+			default:
+				params["text"] = v
+			}
 		case *SendOptions:
 			if v.ParseMode != ModeDefault {
 				params["text_parse_mode"] = v.ParseMode

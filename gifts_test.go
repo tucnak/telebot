@@ -2,11 +2,10 @@ package telebot
 
 import (
 	"encoding/json"
-	"fmt"
-	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGiftUnmarshal(t *testing.T) {
@@ -128,53 +127,16 @@ func TestGiftOmitEmpty(t *testing.T) {
 	assert.NotContains(t, result, "remaining_count")
 }
 
-func TestSendGiftParams(t *testing.T) {
-	// This test ensures the SendGift method correctly handles the new pay_for_upgrade parameter
-	user := &User{ID: 123456}
-	giftID := "test_gift_123"
+func TestSendGift(t *testing.T) {
+	b, srv := newFakeBot(t)
 
-	// Test that SendGift builds parameters correctly with pay_for_upgrade
-	// Note: We can't test the actual API call without a bot token, so we test the parameter building
+	require.NoError(t, b.SendGift(&User{ID: 7}, "g", "<b>Happy</b> birthday!", ModeHTML, true))
+	assert.Equal(t, map[string]string{"user_id": "7", "gift_id": "g", "text": "<b>Happy</b> birthday!",
+		"text_parse_mode": "HTML", "pay_for_upgrade": "true"}, srv.Last().Params)
 
-	// Test case 1: SendGift with text only
-	err := sendGiftTestHelper(user, giftID, "Happy birthday!")
-	assert.NoError(t, err)
-
-	// Test case 2: SendGift with pay_for_upgrade = true
-	err = sendGiftTestHelper(user, giftID, true)
-	assert.NoError(t, err)
-
-	// Test case 3: SendGift with text and pay_for_upgrade = false
-	err = sendGiftTestHelper(user, giftID, "Congratulations!", false)
-	assert.NoError(t, err)
-}
-
-// Helper function to test SendGift parameter building without making actual API calls
-func sendGiftTestHelper(to Recipient, giftID string, opts ...interface{}) error {
-	params := map[string]string{
-		"user_id": to.Recipient(),
-		"gift_id": giftID,
-	}
-
-	for _, opt := range opts {
-		switch v := opt.(type) {
-		case string:
-			params["text"] = v
-		case bool:
-			params["pay_for_upgrade"] = strconv.FormatBool(v)
-		default:
-			// Handle other variadic options if needed
-		}
-	}
-
-	// Verify that parameters are set correctly
-	if giftID != params["gift_id"] {
-		return fmt.Errorf("gift_id parameter not set correctly")
-	}
-	if to.Recipient() != params["user_id"] {
-		return fmt.Errorf("user_id parameter not set correctly")
-	}
-
-	// Just return nil since we're not actually making the API call
-	return nil
+	require.NoError(t, b.SendGift(&Chat{ID: -100}, "g", "Hi", &SendOptions{Entities: Entities{{Type: EntityBold, Length: 2}}}))
+	req := srv.Last()
+	assert.Equal(t, "-100", req.Params["chat_id"])
+	assert.NotContains(t, req.Params, "user_id")
+	assert.JSONEq(t, `[{"type":"bold","offset":0,"length":2}]`, req.Params["text_entities"])
 }
