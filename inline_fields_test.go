@@ -198,9 +198,9 @@ func TestAnswerWebAppResultType(t *testing.T) {
 	srv.Reply("answerWebAppQuery", json.RawMessage(`{"inline_message_id":"im"}`))
 
 	result := &ArticleResult{Title: "T", Text: "x"}
-	result.SetResultID("1")
 	msg, err := b.AnswerWebApp(&Query{ID: "q"}, result)
 	require.NoError(t, err)
 	assert.Equal(t, "im", msg.InlineMessageID)
 	assert.Contains(t, srv.Last().Params["result"], `"type":"article"`)
+	assert.Contains(t, srv.Last().Params["result"], `"id":"0"`, "a result sent on its own gets an ID")
 }

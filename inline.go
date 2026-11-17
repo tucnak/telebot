@@ -154,7 +154,13 @@ func (results Results) MarshalJSON() ([]byte, error) {
 	return json.Marshal([]Result(results))
 }
 
+// inferIQR sets the type of result and, for a result sent on its own, the
+// ID it was left without.
 func inferIQR(result Result) error {
+	if result.ResultID() == "" {
+		result.SetResultID("0")
+	}
+
 	switch r := result.(type) {
 	case *ArticleResult:
 		r.Type = "article"
