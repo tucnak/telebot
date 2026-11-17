@@ -2,6 +2,8 @@ package telebot
 
 import (
 	"encoding/json"
+	"os"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -136,4 +138,28 @@ func TestSendEphemeral(t *testing.T) {
 	_, err = b.Send(ChatID(-100), &InputRichMessage{HTML: "<b>x</b>"}, &EphemeralMessageParameters{ReceiverUserID: 7})
 	require.NoError(t, err)
 	assert.JSONEq(t, `{"receiver_user_id":7}`, srv.Last().Params["ephemeral_message_parameters"])
+}
+
+func TestEphemeralLive(t *testing.T) {
+	if b == nil {
+		t.Skip("Cached bot instance is bad (probably wrong or empty TELEBOT_SECRET)")
+	}
+	groupID, _ := strconv.ParseInt(os.Getenv("GROUP_ID"), 10, 64)
+	if groupID == 0 || userID == 0 {
+		t.Skip("GROUP_ID and USER_ID are required for ephemeral live tests")
+	}
+	group := &Chat{ID: groupID}
+
+	msg, err := b.Send(group, "telebot ephemeral", &EphemeralMessageParameters{ReceiverUserID: userID})
+	require.NoError(t, err)
+	require.NotZero(t, msg.EphemeralID)
+	require.NotNil(t, msg.ReceiverUser)
+	assert.Equal(t, userID, msg.ReceiverUser.ID)
+
+	markup := &ReplyMarkup{InlineKeyboard: [][]InlineButton{{{Text: "ok", Data: "ok"}}}}
+	require.NoError(t, b.EditEphemeral(msg, "telebot ephemeral, edited", markup))
+	require.NoError(t, b.EditEphemeral(msg, &InputRichMessage{Markdown: "**telebot** ephemeral, rich"}))
+	require.NoError(t, b.EditEphemeralReplyMarkup(msg, nil))
+
+	require.NoError(t, b.DeleteEphemeral(msg))
 }
