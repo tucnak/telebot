@@ -26,8 +26,10 @@ func TestPollSend(t *testing.T) {
 		t.Skip("USER_ID is required for Poll methods test")
 	}
 
-	_, err := b.Send(user, &Poll{}) // empty poll
-	assert.Equal(t, ErrBadPollOptions, err)
+	// Telegram rejects an empty poll; which check fails first (question or
+	// options) has changed over time, so only the failure is asserted.
+	_, err := b.Send(user, &Poll{})
+	assert.Error(t, err)
 
 	poll := &Poll{
 		Type:          PollQuiz,
