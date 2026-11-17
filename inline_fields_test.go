@@ -86,3 +86,9 @@ func TestSavePreparedInlineMessage(t *testing.T) {
 	assert.NotContains(t, req.Params, "allow_user_chats")
 	assert.Contains(t, req.Params["result"], `"type":"article"`)
 }
+
+func TestRespondCacheTime(t *testing.T) {
+	b, srv := newFakeBot(t)
+	require.NoError(t, b.Respond(&Callback{ID: "c"}, &CallbackResponse{Text: "ok", CacheTime: 30}))
+	assert.Equal(t, map[string]string{"callback_query_id": "c", "text": "ok", "cache_time": "30"}, srv.Last().Params)
+}

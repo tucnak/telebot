@@ -79,6 +79,10 @@ type CallbackResponse struct {
 	// callback button. Otherwise, you may use deep-linking:
 	// https://telegram.me/your_bot?start=XXXX
 	URL string `json:"url,omitempty"`
+
+	// (Optional) The maximum time in seconds the client may cache the
+	// result of the callback query. Defaults to 0.
+	CacheTime int `json:"cache_time,omitempty"`
 }
 
 // CallbackUnique returns ReplyButton.Text.
