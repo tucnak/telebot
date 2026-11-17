@@ -42,8 +42,15 @@ func TestStickerSet(t *testing.T) {
 	// 1
 	err := b.CreateStickerSet(user, original)
 	require.NoError(t, err)
-	// 2
-	err = b.AddStickerToSet(user, original.Name, input[1])
+	t.Cleanup(func() { b.DeleteStickerSet(original.Name) })
+
+	// 2: a new set takes a moment to become usable.
+	for i := 0; i < 10; i++ {
+		if err = b.AddStickerToSet(user, original.Name, input[1]); err == nil {
+			break
+		}
+		time.Sleep(time.Second)
+	}
 	require.NoError(t, err)
 
 	original.Thumbnail = &Photo{File: thumb}
