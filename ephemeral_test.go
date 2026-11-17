@@ -108,3 +108,32 @@ func TestEditCaptionAbove(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "true", srv.Last().Params["show_caption_above_media"])
 }
+
+func TestSendEphemeral(t *testing.T) {
+	b, srv := newFakeBot(t)
+	srv.Reply("sendMessage", json.RawMessage(`{"message_id":0,"ephemeral_message_id":4,"date":1,
+		"chat":{"id":-100,"type":"supergroup"},"receiver_user":{"id":7,"first_name":"R"},"text":"psst"}`))
+
+	msg, err := b.Send(ChatID(-100), "psst", &EphemeralMessageParameters{ReceiverUserID: 7})
+	require.NoError(t, err)
+	assert.Equal(t, 4, msg.EphemeralID)
+	assert.JSONEq(t, `{"receiver_user_id":7}`, srv.Last().Params["ephemeral_message_parameters"])
+
+	// The returned message can be edited right away.
+	require.NoError(t, b.EditEphemeral(msg, "edited"))
+	assert.Equal(t, "4", srv.Last().Params["ephemeral_message_id"])
+
+	srv.Reply("sendPhoto", json.RawMessage(`{"message_id":1,"chat":{"id":-100},"photo":[{"file_id":"p","width":1,"height":1}]}`))
+	_, err = b.Send(ChatID(-100), &Photo{File: File{FileID: "p"}}, &SendOptions{
+		Ephemeral: &EphemeralMessageParameters{CallbackQueryID: "cb", ReplaceCallbackQueryMessage: true},
+	})
+	require.NoError(t, err)
+	req := srv.Last()
+	assert.Equal(t, "sendPhoto", req.Method)
+	assert.JSONEq(t, `{"callback_query_id":"cb","replace_callback_query_message":true}`, req.Params["ephemeral_message_parameters"])
+
+	srv.Reply("sendRichMessage", json.RawMessage(richReply))
+	_, err = b.Send(ChatID(-100), &InputRichMessage{HTML: "<b>x</b>"}, &EphemeralMessageParameters{ReceiverUserID: 7})
+	require.NoError(t, err)
+	assert.JSONEq(t, `{"receiver_user_id":7}`, srv.Last().Params["ephemeral_message_parameters"])
+}

@@ -12,6 +12,30 @@ import (
 // edited and deleted with their own methods, which take the ephemeral message
 // as received or as returned when it was sent.
 
+// EphemeralMessageParameters makes a sent message ephemeral (Bot API 10.3).
+// Pass it to Send, or set it as SendOptions.Ephemeral:
+//
+//	b.Send(group, "only you can see this", &tele.EphemeralMessageParameters{
+//		ReceiverUserID: user.ID,
+//	})
+//
+// To reply ephemerally to a callback query in any chat, set CallbackQueryID
+// and leave ReceiverUserID zero; the chat passed to Send is then ignored.
+//
+// Bot API: EphemeralMessageParameters.
+type EphemeralMessageParameters struct {
+	// (Optional) The user who will receive the message; required unless the
+	// message replies to a callback query.
+	ReceiverUserID int64 `json:"receiver_user_id,omitempty"`
+
+	// (Optional) The callback query that triggered the message.
+	CallbackQueryID string `json:"callback_query_id,omitempty"`
+
+	// (Optional) Show the message in place of the callback query's message.
+	// Must be false for callback queries from ephemeral messages.
+	ReplaceCallbackQueryMessage bool `json:"replace_callback_query_message,omitempty"`
+}
+
 // ephemeralParams returns the parameters identifying an ephemeral message.
 func ephemeralParams(msg *Message) (map[string]string, error) {
 	if msg == nil || msg.Chat == nil || msg.ReceiverUser == nil || msg.EphemeralID == 0 {

@@ -104,6 +104,11 @@ type SendOptions struct {
 	// unlocked access to paid channels. Only for messages sent to channels.
 	AllowPaidBroadcast bool
 
+	// Ephemeral sends the message as an ephemeral message, visible only to one
+	// user and the bot (Bot API 10.3). It can also be passed to Send as an
+	// option on its own.
+	Ephemeral *EphemeralMessageParameters
+
 	// CaptionAbove shows an edited caption above the media. Used only when
 	// editing a caption; when sending media, set the media's CaptionAbove.
 	CaptionAbove bool
@@ -132,6 +137,8 @@ func (b *Bot) extractOptions(how []interface{}) *SendOptions {
 			}
 		case *ReplyParams:
 			opts.ReplyParams = opt
+		case *EphemeralMessageParameters:
+			opts.Ephemeral = opt
 		case *Topic:
 			opts.ThreadID = opt.ThreadID
 		case Option:
@@ -243,6 +250,11 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 
 	if opt.AllowPaidBroadcast {
 		params["allow_paid_broadcast"] = "true"
+	}
+
+	if opt.Ephemeral != nil {
+		data, _ := json.Marshal(opt.Ephemeral)
+		params["ephemeral_message_parameters"] = string(data)
 	}
 }
 
