@@ -219,11 +219,14 @@ func (b *Bot) Restrict(chat *Chat, member *ChatMember) error {
 // Bot API: promoteChatMember.
 func (b *Bot) Promote(chat *Chat, member *ChatMember) error {
 	params := map[string]interface{}{
-		"chat_id":      chat.Recipient(),
-		"user_id":      member.User.Recipient(),
-		"is_anonymous": member.Anonymous,
+		"chat_id": chat.Recipient(),
+		"user_id": member.User.Recipient(),
 	}
 	embedRights(params, member.Rights)
+
+	// A member as Telegram returns it has is_anonymous beside its rights,
+	// not among them.
+	params["is_anonymous"] = member.Anonymous || member.Rights.Anonymous
 
 	_, err := b.Raw("promoteChatMember", params)
 	return err

@@ -43,6 +43,12 @@ func TestPromoteWelcomeMessages(t *testing.T) {
 	var m ChatMember
 	require.NoError(t, json.Unmarshal([]byte(`{"status":"administrator","user":{"id":7},"can_send_welcome_messages":true}`), &m))
 	assert.True(t, m.Rights.CanSendWelcomeMessages)
+
+	// An anonymous administrator, as Telegram returns it, stays anonymous.
+	var anon ChatMember
+	require.NoError(t, json.Unmarshal([]byte(`{"status":"administrator","user":{"id":7},"is_anonymous":true}`), &anon))
+	require.NoError(t, b.Promote(&Chat{ID: -100}, &anon))
+	assert.Equal(t, "true", srv.Last().Params["is_anonymous"])
 }
 
 func TestChatManagement100(t *testing.T) {
