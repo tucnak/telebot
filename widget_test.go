@@ -47,7 +47,7 @@ func TestWidgetQueries(t *testing.T) {
 		q = c.WidgetQuery()
 		assert.Equal(t, int64(5), c.Sender().ID)
 		assert.Equal(t, int64(7), c.Chat().ID)
-		return c.Bot().AnswerWidgetQuery(q.ID, "pong")
+		return c.Bot().AnswerWidget(q.ID, "pong")
 	})
 	b.Handle(OnSharedWidgetQuery, func(c Context) error {
 		sq = c.SharedWidgetQuery()

@@ -15,7 +15,7 @@ type API interface {
 	AnswerGuest(msg *Message, result Result) (*SentGuestMessage, error)
 	AnswerJoinRequest(req *ChatJoinRequest, result string) error
 	AnswerWebApp(query *Query, r Result) (*WebAppMessage, error)
-	AnswerWidgetQuery(queryID, data string) error
+	AnswerWidget(queryID, data string) error
 	ApproveSuggestedPost(msg Editable, sendDate int64) error
 	ApproveJoinRequest(chat Recipient, user *User) error
 	Ban(chat *Chat, member *ChatMember, revokeMessages ...bool) error

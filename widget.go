@@ -108,7 +108,7 @@ const (
 
 // WidgetQuery is a query from a widget in a message sent by or via the bot
 // (Bot API 10.4), delivered to OnWidgetQuery. Answer it with
-// AnswerWidgetQuery within 15 seconds.
+// AnswerWidget within 15 seconds.
 //
 // Bot API: WidgetQuery.
 type WidgetQuery struct {
@@ -148,7 +148,7 @@ func (q *WidgetQuery) MessageSig() (string, int64) {
 
 // SharedWidgetQuery is a query from a forwarded message with a shared widget
 // created by the bot (Bot API 10.4), delivered to OnSharedWidgetQuery. Answer
-// it with AnswerWidgetQuery.
+// it with AnswerWidget.
 //
 // Bot API: SharedWidgetQuery.
 type SharedWidgetQuery struct {
@@ -199,12 +199,12 @@ type WidgetQueryWallet struct {
 	StateInit string `json:"state_init,omitempty"`
 }
 
-// AnswerWidgetQuery answers a WidgetQuery or SharedWidgetQuery by its ID.
+// AnswerWidget answers a WidgetQuery or SharedWidgetQuery by its ID.
 // Only the widget that sent the query receives data, 0-1024 bytes; the
 // widget's own data is not changed.
 //
 // Bot API: answerWidgetQuery.
-func (b *Bot) AnswerWidgetQuery(queryID, data string) error {
+func (b *Bot) AnswerWidget(queryID, data string) error {
 	params := map[string]string{
 		"widget_query_id": queryID,
 	}

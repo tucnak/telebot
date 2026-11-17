@@ -96,7 +96,7 @@ A method's "unseen parameters" are parameters that the functions calling it, and
 | [unhideGeneralForumTopic](https://core.telegram.org/bots/api#unhidegeneralforumtopic) | `Bot.UnhideGeneralTopic` |  |
 | [unpinAllGeneralForumTopicMessages](https://core.telegram.org/bots/api#unpinallgeneralforumtopicmessages) | `Bot.UnpinAllGeneralTopicMessages` |  |
 | [answerCallbackQuery](https://core.telegram.org/bots/api#answercallbackquery) | `Bot.Respond` |  |
-| [answerWidgetQuery](https://core.telegram.org/bots/api#answerwidgetquery) | `Bot.AnswerWidgetQuery` |  |
+| [answerWidgetQuery](https://core.telegram.org/bots/api#answerwidgetquery) | `Bot.AnswerWidget` |  |
 | [answerGuestQuery](https://core.telegram.org/bots/api#answerguestquery) | `Bot.AnswerGuest` |  |
 | [getUserChatBoosts](https://core.telegram.org/bots/api#getuserchatboosts) | `Bot.UserBoosts` |  |
 | [getBusinessConnection](https://core.telegram.org/bots/api#getbusinessconnection) | `Bot.BusinessConnection` |  |
