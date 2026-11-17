@@ -63,6 +63,8 @@ const (
 	OnInvoice              = "\ainvoice"
 	OnPayment              = "\apayment"
 	OnRefund               = "\arefund"
+	OnGift                 = "\agift"
+	OnUniqueGift           = "\aunique_gift"
 	OnGame                 = "\agame"
 	OnPoll                 = "\apoll"
 	OnPollAnswer           = "\apoll_answer"

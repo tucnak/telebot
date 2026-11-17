@@ -307,6 +307,12 @@ type Message struct {
 	// Message is a service message about a refunded payment, information about the payment.
 	RefundedPayment *RefundedPayment `json:"refunded_payment"`
 
+	// Service message: a regular gift was sent or received.
+	Gift *GiftInfo `json:"gift,omitempty"`
+
+	// Service message: a unique gift was sent or received.
+	UniqueGift *UniqueGiftInfo `json:"unique_gift,omitempty"`
+
 	// For a service message, a user was shared with the bot.
 	UserShared *RecipientShared `json:"users_shared,omitempty"`
 

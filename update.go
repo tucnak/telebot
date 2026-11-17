@@ -130,6 +130,14 @@ func (b *Bot) ProcessContext(c Context) {
 			b.handle(OnRefund, c)
 			return
 		}
+		if m.Gift != nil {
+			b.handle(OnGift, c)
+			return
+		}
+		if m.UniqueGift != nil {
+			b.handle(OnUniqueGift, c)
+			return
+		}
 		if m.TopicCreated != nil {
 			b.handle(OnTopicCreated, c)
 			return
