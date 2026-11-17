@@ -261,6 +261,24 @@ func (pt PollType) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// MarshalJSON encodes the button with chat_is_channel of its Chat request
+// even when false, which requests a group; Telegram requires it.
+func (b ReplyButton) MarshalJSON() ([]byte, error) {
+	type alias ReplyButton
+	if b.Chat == nil {
+		return json.Marshal(alias(b))
+	}
+
+	type recipient ReplyRecipient
+	return json.Marshal(struct {
+		alias
+		Chat interface{} `json:"request_chat"`
+	}{alias(b), struct {
+		*recipient
+		Channel bool `json:"chat_is_channel"`
+	}{(*recipient)(b.Chat), b.Chat.Channel}})
+}
+
 // ReplyRecipient combines both KeyboardButtonRequestUser
 // and KeyboardButtonRequestChat objects. Use inside ReplyButton
 // to request the user or chat sharing with respective settings.

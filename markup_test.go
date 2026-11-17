@@ -70,3 +70,18 @@ func TestDisabledInlineButton(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, string(data), `"disabled":{}`)
 }
+
+func TestRequestChatButtonSendsChatIsChannel(t *testing.T) {
+	// chat_is_channel is required: false asks for a group.
+	data, err := json.Marshal(ReplyButton{Text: "Group", Chat: &ReplyRecipient{ID: 1}})
+	require.NoError(t, err)
+	assert.JSONEq(t, `{"text":"Group","request_chat":{"request_id":1,"chat_is_channel":false}}`, string(data))
+
+	data, err = json.Marshal(ReplyButton{Text: "Channel", Chat: &ReplyRecipient{ID: 2, Channel: true}})
+	require.NoError(t, err)
+	assert.JSONEq(t, `{"text":"Channel","request_chat":{"request_id":2,"chat_is_channel":true}}`, string(data))
+
+	data, err = json.Marshal(ReplyButton{Text: "User", User: &ReplyRecipient{ID: 3}})
+	require.NoError(t, err)
+	assert.JSONEq(t, `{"text":"User","request_users":{"request_id":3}}`, string(data))
+}
