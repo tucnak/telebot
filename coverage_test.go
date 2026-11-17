@@ -128,13 +128,18 @@ func parsePackage(t *testing.T) *goPackage {
 				}
 				p.calls[name] = calls
 
-				// Fields decoded or encoded by hand are declared in the
-				// structs of the type's (Un)MarshalJSON.
-				if d.Recv != nil && d.Body != nil && (d.Name.Name == "UnmarshalJSON" || d.Name.Name == "MarshalJSON") {
+				// Fields decoded or encoded by hand are declared in structs
+				// or named by string literals in the type's methods.
+				if d.Recv != nil && d.Body != nil && strings.Contains(name, ".") {
 					typ := name[:strings.Index(name, ".")]
 					ast.Inspect(d.Body, func(n ast.Node) bool {
-						if st, ok := n.(*ast.StructType); ok {
-							p.codecTags[typ] = append(p.codecTags[typ], jsonTags(st)...)
+						switch n := n.(type) {
+						case *ast.StructType:
+							p.codecTags[typ] = append(p.codecTags[typ], jsonTags(n)...)
+						case *ast.BasicLit:
+							if v, err := strconv.Unquote(n.Value); err == nil && n.Kind == gotoken.STRING {
+								p.codecTags[typ] = append(p.codecTags[typ], v)
+							}
 						}
 						return true
 					})

@@ -257,7 +257,7 @@ A method's "unseen parameters" are parameters whose name appears nowhere in tele
 | [ChecklistTask](https://core.telegram.org/bots/api#checklisttask) | `ChecklistTask` |  |
 | [Checklist](https://core.telegram.org/bots/api#checklist) | `Checklist` |  |
 | [InputChecklistTask](https://core.telegram.org/bots/api#inputchecklisttask) | `ChecklistTask` | parse_mode |
-| [InputChecklist](https://core.telegram.org/bots/api#inputchecklist) | `Checklist` | parse_mode |
+| [InputChecklist](https://core.telegram.org/bots/api#inputchecklist) | `Checklist` |  |
 | [Location](https://core.telegram.org/bots/api#location) | `Location` |  |
 | [Venue](https://core.telegram.org/bots/api#venue) | `Venue` |  |
 | [WebAppData](https://core.telegram.org/bots/api#webappdata) | `WebAppData` |  |
@@ -463,11 +463,11 @@ A method's "unseen parameters" are parameters whose name appears nowhere in tele
 | [InputPaidMediaPhoto](https://core.telegram.org/bots/api#inputpaidmediaphoto) | `InputMedia` |  |
 | [InputPaidMediaVideo](https://core.telegram.org/bots/api#inputpaidmediavideo) | `InputMedia` |  |
 | [InputProfilePhoto](https://core.telegram.org/bots/api#inputprofilephoto) | `InputProfilePhoto` |  |
-| [InputProfilePhotoStatic](https://core.telegram.org/bots/api#inputprofilephotostatic) | `InputProfilePhotoStatic` | photo |
-| [InputProfilePhotoAnimated](https://core.telegram.org/bots/api#inputprofilephotoanimated) | `InputProfilePhotoAnimated` | animation, main_frame_timestamp |
+| [InputProfilePhotoStatic](https://core.telegram.org/bots/api#inputprofilephotostatic) | `InputProfilePhotoStatic` |  |
+| [InputProfilePhotoAnimated](https://core.telegram.org/bots/api#inputprofilephotoanimated) | `InputProfilePhotoAnimated` |  |
 | [InputStoryContent](https://core.telegram.org/bots/api#inputstorycontent) | `InputStoryContent` |  |
-| [InputStoryContentPhoto](https://core.telegram.org/bots/api#inputstorycontentphoto) | `InputStoryContentPhoto` | photo |
-| [InputStoryContentVideo](https://core.telegram.org/bots/api#inputstorycontentvideo) | `InputStoryContentVideo` | video, duration, cover_frame_timestamp, is_animation |
+| [InputStoryContentPhoto](https://core.telegram.org/bots/api#inputstorycontentphoto) | `InputStoryContentPhoto` |  |
+| [InputStoryContentVideo](https://core.telegram.org/bots/api#inputstorycontentvideo) | `InputStoryContentVideo` |  |
 | [Sticker](https://core.telegram.org/bots/api#sticker) | `Sticker` |  |
 | [StickerSet](https://core.telegram.org/bots/api#stickerset) | `StickerSet` |  |
 | [MaskPosition](https://core.telegram.org/bots/api#maskposition) | `MaskPosition` |  |
