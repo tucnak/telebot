@@ -202,6 +202,8 @@ func TestRichTextMarshalRoundTrip(t *testing.T) {
 		`["a ",{"type":"italic","text":"b"}]`,
 		`{"type":"url","text":"site","url":"https://example.com"}`,
 		`{"type":"custom_emoji","custom_emoji_id":"1","alternative_text":":)"}`,
+		`{"type":"anchor_link","text":"up","anchor_name":"a"}`,
+		`{"type":"anchor_link","text":"top","anchor_name":""}`, // back to the top
 	} {
 		var r RichText
 		require.NoError(t, json.Unmarshal([]byte(in), &r))

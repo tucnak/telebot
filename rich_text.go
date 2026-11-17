@@ -177,6 +177,13 @@ func (r RichText) MarshalJSON() ([]byte, error) {
 			r.Button = &btn
 		}
 		type alias RichText
+		if r.Type == RichAnchorLink {
+			// An empty anchor name links back to the top of the message.
+			return json.Marshal(struct {
+				alias
+				AnchorName string `json:"anchor_name"`
+			}{alias(r), r.AnchorName})
+		}
 		return json.Marshal(alias(r))
 	}
 }

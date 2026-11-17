@@ -112,6 +112,27 @@ type StoryAreaType struct {
 	Name string `json:"name,omitempty"`
 }
 
+// MarshalJSON encodes the area with the fields its Type requires even when
+// they are zero, such as a temperature of 0 °C or a point on the equator.
+func (a StoryAreaType) MarshalJSON() ([]byte, error) {
+	type alias StoryAreaType
+	switch a.Type {
+	case StoryAreaLocation:
+		return json.Marshal(struct {
+			alias
+			Latitude  float64 `json:"latitude"`
+			Longitude float64 `json:"longitude"`
+		}{alias(a), a.Latitude, a.Longitude})
+	case StoryAreaWeather:
+		return json.Marshal(struct {
+			alias
+			Temperature     float64 `json:"temperature"`
+			BackgroundColor int     `json:"background_color"`
+		}{alias(a), a.Temperature, a.BackgroundColor})
+	}
+	return json.Marshal(alias(a))
+}
+
 // LocationAddress is the physical address of a location.
 //
 // Bot API: LocationAddress.

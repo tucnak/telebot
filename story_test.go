@@ -72,3 +72,18 @@ func TestStoryAreaDecode(t *testing.T) {
 	assert.Equal(t, "Berlin", a.Type.Address.City)
 	assert.Equal(t, 6.0, a.Position.CornerRadius)
 }
+
+func TestStoryAreaRequiredZeroValues(t *testing.T) {
+	// Telegram rejects an area without the fields its type requires.
+	data, err := json.Marshal([]StoryAreaType{
+		{Type: StoryAreaWeather, Emoji: "❄"},
+		{Type: StoryAreaLocation},
+		{Type: StoryAreaLink, URL: "https://example.com"},
+	})
+	require.NoError(t, err)
+	assert.JSONEq(t, `[
+		{"type":"weather","temperature":0,"emoji":"❄","background_color":0},
+		{"type":"location","latitude":0,"longitude":0},
+		{"type":"link","url":"https://example.com"}
+	]`, string(data))
+}
