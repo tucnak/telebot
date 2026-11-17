@@ -72,6 +72,8 @@ type API interface {
 	Leave(chat Recipient) error
 	Len(chat *Chat) (int, error)
 	Logout() (bool, error)
+	ManagedBotAccessSettings(bot *User) (*BotAccessSettings, error)
+	ManagedBotToken(bot *User) (string, error)
 	MenuButton(chat *User) (*MenuButton, error)
 	MyDescription(language string) (*BotInfo, error)
 	MyName(language string) (*BotInfo, error)
@@ -89,6 +91,7 @@ type API interface {
 	RemoveWebhook(dropPending ...bool) error
 	ReopenGeneralTopic(chat *Chat) error
 	ReopenTopic(chat *Chat, topic *Topic) error
+	ReplaceManagedBotToken(bot *User) (string, error)
 	ReplaceStickerInSet(of Recipient, stickerSet, oldSticker string, sticker InputSticker) (bool, error)
 	Reply(to *Message, what interface{}, opts ...interface{}) (*Message, error)
 	Respond(c *Callback, resp ...*CallbackResponse) error
@@ -100,8 +103,10 @@ type API interface {
 	SendDraft(to Recipient, draftID int, text string, opts ...interface{}) error
 	SendPaidMedia(to Recipient, stars int, a PaidAlbum, opts ...interface{}) (*Message, error)
 	SendGift(to Recipient, giftID string, opts ...interface{}) error
+	SavePreparedKeyboardButton(user Recipient, button ReplyButton) (*PreparedKeyboardButton, error)
 	SavePreparedInlineMessage(user Recipient, result Result, opts ...interface{}) (*PreparedInlineMessage, error)
 	SetAdminTitle(chat *Chat, user *User, title string) error
+	SetManagedBotAccessSettings(bot *User, settings BotAccessSettings) error
 	SetMemberTag(chat *Chat, user *User, tag string) error
 	SetCommands(opts ...interface{}) error
 	SetCustomEmojiStickerSetThumb(name, id string) error

@@ -26,6 +26,7 @@ var AllowedUpdates = []string{
 	"stopped_message_generation",
 	"widget_query",
 	"shared_widget_query",
+	"managed_bot",
 }
 
 // Poller is a provider of Updates.

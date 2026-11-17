@@ -36,6 +36,7 @@ type Update struct {
 	GenerationStopped       *MessageGenerationStopped `json:"stopped_message_generation,omitempty"`
 	WidgetQuery             *WidgetQuery              `json:"widget_query,omitempty"`
 	SharedWidgetQuery       *SharedWidgetQuery        `json:"shared_widget_query,omitempty"`
+	ManagedBot              *ManagedBotUpdated        `json:"managed_bot,omitempty"`
 }
 
 // ProcessUpdate processes a single incoming update.
@@ -146,6 +147,10 @@ func (b *Bot) ProcessContext(c Context) {
 		}
 		if m.PaidMessagesWaived != nil {
 			b.handle(OnPaidMessagesWaived, c)
+			return
+		}
+		if m.ManagedBotCreated != nil {
+			b.handle(OnManagedBotCreated, c)
 			return
 		}
 		if m.TopicCreated != nil {
@@ -422,6 +427,10 @@ func (b *Bot) ProcessContext(c Context) {
 	}
 	if u.SharedWidgetQuery != nil {
 		b.handle(OnSharedWidgetQuery, c)
+		return
+	}
+	if u.ManagedBot != nil {
+		b.handle(OnManagedBot, c)
 		return
 	}
 }

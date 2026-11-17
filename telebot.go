@@ -67,6 +67,7 @@ const (
 	OnUniqueGift           = "\aunique_gift"
 	OnTonWalletTransfer    = "\aton_wallet_transfer"
 	OnPaidMessagesWaived   = "\apaid_messages_waived"
+	OnManagedBotCreated    = "\amanaged_bot_created"
 	OnGame                 = "\agame"
 	OnPoll                 = "\apoll"
 	OnPollAnswer           = "\apoll_answer"
@@ -135,6 +136,7 @@ const (
 	OnGenerationStopped       = "\astopped_message_generation"
 	OnWidgetQuery             = "\awidget_query"
 	OnSharedWidgetQuery       = "\ashared_widget_query"
+	OnManagedBot              = "\amanaged_bot"
 )
 
 // ChatAction is a client-side status indicating bot activity.

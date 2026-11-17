@@ -245,6 +245,10 @@ type ReplyButton struct {
 	User     *ReplyRecipient `json:"request_users,omitempty"`
 	Chat     *ReplyRecipient `json:"request_chat,omitempty"`
 	WebApp   *WebApp         `json:"web_app,omitempty"`
+
+	// (Optional) Asks the user to create a bot managed by this one
+	// (Bot API 9.6).
+	ManagedBot *ReplyManagedBot `json:"request_managed_bot,omitempty"`
 }
 
 // MarshalJSON implements json.Marshaler. It allows passing PollType as a

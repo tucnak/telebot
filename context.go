@@ -88,6 +88,9 @@ type Context interface {
 	// SharedWidgetQuery returns the query from a forwarded shared widget.
 	SharedWidgetQuery() *SharedWidgetQuery
 
+	// ManagedBot returns the created or changed managed bot.
+	ManagedBot() *ManagedBotUpdated
+
 	// Sender returns the current recipient, depending on the context type.
 	// Returns nil if user is not presented.
 	Sender() *User
@@ -345,6 +348,10 @@ func (c *nativeContext) SharedWidgetQuery() *SharedWidgetQuery {
 	return c.u.SharedWidgetQuery
 }
 
+func (c *nativeContext) ManagedBot() *ManagedBotUpdated {
+	return c.u.ManagedBot
+}
+
 func (c *nativeContext) Sender() *User {
 	switch {
 	case c.u.Callback != nil:
@@ -373,6 +380,8 @@ func (c *nativeContext) Sender() *User {
 		return c.u.WidgetQuery.Sender
 	case c.u.SharedWidgetQuery != nil:
 		return c.u.SharedWidgetQuery.Sender
+	case c.u.ManagedBot != nil:
+		return c.u.ManagedBot.User
 	case c.u.Boost != nil:
 		if b := c.u.Boost.Boost; b != nil && b.Source != nil {
 			return b.Source.Booster

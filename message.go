@@ -319,6 +319,10 @@ type Message struct {
 	// Service message: a transfer with a TON wallet (Bot API 10.4).
 	TonWalletTransfer *TonWalletTransfer `json:"ton_wallet_transfer,omitempty"`
 
+	// Service message: the user created a bot managed by this one
+	// (Bot API 9.6).
+	ManagedBotCreated *ManagedBotCreated `json:"managed_bot_created,omitempty"`
+
 	// Service message: the sender used a link that lets them message the
 	// user without paying Telegram Stars (Bot API 10.4).
 	PaidMessagesWaived *PaidMessagesWaived `json:"paid_messages_waived,omitempty"`
