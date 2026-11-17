@@ -2,6 +2,7 @@ package telebot
 
 import (
 	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"path"
@@ -44,4 +45,14 @@ func TestMediaSendsCarryTheirSpoilerAndCaptionAbove(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotContains(t, sent["sendVideo"], "has_spoiler")
 	assert.NotContains(t, sent["sendVideo"], "show_caption_above_media")
+}
+
+func TestSendLocationAlertRadius(t *testing.T) {
+	b, srv := newFakeBot(t)
+	srv.Reply("sendLocation", json.RawMessage(`{"message_id":1,"chat":{"id":7}}`))
+
+	_, err := b.Send(ChatID(7), &Location{Lat: 1, Lng: 2, Heading: 90, AlertRadius: 300, LivePeriod: 60})
+	require.NoError(t, err)
+	assert.Equal(t, "90", srv.Last().Params["heading"])
+	assert.Equal(t, "300", srv.Last().Params["proximity_alert_radius"])
 }

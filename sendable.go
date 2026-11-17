@@ -304,7 +304,7 @@ func (x *Location) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error
 		params["heading"] = strconv.Itoa(x.Heading)
 	}
 	if x.AlertRadius != 0 {
-		params["proximity_alert_radius"] = strconv.Itoa(x.Heading)
+		params["proximity_alert_radius"] = strconv.Itoa(x.AlertRadius)
 	}
 	b.embedSendOptions(params, opt)
 
