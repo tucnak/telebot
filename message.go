@@ -27,6 +27,14 @@ type Message struct {
 	// Sender of the message, sent on behalf of a chat.
 	SenderChat *Chat `json:"sender_chat"`
 
+	// (Optional) For ephemeral messages, the only user who can see the
+	// message besides the bot (Bot API 10.2).
+	ReceiverUser *User `json:"receiver_user,omitempty"`
+
+	// (Optional) For ephemeral messages, the identifier of the message, used
+	// instead of ID by the EditEphemeral* methods and DeleteEphemeral.
+	EphemeralID int `json:"ephemeral_message_id,omitempty"`
+
 	// The user that called the bot in guest mode.
 	GuestUser *User `json:"guest_bot_caller_user"`
 
@@ -796,8 +804,13 @@ type ExternalReply struct {
 // Bot API: ReplyParameters.
 type ReplyParams struct {
 	// Identifier of the message that will be replied to in the current chat,
-	// or in the chat chat_id if it is specified.
-	MessageID int `json:"message_id"`
+	// or in the chat chat_id if it is specified. It is omitted when replying
+	// to an ephemeral message.
+	MessageID int `json:"message_id,omitempty"`
+
+	// (Optional) Identifier of the ephemeral message that will be replied to
+	// (Bot API 10.2).
+	EphemeralMessageID int `json:"ephemeral_message_id,omitempty"`
 
 	// (Optional) If the message to be replied to is from a different chat,
 	// unique identifier for the chat or username of the channel.

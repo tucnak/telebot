@@ -742,6 +742,9 @@ func (b *Bot) EditCaption(msg Editable, caption string, opts ...interface{}) (*M
 
 	sendOpts := b.extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
+	if sendOpts.CaptionAbove {
+		params["show_caption_above_media"] = "true"
+	}
 
 	data, err := b.Raw("editMessageCaption", params)
 	if err != nil {
@@ -764,6 +767,36 @@ func (b *Bot) EditCaption(msg Editable, caption string, opts ...interface{}) (*M
 //
 // Bot API: editMessageMedia.
 func (b *Bot) EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*Message, error) {
+	msgID, chatID := msg.MessageSig()
+	params := make(map[string]string)
+
+	sendOpts := b.extractOptions(opts)
+	b.embedSendOptions(params, sendOpts)
+
+	repr, files, err := encodeEditMedia(media, sendOpts)
+	if err != nil {
+		return nil, err
+	}
+	params["media"] = repr
+
+	if chatID == 0 { // if inline message
+		params["inline_message_id"] = msgID
+	} else {
+		params["chat_id"] = strconv.FormatInt(chatID, 10)
+		params["message_id"] = msgID
+	}
+
+	data, err := b.sendFiles("editMessageMedia", files, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return extractMessage(data)
+}
+
+// encodeEditMedia returns the media parameter of an edit and the files it
+// uploads.
+func encodeEditMedia(media Inputtable, sendOpts *SendOptions) (string, map[string]File, error) {
 	var (
 		repr  string
 		file  = media.MediaFile()
@@ -789,7 +822,7 @@ func (b *Bot) EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*M
 		repr = "attach://" + s
 		files[s] = *file
 	default:
-		return nil, fmt.Errorf("telebot: cannot edit media, it does not exist")
+		return "", nil, fmt.Errorf("telebot: cannot edit media, it does not exist")
 	}
 
 	switch m := media.(type) {
@@ -803,19 +836,15 @@ func (b *Bot) EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*M
 		thumb = m.Thumbnail
 	}
 
-	msgID, chatID := msg.MessageSig()
-	params := make(map[string]string)
-
-	sendOpts := b.extractOptions(opts)
-	b.embedSendOptions(params, sendOpts)
-
 	im := media.InputMedia()
 	im.Media = repr
 
-	if len(sendOpts.Entities) > 0 {
-		im.Entities = sendOpts.Entities
-	} else {
-		im.ParseMode = sendOpts.ParseMode
+	if sendOpts != nil {
+		if len(sendOpts.Entities) > 0 {
+			im.Entities = sendOpts.Entities
+		} else {
+			im.ParseMode = sendOpts.ParseMode
+		}
 	}
 
 	if thumb != nil {
@@ -824,21 +853,7 @@ func (b *Bot) EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*M
 	}
 
 	data, _ := json.Marshal(im)
-	params["media"] = string(data)
-
-	if chatID == 0 { // if inline message
-		params["inline_message_id"] = msgID
-	} else {
-		params["chat_id"] = strconv.FormatInt(chatID, 10)
-		params["message_id"] = msgID
-	}
-
-	data, err := b.sendFiles("editMessageMedia", files, params)
-	if err != nil {
-		return nil, err
-	}
-
-	return extractMessage(data)
+	return string(data), files, nil
 }
 
 // Delete removes the message, including service messages.

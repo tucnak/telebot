@@ -103,6 +103,10 @@ type SendOptions struct {
 	// AllowPaidBroadcast allows the message to be sent to users who have not yet
 	// unlocked access to paid channels. Only for messages sent to channels.
 	AllowPaidBroadcast bool
+
+	// CaptionAbove shows an edited caption above the media. Used only when
+	// editing a caption; when sending media, set the media's CaptionAbove.
+	CaptionAbove bool
 }
 
 func (og *SendOptions) copy() *SendOptions {

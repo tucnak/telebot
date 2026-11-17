@@ -12,6 +12,10 @@ type Command struct {
 
 	// Description of the command, 3-256 characters.
 	Description string `json:"description"`
+
+	// (Optional) The command is ephemeral: in groups, it and the bot's
+	// replies to it are visible only to the user who sent it (Bot API 10.2).
+	IsEphemeral bool `json:"is_ephemeral,omitempty"`
 }
 
 // CommandParams controls parameters for commands-related methods (setMyCommands, deleteMyCommands and getMyCommands).

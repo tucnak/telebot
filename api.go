@@ -36,6 +36,7 @@ type API interface {
 	DefaultRights(forChannels bool) (*Rights, error)
 	Delete(msg Editable) error
 	DeleteCommands(opts ...interface{}) error
+	DeleteEphemeral(msg *Message) error
 	DeleteGroupPhoto(chat *Chat) error
 	DeleteGroupStickerSet(chat *Chat) error
 	DeleteMany(msgs []Editable) error
@@ -45,6 +46,10 @@ type API interface {
 	Download(file *File, localFilename string) error
 	Edit(msg Editable, what interface{}, opts ...interface{}) (*Message, error)
 	EditCaption(msg Editable, caption string, opts ...interface{}) (*Message, error)
+	EditEphemeral(msg *Message, what interface{}, opts ...interface{}) error
+	EditEphemeralCaption(msg *Message, caption string, opts ...interface{}) error
+	EditEphemeralMedia(msg *Message, media Inputtable, opts ...interface{}) error
+	EditEphemeralReplyMarkup(msg *Message, markup *ReplyMarkup) error
 	EditGeneralTopic(chat *Chat, topic *Topic) error
 	EditInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error)
 	EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*Message, error)
