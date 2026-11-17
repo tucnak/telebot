@@ -84,7 +84,7 @@ func (b *Bot) UploadSticker(to Recipient, format StickerSetFormat, f File) (*Fil
 		"sticker_format": format,
 	}
 
-	data, err := b.sendFiles("uploadStickerFile", map[string]File{"0": f}, params)
+	data, err := b.sendFiles("uploadStickerFile", map[string]File{"sticker": f}, params)
 	if err != nil {
 		return nil, err
 	}

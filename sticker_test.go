@@ -1,12 +1,28 @@
 package telebot
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestUploadSticker(t *testing.T) {
+	b, srv := newFakeBot(t)
+	srv.Reply("uploadStickerFile", json.RawMessage(`{"file_id":"st","file_unique_id":"u"}`))
+
+	f, err := b.UploadSticker(&User{ID: 7}, StickerStatic, FromReader(strings.NewReader("webp")))
+	require.NoError(t, err)
+	assert.Equal(t, "st", f.FileID)
+
+	req := srv.Last()
+	assert.Equal(t, map[string]string{"user_id": "7", "sticker_format": "static"}, req.Params)
+	assert.Equal(t, "webp", string(req.Files["sticker"].Data))
+}
 
 func TestStickerSet(t *testing.T) {
 	if b == nil {
