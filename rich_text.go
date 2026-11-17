@@ -56,8 +56,9 @@ const (
 // carrying a "type" discriminator and a (usually nested) text. Kind reports
 // which form was decoded; the relevant fields are populated accordingly.
 //
-// RichText is a received-only type — rich content is sent as HTML or Markdown
-// via InputRichMessage, never as a block tree.
+// To send rich text, build it in the same forms: RichText{Plain: "text"} for
+// plain text, Kind RichTextArray with Parts for a run, or Kind RichTextEntity
+// with Type and Text for a formatted entity.
 //
 // Bot API: RichText, RichTextBold, RichTextItalic, RichTextUnderline, RichTextStrikethrough, RichTextSpoiler, RichTextDateTime, RichTextTextMention, RichTextSubscript, RichTextSuperscript, RichTextMarked, RichTextCode, RichTextCustomEmoji, RichTextMathematicalExpression, RichTextUrl, RichTextEmailAddress, RichTextPhoneNumber, RichTextBankCardNumber, RichTextMention, RichTextHashtag, RichTextCashtag, RichTextBotCommand, RichTextAnchor, RichTextAnchorLink, RichTextReference, RichTextReferenceLink.
 type RichText struct {
@@ -148,6 +149,23 @@ func (r *RichText) UnmarshalJSON(data []byte) error {
 		return json.Unmarshal(data, (*alias)(r))
 	default:
 		return wrapError(fmt.Errorf("telebot: invalid RichText value: %s", data))
+	}
+}
+
+// MarshalJSON encodes the RichText in the wire form given by Kind: a plain
+// string, an array, or a tagged entity object.
+func (r RichText) MarshalJSON() ([]byte, error) {
+	switch r.Kind {
+	case RichTextPlain:
+		return json.Marshal(r.Plain)
+	case RichTextArray:
+		if r.Parts == nil {
+			return []byte("[]"), nil
+		}
+		return json.Marshal(r.Parts)
+	default: // RichTextEntity
+		type alias RichText
+		return json.Marshal(alias(r))
 	}
 }
 

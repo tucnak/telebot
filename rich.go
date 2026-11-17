@@ -1,16 +1,16 @@
 package telebot
 
 import (
-	"encoding/json"
 	"strconv"
 )
 
 // InputRichMessage describes a rich message to send with the Bot API 10.1
 // rich-message methods (sendRichMessage, sendRichMessageDraft, and the
-// rich_message parameter of editMessageText). Exactly one of HTML or Markdown
-// must be set; Telegram parses the source server-side into its rich block tree
-// — headings, tables, ordered and nested lists, blockquotes, dividers, media
-// blocks and so on — and renders it as a single message regardless of length.
+// rich_message parameter of editMessageText). Exactly one of HTML, Markdown or
+// Blocks must be set. Telegram parses HTML and Markdown server-side into its
+// rich block tree — headings, tables, ordered and nested lists, blockquotes,
+// dividers, media blocks and so on — and renders it as a single message
+// regardless of length; Blocks gives that tree directly.
 //
 // InputRichMessage implements Sendable, so the idiomatic way to send one is
 // through Send/Reply:
@@ -35,19 +35,26 @@ type InputRichMessage struct {
 	// (Optional) Pass true to skip automatic detection of URLs, email addresses,
 	// mentions, hashtags, cashtags, bot commands and phone numbers in the text.
 	SkipEntityDetection bool `json:"skip_entity_detection,omitempty"`
+
+	// (Optional) Content described as a list of blocks (Bot API 10.2).
+	Blocks []InputRichBlock `json:"blocks,omitempty"`
+
+	// (Optional) Media referenced from HTML or Markdown by tg://photo?id=,
+	// tg://video?id=, tg://document?id= and tg://audio?id= links (Bot API 10.2).
+	Media []InputRichMessageMedia `json:"media,omitempty"`
 }
 
 // Send delivers the rich message through bot b to recipient via the
 // sendRichMessage method, satisfying the Sendable interface.
 func (i *InputRichMessage) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
-	data, err := json.Marshal(i)
+	rich, files, err := encodeRich(i)
 	if err != nil {
 		return nil, err
 	}
 
 	params := map[string]string{
 		"chat_id":      to.Recipient(),
-		"rich_message": string(data),
+		"rich_message": rich,
 	}
 	b.embedSendOptions(params, opt)
 
@@ -56,7 +63,7 @@ func (i *InputRichMessage) Send(b *Bot, to Recipient, opt *SendOptions) (*Messag
 	delete(params, "parse_mode")
 	delete(params, "entities")
 
-	raw, err := b.Raw("sendRichMessage", params)
+	raw, err := b.sendFiles("sendRichMessage", files, params)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +87,7 @@ func (b *Bot) SendRichDraft(to Recipient, draftID int, rich *InputRichMessage, o
 		return ErrUnsupportedWhat
 	}
 
-	data, err := json.Marshal(rich)
+	data, files, err := encodeRich(rich)
 	if err != nil {
 		return err
 	}
@@ -88,14 +95,14 @@ func (b *Bot) SendRichDraft(to Recipient, draftID int, rich *InputRichMessage, o
 	params := map[string]string{
 		"chat_id":      to.Recipient(),
 		"draft_id":     strconv.Itoa(draftID),
-		"rich_message": string(data),
+		"rich_message": data,
 	}
 
 	if sendOpts := b.extractOptions(opts); sendOpts != nil && sendOpts.ThreadID != 0 {
 		params["message_thread_id"] = strconv.Itoa(sendOpts.ThreadID)
 	}
 
-	_, err = b.Raw("sendRichMessageDraft", params)
+	_, err = b.sendFiles("sendRichMessageDraft", files, params)
 	return err
 }
 

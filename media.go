@@ -17,7 +17,7 @@ type Media interface {
 // InputMedia represents a composite InputMedia struct that is
 // used by Telebot in sending and editing media methods.
 //
-// Bot API: InputMedia, InputMediaAnimation, InputMediaAudio, InputMediaDocument, InputMediaPhoto, InputMediaVideo.
+// Bot API: InputMedia, InputMediaAnimation, InputMediaAudio, InputMediaDocument, InputMediaPhoto, InputMediaVideo, InputMediaVoiceNote.
 type InputMedia struct {
 	Type                 string   `json:"type"`
 	Media                string   `json:"media"`
@@ -351,6 +351,16 @@ func (v *Voice) MediaType() string {
 
 func (v *Voice) MediaFile() *File {
 	return &v.File
+}
+
+// InputMedia returns the voice note as an InputMediaVoiceNote, which Telegram
+// accepts in rich messages (Bot API 10.2).
+func (v *Voice) InputMedia() InputMedia {
+	return InputMedia{
+		Type:     "voice_note",
+		Caption:  v.Caption,
+		Duration: v.Duration,
+	}
 }
 
 // VideoNote represents a video message.

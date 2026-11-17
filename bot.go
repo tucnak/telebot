@@ -617,6 +617,7 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 	var (
 		method string
 		params = make(map[string]string)
+		files  map[string]File
 	)
 
 	switch v := what.(type) {
@@ -629,11 +630,12 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 		params["text"] = v
 	case *InputRichMessage:
 		method = "editMessageText"
-		data, err := json.Marshal(v)
+		rich, f, err := encodeRich(v)
 		if err != nil {
 			return nil, err
 		}
-		params["rich_message"] = string(data)
+		params["rich_message"] = rich
+		files = f
 	case Location:
 		method = "editMessageLiveLocation"
 		params["latitude"] = fmt.Sprintf("%f", v.Lat)
@@ -673,7 +675,7 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 		delete(params, "entities")
 	}
 
-	data, err := b.Raw(method, params)
+	data, err := b.sendFiles(method, files, params)
 	if err != nil {
 		return nil, err
 	}
