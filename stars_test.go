@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTransactionPartnerSubscriptionPeriod(t *testing.T) {
@@ -354,4 +355,29 @@ func TestVerificationInfoJSON(t *testing.T) {
 	assert.Equal(t, "official_bot", info.VerifiedBy)
 	assert.Equal(t, "User identity verified", info.Details)
 	assert.True(t, info.IsActive)
+}
+
+func TestTransactionPartnerFields(t *testing.T) {
+	var chat TransactionPartner
+	require.NoError(t, json.Unmarshal([]byte(`{"type":"chat","chat":{"id":-100,"type":"channel"},"gift":{"id":"g","star_count":5}}`), &chat))
+	require.NotNil(t, chat.Chat)
+	assert.Equal(t, int64(-100), chat.Chat.Chat.ID)
+	assert.Equal(t, "g", chat.Chat.Gift.ID)
+
+	var user TransactionPartner
+	require.NoError(t, json.Unmarshal([]byte(`{"type":"user","transaction_type":"paid_media_payment","user":{"id":7},
+		"paid_media":[{"type":"photo","photo":[{"file_id":"p"}]}],"paid_media_payload":"pl",
+		"affiliate":{"affiliate_chat":{"id":-5},"commission_per_mille":100,"amount":3}}`), &user))
+	assert.Equal(t, "paid_media_payment", user.TransactionType)
+	assert.Equal(t, "pl", user.PaidMediaPayload)
+	assert.Len(t, user.PaidMedia, 1)
+	assert.Equal(t, int64(-5), user.Affiliate.AffiliateChat.ID)
+
+	var api TransactionPartner
+	require.NoError(t, json.Unmarshal([]byte(`{"type":"telegram_api","request_count":12}`), &api))
+	assert.Equal(t, 12, api.RequestCount)
+
+	var premium TransactionPartner
+	require.NoError(t, json.Unmarshal([]byte(`{"type":"user","transaction_type":"premium_purchase","user":{"id":7},"premium_subscription_duration":6}`), &premium))
+	assert.Equal(t, 6, premium.PremiumSubscriptionDuration)
 }

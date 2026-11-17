@@ -605,14 +605,14 @@ A method's "unseen parameters" are parameters whose name appears nowhere in tele
 | [RevenueWithdrawalStatePending](https://core.telegram.org/bots/api#revenuewithdrawalstatepending) | `RevenueWithdrawal` |  |
 | [RevenueWithdrawalStateSucceeded](https://core.telegram.org/bots/api#revenuewithdrawalstatesucceeded) | `RevenueWithdrawal` |  |
 | [RevenueWithdrawalStateFailed](https://core.telegram.org/bots/api#revenuewithdrawalstatefailed) | `RevenueWithdrawal` |  |
-| [AffiliateInfo](https://core.telegram.org/bots/api#affiliateinfo) | `AffiliateInfo` | affiliate_user, affiliate_chat |
+| [AffiliateInfo](https://core.telegram.org/bots/api#affiliateinfo) | `AffiliateInfo` |  |
 | [TransactionPartner](https://core.telegram.org/bots/api#transactionpartner) | `TransactionPartner` |  |
-| [TransactionPartnerUser](https://core.telegram.org/bots/api#transactionpartneruser) | `TransactionPartner` | transaction_type, paid_media, paid_media_payload, premium_subscription_duration |
-| [TransactionPartnerChat](https://core.telegram.org/bots/api#transactionpartnerchat) | `TransactionPartnerChat` | gift |
+| [TransactionPartnerUser](https://core.telegram.org/bots/api#transactionpartneruser) | `TransactionPartner` |  |
+| [TransactionPartnerChat](https://core.telegram.org/bots/api#transactionpartnerchat) | `TransactionPartnerChat` |  |
 | [TransactionPartnerAffiliateProgram](https://core.telegram.org/bots/api#transactionpartneraffiliateprogram) | `TransactionPartnerAffiliateProgram` |  |
 | [TransactionPartnerFragment](https://core.telegram.org/bots/api#transactionpartnerfragment) | `TransactionPartner` |  |
 | [TransactionPartnerTelegramAds](https://core.telegram.org/bots/api#transactionpartnertelegramads) | `TransactionPartner` |  |
-| [TransactionPartnerTelegramApi](https://core.telegram.org/bots/api#transactionpartnertelegramapi) | `TransactionPartner` | request_count |
+| [TransactionPartnerTelegramApi](https://core.telegram.org/bots/api#transactionpartnertelegramapi) | `TransactionPartner` |  |
 | [TransactionPartnerOther](https://core.telegram.org/bots/api#transactionpartnerother) | `TransactionPartner` |  |
 | [StarTransaction](https://core.telegram.org/bots/api#startransaction) | `StarTransaction` |  |
 | [StarTransactions](https://core.telegram.org/bots/api#startransactions) | **missing** |  |

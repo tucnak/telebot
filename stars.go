@@ -63,6 +63,9 @@ type TransactionPartnerChat struct {
 
 	// Information about the chat
 	Chat *Chat `json:"chat"`
+
+	// (Optional) The gift sent to the chat by the bot.
+	Gift *Gift `json:"gift,omitempty"`
 }
 
 // TransactionPartner describes the source or the recipient of a Telegram
@@ -88,7 +91,25 @@ type TransactionPartner struct {
 	Affiliate *AffiliateInfo `json:"affiliate,omitempty"`
 
 	// Bot API 8.3: Information about the chat transaction partner
-	Chat *TransactionPartnerChat `json:"chat,omitempty"`
+	// For "chat" partners, the chat; Chat.Chat holds it (Bot API 8.3).
+	Chat *TransactionPartnerChat `json:"-"`
+
+	// Bot API 9.0: for "user" partners, the type of the transaction:
+	// "invoice_payment", "paid_media_payment", "gift_purchase",
+	// "premium_purchase" or "business_account_transfer".
+	TransactionType string `json:"transaction_type,omitempty"`
+
+	// For "paid_media_payment" transactions, the media bought and its
+	// payload.
+	PaidMedia        []PaidMedia `json:"paid_media,omitempty"`
+	PaidMediaPayload string      `json:"paid_media_payload,omitempty"`
+
+	// Bot API 9.0: for "premium_purchase" transactions, the months of
+	// Telegram Premium gifted.
+	PremiumSubscriptionDuration int `json:"premium_subscription_duration,omitempty"`
+
+	// For "telegram_api" partners, the billed requests over the limits.
+	RequestCount int `json:"request_count,omitempty"`
 }
 
 // RevenueWithdrawal describes the state of a revenue withdrawal operation.
@@ -177,6 +198,10 @@ type VerificationInfo struct {
 type AffiliateInfo struct {
 	// (Optional) Information about the affiliate program that paid the transaction
 	AffiliateProgram *TransactionPartnerAffiliateProgram `json:"affiliate_program,omitempty"`
+
+	// (Optional) The bot or user, or the chat, that received the commission.
+	AffiliateUser *User `json:"affiliate_user,omitempty"`
+	AffiliateChat *Chat `json:"affiliate_chat,omitempty"`
 
 	// (Optional) The number of Telegram Stars received by the affiliate program for each 1000 Telegram Stars received by the bot
 	CommissionPerMille int `json:"commission_per_mille"`
@@ -279,4 +304,21 @@ func (b *Bot) StarBalance() (*StarAmount, error) {
 		return nil, wrapError(err)
 	}
 	return resp.Result, nil
+}
+
+// UnmarshalJSON decodes a transaction partner, putting the chat of a "chat"
+// partner in Chat.
+func (p *TransactionPartner) UnmarshalJSON(data []byte) error {
+	type alias TransactionPartner
+	aux := struct {
+		*alias
+		Chat *Chat `json:"chat"`
+	}{alias: (*alias)(p)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Chat != nil {
+		p.Chat = &TransactionPartnerChat{Type: p.Type, Chat: aux.Chat, Gift: p.Gift}
+	}
+	return nil
 }
