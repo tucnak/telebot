@@ -62,6 +62,18 @@ func TestNewBot(t *testing.T) {
 	assert.Equal(t, 100, cap(b.Updates))
 	assert.NotZero(t, b.client.Timeout)
 
+	for tok, id := range map[string]int64{
+		"123456:AAA": 123456,
+		"":           0,
+		"BAD":        0,
+		"abc:AAA":    0,
+		"-1:AAA":     0,
+	} {
+		b, err := NewBot(Settings{Token: tok, Offline: true, OnError: func(error, Context) {}})
+		require.NoError(t, err)
+		assert.Equal(t, id, b.Me.ID, tok)
+	}
+
 	pref = defaultSettings()
 	client := &http.Client{Timeout: time.Minute}
 	pref.URL = "http://api.telegram.org" // not https
