@@ -333,6 +333,24 @@ type Message struct {
 	// Service message: a transfer with a TON wallet (Bot API 10.4).
 	TonWalletTransfer *TonWalletTransfer `json:"ton_wallet_transfer,omitempty"`
 
+	// (Optional) Topic of a channel's direct messages chat the message
+	// belongs to (Bot API 9.2).
+	DirectMessagesTopic *DirectMessagesTopic `json:"direct_messages_topic,omitempty"`
+
+	// (Optional) The message is a paid post, which must not be deleted for
+	// 24 hours for the payment to arrive (Bot API 9.2).
+	IsPaidPost bool `json:"is_paid_post,omitempty"`
+
+	// (Optional) The message is a suggested post (Bot API 9.2).
+	SuggestedPostInfo *SuggestedPostInfo `json:"suggested_post_info,omitempty"`
+
+	// Service messages about suggested posts (Bot API 9.2).
+	SuggestedPostApproved       *SuggestedPostApprovalInfo   `json:"suggested_post_approved,omitempty"`
+	SuggestedPostApprovalFailed *SuggestedPostApprovalFailed `json:"suggested_post_approval_failed,omitempty"`
+	SuggestedPostDeclined       *SuggestedPostDeclineInfo    `json:"suggested_post_declined,omitempty"`
+	SuggestedPostPaid           *SuggestedPostPaid           `json:"suggested_post_paid,omitempty"`
+	SuggestedPostRefunded       *SuggestedPostRefunded       `json:"suggested_post_refunded,omitempty"`
+
 	// Service message: checklist tasks were marked as done or not done
 	// (Bot API 9.1).
 	ChecklistTasksDone *ChecklistTasksDone `json:"checklist_tasks_done,omitempty"`

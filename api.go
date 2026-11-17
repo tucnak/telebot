@@ -15,6 +15,7 @@ type API interface {
 	AnswerGuest(msg *Message, result Result) (*SentGuestMessage, error)
 	AnswerWebApp(query *Query, r Result) (*WebAppMessage, error)
 	AnswerWidgetQuery(queryID, data string) error
+	ApproveSuggestedPost(msg Editable, sendDate int64) error
 	ApproveJoinRequest(chat Recipient, user *User) error
 	Ban(chat *Chat, member *ChatMember, revokeMessages ...bool) error
 	BanSenderChat(chat *Chat, sender Recipient) error
@@ -35,6 +36,7 @@ type API interface {
 	CreateTopic(chat *Chat, topic *Topic) (*Topic, error)
 	CustomEmojiStickers(ids []string) ([]Sticker, error)
 	DeclineJoinRequest(chat Recipient, user *User) error
+	DeclineSuggestedPost(msg Editable, comment string) error
 	DefaultRights(forChannels bool) (*Rights, error)
 	Delete(msg Editable) error
 	DeleteBusinessAccountGift(connectionID, ownedGiftID string) error

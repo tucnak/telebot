@@ -69,26 +69,32 @@ type Chat struct {
 	Username  string `json:"username"`
 
 	// Returns only in getChat
-	Bio                            string               `json:"bio,omitempty"`
-	Photo                          *ChatPhoto           `json:"photo,omitempty"`
-	Description                    string               `json:"description,omitempty"`
-	InviteLink                     string               `json:"invite_link,omitempty"`
-	PinnedMessage                  *Message             `json:"pinned_message,omitempty"`
-	Permissions                    *Rights              `json:"permissions,omitempty"`
-	Reactions                      []Reaction           `json:"available_reactions"`
-	SlowMode                       int                  `json:"slow_mode_delay,omitempty"`
-	StickerSet                     string               `json:"sticker_set_name,omitempty"`
-	CanSetStickerSet               bool                 `json:"can_set_sticker_set,omitempty"`
-	CanSendPaidMedia               bool                 `json:"can_send_paid_media"`
-	CustomEmojiStickerSet          string               `json:"custom_emoji_sticker_set_name"`
-	LinkedChatID                   int64                `json:"linked_chat_id,omitempty"`
-	ChatLocation                   *ChatLocation        `json:"location,omitempty"`
-	Private                        bool                 `json:"has_private_forwards,omitempty"`
-	Protected                      bool                 `json:"has_protected_content,omitempty"`
-	NoVoiceAndVideo                bool                 `json:"has_restricted_voice_and_video_messages"`
-	HasHiddenMembers               bool                 `json:"has_hidden_members,omitempty"`
-	AggressiveAntiSpam             bool                 `json:"has_aggressive_anti_spam_enabled,omitempty"`
-	IsForum                        bool                 `json:"is_forum"`
+	Bio                   string        `json:"bio,omitempty"`
+	Photo                 *ChatPhoto    `json:"photo,omitempty"`
+	Description           string        `json:"description,omitempty"`
+	InviteLink            string        `json:"invite_link,omitempty"`
+	PinnedMessage         *Message      `json:"pinned_message,omitempty"`
+	Permissions           *Rights       `json:"permissions,omitempty"`
+	Reactions             []Reaction    `json:"available_reactions"`
+	SlowMode              int           `json:"slow_mode_delay,omitempty"`
+	StickerSet            string        `json:"sticker_set_name,omitempty"`
+	CanSetStickerSet      bool          `json:"can_set_sticker_set,omitempty"`
+	CanSendPaidMedia      bool          `json:"can_send_paid_media"`
+	CustomEmojiStickerSet string        `json:"custom_emoji_sticker_set_name"`
+	LinkedChatID          int64         `json:"linked_chat_id,omitempty"`
+	ChatLocation          *ChatLocation `json:"location,omitempty"`
+	Private               bool          `json:"has_private_forwards,omitempty"`
+	Protected             bool          `json:"has_protected_content,omitempty"`
+	NoVoiceAndVideo       bool          `json:"has_restricted_voice_and_video_messages"`
+	HasHiddenMembers      bool          `json:"has_hidden_members,omitempty"`
+	AggressiveAntiSpam    bool          `json:"has_aggressive_anti_spam_enabled,omitempty"`
+	IsForum               bool          `json:"is_forum"`
+
+	// Bot API 9.2: the supergroup is the direct messages chat of a channel,
+	// and ParentChat (returned only by ChatByID) is that channel.
+	IsDirectMessages bool  `json:"is_direct_messages,omitempty"`
+	ParentChat       *Chat `json:"parent_chat,omitempty"`
+
 	StatusCustomEmojiID            string               `json:"emoji_status_custom_emoji_id"`
 	EmojiExpirationUnixtime        int64                `json:"emoji_status_expiration_date"`
 	BackgroundCustomEmojiID        string               `json:"background_custom_emoji_id"`
@@ -428,6 +434,11 @@ type ChatFullInfo struct {
 
 	// Bot API 9.4: For private chats, the first audio added to the profile of the user.
 	FirstProfileAudio *Audio `json:"first_profile_audio,omitempty"`
+
+	// Bot API 9.2: the supergroup is the direct messages chat of a channel,
+	// ParentChat.
+	IsDirectMessages bool  `json:"is_direct_messages,omitempty"`
+	ParentChat       *Chat `json:"parent_chat,omitempty"`
 
 	// Bot API 10.2: (Optional) The community the chat belongs to.
 	Community *Community `json:"community,omitempty"`

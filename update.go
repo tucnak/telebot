@@ -153,6 +153,26 @@ func (b *Bot) ProcessContext(c Context) {
 			b.handle(OnManagedBotCreated, c)
 			return
 		}
+		if m.SuggestedPostApproved != nil {
+			b.handle(OnSuggestedPostApproved, c)
+			return
+		}
+		if m.SuggestedPostApprovalFailed != nil {
+			b.handle(OnSuggestedPostApprovalFailed, c)
+			return
+		}
+		if m.SuggestedPostDeclined != nil {
+			b.handle(OnSuggestedPostDeclined, c)
+			return
+		}
+		if m.SuggestedPostPaid != nil {
+			b.handle(OnSuggestedPostPaid, c)
+			return
+		}
+		if m.SuggestedPostRefunded != nil {
+			b.handle(OnSuggestedPostRefunded, c)
+			return
+		}
 		if m.ChecklistTasksDone != nil {
 			b.handle(OnChecklistTasksDone, c)
 			return

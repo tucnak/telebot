@@ -116,6 +116,15 @@ type SendOptions struct {
 	CanStop    bool
 	KeepOnStop bool
 
+	// DirectMessagesTopicID sends the message to a topic of a channel's direct
+	// messages chat (Bot API 9.2).
+	DirectMessagesTopicID int64
+
+	// SuggestedPost sends the message as a post suggested to the channel of
+	// a direct messages chat (Bot API 9.2). It can also be passed to Send as
+	// an option on its own.
+	SuggestedPost *SuggestedPostParameters
+
 	// CaptionAbove shows an edited caption above the media. Used only when
 	// editing a caption; when sending media, set the media's CaptionAbove.
 	CaptionAbove bool
@@ -146,6 +155,8 @@ func (b *Bot) extractOptions(how []interface{}) *SendOptions {
 			opts.ReplyParams = opt
 		case *EphemeralMessageParameters:
 			opts.Ephemeral = opt
+		case *SuggestedPostParameters:
+			opts.SuggestedPost = opt
 		case *Topic:
 			opts.ThreadID = opt.ThreadID
 		case Option:
@@ -257,6 +268,15 @@ func (b *Bot) embedSendOptions(params map[string]string, opt *SendOptions) {
 
 	if opt.AllowPaidBroadcast {
 		params["allow_paid_broadcast"] = "true"
+	}
+
+	if opt.DirectMessagesTopicID != 0 {
+		params["direct_messages_topic_id"] = strconv.FormatInt(opt.DirectMessagesTopicID, 10)
+	}
+
+	if opt.SuggestedPost != nil {
+		data, _ := json.Marshal(opt.SuggestedPost)
+		params["suggested_post_parameters"] = string(data)
 	}
 
 	if opt.Ephemeral != nil {

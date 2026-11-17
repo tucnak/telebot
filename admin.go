@@ -48,6 +48,10 @@ type Rights struct {
 	// Bot API 9.5: restricted member permission (ChatPermissions).
 	CanEditTag bool `json:"can_edit_tag"`
 
+	// Bot API 9.2: administrator right to manage the channel's direct
+	// messages and decline suggested posts.
+	CanManageDirectMessages bool `json:"can_manage_direct_messages"`
+
 	// Bot API 10.0: restricted member permission to react to messages
 	// (ChatPermissions).
 	CanReactToMessages bool `json:"can_react_to_messages"`
