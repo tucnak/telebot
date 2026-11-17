@@ -319,6 +319,10 @@ type Message struct {
 	// Service message: a transfer with a TON wallet (Bot API 10.4).
 	TonWalletTransfer *TonWalletTransfer `json:"ton_wallet_transfer,omitempty"`
 
+	// Service message: the sender used a link that lets them message the
+	// user without paying Telegram Stars (Bot API 10.4).
+	PaidMessagesWaived *PaidMessagesWaived `json:"paid_messages_waived,omitempty"`
+
 	// For a service message, a user was shared with the bot.
 	UserShared *RecipientShared `json:"users_shared,omitempty"`
 
@@ -704,6 +708,10 @@ type TextQuote struct {
 	// (Optional) True, if the quote was chosen manually by the message sender.
 	// Otherwise, the quote was added automatically by the server.
 	Manual bool `json:"is_manual"`
+
+	// (Optional) The quote as rich text, if it was chosen from a rich
+	// message; Text may then be empty (Bot API 10.4).
+	RichTexts []RichText `json:"rich_texts,omitempty"`
 }
 
 // MessageOrigin a message reference that has been sent originally by a known user.
@@ -862,4 +870,16 @@ type ReplyParams struct {
 
 	// (Optional) Position of the quote in the original message in UTF-16 code units.
 	QuotePosition int `json:"quote_position,omitempty"`
+
+	// (Optional) Quoted parts of a rich message, one per quoted text in the
+	// order they appear; if set, Quote, QuoteParseMode and QuoteEntities are
+	// ignored (Bot API 10.4).
+	QuoteRichTexts []RichText `json:"quote_rich_texts,omitempty"`
 }
+
+// PaidMessagesWaived is a service message about the sender using a link that
+// lets them message the user without paying Telegram Stars (Bot API 10.4).
+// It holds no information.
+//
+// Bot API: PaidMessagesWaived.
+type PaidMessagesWaived struct{}

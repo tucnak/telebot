@@ -144,6 +144,10 @@ func (b *Bot) ProcessContext(c Context) {
 			b.handle(OnTonWalletTransfer, c)
 			return
 		}
+		if m.PaidMessagesWaived != nil {
+			b.handle(OnPaidMessagesWaived, c)
+			return
+		}
 		if m.TopicCreated != nil {
 			b.handle(OnTopicCreated, c)
 			return

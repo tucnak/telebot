@@ -66,6 +66,7 @@ const (
 	OnGift                 = "\agift"
 	OnUniqueGift           = "\aunique_gift"
 	OnTonWalletTransfer    = "\aton_wallet_transfer"
+	OnPaidMessagesWaived   = "\apaid_messages_waived"
 	OnGame                 = "\agame"
 	OnPoll                 = "\apoll"
 	OnPollAnswer           = "\apoll_answer"
