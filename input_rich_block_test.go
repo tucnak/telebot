@@ -210,3 +210,38 @@ func TestRichTextMarshalRoundTrip(t *testing.T) {
 		assert.JSONEq(t, in, string(out))
 	}
 }
+
+func TestRichBlocksLive(t *testing.T) {
+	if b == nil {
+		t.Skip("Cached bot instance is bad (probably wrong or empty TELEBOT_SECRET)")
+	}
+	if userID == 0 {
+		t.Skip("USER_ID is required for rich message live tests")
+	}
+
+	msg, err := b.Send(user, &InputRichMessage{Blocks: []InputRichBlock{
+		InputRichBlockSectionHeading{Text: plain("telebot"), Size: 2},
+		InputRichBlockParagraph{Text: RichText{Kind: RichTextArray, Parts: []RichText{
+			plain("Rich blocks "),
+			{Kind: RichTextEntity, Type: RichBold, Text: &RichText{Plain: "work"}},
+		}}},
+		InputRichBlockList{Items: []InputRichBlockListItem{
+			{Blocks: []InputRichBlock{InputRichBlockParagraph{Text: plain("one")}}},
+			{Blocks: []InputRichBlock{InputRichBlockParagraph{Text: plain("two")}}, HasCheckbox: true, IsChecked: true},
+		}},
+		InputRichBlockTable{Cells: [][]RichBlockTableCell{{
+			{Text: &RichText{Plain: "a"}, IsHeader: true, Align: "left", VAlign: "top"},
+			{Text: &RichText{Plain: "b"}, Align: "right", VAlign: "middle"},
+		}}, IsBordered: true},
+		InputRichBlockPhoto{Photo: &Photo{File: logo}, Caption: &RichBlockCaption{Text: plain("by URL")}},
+		InputRichBlockAudio{Audio: &Audio{File: FromReader(strings.NewReader("ID3")), FileName: "a.mp3"}},
+	}})
+	require.NoError(t, err)
+	require.NotNil(t, msg.RichMessage)
+
+	var types []string
+	for _, bl := range msg.RichMessage.Blocks {
+		types = append(types, bl.Type)
+	}
+	assert.Equal(t, []string{"heading", "paragraph", "list", "table", "photo", "audio"}, types)
+}
