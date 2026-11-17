@@ -145,6 +145,7 @@ func (r *RichText) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 
+	*r = RichText{} // a reused value keeps nothing of its previous form
 	switch data[0] {
 	case '"':
 		r.Kind = RichTextPlain

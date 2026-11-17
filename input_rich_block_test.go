@@ -230,6 +230,12 @@ func TestRichTextWithoutKind(t *testing.T) {
 	require.NoError(t, err)
 	assert.JSONEq(t, `["a ",{"type":"bold","text":"b"}]`, string(data))
 	assert.Equal(t, "a b", run.String())
+
+	// A reused value keeps nothing of the entity it held.
+	require.NoError(t, json.Unmarshal([]byte(`""`), &bold))
+	data, err = json.Marshal(bold)
+	require.NoError(t, err)
+	assert.Equal(t, `""`, string(data))
 }
 
 func TestRichBlocksLive(t *testing.T) {
