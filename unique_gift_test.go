@@ -72,9 +72,9 @@ func TestGetUniqueGift(t *testing.T) {
 	assert.Equal(t, map[string]string{"name": "Cake-7"}, srv.Last().Params)
 }
 
-func TestDeleteBusinessAccountGift(t *testing.T) {
+func TestDeleteBusinessGift(t *testing.T) {
 	b, srv := newFakeBot(t)
-	require.NoError(t, b.DeleteBusinessAccountGift("bc", "og"))
+	require.NoError(t, b.DeleteBusinessGift("bc", "og"))
 	assert.Equal(t, "deleteBusinessAccountGift", srv.Last().Method)
 	assert.Equal(t, map[string]string{"business_connection_id": "bc", "owned_gift_id": "og"}, srv.Last().Params)
 }

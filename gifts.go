@@ -395,7 +395,7 @@ type OwnedGifts struct {
 }
 
 // GiftQuery filters, sorts and pages the gifts returned by
-// BusinessAccountGifts, UserGifts and ChatGifts. Not every method takes
+// BusinessGifts, UserGifts and ChatGifts. Not every method takes
 // every filter; see the Bot API.
 type GiftQuery struct {
 	ExcludeUnsaved              bool   `json:"exclude_unsaved,omitempty"`
@@ -428,11 +428,11 @@ func (b *Bot) ownedGifts(method string, params map[string]interface{}, q GiftQue
 	return resp.Result, nil
 }
 
-// BusinessAccountGifts returns the gifts owned by the business account
+// BusinessGifts returns the gifts owned by the business account
 // (Bot API 9.0).
 //
 // Bot API: getBusinessAccountGifts.
-func (b *Bot) BusinessAccountGifts(connectionID string, q GiftQuery) (*OwnedGifts, error) {
+func (b *Bot) BusinessGifts(connectionID string, q GiftQuery) (*OwnedGifts, error) {
 	return b.ownedGifts("getBusinessAccountGifts", map[string]interface{}{"business_connection_id": connectionID}, q)
 }
 

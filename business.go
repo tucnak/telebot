@@ -131,12 +131,12 @@ func (b *Bot) BusinessConnection(id string) (*BusinessConnection, error) {
 	return resp.Result, nil
 }
 
-// DeleteBusinessAccountGift deletes a regular gift owned by a managed
+// DeleteBusinessGift deletes a regular gift owned by a managed
 // business account without converting it to Telegram Stars (Bot API 10.4).
 // It needs the can_convert_gifts_to_stars business bot right.
 //
 // Bot API: deleteBusinessAccountGift.
-func (b *Bot) DeleteBusinessAccountGift(connectionID, ownedGiftID string) error {
+func (b *Bot) DeleteBusinessGift(connectionID, ownedGiftID string) error {
 	_, err := b.Raw("deleteBusinessAccountGift", map[string]string{
 		"business_connection_id": connectionID,
 		"owned_gift_id":          ownedGiftID,
@@ -211,11 +211,11 @@ func (b *Bot) DeleteBusinessMessages(connectionID string, msgs []Editable) error
 	return err
 }
 
-// SetBusinessAccountName changes the first and last name of the business
+// SetBusinessName changes the first and last name of the business
 // account (Bot API 9.0).
 //
 // Bot API: setBusinessAccountName.
-func (b *Bot) SetBusinessAccountName(connectionID, firstName, lastName string) error {
+func (b *Bot) SetBusinessName(connectionID, firstName, lastName string) error {
 	params := map[string]string{
 		"business_connection_id": connectionID,
 		"first_name":             firstName,
@@ -227,11 +227,11 @@ func (b *Bot) SetBusinessAccountName(connectionID, firstName, lastName string) e
 	return err
 }
 
-// SetBusinessAccountUsername changes the username of the business account;
+// SetBusinessUsername changes the username of the business account;
 // an empty username removes it (Bot API 9.0).
 //
 // Bot API: setBusinessAccountUsername.
-func (b *Bot) SetBusinessAccountUsername(connectionID, username string) error {
+func (b *Bot) SetBusinessUsername(connectionID, username string) error {
 	_, err := b.Raw("setBusinessAccountUsername", map[string]string{
 		"business_connection_id": connectionID,
 		"username":               username,
@@ -239,11 +239,11 @@ func (b *Bot) SetBusinessAccountUsername(connectionID, username string) error {
 	return err
 }
 
-// SetBusinessAccountBio changes the bio of the business account; an empty
+// SetBusinessBio changes the bio of the business account; an empty
 // bio removes it (Bot API 9.0).
 //
 // Bot API: setBusinessAccountBio.
-func (b *Bot) SetBusinessAccountBio(connectionID, bio string) error {
+func (b *Bot) SetBusinessBio(connectionID, bio string) error {
 	_, err := b.Raw("setBusinessAccountBio", map[string]string{
 		"business_connection_id": connectionID,
 		"bio":                    bio,
@@ -251,12 +251,12 @@ func (b *Bot) SetBusinessAccountBio(connectionID, bio string) error {
 	return err
 }
 
-// SetBusinessAccountProfilePhoto changes the profile photo of the business
+// SetBusinessProfilePhoto changes the profile photo of the business
 // account; with public, the public photo shown when the main one is hidden
 // (Bot API 9.0).
 //
 // Bot API: setBusinessAccountProfilePhoto.
-func (b *Bot) SetBusinessAccountProfilePhoto(connectionID string, photo InputProfilePhoto, public bool) error {
+func (b *Bot) SetBusinessProfilePhoto(connectionID string, photo InputProfilePhoto, public bool) error {
 	files := make(map[string]File)
 	data, err := photo.inputProfilePhoto(files)
 	if err != nil {
@@ -273,11 +273,11 @@ func (b *Bot) SetBusinessAccountProfilePhoto(connectionID string, photo InputPro
 	return err
 }
 
-// RemoveBusinessAccountProfilePhoto removes the profile photo of the
+// RemoveBusinessProfilePhoto removes the profile photo of the
 // business account, or with public its public photo (Bot API 9.0).
 //
 // Bot API: removeBusinessAccountProfilePhoto.
-func (b *Bot) RemoveBusinessAccountProfilePhoto(connectionID string, public bool) error {
+func (b *Bot) RemoveBusinessProfilePhoto(connectionID string, public bool) error {
 	params := map[string]string{"business_connection_id": connectionID}
 	if public {
 		params["is_public"] = "true"
@@ -286,11 +286,11 @@ func (b *Bot) RemoveBusinessAccountProfilePhoto(connectionID string, public bool
 	return err
 }
 
-// SetBusinessAccountGiftSettings changes which gifts the business account
+// SetBusinessGiftSettings changes which gifts the business account
 // accepts and whether the gift button is always shown (Bot API 9.0).
 //
 // Bot API: setBusinessAccountGiftSettings.
-func (b *Bot) SetBusinessAccountGiftSettings(connectionID string, showGiftButton bool, types AcceptedGiftTypes) error {
+func (b *Bot) SetBusinessGiftSettings(connectionID string, showGiftButton bool, types AcceptedGiftTypes) error {
 	data, err := json.Marshal(types)
 	if err != nil {
 		return err
@@ -303,11 +303,11 @@ func (b *Bot) SetBusinessAccountGiftSettings(connectionID string, showGiftButton
 	return err
 }
 
-// BusinessAccountStarBalance returns the Telegram Stars of the business
+// BusinessStarBalance returns the Telegram Stars of the business
 // account (Bot API 9.0).
 //
 // Bot API: getBusinessAccountStarBalance.
-func (b *Bot) BusinessAccountStarBalance(connectionID string) (*StarAmount, error) {
+func (b *Bot) BusinessStarBalance(connectionID string) (*StarAmount, error) {
 	data, err := b.Raw("getBusinessAccountStarBalance", map[string]string{
 		"business_connection_id": connectionID,
 	})
@@ -324,11 +324,11 @@ func (b *Bot) BusinessAccountStarBalance(connectionID string) (*StarAmount, erro
 	return resp.Result, nil
 }
 
-// TransferBusinessAccountStars moves 1-10000 Telegram Stars from the business
+// TransferBusinessStars moves 1-10000 Telegram Stars from the business
 // account to the bot (Bot API 9.0).
 //
 // Bot API: transferBusinessAccountStars.
-func (b *Bot) TransferBusinessAccountStars(connectionID string, stars int) error {
+func (b *Bot) TransferBusinessStars(connectionID string, stars int) error {
 	_, err := b.Raw("transferBusinessAccountStars", map[string]string{
 		"business_connection_id": connectionID,
 		"star_count":             strconv.Itoa(stars),

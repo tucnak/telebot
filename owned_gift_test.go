@@ -18,7 +18,7 @@ func TestOwnedGifts(t *testing.T) {
 	srv.Reply("getUserGifts", page)
 	srv.Reply("getChatGifts", page)
 
-	gifts, err := b.BusinessAccountGifts("bc", GiftQuery{ExcludeUnsaved: true, SortByPrice: true, Limit: 10})
+	gifts, err := b.BusinessGifts("bc", GiftQuery{ExcludeUnsaved: true, SortByPrice: true, Limit: 10})
 	require.NoError(t, err)
 	assert.Equal(t, map[string]string{"business_connection_id": "bc", "exclude_unsaved": "true", "sort_by_price": "true", "limit": "10"},
 		srv.Last().Params)

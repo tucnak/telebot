@@ -20,9 +20,9 @@ type API interface {
 	ApproveJoinRequest(chat Recipient, user *User) error
 	Ban(chat *Chat, member *ChatMember, revokeMessages ...bool) error
 	BanSenderChat(chat *Chat, sender Recipient) error
-	BusinessAccountStarBalance(connectionID string) (*StarAmount, error)
-	BusinessAccountGifts(connectionID string, q GiftQuery) (*OwnedGifts, error)
 	BusinessConnection(id string) (*BusinessConnection, error)
+	BusinessGifts(connectionID string, q GiftQuery) (*OwnedGifts, error)
+	BusinessStarBalance(connectionID string) (*StarAmount, error)
 	ChatByID(id int64) (*Chat, error)
 	ChatByUsername(name string) (*Chat, error)
 	ChatFullInfo(chat Recipient) (*ChatFullInfo, error)
@@ -45,8 +45,8 @@ type API interface {
 	DeclineSuggestedPost(msg Editable, comment string) error
 	DefaultRights(forChannels bool) (*Rights, error)
 	Delete(msg Editable) error
-	DeleteBusinessAccountGift(connectionID, ownedGiftID string) error
 	DeleteAllReactions(chat, actor Recipient) error
+	DeleteBusinessGift(connectionID, ownedGiftID string) error
 	DeleteBusinessMessages(connectionID string, msgs []Editable) error
 	DeleteCommands(opts ...interface{}) error
 	DeleteEphemeral(msg *Message) error
@@ -103,7 +103,7 @@ type API interface {
 	RefundStars(to Recipient, chargeID string) error
 	EditUserStarSubscription(user Recipient, chargeID string, isCanceled bool) error
 	EditWidgetData(msg Editable, publicData, chatData *string) error
-	RemoveBusinessAccountProfilePhoto(connectionID string, public bool) error
+	RemoveBusinessProfilePhoto(connectionID string, public bool) error
 	RemoveChatVerification(chat *Chat) error
 	RemoveMyProfilePhoto() error
 	RemoveUserVerification(user Recipient) error
@@ -129,11 +129,11 @@ type API interface {
 	SetAdminTitle(chat *Chat, user *User, title string) error
 	SetManagedBotAccessSettings(bot *User, settings BotAccessSettings) error
 	SetMemberTag(chat *Chat, user *User, tag string) error
-	SetBusinessAccountBio(connectionID, bio string) error
-	SetBusinessAccountGiftSettings(connectionID string, showGiftButton bool, types AcceptedGiftTypes) error
-	SetBusinessAccountName(connectionID, firstName, lastName string) error
-	SetBusinessAccountProfilePhoto(connectionID string, photo InputProfilePhoto, public bool) error
-	SetBusinessAccountUsername(connectionID, username string) error
+	SetBusinessBio(connectionID, bio string) error
+	SetBusinessGiftSettings(connectionID string, showGiftButton bool, types AcceptedGiftTypes) error
+	SetBusinessName(connectionID, firstName, lastName string) error
+	SetBusinessProfilePhoto(connectionID string, photo InputProfilePhoto, public bool) error
+	SetBusinessUsername(connectionID, username string) error
 	SetCommands(opts ...interface{}) error
 	SetCustomEmojiStickerSetThumb(name, id string) error
 	SetDefaultRights(rights Rights, forChannels bool) error
@@ -165,7 +165,7 @@ type API interface {
 	StopLiveLocation(msg Editable, opts ...interface{}) (*Message, error)
 	StopPoll(msg Editable, opts ...interface{}) (*Poll, error)
 	TopicIconStickers() ([]Sticker, error)
-	TransferBusinessAccountStars(connectionID string, stars int) error
+	TransferBusinessStars(connectionID string, stars int) error
 	TransferGift(connectionID, ownedGiftID string, newOwner Recipient, stars int) error
 	Unban(chat *Chat, user *User, forBanned ...bool) error
 	UnbanSenderChat(chat *Chat, sender Recipient) error
