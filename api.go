@@ -54,6 +54,7 @@ type API interface {
 	DeleteReaction(msg Editable, actor Recipient) error
 	DeleteSticker(sticker string) error
 	DeleteStickerSet(name string) error
+	DeleteStory(connectionID string, storyID int) error
 	DeleteTopic(chat *Chat, topic *Topic) error
 	Download(file *File, localFilename string) error
 	Edit(msg Editable, what interface{}, opts ...interface{}) (*Message, error)
@@ -67,6 +68,7 @@ type API interface {
 	EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*Message, error)
 	EditReplyMarkup(msg Editable, markup *ReplyMarkup) (*Message, error)
 	EditSharedWidgetData(widgetID, publicData string, cacheTime int) error
+	EditStory(connectionID string, storyID int, story StoryParams) (*Story, error)
 	EditTopic(chat *Chat, topic *Topic) error
 	File(file *File) (io.ReadCloser, error)
 	FileByID(fileID string) (File, error)
@@ -89,6 +91,7 @@ type API interface {
 	Notify(to Recipient, action ChatAction, threadID ...int) error
 	PersonalChatMessages(user Recipient, limit int) ([]Message, error)
 	Pin(msg Editable, opts ...interface{}) error
+	PostStory(connectionID string, story StoryParams) (*Story, error)
 	ProfileAudiosOf(user *User, offset, limit int) (*UserProfileAudios, error)
 	ProfilePhotosOf(user *User) ([]Photo, error)
 	Promote(chat *Chat, member *ChatMember) error
@@ -105,6 +108,7 @@ type API interface {
 	ReplaceManagedBotToken(bot *User) (string, error)
 	ReplaceStickerInSet(of Recipient, stickerSet, oldSticker string, sticker InputSticker) (bool, error)
 	Reply(to *Message, what interface{}, opts ...interface{}) (*Message, error)
+	RepostStory(connectionID string, from *Story, story StoryParams) (*Story, error)
 	Respond(c *Callback, resp ...*CallbackResponse) error
 	Restrict(chat *Chat, member *ChatMember) error
 	RevokeInviteLink(chat Recipient, link string) (*ChatInviteLink, error)
