@@ -104,7 +104,9 @@ type API interface {
 	EditUserStarSubscription(user Recipient, chargeID string, isCanceled bool) error
 	EditWidgetData(msg Editable, publicData, chatData *string) error
 	RemoveBusinessAccountProfilePhoto(connectionID string, public bool) error
+	RemoveChatVerification(chat *Chat) error
 	RemoveMyProfilePhoto() error
+	RemoveUserVerification(user Recipient) error
 	RemoveWebhook(dropPending ...bool) error
 	ReopenGeneralTopic(chat *Chat) error
 	ReopenTopic(chat *Chat, topic *Topic) error
@@ -120,6 +122,7 @@ type API interface {
 	SendChatJoinRequestWebApp(queryID, url string) error
 	SendDraft(to Recipient, draftID int, text string, opts ...interface{}) error
 	SendPaidMedia(to Recipient, stars int, a PaidAlbum, opts ...interface{}) (*Message, error)
+	SendRichDraft(to Recipient, draftID int, rich *InputRichMessage, opts ...interface{}) error
 	SendGift(to Recipient, giftID string, opts ...interface{}) error
 	SavePreparedKeyboardButton(user Recipient, button ReplyButton) (*PreparedKeyboardButton, error)
 	SavePreparedInlineMessage(user Recipient, result Result, opts ...interface{}) (*PreparedInlineMessage, error)
@@ -137,6 +140,7 @@ type API interface {
 	SetGameScore(user Recipient, msg Editable, score GameHighScore) (*Message, error)
 	SetGroupDescription(chat *Chat, description string) error
 	SetGroupPermissions(chat *Chat, perms Rights) error
+	SetGroupPhoto(chat *Chat, p *Photo) error
 	SetGroupStickerSet(chat *Chat, setName string) error
 	SetGroupTitle(chat *Chat, title string) error
 	SetMenuButton(chat *User, mb interface{}) error
