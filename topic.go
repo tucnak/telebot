@@ -19,6 +19,24 @@ type Topic struct {
 	IsNameImplicit bool `json:"is_name_implicit,omitempty"`
 }
 
+// ForumTopicClosed is a service message about a forum topic closed in the
+// chat. It holds no information.
+//
+// Bot API: ForumTopicClosed.
+type ForumTopicClosed struct{}
+
+// GeneralForumTopicHidden is a service message about the General forum topic
+// hidden in the chat. It holds no information.
+//
+// Bot API: GeneralForumTopicHidden.
+type GeneralForumTopicHidden struct{}
+
+// GeneralForumTopicUnhidden is a service message about the General forum
+// topic unhidden in the chat. It holds no information.
+//
+// Bot API: GeneralForumTopicUnhidden.
+type GeneralForumTopicUnhidden struct{}
+
 // CreateTopic creates a topic in a forum supergroup chat.
 //
 // Bot API: createForumTopic.

@@ -329,21 +329,18 @@ func TestCoverage(t *testing.T) {
 }
 
 // representedBy names how telebot handles Bot API types that have no Go
-// type of their own: empty service messages decoded as *struct{}, result
+// type of their own: service messages decoded into other types, result
 // wrappers decoded inside a method, and input media built from other types.
 var representedBy = map[string]string{
-	"ForumTopicClosed":          "Message.TopicClosed",
-	"ForumTopicReopened":        "Message.TopicReopened",
-	"GeneralForumTopicHidden":   "Message.GeneralTopicHidden",
-	"GeneralForumTopicUnhidden": "Message.GeneralTopicUnhidden",
-	"SharedUser":                "RecipientShared.Users",
-	"StarTransactions":          "Bot.StarTransactions",
-	"UserProfilePhotos":         "Bot.ProfilePhotosOf",
-	"UserChatBoosts":            "Bot.UserBoosts",
-	"ResponseParameters":        "FloodError, GroupError",
-	"InputMediaLocation":        "Location as InputPollMedia",
-	"InputMediaVenue":           "Venue as InputPollMedia",
-	"InputMediaSticker":         "Sticker as InputPollMedia",
+	"ForumTopicReopened": "Message.TopicReopened",
+	"SharedUser":         "RecipientShared.Users",
+	"StarTransactions":   "Bot.StarTransactions",
+	"UserProfilePhotos":  "Bot.ProfilePhotosOf",
+	"UserChatBoosts":     "Bot.UserBoosts",
+	"ResponseParameters": "FloodError, GroupError",
+	"InputMediaLocation": "Location as InputPollMedia",
+	"InputMediaVenue":    "Venue as InputPollMedia",
+	"InputMediaSticker":  "Sticker as InputPollMedia",
 }
 
 // notBotAPITypes are exported structs with json tags that are telebot's own,

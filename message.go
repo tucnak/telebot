@@ -442,7 +442,7 @@ type Message struct {
 	TopicCreated *Topic `json:"forum_topic_created,omitempty"`
 
 	// Service message: forum topic closed
-	TopicClosed *struct{} `json:"forum_topic_closed,omitempty"`
+	TopicClosed *ForumTopicClosed `json:"forum_topic_closed,omitempty"`
 
 	// Service message: forum topic reopened
 	TopicReopened *Topic `json:"forum_topic_reopened,omitempty"`
@@ -451,10 +451,10 @@ type Message struct {
 	TopicEdited *Topic `json:"forum_topic_edited,omitempty"`
 
 	// Service message: general forum topic hidden
-	GeneralTopicHidden *struct{} `json:"general_forum_topic_hidden,omitempty"`
+	GeneralTopicHidden *GeneralForumTopicHidden `json:"general_forum_topic_hidden,omitempty"`
 
 	// Service message: general forum topic unhidden
-	GeneralTopicUnhidden *struct{} `json:"general_forum_topic_unhidden,omitempty"`
+	GeneralTopicUnhidden *GeneralForumTopicUnhidden `json:"general_forum_topic_unhidden,omitempty"`
 
 	// Service message: represents spoiler information about the message.
 	HasMediaSpoiler bool `json:"has_media_spoiler,omitempty"`

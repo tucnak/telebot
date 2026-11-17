@@ -286,11 +286,11 @@ A method's "unseen parameters" are parameters whose name appears nowhere in tele
 | [CommunityChatJoined](https://core.telegram.org/bots/api#communitychatjoined) | `CommunityChatJoined` |  |
 | [CommunityChatRemoved](https://core.telegram.org/bots/api#communitychatremoved) | `CommunityChatRemoved` |  |
 | [ForumTopicCreated](https://core.telegram.org/bots/api#forumtopiccreated) | `Topic` |  |
-| [ForumTopicClosed](https://core.telegram.org/bots/api#forumtopicclosed) | `Message.TopicClosed` |  |
+| [ForumTopicClosed](https://core.telegram.org/bots/api#forumtopicclosed) | `ForumTopicClosed` |  |
 | [ForumTopicEdited](https://core.telegram.org/bots/api#forumtopicedited) | `Topic` |  |
 | [ForumTopicReopened](https://core.telegram.org/bots/api#forumtopicreopened) | `Message.TopicReopened` |  |
-| [GeneralForumTopicHidden](https://core.telegram.org/bots/api#generalforumtopichidden) | `Message.GeneralTopicHidden` |  |
-| [GeneralForumTopicUnhidden](https://core.telegram.org/bots/api#generalforumtopicunhidden) | `Message.GeneralTopicUnhidden` |  |
+| [GeneralForumTopicHidden](https://core.telegram.org/bots/api#generalforumtopichidden) | `GeneralForumTopicHidden` |  |
+| [GeneralForumTopicUnhidden](https://core.telegram.org/bots/api#generalforumtopicunhidden) | `GeneralForumTopicUnhidden` |  |
 | [SharedUser](https://core.telegram.org/bots/api#shareduser) | `RecipientShared.Users` |  |
 | [UsersShared](https://core.telegram.org/bots/api#usersshared) | `RecipientShared` |  |
 | [ChatShared](https://core.telegram.org/bots/api#chatshared) | `RecipientShared` |  |
