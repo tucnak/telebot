@@ -189,7 +189,16 @@ func inferIQR(result Result) error {
 	return nil
 }
 
+// PreparedInlineChats are the kinds of chats a prepared inline message can
+// be sent to: private chats with users and with bots, groups and
+// supergroups, and channels.
+type PreparedInlineChats struct {
+	Users, Bots, Groups, Channels bool
+}
+
 // SavePreparedInlineMessage stores a message that can be sent by a user of a Mini App.
+// Pass a PreparedInlineChats to choose the chats it can be sent to, or a
+// bool for private chats with users only.
 //
 // Bot API: savePreparedInlineMessage.
 func (b *Bot) SavePreparedInlineMessage(user Recipient, result Result, opts ...interface{}) (*PreparedInlineMessage, error) {
@@ -201,8 +210,17 @@ func (b *Bot) SavePreparedInlineMessage(user Recipient, result Result, opts ...i
 		switch v := opt.(type) {
 		case bool:
 			params["allow_user_chats"] = strconv.FormatBool(v)
-		case *SendOptions:
-			// Handle additional options if needed
+		case PreparedInlineChats:
+			for key, on := range map[string]bool{
+				"allow_user_chats":    v.Users,
+				"allow_bot_chats":     v.Bots,
+				"allow_group_chats":   v.Groups,
+				"allow_channel_chats": v.Channels,
+			} {
+				if on {
+					params[key] = "true"
+				}
+			}
 		}
 	}
 

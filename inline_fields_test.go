@@ -68,3 +68,21 @@ func TestForwardCopyDeleteMany(t *testing.T) {
 	require.NoError(t, b.DeleteMany(msgs))
 	assert.Equal(t, map[string]string{"chat_id": "2", "message_ids": "[1,3]"}, srv.Last().Params)
 }
+
+func TestSavePreparedInlineMessage(t *testing.T) {
+	b, srv := newFakeBot(t)
+	srv.Reply("savePreparedInlineMessage", json.RawMessage(`{"id":"prep","expiration_date":9}`))
+
+	result := &ArticleResult{Title: "T", Text: "x"}
+	result.SetResultID("1")
+	msg, err := b.SavePreparedInlineMessage(&User{ID: 7}, result, PreparedInlineChats{Bots: true, Groups: true, Channels: true})
+	require.NoError(t, err)
+	assert.Equal(t, "prep", msg.ID)
+
+	req := srv.Last()
+	assert.Equal(t, "true", req.Params["allow_bot_chats"])
+	assert.Equal(t, "true", req.Params["allow_group_chats"])
+	assert.Equal(t, "true", req.Params["allow_channel_chats"])
+	assert.NotContains(t, req.Params, "allow_user_chats")
+	assert.Contains(t, req.Params["result"], `"type":"article"`)
+}
