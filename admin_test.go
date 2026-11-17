@@ -44,6 +44,7 @@ func TestEmbedRights(t *testing.T) {
 		"can_edit_stories":          false,
 		"can_delete_stories":        false,
 		"can_manage_tags":           false,
+		"can_send_welcome_messages": false,
 		"can_edit_tag":              false,
 	}
 	assert.Equal(t, expected, params)

@@ -48,6 +48,10 @@ type Rights struct {
 	// Bot API 9.5: restricted member permission (ChatPermissions).
 	CanEditTag bool `json:"can_edit_tag"`
 
+	// Bot API 10.3: administrator right to manage the chat's welcome
+	// messages, or for bots, to send them.
+	CanSendWelcomeMessages bool `json:"can_send_welcome_messages"`
+
 	// Independent defines whether the chat permissions are set independently.
 	// If not, the can_send_other_messages and can_add_web_page_previews permissions
 	// will imply the can_send_messages, can_send_audios, can_send_documents, can_send_photos,

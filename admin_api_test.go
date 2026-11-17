@@ -1,6 +1,7 @@
 package telebot
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,4 +30,17 @@ func TestLenUsesGetChatMemberCount(t *testing.T) {
 	assert.Equal(t, 12, n)
 	assert.Equal(t, "getChatMemberCount", srv.Last().Method)
 	assert.Equal(t, "-100", srv.Last().Params["chat_id"])
+}
+
+func TestPromoteWelcomeMessages(t *testing.T) {
+	b, srv := newFakeBot(t)
+
+	member := &ChatMember{User: &User{ID: 7}, Rights: Rights{CanSendWelcomeMessages: true}}
+	require.NoError(t, b.Promote(&Chat{ID: -100}, member))
+	assert.Equal(t, "promoteChatMember", srv.Last().Method)
+	assert.Equal(t, "true", srv.Last().Params["can_send_welcome_messages"])
+
+	var m ChatMember
+	require.NoError(t, json.Unmarshal([]byte(`{"status":"administrator","user":{"id":7},"can_send_welcome_messages":true}`), &m))
+	assert.True(t, m.Rights.CanSendWelcomeMessages)
 }
