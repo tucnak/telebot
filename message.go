@@ -330,6 +330,10 @@ type Message struct {
 	// Service message: a unique gift was sent or received.
 	UniqueGift *UniqueGiftInfo `json:"unique_gift,omitempty"`
 
+	// Service message: an upgrade was bought for a gift after it was sent
+	// (Bot API 9.3).
+	GiftUpgradeSent *GiftInfo `json:"gift_upgrade_sent,omitempty"`
+
 	// Service message: a transfer with a TON wallet (Bot API 10.4).
 	TonWalletTransfer *TonWalletTransfer `json:"ton_wallet_transfer,omitempty"`
 

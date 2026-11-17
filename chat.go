@@ -90,6 +90,10 @@ type Chat struct {
 	AggressiveAntiSpam    bool          `json:"has_aggressive_anti_spam_enabled,omitempty"`
 	IsForum               bool          `json:"is_forum"`
 
+	// Bot API 9.0: the gifts the user or chat accepts; returned only by
+	// ChatByID.
+	AcceptedGiftTypes *AcceptedGiftTypes `json:"accepted_gift_types,omitempty"`
+
 	// Bot API 9.2: the supergroup is the direct messages chat of a channel,
 	// and ParentChat (returned only by ChatByID) is that channel.
 	IsDirectMessages bool  `json:"is_direct_messages,omitempty"`
@@ -434,6 +438,9 @@ type ChatFullInfo struct {
 
 	// Bot API 9.4: For private chats, the first audio added to the profile of the user.
 	FirstProfileAudio *Audio `json:"first_profile_audio,omitempty"`
+
+	// Bot API 9.0: the gifts the user or chat accepts.
+	AcceptedGiftTypes *AcceptedGiftTypes `json:"accepted_gift_types,omitempty"`
 
 	// Bot API 9.2: the supergroup is the direct messages chat of a channel,
 	// ParentChat.

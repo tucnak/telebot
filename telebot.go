@@ -67,6 +67,7 @@ const (
 	OnRefund                      = "\arefund"
 	OnGift                        = "\agift"
 	OnUniqueGift                  = "\aunique_gift"
+	OnGiftUpgradeSent             = "\agift_upgrade_sent"
 	OnTonWalletTransfer           = "\aton_wallet_transfer"
 	OnPaidMessagesWaived          = "\apaid_messages_waived"
 	OnManagedBotCreated           = "\amanaged_bot_created"

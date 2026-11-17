@@ -307,3 +307,217 @@ func (b *Bot) UniqueGift(name string) (*UniqueGift, error) {
 	}
 	return resp.Result, nil
 }
+
+// Owned gift types.
+const (
+	OwnedGiftRegular = "regular"
+	OwnedGiftUnique  = "unique"
+)
+
+// OwnedGift is a gift received and owned by a user or a chat (Bot API 9.0):
+// a regular gift, in Gift, or a unique one, in UniqueGift.
+//
+// Bot API: OwnedGift, OwnedGiftRegular, OwnedGiftUnique.
+type OwnedGift struct {
+	// OwnedGiftRegular or OwnedGiftUnique.
+	Type string `json:"type"`
+
+	// The gift, by Type.
+	Gift       *Gift       `json:"-"`
+	UniqueGift *UniqueGift `json:"-"`
+
+	// (Optional) Identifier of the gift for the bot; for business accounts
+	// only.
+	OwnedGiftID string `json:"owned_gift_id,omitempty"`
+
+	// (Optional) The sender, if known, and when the gift was sent.
+	SenderUser *User `json:"sender_user,omitempty"`
+	SendDate   int64 `json:"send_date"`
+
+	// (Optional) Regular gifts: text added to the gift and its entities, and
+	// whether only the receiver sees it.
+	Text      string          `json:"text,omitempty"`
+	Entities  []MessageEntity `json:"entities,omitempty"`
+	IsPrivate bool            `json:"is_private,omitempty"`
+
+	// (Optional) The gift is shown on the profile page; business accounts
+	// only.
+	IsSaved bool `json:"is_saved,omitempty"`
+
+	// (Optional) Regular gifts: upgrade and conversion details.
+	CanBeUpgraded           bool `json:"can_be_upgraded,omitempty"`
+	WasRefunded             bool `json:"was_refunded,omitempty"`
+	ConvertStarCount        int  `json:"convert_star_count,omitempty"`
+	PrepaidUpgradeStarCount int  `json:"prepaid_upgrade_star_count,omitempty"`
+	IsUpgradeSeparate       bool `json:"is_upgrade_separate,omitempty"`
+	UniqueGiftNumber        int  `json:"unique_gift_number,omitempty"`
+
+	// (Optional) Unique gifts: transfer details.
+	CanBeTransferred  bool  `json:"can_be_transferred,omitempty"`
+	TransferStarCount int   `json:"transfer_star_count,omitempty"`
+	NextTransferDate  int64 `json:"next_transfer_date,omitempty"`
+}
+
+// UnmarshalJSON decodes the gift into Gift or UniqueGift by Type.
+func (g *OwnedGift) UnmarshalJSON(data []byte) error {
+	type alias OwnedGift
+	aux := struct {
+		*alias
+		Gift json.RawMessage `json:"gift"`
+	}{alias: (*alias)(g)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if len(aux.Gift) == 0 {
+		return nil
+	}
+	if g.Type == OwnedGiftUnique {
+		g.UniqueGift = new(UniqueGift)
+		return json.Unmarshal(aux.Gift, g.UniqueGift)
+	}
+	g.Gift = new(Gift)
+	return json.Unmarshal(aux.Gift, g.Gift)
+}
+
+// OwnedGifts is a page of gifts owned by a user or a chat.
+//
+// Bot API: OwnedGifts.
+type OwnedGifts struct {
+	TotalCount int         `json:"total_count"`
+	Gifts      []OwnedGift `json:"gifts"`
+
+	// (Optional) Offset of the next page; empty on the last one.
+	NextOffset string `json:"next_offset,omitempty"`
+}
+
+// GiftQuery filters, sorts and pages the gifts returned by
+// BusinessAccountGifts, UserGifts and ChatGifts. Not every method takes
+// every filter; see the Bot API.
+type GiftQuery struct {
+	ExcludeUnsaved              bool   `json:"exclude_unsaved,omitempty"`
+	ExcludeSaved                bool   `json:"exclude_saved,omitempty"`
+	ExcludeUnlimited            bool   `json:"exclude_unlimited,omitempty"`
+	ExcludeLimitedUpgradable    bool   `json:"exclude_limited_upgradable,omitempty"`
+	ExcludeLimitedNonUpgradable bool   `json:"exclude_limited_non_upgradable,omitempty"`
+	ExcludeUnique               bool   `json:"exclude_unique,omitempty"`
+	ExcludeFromBlockchain       bool   `json:"exclude_from_blockchain,omitempty"`
+	SortByPrice                 bool   `json:"sort_by_price,omitempty"`
+	Offset                      string `json:"offset,omitempty"`
+	Limit                       int    `json:"limit,omitempty"`
+}
+
+func (b *Bot) ownedGifts(method string, params map[string]interface{}, q GiftQuery) (*OwnedGifts, error) {
+	data, _ := json.Marshal(q)
+	_ = json.Unmarshal(data, &params)
+
+	data, err := b.Raw(method, params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result *OwnedGifts
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return resp.Result, nil
+}
+
+// BusinessAccountGifts returns the gifts owned by the business account
+// (Bot API 9.0).
+//
+// Bot API: getBusinessAccountGifts.
+func (b *Bot) BusinessAccountGifts(connectionID string, q GiftQuery) (*OwnedGifts, error) {
+	return b.ownedGifts("getBusinessAccountGifts", map[string]interface{}{"business_connection_id": connectionID}, q)
+}
+
+// UserGifts returns the gifts owned and hosted by user (Bot API 9.3).
+//
+// Bot API: getUserGifts.
+func (b *Bot) UserGifts(user Recipient, q GiftQuery) (*OwnedGifts, error) {
+	return b.ownedGifts("getUserGifts", map[string]interface{}{"user_id": user.Recipient()}, q)
+}
+
+// ChatGifts returns the gifts owned by chat (Bot API 9.3).
+//
+// Bot API: getChatGifts.
+func (b *Bot) ChatGifts(chat Recipient, q GiftQuery) (*OwnedGifts, error) {
+	return b.ownedGifts("getChatGifts", map[string]interface{}{"chat_id": chat.Recipient()}, q)
+}
+
+// ConvertGiftToStars converts a regular gift of the business account to
+// Telegram Stars (Bot API 9.0).
+//
+// Bot API: convertGiftToStars.
+func (b *Bot) ConvertGiftToStars(connectionID, ownedGiftID string) error {
+	_, err := b.Raw("convertGiftToStars", map[string]string{
+		"business_connection_id": connectionID,
+		"owned_gift_id":          ownedGiftID,
+	})
+	return err
+}
+
+// UpgradeGift upgrades a regular gift of the business account to a unique
+// one, paying stars from the business account unless the upgrade was
+// prepaid; keepDetails keeps the original text, sender and receiver
+// (Bot API 9.0).
+//
+// Bot API: upgradeGift.
+func (b *Bot) UpgradeGift(connectionID, ownedGiftID string, keepDetails bool, stars int) error {
+	params := map[string]string{
+		"business_connection_id": connectionID,
+		"owned_gift_id":          ownedGiftID,
+	}
+	if keepDetails {
+		params["keep_original_details"] = "true"
+	}
+	if stars != 0 {
+		params["star_count"] = strconv.Itoa(stars)
+	}
+	_, err := b.Raw("upgradeGift", params)
+	return err
+}
+
+// TransferGift transfers a unique gift of the business account to the chat
+// newOwner, active in the last 24 hours, paying stars from the business
+// account if the transfer isn't free (Bot API 9.0).
+//
+// Bot API: transferGift.
+func (b *Bot) TransferGift(connectionID, ownedGiftID string, newOwner Recipient, stars int) error {
+	params := map[string]string{
+		"business_connection_id": connectionID,
+		"owned_gift_id":          ownedGiftID,
+		"new_owner_chat_id":      newOwner.Recipient(),
+	}
+	if stars != 0 {
+		params["star_count"] = strconv.Itoa(stars)
+	}
+	_, err := b.Raw("transferGift", params)
+	return err
+}
+
+// GiftPremiumSubscription gifts user a Telegram Premium subscription for 3,
+// 6 or 12 months, for 1000, 1500 or 2500 Telegram Stars, with an optional
+// text whose parse mode or entities come from opts (Bot API 9.0).
+//
+// Bot API: giftPremiumSubscription.
+func (b *Bot) GiftPremiumSubscription(user Recipient, months, stars int, text string, opts ...interface{}) error {
+	params := map[string]string{
+		"user_id":     user.Recipient(),
+		"month_count": strconv.Itoa(months),
+		"star_count":  strconv.Itoa(stars),
+	}
+	if text != "" {
+		params["text"] = text
+		sendOpts := b.extractOptions(opts)
+		if len(sendOpts.Entities) > 0 {
+			entities, _ := json.Marshal(sendOpts.Entities)
+			params["text_entities"] = string(entities)
+		} else if sendOpts.ParseMode != ModeDefault {
+			params["text_parse_mode"] = sendOpts.ParseMode
+		}
+	}
+	_, err := b.Raw("giftPremiumSubscription", params)
+	return err
+}

@@ -141,6 +141,10 @@ func (b *Bot) ProcessContext(c Context) {
 			b.handle(OnUniqueGift, c)
 			return
 		}
+		if m.GiftUpgradeSent != nil {
+			b.handle(OnGiftUpgradeSent, c)
+			return
+		}
 		if m.TonWalletTransfer != nil {
 			b.handle(OnTonWalletTransfer, c)
 			return

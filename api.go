@@ -20,15 +20,18 @@ type API interface {
 	Ban(chat *Chat, member *ChatMember, revokeMessages ...bool) error
 	BanSenderChat(chat *Chat, sender Recipient) error
 	BusinessAccountStarBalance(connectionID string) (*StarAmount, error)
+	BusinessAccountGifts(connectionID string, q GiftQuery) (*OwnedGifts, error)
 	BusinessConnection(id string) (*BusinessConnection, error)
 	ChatByID(id int64) (*Chat, error)
 	ChatByUsername(name string) (*Chat, error)
 	ChatFullInfo(chat Recipient) (*ChatFullInfo, error)
+	ChatGifts(chat Recipient, q GiftQuery) (*OwnedGifts, error)
 	ChatMemberOf(chat, user Recipient) (*ChatMember, error)
 	Close() (bool, error)
 	CloseGeneralTopic(chat *Chat) error
 	CloseTopic(chat *Chat, topic *Topic) error
 	Commands(opts ...interface{}) ([]Command, error)
+	ConvertGiftToStars(connectionID, ownedGiftID string) error
 	Copy(to Recipient, msg Editable, opts ...interface{}) (*Message, error)
 	CopyMany(to Recipient, msgs []Editable, opts ...*SendOptions) ([]Message, error)
 	CreateInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error)
@@ -71,6 +74,7 @@ type API interface {
 	ForwardMany(to Recipient, msgs []Editable, opts ...*SendOptions) ([]Message, error)
 	GameScores(user Recipient, msg Editable) ([]GameHighScore, error)
 	GetAvailableGifts() ([]Gift, error)
+	GiftPremiumSubscription(user Recipient, months, stars int, text string, opts ...interface{}) error
 	HideGeneralTopic(chat *Chat) error
 	InviteLink(chat *Chat) (string, error)
 	Leave(chat Recipient) error
@@ -150,6 +154,7 @@ type API interface {
 	StopPoll(msg Editable, opts ...interface{}) (*Poll, error)
 	TopicIconStickers() ([]Sticker, error)
 	TransferBusinessAccountStars(connectionID string, stars int) error
+	TransferGift(connectionID, ownedGiftID string, newOwner Recipient, stars int) error
 	Unban(chat *Chat, user *User, forBanned ...bool) error
 	UnbanSenderChat(chat *Chat, sender Recipient) error
 	UniqueGift(name string) (*UniqueGift, error)
@@ -158,8 +163,10 @@ type API interface {
 	UnpinAll(chat Recipient) error
 	UnpinAllGeneralTopicMessages(chat *Chat) error
 	UnpinAllTopicMessages(chat *Chat, topic *Topic) error
+	UpgradeGift(connectionID, ownedGiftID string, keepDetails bool, stars int) error
 	UploadSticker(to Recipient, format StickerSetFormat, f File) (*File, error)
 	UserBoosts(chat, user Recipient) ([]Boost, error)
+	UserGifts(user Recipient, q GiftQuery) (*OwnedGifts, error)
 	Verify(to Recipient, description string, opts ...interface{}) error
 	Webhook() (*Webhook, error)
 }

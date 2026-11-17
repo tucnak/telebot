@@ -320,6 +320,7 @@ var notBotAPITypes = map[string]bool{
 	"CallbackResponse": true, // answerCallbackQuery parameters
 	"CommandParams":    true, // setMyCommands parameters
 	"Currency":         true, // payments currency table
+	"GiftQuery":        true, // gift list parameters
 	"QueryResponse":    true, // answerInlineQuery parameters
 	"Reactions":        true, // setMessageReaction parameters
 	"StoredMessage":    true, // Editable for stored messages
