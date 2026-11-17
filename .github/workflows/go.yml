@@ -14,9 +14,9 @@ jobs:
       matrix:
         go: ['1.16', 'oldstable', 'stable']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go }}
 
@@ -42,9 +42,9 @@ jobs:
       USER_ID: ${{ secrets.USER_ID }}
       CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: stable
 
