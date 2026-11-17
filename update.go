@@ -138,6 +138,10 @@ func (b *Bot) ProcessContext(c Context) {
 			b.handle(OnUniqueGift, c)
 			return
 		}
+		if m.TonWalletTransfer != nil {
+			b.handle(OnTonWalletTransfer, c)
+			return
+		}
 		if m.TopicCreated != nil {
 			b.handle(OnTopicCreated, c)
 			return

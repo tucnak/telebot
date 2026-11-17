@@ -313,6 +313,9 @@ type Message struct {
 	// Service message: a unique gift was sent or received.
 	UniqueGift *UniqueGiftInfo `json:"unique_gift,omitempty"`
 
+	// Service message: a transfer with a TON wallet (Bot API 10.4).
+	TonWalletTransfer *TonWalletTransfer `json:"ton_wallet_transfer,omitempty"`
+
 	// For a service message, a user was shared with the bot.
 	UserShared *RecipientShared `json:"users_shared,omitempty"`
 
@@ -486,6 +489,8 @@ const (
 	EntityBlockquote    EntityType = "blockquote"
 	EntityEBlockquote   EntityType = "expandable_blockquote"
 	EntityDateTime      EntityType = "date_time"
+	EntityBankCard      EntityType = "bank_card_number" // Bot API 10.4
+	EntityTonAddress    EntityType = "ton_address"      // Bot API 10.4
 )
 
 // Entities are used to set message's text entities as a send option.

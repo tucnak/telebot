@@ -95,6 +95,10 @@ type Chat struct {
 	// (Optional) The community the chat belongs to; returned only by
 	// ChatByID (Bot API 10.2).
 	Community *Community `json:"community,omitempty"`
+
+	// (Optional) The TON wallet card of a private chat's user; returned only
+	// by ChatByID (Bot API 10.4).
+	TonWalletCard *TonWalletCard `json:"ton_wallet_card,omitempty"`
 }
 
 // Recipient returns chat ID (see Recipient interface).
@@ -401,6 +405,9 @@ type ChatFullInfo struct {
 
 	// Bot API 10.2: (Optional) The community the chat belongs to.
 	Community *Community `json:"community,omitempty"`
+
+	// Bot API 10.4: (Optional) The TON wallet card of a private chat's user.
+	TonWalletCard *TonWalletCard `json:"ton_wallet_card,omitempty"`
 }
 
 // ChatBackground is a chat background.
