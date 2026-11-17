@@ -90,9 +90,8 @@ type TransactionPartner struct {
 	// Bot API 8.1: Information about the affiliate program from which the transaction was made
 	Affiliate *AffiliateInfo `json:"affiliate,omitempty"`
 
-	// Bot API 8.3: Information about the chat transaction partner
-	// For "chat" partners, the chat; Chat.Chat holds it (Bot API 8.3).
-	Chat *TransactionPartnerChat `json:"-"`
+	// Bot API 8.3: for "chat" partners, the chat.
+	Chat *Chat `json:"chat,omitempty"`
 
 	// Bot API 9.0: for "user" partners, the type of the transaction:
 	// "invoice_payment", "paid_media_payment", "gift_purchase",
@@ -229,21 +228,4 @@ func (b *Bot) StarBalance() (*StarAmount, error) {
 		return nil, wrapError(err)
 	}
 	return resp.Result, nil
-}
-
-// UnmarshalJSON decodes a transaction partner, putting the chat of a "chat"
-// partner in Chat.
-func (p *TransactionPartner) UnmarshalJSON(data []byte) error {
-	type alias TransactionPartner
-	aux := struct {
-		*alias
-		Chat *Chat `json:"chat"`
-	}{alias: (*alias)(p)}
-	if err := json.Unmarshal(data, &aux); err != nil {
-		return err
-	}
-	if aux.Chat != nil {
-		p.Chat = &TransactionPartnerChat{Type: p.Type, Chat: aux.Chat, Gift: p.Gift}
-	}
-	return nil
 }

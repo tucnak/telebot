@@ -232,8 +232,12 @@ func TestTransactionPartnerFields(t *testing.T) {
 	var chat TransactionPartner
 	require.NoError(t, json.Unmarshal([]byte(`{"type":"chat","chat":{"id":-100,"type":"channel"},"gift":{"id":"g","star_count":5}}`), &chat))
 	require.NotNil(t, chat.Chat)
-	assert.Equal(t, int64(-100), chat.Chat.Chat.ID)
-	assert.Equal(t, "g", chat.Chat.Gift.ID)
+	assert.Equal(t, int64(-100), chat.Chat.ID)
+	assert.Equal(t, "g", chat.Gift.ID)
+
+	data, err := json.Marshal(chat)
+	require.NoError(t, err)
+	assert.Contains(t, string(data), `"chat":{"id":-100`)
 
 	var user TransactionPartner
 	require.NoError(t, json.Unmarshal([]byte(`{"type":"user","transaction_type":"paid_media_payment","user":{"id":7},
