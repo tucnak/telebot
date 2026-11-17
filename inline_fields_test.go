@@ -14,6 +14,7 @@ func TestInlineResultFields(t *testing.T) {
 
 	photo := &PhotoResult{URL: "https://example.com/p.jpg", ThumbURL: "https://example.com/t.jpg", Caption: "hi"}
 	photo.CaptionEntities = []MessageEntity{{Type: EntityBold, Length: 2}}
+	plain := &PhotoResult{URL: "https://example.com/p.jpg", ThumbURL: "https://example.com/t.jpg", Caption: "<b>hi</b>"}
 	loc := &LocationResult{Location: Location{Lat: 1, Lng: 2}, Title: "L", ThumbWidth: 64, ThumbHeight: 48}
 	venue := &VenueResult{Location: Location{Lat: 1, Lng: 2}, Title: "V", Address: "A", GooglePlaceID: "gp"}
 	text := &ArticleResult{Title: "T"}
@@ -22,14 +23,14 @@ func TestInlineResultFields(t *testing.T) {
 	invoice.Content = &InputInvoiceMessageContent{Title: "Item", Description: "D", Payload: "p", Currency: "XTR",
 		Prices: []Price{{Label: "Item", Amount: 5}}, PhotoURL: "https://example.com/i.jpg"}
 
-	require.NoError(t, b.Answer(&Query{ID: "q"}, &QueryResponse{Results: Results{photo, loc, venue, text, invoice}}))
+	require.NoError(t, b.Answer(&Query{ID: "q"}, &QueryResponse{Results: Results{photo, loc, venue, text, invoice, plain}}))
 
 	var results []map[string]interface{}
 	srv.Last().JSON(t, "results", &results)
-	require.Len(t, results, 5)
+	require.Len(t, results, 6)
 	assert.Equal(t, []interface{}{map[string]interface{}{"type": "bold", "offset": 0.0, "length": 2.0}}, results[0]["caption_entities"])
 	assert.NotContains(t, results[0], "parse_mode")
-	assert.Equal(t, "HTML", results[1]["parse_mode"])
+	assert.Equal(t, "HTML", results[5]["parse_mode"])
 	assert.Equal(t, 64.0, results[1]["thumbnail_width"])
 	assert.Equal(t, "gp", results[2]["google_place_id"])
 	assert.Equal(t, map[string]interface{}{"message_text": "x", "entities": []interface{}{map[string]interface{}{"type": "italic", "offset": 0.0, "length": 1.0}}},
