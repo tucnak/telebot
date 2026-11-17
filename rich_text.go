@@ -59,12 +59,13 @@ const (
 // which form was decoded; the relevant fields are populated accordingly.
 //
 // To send rich text, build it in the same forms: RichText{Plain: "text"} for
-// plain text, Kind RichTextArray with Parts for a run, or Kind RichTextEntity
-// with Type and Text for a formatted entity.
+// plain text, Parts for a run, or Type and Text for a formatted entity. Kind
+// may then be left unset.
 //
 // Bot API: RichText, RichTextBold, RichTextItalic, RichTextUnderline, RichTextStrikethrough, RichTextSpoiler, RichTextDateTime, RichTextTextMention, RichTextSubscript, RichTextSuperscript, RichTextMarked, RichTextCode, RichTextCustomEmoji, RichTextMathematicalExpression, RichTextUrl, RichTextEmailAddress, RichTextPhoneNumber, RichTextBankCardNumber, RichTextMention, RichTextHashtag, RichTextCashtag, RichTextBotCommand, RichTextAnchor, RichTextAnchorLink, RichTextReference, RichTextReferenceLink, RichTextButton, RichTextTonAddress.
 type RichText struct {
-	// Kind is the wire form this value was decoded from.
+	// Kind is the wire form this value was decoded from. A value built
+	// without it is an entity if Type is set and an array if Parts is.
 	Kind RichTextKind `json:"-"`
 
 	// Plain holds the text when Kind is RichTextPlain.
@@ -160,10 +161,23 @@ func (r *RichText) UnmarshalJSON(data []byte) error {
 	}
 }
 
-// MarshalJSON encodes the RichText in the wire form given by Kind: a plain
-// string, an array, or a tagged entity object.
+// kind returns Kind, or the form the set fields make when it is unset.
+func (r RichText) kind() RichTextKind {
+	switch {
+	case r.Kind != RichTextPlain || r.Plain != "":
+		return r.Kind
+	case r.Type != "":
+		return RichTextEntity
+	case r.Parts != nil:
+		return RichTextArray
+	}
+	return RichTextPlain
+}
+
+// MarshalJSON encodes the RichText in its wire form: a plain string, an
+// array, or a tagged entity object.
 func (r RichText) MarshalJSON() ([]byte, error) {
-	switch r.Kind {
+	switch r.kind() {
 	case RichTextPlain:
 		return json.Marshal(r.Plain)
 	case RichTextArray:
@@ -192,7 +206,7 @@ func (r RichText) MarshalJSON() ([]byte, error) {
 // entities. Entities without textual content (anchors, dividers) contribute
 // nothing; custom emoji contribute their alternative text.
 func (r RichText) String() string {
-	switch r.Kind {
+	switch r.kind() {
 	case RichTextPlain:
 		return r.Plain
 	case RichTextArray:

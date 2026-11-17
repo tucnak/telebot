@@ -222,6 +222,16 @@ func TestRichTextMarshalRoundTrip(t *testing.T) {
 	}
 }
 
+func TestRichTextWithoutKind(t *testing.T) {
+	bold := RichText{Type: RichBold, Text: &RichText{Plain: "b"}}
+	run := RichText{Parts: []RichText{{Plain: "a "}, bold}}
+
+	data, err := json.Marshal(run)
+	require.NoError(t, err)
+	assert.JSONEq(t, `["a ",{"type":"bold","text":"b"}]`, string(data))
+	assert.Equal(t, "a b", run.String())
+}
+
 func TestRichBlocksLive(t *testing.T) {
 	if b == nil {
 		t.Skip("Cached bot instance is bad (probably wrong or empty TELEBOT_SECRET)")
