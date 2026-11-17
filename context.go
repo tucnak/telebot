@@ -648,7 +648,11 @@ func (c *nativeContext) DeleteAfter(d time.Duration) *time.Timer {
 }
 
 func (c *nativeContext) Notify(action ChatAction) error {
-	return c.b.Notify(c.Recipient(), action, c.ThreadID())
+	opts := &SendOptions{ThreadID: c.ThreadID()}
+	if m := c.Message(); m != nil {
+		opts.BusinessConnectionID = m.BusinessConnectionID
+	}
+	return c.b.Notify(c.Recipient(), action, opts)
 }
 
 func (c *nativeContext) Ship(what ...interface{}) error {

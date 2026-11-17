@@ -20,7 +20,7 @@ func TestContext(t *testing.T) {
 }
 
 func TestContextBusinessMessage(t *testing.T) {
-	b, _ := newFakeBot(t)
+	b, srv := newFakeBot(t)
 
 	for _, kind := range []string{"business_message", "edited_business_message"} {
 		var u Update
@@ -31,6 +31,10 @@ func TestContextBusinessMessage(t *testing.T) {
 		require.NotNil(t, c.Message(), kind)
 		assert.Equal(t, int64(7), c.Chat().ID, kind)
 		assert.Equal(t, int64(5), c.Sender().ID, kind)
+
+		// The chat action goes to the business account's chat.
+		require.NoError(t, c.Notify(Typing))
+		assert.Equal(t, map[string]string{"chat_id": "7", "action": "typing", "business_connection_id": "bc"}, srv.Last().Params, kind)
 	}
 }
 
