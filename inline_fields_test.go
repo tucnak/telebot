@@ -75,13 +75,13 @@ func TestForwardCopyDeleteMany(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestSavePreparedInlineMessage(t *testing.T) {
+func TestPrepareMessage(t *testing.T) {
 	b, srv := newFakeBot(t)
 	srv.Reply("savePreparedInlineMessage", json.RawMessage(`{"id":"prep","expiration_date":9}`))
 
 	result := &ArticleResult{Title: "T", Text: "x"}
 	result.SetResultID("1")
-	msg, err := b.SavePreparedInlineMessage(&User{ID: 7}, result, &PreparedInlineChats{Bots: true, Groups: true, Channels: true})
+	msg, err := b.PrepareMessage(&User{ID: 7}, result, &PreparedInlineChats{Bots: true, Groups: true, Channels: true})
 	require.NoError(t, err)
 	assert.Equal(t, "prep", msg.ID)
 

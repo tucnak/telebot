@@ -834,7 +834,7 @@ func TestBot(t *testing.T) {
 		assert.Error(t, err)
 	})
 
-	t.Run("SavePreparedInlineMessage", func(t *testing.T) {
+	t.Run("PrepareMessage", func(t *testing.T) {
 		result := &ArticleResult{
 			Title: "Test Article",
 			Text:  "Test content",
@@ -842,7 +842,7 @@ func TestBot(t *testing.T) {
 		result.SetResultID("test_id")
 
 		// This will likely fail on test bots without inline mode
-		_, err := b.SavePreparedInlineMessage(&User{ID: userID}, result)
+		_, err := b.PrepareMessage(&User{ID: userID}, result)
 		// Error expected for test bots
 		if err != nil {
 			assert.Error(t, err)

@@ -96,6 +96,7 @@ type API interface {
 	Pin(msg Editable, opts ...interface{}) error
 	PostStory(connectionID string, story StoryParams) (*Story, error)
 	PrepareButton(user Recipient, button ReplyButton) (*PreparedKeyboardButton, error)
+	PrepareMessage(user Recipient, result Result, opts ...interface{}) (*PreparedInlineMessage, error)
 	ProfileAudiosOf(user *User, offset, limit int) (*UserProfileAudios, error)
 	ProfilePhotosOf(user *User, page ...int) ([]Photo, error)
 	Promote(chat *Chat, member *ChatMember) error
@@ -125,7 +126,6 @@ type API interface {
 	SendPaidMedia(to Recipient, stars int, a PaidAlbum, opts ...interface{}) (*Message, error)
 	SendRichDraft(to Recipient, draftID int, rich *InputRichMessage, opts ...interface{}) error
 	SendGift(to Recipient, giftID string, opts ...interface{}) error
-	SavePreparedInlineMessage(user Recipient, result Result, opts ...interface{}) (*PreparedInlineMessage, error)
 	SetAdminTitle(chat *Chat, user *User, title string) error
 	SetManagedBotAccessSettings(bot *User, settings BotAccessSettings) error
 	SetMemberTag(chat *Chat, user *User, tag string) error

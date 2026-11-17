@@ -202,12 +202,12 @@ type PreparedInlineChats struct {
 	Users, Bots, Groups, Channels bool
 }
 
-// SavePreparedInlineMessage stores a message that can be sent by a user of a Mini App.
+// PrepareMessage stores a message that can be sent by a user of a Mini App.
 // Pass a PreparedInlineChats to choose the chats it can be sent to, or a
 // bool for private chats with users only.
 //
 // Bot API: savePreparedInlineMessage.
-func (b *Bot) SavePreparedInlineMessage(user Recipient, result Result, opts ...interface{}) (*PreparedInlineMessage, error) {
+func (b *Bot) PrepareMessage(user Recipient, result Result, opts ...interface{}) (*PreparedInlineMessage, error) {
 	params := map[string]string{
 		"user_id": user.Recipient(),
 	}
