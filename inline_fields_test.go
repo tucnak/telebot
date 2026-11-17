@@ -47,11 +47,21 @@ func TestInputMessageContentFields(t *testing.T) {
 	assert.JSONEq(t, `{"phone_number":"+1","first_name":"A","vcard":"V"}`, string(data))
 }
 
-func TestCopyManyRemoveCaption(t *testing.T) {
+func TestForwardCopyDeleteMany(t *testing.T) {
 	b, srv := newFakeBot(t)
-	srv.Reply("copyMessages", json.RawMessage(`[{"message_id":9}]`))
+	srv.Reply("forwardMessages", json.RawMessage(`[{"message_id":8},{"message_id":9}]`))
+	srv.Reply("copyMessages", json.RawMessage(`[{"message_id":10}]`))
+	msgs := []Editable{&Message{ID: 1, Chat: &Chat{ID: 2}}, &Message{ID: 3, Chat: &Chat{ID: 2}}}
 
-	_, err := b.CopyMany(ChatID(7), []Editable{&Message{ID: 1, Chat: &Chat{ID: 2}}}, &SendOptions{RemoveCaption: true})
+	sent, err := b.ForwardMany(ChatID(7), msgs)
 	require.NoError(t, err)
-	assert.Equal(t, "true", srv.Last().Params["remove_caption"])
+	assert.Equal(t, 9, sent[1].ID)
+	assert.Equal(t, map[string]string{"chat_id": "7", "from_chat_id": "2", "message_ids": "[1,3]"}, srv.Last().Params)
+
+	_, err = b.CopyMany(ChatID(7), msgs, &SendOptions{RemoveCaption: true})
+	require.NoError(t, err)
+	assert.Equal(t, map[string]string{"chat_id": "7", "from_chat_id": "2", "message_ids": "[1,3]", "remove_caption": "true"}, srv.Last().Params)
+
+	require.NoError(t, b.DeleteMany(msgs))
+	assert.Equal(t, map[string]string{"chat_id": "2", "message_ids": "[1,3]"}, srv.Last().Params)
 }

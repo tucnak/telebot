@@ -3,6 +3,7 @@ package telebot
 import (
 	"encoding/json"
 	"strconv"
+	"strings"
 )
 
 // Option is a shortcut flag type for certain message features
@@ -362,7 +363,9 @@ type PreviewOptions struct {
 	AboveText bool `json:"show_above_text"`
 }
 
-func embedMessages(params map[string]string, msgs []Editable) {
+// embedMessages sets message_ids to the IDs of msgs and chatKey to the chat
+// they are in.
+func embedMessages(params map[string]string, chatKey string, msgs []Editable) {
 	ids := make([]string, 0, len(msgs))
 
 	_, chatID := msgs[0].MessageSig()
@@ -371,11 +374,6 @@ func embedMessages(params map[string]string, msgs []Editable) {
 		ids = append(ids, msgID)
 	}
 
-	data, err := json.Marshal(ids)
-	if err != nil {
-		return
-	}
-
-	params["message_ids"] = string(data)
-	params["chat_id"] = strconv.FormatInt(chatID, 10)
+	params["message_ids"] = "[" + strings.Join(ids, ",") + "]"
+	params[chatKey] = strconv.FormatInt(chatID, 10)
 }

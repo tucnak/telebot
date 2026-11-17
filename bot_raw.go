@@ -275,7 +275,7 @@ func (b *Bot) forwardCopyMany(to Recipient, msgs []Editable, key string, opts ..
 		"chat_id": to.Recipient(),
 	}
 
-	embedMessages(params, msgs)
+	embedMessages(params, "from_chat_id", msgs)
 
 	if len(opts) > 0 {
 		b.embedSendOptions(params, opts[0])
