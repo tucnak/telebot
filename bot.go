@@ -55,18 +55,8 @@ func NewBot(pref Settings) (*Bot, error) {
 	}
 
 	if pref.Offline {
-		// Derive the bot ID from the token so that offline tests can rely on
-		// b.Me.ID (e.g. UserJoined checks). Left as 0 for malformed tokens.
-		var botID int64
-		if pos := strings.IndexByte(bot.Token, ':'); pos > 0 {
-			v, err := strconv.ParseInt(bot.Token[:pos], 10, 64)
-			if err != nil || v <= 0 {
-				bot.debug(fmt.Errorf("cannot derive bot ID from token: %q", bot.Token[:pos]))
-			} else {
-				botID = v
-			}
-		}
-		bot.Me = &User{ID: botID}
+		// Offline tests rely on b.Me.ID (e.g. UserJoined checks).
+		bot.Me = &User{ID: bot.tokenID()}
 	} else {
 		user, err := bot.getMe()
 		if err != nil {
@@ -77,6 +67,21 @@ func NewBot(pref Settings) (*Bot, error) {
 
 	bot.group = bot.Group()
 	return bot, nil
+}
+
+// tokenID returns the bot ID the token starts with, or 0 if the token is
+// malformed.
+func (b *Bot) tokenID() int64 {
+	pos := strings.IndexByte(b.Token, ':')
+	if pos <= 0 {
+		return 0
+	}
+	id, err := strconv.ParseInt(b.Token[:pos], 10, 64)
+	if err != nil || id <= 0 {
+		b.debug(fmt.Errorf("cannot derive bot ID from token: %q", b.Token[:pos]))
+		return 0
+	}
+	return id
 }
 
 // Bot represents a separate Telegram bot instance.
