@@ -13,7 +13,7 @@ type API interface {
 	AdminsOf(chat *Chat, returnBots ...bool) ([]ChatMember, error)
 	Answer(query *Query, resp *QueryResponse) error
 	AnswerGuest(msg *Message, result Result) (*SentGuestMessage, error)
-	AnswerJoinRequest(queryID, result string) error
+	AnswerJoinRequest(req *ChatJoinRequest, result string) error
 	AnswerWebApp(query *Query, r Result) (*WebAppMessage, error)
 	AnswerWidgetQuery(queryID, data string) error
 	ApproveSuggestedPost(msg Editable, sendDate int64) error
@@ -120,7 +120,7 @@ type API interface {
 	Send(to Recipient, what interface{}, opts ...interface{}) (*Message, error)
 	SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, error)
 	SendDraft(to Recipient, draftID int, text string, opts ...interface{}) error
-	SendJoinRequestWebApp(queryID, url string) error
+	SendJoinRequestWebApp(req *ChatJoinRequest, url string) error
 	SendPaidMedia(to Recipient, stars int, a PaidAlbum, opts ...interface{}) (*Message, error)
 	SendRichDraft(to Recipient, draftID int, rich *InputRichMessage, opts ...interface{}) error
 	SendGift(to Recipient, giftID string, opts ...interface{}) error

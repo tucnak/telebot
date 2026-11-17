@@ -684,28 +684,28 @@ const (
 	JoinRequestQueue   = "queue"
 )
 
-// AnswerJoinRequest resolves a join request query, the ChatJoinRequest.QueryID
-// received by a bot assigned to process join requests. result is JoinRequestApprove, JoinRequestDecline, or
-// JoinRequestQueue to leave the decision to other administrators
+// AnswerJoinRequest resolves the join request query a bot assigned to process
+// join requests received. result is JoinRequestApprove, JoinRequestDecline,
+// or JoinRequestQueue to leave the decision to other administrators
 // (Bot API 10.1).
 //
 // Bot API: answerChatJoinRequestQuery.
-func (b *Bot) AnswerJoinRequest(queryID, result string) error {
+func (b *Bot) AnswerJoinRequest(req *ChatJoinRequest, result string) error {
 	_, err := b.Raw("answerChatJoinRequestQuery", map[string]string{
-		"chat_join_request_query_id": queryID,
+		"chat_join_request_query_id": req.QueryID,
 		"result":                     result,
 	})
 	return err
 }
 
-// SendJoinRequestWebApp shows the user who sent a join request query a
+// SendJoinRequestWebApp shows the user who sent the join request query a
 // Mini App at url before the bot decides; resolve the query afterwards with
 // AnswerJoinRequest (Bot API 10.1).
 //
 // Bot API: sendChatJoinRequestWebApp.
-func (b *Bot) SendJoinRequestWebApp(queryID, url string) error {
+func (b *Bot) SendJoinRequestWebApp(req *ChatJoinRequest, url string) error {
 	_, err := b.Raw("sendChatJoinRequestWebApp", map[string]string{
-		"chat_join_request_query_id": queryID,
+		"chat_join_request_query_id": req.QueryID,
 		"web_app_url":                url,
 	})
 	return err
