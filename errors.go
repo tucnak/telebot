@@ -277,8 +277,8 @@ func wrapError(err error) error {
 var botTokenRe = regexp.MustCompile(`/bot\d+:[A-Za-z0-9_-]+`)
 
 // redactToken returns err with the bot token portion of any embedded
-// `/bot<id>:<secret>` path replaced by `/bot<token>`. The wrapped chain
-// is preserved with errors.Is / errors.As.
+// `/bot<id>:<secret>` path replaced by `/bot<token>`. errors.Is and
+// errors.As still find the cause, but not the errors that hold the token.
 func redactToken(err error) error {
 	if err == nil {
 		return nil
@@ -297,4 +297,15 @@ type redactedError struct {
 }
 
 func (e *redactedError) Error() string { return e.msg }
-func (e *redactedError) Unwrap() error { return e.wrapped }
+
+// Unwrap returns the first error of the chain without the token in its
+// text, skipping those that have it, such as the *url.Error of a failed
+// request, which holds the request URL.
+func (e *redactedError) Unwrap() error {
+	for err := e.wrapped; err != nil; err = errors.Unwrap(err) {
+		if !botTokenRe.MatchString(err.Error()) {
+			return err
+		}
+	}
+	return nil
+}
