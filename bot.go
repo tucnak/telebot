@@ -653,7 +653,7 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 
 	switch v := what.(type) {
 	case *ReplyMarkup:
-		return b.EditReplyMarkup(msg, v)
+		return b.EditReplyMarkup(msg, v, opts...)
 	case Inputtable:
 		return b.EditMedia(msg, v, opts...)
 	case string:
@@ -725,14 +725,19 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 // EditReplyMarkup edits reply markup of already sent message.
 // This function will panic upon nil Editable.
 // Pass nil or empty ReplyMarkup to delete it from the message.
+// Of the options, only BusinessConnectionID applies.
 //
 // If edited message is sent by the bot, returns it,
 // otherwise returns nil and ErrTrueResult.
 //
 // Bot API: editMessageReplyMarkup.
-func (b *Bot) EditReplyMarkup(msg Editable, markup *ReplyMarkup) (*Message, error) {
+func (b *Bot) EditReplyMarkup(msg Editable, markup *ReplyMarkup, opts ...interface{}) (*Message, error) {
 	msgID, chatID := msg.MessageSig()
 	params := make(map[string]string)
+
+	if id := b.extractOptions(opts).BusinessConnectionID; id != "" {
+		params["business_connection_id"] = id
+	}
 
 	if chatID == 0 { // if inline message
 		params["inline_message_id"] = msgID

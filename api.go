@@ -68,7 +68,7 @@ type API interface {
 	EditGeneralTopic(chat *Chat, topic *Topic) error
 	EditInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error)
 	EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*Message, error)
-	EditReplyMarkup(msg Editable, markup *ReplyMarkup) (*Message, error)
+	EditReplyMarkup(msg Editable, markup *ReplyMarkup, opts ...interface{}) (*Message, error)
 	EditSharedWidgetData(widgetID, publicData string, cacheTime int) error
 	EditStory(connectionID string, storyID int, story StoryParams) (*Story, error)
 	EditSubscriptionInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error)

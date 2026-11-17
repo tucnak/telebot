@@ -112,6 +112,20 @@ func TestForwardCopyVideoStartTimestamp(t *testing.T) {
 		"show_caption_above_media": "true", "caption_entities": `[{"type":"bold","offset":0,"length":3}]`}, srv.Last().Params)
 }
 
+func TestEditReplyMarkupBusinessConnection(t *testing.T) {
+	b, srv := newFakeBot(t)
+	srv.Reply("editMessageReplyMarkup", json.RawMessage(`{"message_id":1,"chat":{"id":2}}`))
+	msg := &Message{ID: 1, Chat: &Chat{ID: 2}}
+
+	_, err := b.Edit(msg, &ReplyMarkup{}, &SendOptions{BusinessConnectionID: "bc"})
+	require.NoError(t, err)
+	assert.Equal(t, map[string]string{"chat_id": "2", "message_id": "1", "business_connection_id": "bc", "reply_markup": "{}"}, srv.Last().Params)
+
+	_, err = b.EditReplyMarkup(msg, nil)
+	require.NoError(t, err)
+	assert.NotContains(t, srv.Last().Params, "business_connection_id")
+}
+
 func TestMessageIsForwardedAndInaccessible(t *testing.T) {
 	var fwd, post, gone Message
 	require.NoError(t, json.Unmarshal([]byte(`{"message_id":1,"date":5,"chat":{"id":2},"forward_origin":{"type":"hidden_user","date":4,"sender_user_name":"x"}}`), &fwd))
