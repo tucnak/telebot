@@ -915,8 +915,10 @@ type ReplyParams struct {
 	// to an ephemeral message.
 	MessageID int `json:"message_id,omitempty"`
 
-	// (Optional) Identifier of the ephemeral message that will be replied to
-	// (Bot API 10.2).
+	// (Optional) Identifier of an incoming ephemeral message, such as an
+	// ephemeral command, to reply to within 15 seconds; the reply must be
+	// ephemeral too (Bot API 10.2). The bot's own ephemeral messages can't
+	// be replied to.
 	EphemeralMessageID int `json:"ephemeral_message_id,omitempty"`
 
 	// (Optional) If the message to be replied to is from a different chat,
