@@ -139,7 +139,7 @@ func (b *Bot) Ban(chat *Chat, member *ChatMember, revokeMessages ...bool) error 
 		params["revoke_messages"] = strconv.FormatBool(revokeMessages[0])
 	}
 
-	_, err := b.Raw("kickChatMember", params)
+	_, err := b.Raw("banChatMember", params)
 	return err
 }
 
@@ -239,7 +239,7 @@ func (b *Bot) Len(chat *Chat) (int, error) {
 		"chat_id": chat.Recipient(),
 	}
 
-	data, err := b.Raw("getChatMembersCount", params)
+	data, err := b.Raw("getChatMemberCount", params)
 	if err != nil {
 		return 0, err
 	}
