@@ -192,6 +192,9 @@ func TestNotifyUnpinProfilePhotosOptions(t *testing.T) {
 	_, err = b.ProfilePhotosOf(&User{ID: 7}, 5, 2)
 	require.NoError(t, err)
 	assert.Equal(t, map[string]string{"user_id": "7", "offset": "5", "limit": "2"}, srv.Last().Params)
+	_, err = b.ProfilePhotosOf(&User{ID: 7}, 0, 0)
+	require.NoError(t, err)
+	assert.Equal(t, map[string]string{"user_id": "7"}, srv.Last().Params, "zero means Telegram's default")
 }
 
 func TestAnswerWebAppResultType(t *testing.T) {

@@ -1406,10 +1406,10 @@ func (b *Bot) ProfilePhotosOf(user *User, page ...int) ([]Photo, error) {
 	params := map[string]string{
 		"user_id": user.Recipient(),
 	}
-	if len(page) > 0 {
+	if len(page) > 0 && page[0] > 0 {
 		params["offset"] = strconv.Itoa(page[0])
 	}
-	if len(page) > 1 {
+	if len(page) > 1 && page[1] > 0 {
 		params["limit"] = strconv.Itoa(page[1])
 	}
 
