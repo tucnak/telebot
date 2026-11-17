@@ -77,6 +77,7 @@ const (
 	OnSuggestedPostDeclined       = "\asuggested_post_declined"
 	OnSuggestedPostPaid           = "\asuggested_post_paid"
 	OnSuggestedPostRefunded       = "\asuggested_post_refunded"
+	OnPassportData                = "\apassport_data"
 	OnPaidMessagePriceChanged     = "\apaid_message_price_changed"
 	OnChecklistTasksDone          = "\achecklist_tasks_done"
 	OnChecklistTasksAdded         = "\achecklist_tasks_added"

@@ -143,6 +143,7 @@ type API interface {
 	SetMyName(name, language string) error
 	SetMyProfilePhoto(photo InputProfilePhoto) error
 	SetMyShortDescription(desc, language string) error
+	SetPassportDataErrors(user Recipient, errs []PassportElementError) error
 	SetStickerEmojis(sticker string, emojis []string) error
 	SetStickerKeywords(sticker string, keywords []string) error
 	SetStickerMaskPosition(sticker string, mask MaskPosition) error

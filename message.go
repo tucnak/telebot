@@ -355,6 +355,9 @@ type Message struct {
 	SuggestedPostPaid           *SuggestedPostPaid           `json:"suggested_post_paid,omitempty"`
 	SuggestedPostRefunded       *SuggestedPostRefunded       `json:"suggested_post_refunded,omitempty"`
 
+	// (Optional) Telegram Passport data shared with the bot.
+	PassportData *PassportData `json:"passport_data,omitempty"`
+
 	// (Optional) Stars the sender paid to send the message (Bot API 9.0).
 	PaidStarCount int `json:"paid_star_count,omitempty"`
 
