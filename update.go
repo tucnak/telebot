@@ -153,6 +153,14 @@ func (b *Bot) ProcessContext(c Context) {
 			b.handle(OnManagedBotCreated, c)
 			return
 		}
+		if m.PollOptionAdded != nil {
+			b.handle(OnPollOptionAdded, c)
+			return
+		}
+		if m.PollOptionDeleted != nil {
+			b.handle(OnPollOptionDeleted, c)
+			return
+		}
 		if m.TopicCreated != nil {
 			b.handle(OnTopicCreated, c)
 			return

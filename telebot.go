@@ -69,6 +69,8 @@ const (
 	OnTonWalletTransfer    = "\aton_wallet_transfer"
 	OnPaidMessagesWaived   = "\apaid_messages_waived"
 	OnManagedBotCreated    = "\amanaged_bot_created"
+	OnPollOptionAdded      = "\apoll_option_added"
+	OnPollOptionDeleted    = "\apoll_option_deleted"
 	OnGame                 = "\agame"
 	OnPoll                 = "\apoll"
 	OnPollAnswer           = "\apoll_answer"

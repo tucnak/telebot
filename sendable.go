@@ -362,23 +362,82 @@ func (p *Poll) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		"is_closed":               strconv.FormatBool(p.Closed),
 		"is_anonymous":            strconv.FormatBool(p.Anonymous),
 		"allows_multiple_answers": strconv.FormatBool(p.MultipleAnswers),
-		"correct_option_id":       strconv.Itoa(p.CorrectOption),
+	}
+	if p.Type == PollQuiz || len(p.CorrectOptions) > 0 {
+		correct := p.CorrectOptions
+		if len(correct) == 0 {
+			correct = []int{p.CorrectOption}
+		}
+		data, _ := json.Marshal(correct)
+		params["correct_option_ids"] = string(data)
+	}
+	if p.QuestionParseMode != "" {
+		params["question_parse_mode"] = p.QuestionParseMode
+	}
+	if len(p.QuestionEntities) > 0 {
+		data, _ := json.Marshal(p.QuestionEntities)
+		params["question_entities"] = string(data)
 	}
 	if p.Explanation != "" {
 		params["explanation"] = p.Explanation
 		params["explanation_parse_mode"] = p.ParseMode
+		if len(p.Entities) > 0 {
+			data, _ := json.Marshal(p.Entities)
+			params["explanation_entities"] = string(data)
+			delete(params, "explanation_parse_mode")
+		}
+	}
+	if p.Description != "" {
+		params["description"] = p.Description
+		if len(p.DescriptionEntities) > 0 {
+			data, _ := json.Marshal(p.DescriptionEntities)
+			params["description_entities"] = string(data)
+		} else if p.DescriptionParseMode != "" {
+			params["description_parse_mode"] = p.DescriptionParseMode
+		}
 	}
 	if p.OpenPeriod != 0 {
 		params["open_period"] = strconv.Itoa(p.OpenPeriod)
 	} else if p.CloseUnixdate != 0 {
 		params["close_date"] = strconv.FormatInt(p.CloseUnixdate, 10)
 	}
+	for key, on := range map[string]bool{
+		"allows_revoting":           p.AllowsRevoting,
+		"shuffle_options":           p.ShuffleOptions,
+		"allow_adding_options":      p.AllowAddingOptions,
+		"hide_results_until_closes": p.HideResultsUntilCloses,
+		"members_only":              p.MembersOnly,
+	} {
+		if on {
+			params[key] = "true"
+		}
+	}
+	if len(p.CountryCodes) > 0 {
+		data, _ := json.Marshal(p.CountryCodes)
+		params["country_codes"] = string(data)
+	}
 	b.embedSendOptions(params, opt)
 
-	opts, _ := json.Marshal(p.Options)
-	params["options"] = string(opts)
+	files := make(map[string]File)
+	for key, m := range map[string]InputPollMedia{"media": p.InputMedia, "explanation_media": p.InputExplanationMedia} {
+		if m == nil {
+			continue
+		}
+		media, err := encodePollMedia(m, key, files)
+		if err != nil {
+			return nil, err
+		}
+		data, _ := json.Marshal(media)
+		params[key] = string(data)
+	}
 
-	data, err := b.Raw("sendPoll", params)
+	options, err := encodePollOptions(p.Options, files)
+	if err != nil {
+		return nil, err
+	}
+	params["options"] = options
+
+	data, err := b.sendFiles("sendPoll", files, params)
 	if err != nil {
 		return nil, err
 	}

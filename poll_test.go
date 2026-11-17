@@ -43,12 +43,20 @@ func TestPollSend(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, poll.Type, msg.Poll.Type)
 	assert.Equal(t, poll.Question, msg.Poll.Question)
-	assert.Equal(t, poll.Options, msg.Poll.Options)
+	assert.Equal(t, optionTexts(poll.Options), optionTexts(msg.Poll.Options))
 	assert.Equal(t, poll.CloseUnixdate, msg.Poll.CloseUnixdate)
 	assert.Equal(t, poll.CloseDate(), msg.Poll.CloseDate())
 
 	p, err := b.StopPoll(msg)
 	require.NoError(t, err)
-	assert.Equal(t, poll.Options, p.Options)
+	assert.Equal(t, optionTexts(poll.Options), optionTexts(p.Options))
 	assert.Equal(t, 0, p.VoterCount)
+}
+
+func optionTexts(options []PollOption) []string {
+	var texts []string
+	for _, o := range options {
+		texts = append(texts, o.Text)
+	}
+	return texts
 }

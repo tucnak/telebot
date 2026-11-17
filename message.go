@@ -92,6 +92,10 @@ type Message struct {
 	// For replies to a story, the original story.
 	ReplyToStory *Story `json:"reply_to_story"`
 
+	// (Optional) Persistent identifier of the poll option being replied to
+	// (Bot API 9.6).
+	ReplyToPollOptionID string `json:"reply_to_poll_option_id,omitempty"`
+
 	// (Optional) Time of last edit in Unix.
 	LastEdit int64 `json:"edit_date"`
 
@@ -321,6 +325,12 @@ type Message struct {
 
 	// Service message: a transfer with a TON wallet (Bot API 10.4).
 	TonWalletTransfer *TonWalletTransfer `json:"ton_wallet_transfer,omitempty"`
+
+	// Service message: an option was added to a poll (Bot API 9.6).
+	PollOptionAdded *PollOptionAdded `json:"poll_option_added,omitempty"`
+
+	// Service message: an option was deleted from a poll (Bot API 9.6).
+	PollOptionDeleted *PollOptionDeleted `json:"poll_option_deleted,omitempty"`
 
 	// Service message: the user created a bot managed by this one
 	// (Bot API 9.6).
@@ -885,6 +895,10 @@ type ReplyParams struct {
 	// order they appear; if set, Quote, QuoteParseMode and QuoteEntities are
 	// ignored (Bot API 10.4).
 	QuoteRichTexts []RichText `json:"quote_rich_texts,omitempty"`
+
+	// (Optional) Persistent identifier of the poll option to reply to
+	// (Bot API 9.6).
+	PollOptionID string `json:"poll_option_id,omitempty"`
 }
 
 // PaidMessagesWaived is a service message about the sender using a link that
