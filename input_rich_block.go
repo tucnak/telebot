@@ -144,6 +144,7 @@ type InputRichBlockTable struct {
 	Cells      [][]RichBlockTableCell `json:"cells"`
 	IsBordered bool                   `json:"is_bordered,omitempty"`
 	IsStriped  bool                   `json:"is_striped,omitempty"`
+	IsCompact  bool                   `json:"is_compact,omitempty"` // Bot API 10.3
 	Caption    *RichText              `json:"caption,omitempty"`
 }
 
@@ -219,6 +220,35 @@ type InputRichBlockVoiceNote struct {
 // Bot API: InputRichBlockThinking.
 type InputRichBlockThinking struct {
 	Text RichText `json:"text"`
+}
+
+// InputRichBlockExpandableBlockQuotation is a block quotation that can be
+// expanded and collapsed, like the HTML tag <blockquote expandable>.
+// Credit is optional (Bot API 10.3).
+//
+// Bot API: InputRichBlockExpandableBlockQuotation.
+type InputRichBlockExpandableBlockQuotation struct {
+	Text   RichText  `json:"text"`
+	Credit *RichText `json:"credit,omitempty"`
+}
+
+// InputRichBlockButtons is a row of 1-8 buttons, like the custom HTML tag
+// <tg-button-row>. Align is "left", "center" or "right" (Bot API 10.3).
+//
+// Bot API: InputRichBlockButtons.
+type InputRichBlockButtons struct {
+	Buttons []RichMessageButton `json:"buttons"`
+	Align   string              `json:"align,omitempty"`
+}
+
+// InputRichBlockDocument is a block with a general file, like the custom
+// HTML tag <tg-document>. The document's own caption is ignored; use Caption
+// (Bot API 10.3).
+//
+// Bot API: InputRichBlockDocument.
+type InputRichBlockDocument struct {
+	Document *Document         `json:"document"`
+	Caption  *RichBlockCaption `json:"caption,omitempty"`
 }
 
 // InputRichMessageMedia is a media file referenced from InputRichMessage.HTML
@@ -453,6 +483,7 @@ func (b InputRichBlockTable) encodeRichBlock(*richEncoder) (richWire, error) {
 	w := richWire{"type": RichBlockTable, "cells": b.Cells}
 	w.set("is_bordered", b.IsBordered)
 	w.set("is_striped", b.IsStriped)
+	w.set("is_compact", b.IsCompact)
 	w.set("caption", b.Caption)
 	return w, nil
 }
@@ -513,4 +544,27 @@ func (b InputRichBlockVoiceNote) encodeRichBlock(e *richEncoder) (richWire, erro
 
 func (b InputRichBlockThinking) encodeRichBlock(*richEncoder) (richWire, error) {
 	return textBlock(RichBlockThinking, b.Text), nil
+}
+
+func (b InputRichBlockExpandableBlockQuotation) encodeRichBlock(*richEncoder) (richWire, error) {
+	w := textBlock(RichBlockExpandableBlockquote, b.Text)
+	w.set("credit", b.Credit)
+	return w, nil
+}
+
+func (b InputRichBlockButtons) encodeRichBlock(*richEncoder) (richWire, error) {
+	buttons := make([]RichMessageButton, len(b.Buttons))
+	for i, btn := range b.Buttons {
+		buttons[i] = btn.wire()
+	}
+	w := richWire{"type": RichBlockButtons, "buttons": buttons}
+	w.set("align", b.Align)
+	return w, nil
+}
+
+func (b InputRichBlockDocument) encodeRichBlock(e *richEncoder) (richWire, error) {
+	if b.Document == nil {
+		return nil, errors.New("telebot: rich document block has no document")
+	}
+	return e.mediaBlock(RichBlockDocumentType, "document", b.Document, b.Caption)
 }

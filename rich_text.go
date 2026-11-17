@@ -49,6 +49,7 @@ const (
 	RichAnchorLink             = "anchor_link"
 	RichReference              = "reference"
 	RichReferenceLink          = "reference_link"
+	RichButton                 = "button" // Bot API 10.3
 )
 
 // RichText is a polymorphic piece of rich-formatted text (Bot API 10.1). On the
@@ -60,7 +61,7 @@ const (
 // plain text, Kind RichTextArray with Parts for a run, or Kind RichTextEntity
 // with Type and Text for a formatted entity.
 //
-// Bot API: RichText, RichTextBold, RichTextItalic, RichTextUnderline, RichTextStrikethrough, RichTextSpoiler, RichTextDateTime, RichTextTextMention, RichTextSubscript, RichTextSuperscript, RichTextMarked, RichTextCode, RichTextCustomEmoji, RichTextMathematicalExpression, RichTextUrl, RichTextEmailAddress, RichTextPhoneNumber, RichTextBankCardNumber, RichTextMention, RichTextHashtag, RichTextCashtag, RichTextBotCommand, RichTextAnchor, RichTextAnchorLink, RichTextReference, RichTextReferenceLink.
+// Bot API: RichText, RichTextBold, RichTextItalic, RichTextUnderline, RichTextStrikethrough, RichTextSpoiler, RichTextDateTime, RichTextTextMention, RichTextSubscript, RichTextSuperscript, RichTextMarked, RichTextCode, RichTextCustomEmoji, RichTextMathematicalExpression, RichTextUrl, RichTextEmailAddress, RichTextPhoneNumber, RichTextBankCardNumber, RichTextMention, RichTextHashtag, RichTextCashtag, RichTextBotCommand, RichTextAnchor, RichTextAnchorLink, RichTextReference, RichTextReferenceLink, RichTextButton.
 type RichText struct {
 	// Kind is the wire form this value was decoded from.
 	Kind RichTextKind `json:"-"`
@@ -127,6 +128,9 @@ type RichText struct {
 
 	// ReferenceName is the target of a "reference_link" entity.
 	ReferenceName string `json:"reference_name,omitempty"`
+
+	// Button is the button of a "button" entity (Bot API 10.3).
+	Button *RichMessageButton `json:"button,omitempty"`
 }
 
 // UnmarshalJSON decodes the string, array and tagged-object forms of RichText.
@@ -164,6 +168,10 @@ func (r RichText) MarshalJSON() ([]byte, error) {
 		}
 		return json.Marshal(r.Parts)
 	default: // RichTextEntity
+		if r.Button != nil {
+			btn := r.Button.wire()
+			r.Button = &btn
+		}
 		type alias RichText
 		return json.Marshal(alias(r))
 	}

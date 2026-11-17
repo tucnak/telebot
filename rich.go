@@ -131,3 +131,50 @@ type RichMessage struct {
 	// (Optional) True if the message must be shown right-to-left.
 	IsRTL bool `json:"is_rtl,omitempty"`
 }
+
+// RichMessageButton is a button in a rich message (Bot API 10.3), shown in a
+// buttons block or inline in text. Exactly one of the fields other than
+// Text, Style and Unique must be set.
+//
+// Like InlineButton, a button with Unique set reaches the handler registered
+// with b.Handle(&button), its Data becoming the callback's data.
+//
+// Bot API: RichMessageButton.
+type RichMessageButton struct {
+	// Unique names the callback endpoint, as in InlineButton.
+	Unique string `json:"-"`
+
+	// Text of the button: plain text, custom emoji and date-time entities.
+	Text RichText `json:"text"`
+
+	// (Optional) "danger", "success", "primary" or "link".
+	Style ButtonStyle `json:"style,omitempty"`
+
+	URL                   string             `json:"url,omitempty"`
+	Data                  string             `json:"callback_data,omitempty"`
+	WebApp                *WebApp            `json:"web_app,omitempty"`
+	Login                 *Login             `json:"login_url,omitempty"`
+	InlineQuery           *string            `json:"switch_inline_query,omitempty"`
+	InlineQueryChat       *string            `json:"switch_inline_query_current_chat,omitempty"`
+	InlineQueryChosenChat *SwitchInlineQuery `json:"switch_inline_query_chosen_chat,omitempty"`
+	CopyText              *CopyTextButton    `json:"copy_text,omitempty"`
+	Disabled              *DisabledButton    `json:"disabled,omitempty"`
+}
+
+// CallbackUnique returns the endpoint of the button for b.Handle.
+func (t *RichMessageButton) CallbackUnique() string {
+	return "\f" + t.Unique
+}
+
+// wire returns the button as Telegram expects it, its Unique folded into
+// the callback data.
+func (t RichMessageButton) wire() RichMessageButton {
+	if t.Unique != "" {
+		if t.Data == "" {
+			t.Data = "\f" + t.Unique
+		} else {
+			t.Data = "\f" + t.Unique + "|" + t.Data
+		}
+	}
+	return t
+}
