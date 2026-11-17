@@ -64,8 +64,8 @@ A method's "unseen parameters" are parameters that the functions calling it, and
 | [revokeChatInviteLink](https://core.telegram.org/bots/api#revokechatinvitelink) | `Bot.RevokeInviteLink` |  |
 | [approveChatJoinRequest](https://core.telegram.org/bots/api#approvechatjoinrequest) | `Bot.ApproveJoinRequest` |  |
 | [declineChatJoinRequest](https://core.telegram.org/bots/api#declinechatjoinrequest) | `Bot.DeclineJoinRequest` |  |
-| [answerChatJoinRequestQuery](https://core.telegram.org/bots/api#answerchatjoinrequestquery) | `Bot.AnswerChatJoinRequestQuery` |  |
-| [sendChatJoinRequestWebApp](https://core.telegram.org/bots/api#sendchatjoinrequestwebapp) | `Bot.SendChatJoinRequestWebApp` |  |
+| [answerChatJoinRequestQuery](https://core.telegram.org/bots/api#answerchatjoinrequestquery) | `Bot.AnswerJoinRequest` |  |
+| [sendChatJoinRequestWebApp](https://core.telegram.org/bots/api#sendchatjoinrequestwebapp) | `Bot.SendJoinRequestWebApp` |  |
 | [setChatPhoto](https://core.telegram.org/bots/api#setchatphoto) | `Bot.SetGroupPhoto` |  |
 | [deleteChatPhoto](https://core.telegram.org/bots/api#deletechatphoto) | `Bot.DeleteGroupPhoto` |  |
 | [setChatTitle](https://core.telegram.org/bots/api#setchattitle) | `Bot.SetGroupTitle` |  |

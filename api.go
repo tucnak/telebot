@@ -12,8 +12,8 @@ type API interface {
 	AddStickerToSet(of Recipient, name string, sticker InputSticker) error
 	AdminsOf(chat *Chat, returnBots ...bool) ([]ChatMember, error)
 	Answer(query *Query, resp *QueryResponse) error
-	AnswerChatJoinRequestQuery(queryID, result string) error
 	AnswerGuest(msg *Message, result Result) (*SentGuestMessage, error)
+	AnswerJoinRequest(queryID, result string) error
 	AnswerWebApp(query *Query, r Result) (*WebAppMessage, error)
 	AnswerWidgetQuery(queryID, data string) error
 	ApproveSuggestedPost(msg Editable, sendDate int64) error
@@ -119,8 +119,8 @@ type API interface {
 	RevokeInviteLink(chat Recipient, link string) (*ChatInviteLink, error)
 	Send(to Recipient, what interface{}, opts ...interface{}) (*Message, error)
 	SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, error)
-	SendChatJoinRequestWebApp(queryID, url string) error
 	SendDraft(to Recipient, draftID int, text string, opts ...interface{}) error
+	SendJoinRequestWebApp(queryID, url string) error
 	SendPaidMedia(to Recipient, stars int, a PaidAlbum, opts ...interface{}) (*Message, error)
 	SendRichDraft(to Recipient, draftID int, rich *InputRichMessage, opts ...interface{}) error
 	SendGift(to Recipient, giftID string, opts ...interface{}) error

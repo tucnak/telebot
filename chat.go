@@ -306,8 +306,7 @@ type ChatJoinRequest struct {
 
 	// (Optional) Identifier of the join request query, for a bot assigned to
 	// process join requests. The bot must answer it with
-	// AnswerChatJoinRequestQuery, directly or after SendChatJoinRequestWebApp
-	// (Bot API 10.1).
+	// AnswerJoinRequest, directly or after SendJoinRequestWebApp (Bot API 10.1).
 	QueryID string `json:"query_id,omitempty"`
 }
 
@@ -678,21 +677,20 @@ func (b *Bot) RevokeInviteLink(chat Recipient, link string) (*ChatInviteLink, er
 	return &resp.Result, nil
 }
 
-// Results of AnswerChatJoinRequestQuery.
+// Results of AnswerJoinRequest.
 const (
 	JoinRequestApprove = "approve"
 	JoinRequestDecline = "decline"
 	JoinRequestQueue   = "queue"
 )
 
-// AnswerChatJoinRequestQuery resolves a join request query, the
-// ChatJoinRequest.QueryID received by a bot assigned to process join
-// requests. result is JoinRequestApprove, JoinRequestDecline, or
+// AnswerJoinRequest resolves a join request query, the ChatJoinRequest.QueryID
+// received by a bot assigned to process join requests. result is JoinRequestApprove, JoinRequestDecline, or
 // JoinRequestQueue to leave the decision to other administrators
 // (Bot API 10.1).
 //
 // Bot API: answerChatJoinRequestQuery.
-func (b *Bot) AnswerChatJoinRequestQuery(queryID, result string) error {
+func (b *Bot) AnswerJoinRequest(queryID, result string) error {
 	_, err := b.Raw("answerChatJoinRequestQuery", map[string]string{
 		"chat_join_request_query_id": queryID,
 		"result":                     result,
@@ -700,12 +698,12 @@ func (b *Bot) AnswerChatJoinRequestQuery(queryID, result string) error {
 	return err
 }
 
-// SendChatJoinRequestWebApp shows the user who sent a join request query a
+// SendJoinRequestWebApp shows the user who sent a join request query a
 // Mini App at url before the bot decides; resolve the query afterwards with
-// AnswerChatJoinRequestQuery (Bot API 10.1).
+// AnswerJoinRequest (Bot API 10.1).
 //
 // Bot API: sendChatJoinRequestWebApp.
-func (b *Bot) SendChatJoinRequestWebApp(queryID, url string) error {
+func (b *Bot) SendJoinRequestWebApp(queryID, url string) error {
 	_, err := b.Raw("sendChatJoinRequestWebApp", map[string]string{
 		"chat_join_request_query_id": queryID,
 		"web_app_url":                url,

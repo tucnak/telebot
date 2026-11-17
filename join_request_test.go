@@ -14,7 +14,7 @@ func TestJoinRequestQueries(t *testing.T) {
 	var req *ChatJoinRequest
 	b.Handle(OnChatJoinRequest, func(c Context) error {
 		req = c.ChatJoinRequest()
-		return c.Bot().SendChatJoinRequestWebApp(req.QueryID, "https://example.com/check")
+		return c.Bot().SendJoinRequestWebApp(req.QueryID, "https://example.com/check")
 	})
 
 	var u Update
@@ -26,7 +26,7 @@ func TestJoinRequestQueries(t *testing.T) {
 	assert.Equal(t, "sendChatJoinRequestWebApp", srv.Last().Method)
 	assert.Equal(t, map[string]string{"chat_join_request_query_id": "jq1", "web_app_url": "https://example.com/check"}, srv.Last().Params)
 
-	require.NoError(t, b.AnswerChatJoinRequestQuery("jq1", JoinRequestQueue))
+	require.NoError(t, b.AnswerJoinRequest("jq1", JoinRequestQueue))
 	assert.Equal(t, "answerChatJoinRequestQuery", srv.Last().Method)
 	assert.Equal(t, map[string]string{"chat_join_request_query_id": "jq1", "result": "queue"}, srv.Last().Params)
 }
