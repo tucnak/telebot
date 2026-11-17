@@ -78,6 +78,8 @@ const (
 	OnWriteAccessAllowed   = "\awrite_access_allowed"
 	OnChatOwnerLeft        = "\achat_owner_left"
 	OnChatOwnerChanged     = "\achat_owner_changed"
+	OnCommunityChatAdded   = "\acommunity_chat_added"
+	OnCommunityChatRemoved = "\acommunity_chat_removed"
 
 	OnAddedToGroup      = "\aadded_to_group"
 	OnUserJoined        = "\auser_joined"
@@ -124,6 +126,7 @@ const (
 	OnDeletedBusinessMessages = "\adeleted_business_messages"
 	OnGuestMessage            = "\aguest_message"
 	OnPurchasedPaidMedia      = "\apurchased_paid_media"
+	OnSubscription            = "\asubscription"
 )
 
 // ChatAction is a client-side status indicating bot activity.

@@ -91,6 +91,10 @@ type Chat struct {
 	BusinessIntro                  BusinessIntro        `json:"business_intro,omitempty"`
 	BusinessLocation               BusinessLocation     `json:"business_location,omitempty"`
 	BusinessOpeningHours           BusinessOpeningHours `json:"business_opening_hours,omitempty"`
+
+	// (Optional) The community the chat belongs to; returned only by
+	// ChatByID (Bot API 10.2).
+	Community *Community `json:"community,omitempty"`
 }
 
 // Recipient returns chat ID (see Recipient interface).
@@ -394,6 +398,9 @@ type ChatFullInfo struct {
 
 	// Bot API 9.4: For private chats, the first audio added to the profile of the user.
 	FirstProfileAudio *Audio `json:"first_profile_audio,omitempty"`
+
+	// Bot API 10.2: (Optional) The community the chat belongs to.
+	Community *Community `json:"community,omitempty"`
 }
 
 // ChatBackground is a chat background.

@@ -330,3 +330,27 @@ func (b *Bot) RemoveChatVerification(chat *Chat) error {
 	_, err := b.Raw("removeChatVerification", params)
 	return err
 }
+
+// Subscription states of BotSubscriptionUpdated.
+const (
+	SubscriptionCanceled = "canceled"
+	SubscriptionActive   = "active"
+	SubscriptionFailed   = "failed"
+)
+
+// BotSubscriptionUpdated is received when a user's payment subscription to
+// the bot changes (Bot API 10.2): the user canceled it, re-enabled it, or a
+// payment failed.
+//
+// Bot API: BotSubscriptionUpdated.
+type BotSubscriptionUpdated struct {
+	// User who subscribed.
+	User *User `json:"user"`
+
+	// Bot-specified invoice payload.
+	Payload string `json:"invoice_payload"`
+
+	// The new state: SubscriptionCanceled, SubscriptionActive or
+	// SubscriptionFailed.
+	State string `json:"state"`
+}

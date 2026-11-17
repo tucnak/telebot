@@ -76,6 +76,9 @@ type Context interface {
 	// PurchasedPaidMedia returns the purchased paid media instance.
 	PurchasedPaidMedia() *PaidMediaPurchased
 
+	// Subscription returns the change to a user's payment subscription.
+	Subscription() *BotSubscriptionUpdated
+
 	// Sender returns the current recipient, depending on the context type.
 	// Returns nil if user is not presented.
 	Sender() *User
@@ -317,6 +320,10 @@ func (c *nativeContext) PurchasedPaidMedia() *PaidMediaPurchased {
 	return c.u.PurchasedPaidMedia
 }
 
+func (c *nativeContext) Subscription() *BotSubscriptionUpdated {
+	return c.u.Subscription
+}
+
 func (c *nativeContext) Sender() *User {
 	switch {
 	case c.u.Callback != nil:
@@ -339,6 +346,8 @@ func (c *nativeContext) Sender() *User {
 		return c.u.ChatMember.Sender
 	case c.u.ChatJoinRequest != nil:
 		return c.u.ChatJoinRequest.Sender
+	case c.u.Subscription != nil:
+		return c.u.Subscription.User
 	case c.u.Boost != nil:
 		if b := c.u.Boost.Boost; b != nil && b.Source != nil {
 			return b.Source.Booster

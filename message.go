@@ -387,6 +387,12 @@ type Message struct {
 
 	// Bot API 9.4: Service message: chat owner has changed.
 	ChatOwnerChanged *ChatOwnerChanged `json:"chat_owner_changed,omitempty"`
+
+	// Service message: the chat or the bot was added to a community.
+	CommunityChatAdded *CommunityChatAdded `json:"community_chat_added,omitempty"`
+
+	// Service message: the chat or the bot was removed from a community.
+	CommunityChatRemoved *CommunityChatRemoved `json:"community_chat_removed,omitempty"`
 }
 
 // ChatOwnerLeft describes a service message about the chat owner leaving the chat.

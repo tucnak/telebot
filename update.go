@@ -32,6 +32,7 @@ type Update struct {
 	DeletedBusinessMessages *BusinessMessagesDeleted `json:"deleted_business_messages"`
 	GuestMessage            *Message                 `json:"guest_message"`
 	PurchasedPaidMedia      *PaidMediaPurchased      `json:"purchased_paid_media"`
+	Subscription            *BotSubscriptionUpdated  `json:"subscription,omitempty"`
 }
 
 // ProcessUpdate processes a single incoming update.
@@ -162,6 +163,14 @@ func (b *Bot) ProcessContext(c Context) {
 		}
 		if m.ChatOwnerChanged != nil {
 			b.handle(OnChatOwnerChanged, c)
+			return
+		}
+		if m.CommunityChatAdded != nil {
+			b.handle(OnCommunityChatAdded, c)
+			return
+		}
+		if m.CommunityChatRemoved != nil {
+			b.handle(OnCommunityChatRemoved, c)
 			return
 		}
 
@@ -374,6 +383,10 @@ func (b *Bot) ProcessContext(c Context) {
 	}
 	if u.PurchasedPaidMedia != nil {
 		b.handle(OnPurchasedPaidMedia, c)
+		return
+	}
+	if u.Subscription != nil {
+		b.handle(OnSubscription, c)
 		return
 	}
 }
