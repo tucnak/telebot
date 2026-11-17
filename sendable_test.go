@@ -39,6 +39,16 @@ func TestMediaSendsCarryTheirSpoilerAndCaptionAbove(t *testing.T) {
 		require.NoError(t, err, method)
 		assert.Equal(t, "true", sent[method]["has_spoiler"], method)
 		assert.Equal(t, "true", sent[method]["show_caption_above_media"], method)
+
+		// The sent media keeps both, to be sent again.
+		switch m := media.(type) {
+		case *Photo:
+			assert.True(t, m.HasSpoiler && m.CaptionAbove, method)
+		case *Video:
+			assert.True(t, m.HasSpoiler && m.CaptionAbove, method)
+		case *Animation:
+			assert.True(t, m.HasSpoiler && m.CaptionAbove, method)
+		}
 	}
 
 	_, err = b.Send(ChatID(2), &Video{File: file(), Caption: "c"})
