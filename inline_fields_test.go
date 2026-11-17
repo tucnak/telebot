@@ -69,6 +69,7 @@ func TestForwardCopyDeleteMany(t *testing.T) {
 	assert.Equal(t, map[string]string{"chat_id": "2", "message_ids": "[1,3]"}, srv.Last().Params)
 
 	assert.Error(t, b.DeleteMany(nil))
+	assert.Error(t, b.DeleteMany([]Editable{StoredMessage{MessageID: "1,2", ChatID: 2}}), "not one message ID")
 	_, err = b.ForwardMany(ChatID(7), nil)
 	assert.Error(t, err)
 }

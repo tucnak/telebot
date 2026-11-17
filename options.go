@@ -3,6 +3,7 @@ package telebot
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 )
 
@@ -380,7 +381,11 @@ func embedMessages(params map[string]string, chatKey string, msgs []Editable) er
 	ids := make([]int, len(msgs))
 	for i, msg := range msgs {
 		msgID, _ := msg.MessageSig()
-		ids[i], _ = strconv.Atoi(msgID)
+		id, err := strconv.Atoi(msgID)
+		if err != nil {
+			return fmt.Errorf("telebot: message ID %q is not a number", msgID)
+		}
+		ids[i] = id
 	}
 	data, _ := json.Marshal(ids)
 	_, chatID := msgs[0].MessageSig()
