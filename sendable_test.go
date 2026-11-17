@@ -56,3 +56,14 @@ func TestSendLocationAlertRadius(t *testing.T) {
 	assert.Equal(t, "90", srv.Last().Params["heading"])
 	assert.Equal(t, "300", srv.Last().Params["proximity_alert_radius"])
 }
+
+func TestSendContact(t *testing.T) {
+	b, srv := newFakeBot(t)
+	srv.Reply("sendContact", json.RawMessage(`{"message_id":1,"chat":{"id":7},"contact":{"phone_number":"+100","first_name":"Ada"}}`))
+
+	msg, err := b.Send(ChatID(7), &Contact{PhoneNumber: "+100", FirstName: "Ada", VCard: "BEGIN:VCARD"}, Silent)
+	require.NoError(t, err)
+	assert.Equal(t, "Ada", msg.Contact.FirstName)
+	assert.Equal(t, map[string]string{"chat_id": "7", "phone_number": "+100", "first_name": "Ada", "vcard": "BEGIN:VCARD",
+		"disable_notification": "true"}, srv.Last().Params)
+}
