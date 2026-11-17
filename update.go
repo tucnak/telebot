@@ -509,6 +509,12 @@ func (b *Bot) handleMedia(c Context) bool {
 		fired = true
 	)
 
+	// A live photo also carries its still in Photo, so without an
+	// OnLivePhoto handler it is handled as a photo.
+	if m.LivePhoto != nil && b.handle(OnLivePhoto, c) {
+		return true
+	}
+
 	switch {
 	case m.Photo != nil:
 		fired = b.handle(OnPhoto, c)
@@ -526,8 +532,6 @@ func (b *Bot) handleMedia(c Context) bool {
 		fired = b.handle(OnVideo, c)
 	case m.VideoNote != nil:
 		fired = b.handle(OnVideoNote, c)
-	case m.LivePhoto != nil:
-		fired = b.handle(OnLivePhoto, c)
 	case m.Checklist != nil:
 		fired = b.handle(OnChecklist, c)
 	default:

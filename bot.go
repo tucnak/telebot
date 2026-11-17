@@ -482,6 +482,8 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 
 		var newID string
 		switch {
+		case r.LivePhoto != nil: // before Photo, which holds its still
+			newID = r.LivePhoto.FileID
 		case r.Photo != nil:
 			newID = r.Photo.FileID
 		case r.Video != nil:
@@ -490,8 +492,6 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 			newID = r.Audio.FileID
 		case r.Document != nil:
 			newID = r.Document.FileID
-		case r.LivePhoto != nil:
-			newID = r.LivePhoto.FileID
 		}
 
 		a[i].MediaFile().FileID = newID

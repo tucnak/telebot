@@ -49,7 +49,7 @@ func TestSendLivePhoto(t *testing.T) {
 
 func TestLivePhotoInAlbumAndEdit(t *testing.T) {
 	b, srv := newFakeBot(t)
-	srv.Reply("sendMediaGroup", json.RawMessage(`[{"message_id":1,"chat":{"id":7},"live_photo":`+livePhotoJSON+`},{"message_id":2,"chat":{"id":7},"photo":[{"file_id":"p2"}]}]`))
+	srv.Reply("sendMediaGroup", json.RawMessage(`[{"message_id":1,"chat":{"id":7},"photo":[{"file_id":"pl"}],"live_photo":`+livePhotoJSON+`},{"message_id":2,"chat":{"id":7},"photo":[{"file_id":"p2"}]}]`))
 
 	lp := &LivePhoto{File: FromReader(strings.NewReader("mov")), Still: &Photo{File: FromReader(strings.NewReader("jpg"))}}
 	_, err := b.SendAlbum(ChatID(7), Album{lp, &Photo{File: File{FileID: "p2"}}})
@@ -78,15 +78,26 @@ func TestLivePhotoInAlbumAndEdit(t *testing.T) {
 func TestReceiveLivePhoto(t *testing.T) {
 	b, _ := newFakeBot(t)
 
-	var got *LivePhoto
-	b.Handle(OnLivePhoto, func(c Context) error { got = c.Message().LivePhoto; return nil })
+	// Telegram sets photo on every live photo message.
+	update := func() Update {
+		var u Update
+		require.NoError(t, json.Unmarshal([]byte(`{"update_id":1,"message":{"message_id":1,"date":1,"chat":{"id":7,"type":"private"},
+			"photo":[{"file_id":"pl","file_unique_id":"plu","width":1080,"height":1920}],"live_photo":`+livePhotoJSON+`}}`), &u))
+		return u
+	}
 
-	var u Update
-	require.NoError(t, json.Unmarshal([]byte(`{"update_id":1,"message":{"message_id":1,"date":1,"chat":{"id":7,"type":"private"},"live_photo":`+livePhotoJSON+`}}`), &u))
-	b.ProcessUpdate(u)
-	require.NotNil(t, got)
-	assert.Equal(t, 3, got.Duration)
-	assert.Len(t, got.Photo, 2)
+	var got []string
+	b.Handle(OnPhoto, func(c Context) error { got = append(got, OnPhoto); return nil })
+	b.ProcessUpdate(update())
+	assert.Equal(t, []string{OnPhoto}, got, "without OnLivePhoto a live photo is a photo")
+
+	var lp *LivePhoto
+	b.Handle(OnLivePhoto, func(c Context) error { lp = c.Message().LivePhoto; return nil })
+	b.ProcessUpdate(update())
+	assert.Equal(t, []string{OnPhoto}, got, "OnLivePhoto takes the live photo from OnPhoto")
+	require.NotNil(t, lp)
+	assert.Equal(t, 3, lp.Duration)
+	assert.Len(t, lp.Photo, 2)
 
 	var pm PaidMedia
 	require.NoError(t, json.Unmarshal([]byte(`{"type":"live_photo","live_photo":`+livePhotoJSON+`}`), &pm))
