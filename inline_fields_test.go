@@ -92,3 +92,18 @@ func TestRespondCacheTime(t *testing.T) {
 	require.NoError(t, b.Respond(&Callback{ID: "c"}, &CallbackResponse{Text: "ok", CacheTime: 30}))
 	assert.Equal(t, map[string]string{"callback_query_id": "c", "text": "ok", "cache_time": "30"}, srv.Last().Params)
 }
+
+func TestStopLiveLocation(t *testing.T) {
+	b, srv := newFakeBot(t)
+	srv.Reply("stopMessageLiveLocation", json.RawMessage(`{"message_id":1,"chat":{"id":7}}`))
+	srv.Reply("stopMessageLiveLocation", true)
+
+	_, err := b.StopLiveLocation(&Message{ID: 1, Chat: &Chat{ID: 7}})
+	require.NoError(t, err)
+	assert.Equal(t, map[string]string{"chat_id": "7", "message_id": "1"}, srv.Last().Params)
+
+	// A live location sent through inline mode has an inline message ID.
+	_, err = b.StopLiveLocation(&Callback{MessageID: "inline"})
+	assert.Equal(t, ErrTrueResult, err)
+	assert.Equal(t, map[string]string{"inline_message_id": "inline"}, srv.Last().Params)
+}

@@ -1169,10 +1169,13 @@ func (b *Bot) File(file *File) (io.ReadCloser, error) {
 // Bot API: stopMessageLiveLocation.
 func (b *Bot) StopLiveLocation(msg Editable, opts ...interface{}) (*Message, error) {
 	msgID, chatID := msg.MessageSig()
+	params := make(map[string]string)
 
-	params := map[string]string{
-		"chat_id":    strconv.FormatInt(chatID, 10),
-		"message_id": msgID,
+	if chatID == 0 { // if inline message
+		params["inline_message_id"] = msgID
+	} else {
+		params["chat_id"] = strconv.FormatInt(chatID, 10)
+		params["message_id"] = msgID
 	}
 
 	sendOpts := b.extractOptions(opts)
