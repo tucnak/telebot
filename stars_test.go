@@ -122,10 +122,10 @@ func TestStarTransactionWithNanostarAmount(t *testing.T) {
 
 func TestStarTransactionNoNanostarAmount(t *testing.T) {
 	tx := StarTransaction{
-		ID:           "tx_no_nano",
-		Amount:       1000,
+		ID:             "tx_no_nano",
+		Amount:         1000,
 		NanostarAmount: 0,
-		Unixtime:     1700000000,
+		Unixtime:       1700000000,
 	}
 
 	assert.False(t, tx.HasNanostarAmount())
@@ -183,7 +183,7 @@ func TestAffiliateInfo(t *testing.T) {
 func TestAffiliateInfoNoProgram(t *testing.T) {
 	ai := AffiliateInfo{
 		CommissionPerMille: 25,
-		Amount:            50,
+		Amount:             50,
 	}
 
 	assert.False(t, ai.IsAffiliateProgram())
@@ -258,13 +258,13 @@ func TestVerificationInfoMethods(t *testing.T) {
 	// Use actual current time for proper testing
 	now := time.Now().Unix()
 	future := now + 86400 // 24 hours later
-	past := now - 86400    // 24 hours ago
+	past := now - 86400   // 24 hours ago
 
 	tests := []struct {
-		name           string
-		info           VerificationInfo
-		isExpired      bool
-		isValid        bool
+		name             string
+		info             VerificationInfo
+		isExpired        bool
+		isValid          bool
 		verificationTime int64
 	}{
 		{

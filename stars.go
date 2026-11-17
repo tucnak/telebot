@@ -5,14 +5,14 @@ import "time"
 type TransactionType = string
 
 const (
-	TransactionTypeUser               TransactionType = "user"
-	TransactionTypeFragment           TransactionType = "fragment"
-	TransactionPartnerTelegramAds     TransactionType = "telegram_ads"
-	TransactionPartnerTelegramApi     TransactionType = "telegram_api"
-	TransactionTypeAffiliateProgram   TransactionType = "affiliate_program"
-	TransactionTypeOther              TransactionType = "other"
+	TransactionTypeUser             TransactionType = "user"
+	TransactionTypeFragment         TransactionType = "fragment"
+	TransactionPartnerTelegramAds   TransactionType = "telegram_ads"
+	TransactionPartnerTelegramApi   TransactionType = "telegram_api"
+	TransactionTypeAffiliateProgram TransactionType = "affiliate_program"
+	TransactionTypeOther            TransactionType = "other"
 	// Bot API 8.3: Transaction partner is a chat
-	TransactionTypeChat               TransactionType = "chat"
+	TransactionTypeChat TransactionType = "chat"
 )
 
 type RevenueState = string
@@ -106,10 +106,10 @@ type TransactionPartnerAffiliateProgram struct {
 type VerificationLevel string
 
 const (
-	VerificationLevelNone      VerificationLevel = "none"
-	VerificationLevelBasic     VerificationLevel = "basic"
-	VerificationLevelDetailed  VerificationLevel = "detailed"
-	VerificationLevelFull      VerificationLevel = "full"
+	VerificationLevelNone     VerificationLevel = "none"
+	VerificationLevelBasic    VerificationLevel = "basic"
+	VerificationLevelDetailed VerificationLevel = "detailed"
+	VerificationLevelFull     VerificationLevel = "full"
 )
 
 // VerificationRequirements describes the requirements for verification.
