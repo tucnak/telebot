@@ -94,3 +94,20 @@ func TestSendPreviewOptions(t *testing.T) {
 	srv.Last().JSON(t, "link_preview_options", &opts)
 	assert.True(t, opts.Disabled)
 }
+
+func TestSendMediaReturnedAsAnotherKind(t *testing.T) {
+	b, srv := newFakeBot(t)
+
+	// Telegram may send a voice note back as an audio or a document.
+	for method, media := range map[string]Sendable{
+		"sendPhoto":     &Photo{File: File{FileID: "f"}},
+		"sendSticker":   &Sticker{File: File{FileID: "f"}},
+		"sendVoice":     &Voice{File: File{FileID: "f"}},
+		"sendVideoNote": &VideoNote{File: File{FileID: "f"}},
+	} {
+		srv.Reply(method, json.RawMessage(`{"message_id":1,"chat":{"id":2},"document":{"file_id":"d"}}`))
+		msg, err := b.Send(ChatID(2), media)
+		require.NoError(t, err, method)
+		assert.Equal(t, "d", msg.Document.FileID, method)
+	}
+}

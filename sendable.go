@@ -47,10 +47,12 @@ func (p *Photo) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		return nil, err
 	}
 
-	msg.Photo.File.stealRef(&p.File)
-	spoiler, above := p.HasSpoiler, p.CaptionAbove
-	*p = *msg.Photo
-	p.Caption, p.HasSpoiler, p.CaptionAbove = msg.Caption, spoiler, above
+	if msg.Photo != nil {
+		msg.Photo.File.stealRef(&p.File)
+		spoiler, above := p.HasSpoiler, p.CaptionAbove
+		*p = *msg.Photo
+		p.Caption, p.HasSpoiler, p.CaptionAbove = msg.Caption, spoiler, above
+	}
 
 	return msg, nil
 }
@@ -137,8 +139,10 @@ func (s *Sticker) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error)
 		return nil, err
 	}
 
-	msg.Sticker.File.stealRef(&s.File)
-	*s = *msg.Sticker
+	if msg.Sticker != nil {
+		msg.Sticker.File.stealRef(&s.File)
+		*s = *msg.Sticker
+	}
 
 	return msg, nil
 }
@@ -261,8 +265,12 @@ func (v *Voice) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, error) {
 		return nil, err
 	}
 
-	msg.Voice.File.stealRef(&v.File)
-	*v = *msg.Voice
+	// Telegram sends a voice note that is not OGG, MP3 or M4A as an audio
+	// or a document.
+	if msg.Voice != nil {
+		msg.Voice.File.stealRef(&v.File)
+		*v = *msg.Voice
+	}
 
 	return msg, nil
 }
@@ -286,8 +294,10 @@ func (v *VideoNote) Send(b *Bot, to Recipient, opt *SendOptions) (*Message, erro
 		return nil, err
 	}
 
-	msg.VideoNote.File.stealRef(&v.File)
-	*v = *msg.VideoNote
+	if msg.VideoNote != nil {
+		msg.VideoNote.File.stealRef(&v.File)
+		*v = *msg.VideoNote
+	}
 
 	return msg, nil
 }
