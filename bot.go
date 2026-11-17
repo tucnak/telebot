@@ -952,8 +952,8 @@ func (b *Bot) DeleteMany(msgs []Editable) error {
 // Currently, Telegram supports only a narrow range of possible
 // actions, these are aligned as constants of this package.
 //
-// Pass the ID of a thread as an int, or a *SendOptions with ThreadID and
-// BusinessConnectionID, to send the action there.
+// Pass the ID of a thread as an int or a *Topic, or a *SendOptions with
+// ThreadID and BusinessConnectionID, to send the action there.
 //
 // Bot API: sendChatAction.
 func (b *Bot) Notify(to Recipient, action ChatAction, opts ...interface{}) error {
@@ -966,18 +966,20 @@ func (b *Bot) Notify(to Recipient, action ChatAction, opts ...interface{}) error
 		"action":  string(action),
 	}
 
+	var sendOpts []interface{}
 	for _, opt := range opts {
-		switch v := opt.(type) {
-		case int:
-			params["message_thread_id"] = strconv.Itoa(v)
-		case *SendOptions:
-			if v.ThreadID != 0 {
-				params["message_thread_id"] = strconv.Itoa(v.ThreadID)
-			}
-			if v.BusinessConnectionID != "" {
-				params["business_connection_id"] = v.BusinessConnectionID
-			}
+		if threadID, ok := opt.(int); ok {
+			params["message_thread_id"] = strconv.Itoa(threadID)
+		} else {
+			sendOpts = append(sendOpts, opt)
 		}
+	}
+	opt := b.extractOptions(sendOpts)
+	if opt.ThreadID != 0 {
+		params["message_thread_id"] = strconv.Itoa(opt.ThreadID)
+	}
+	if opt.BusinessConnectionID != "" {
+		params["business_connection_id"] = opt.BusinessConnectionID
 	}
 
 	_, err := b.Raw("sendChatAction", params)
@@ -1290,10 +1292,10 @@ func (b *Bot) Pin(msg Editable, opts ...interface{}) error {
 	return err
 }
 
-// Unpin unpins a message in a supergroup or a channel: the one with the
-// message ID passed as an int, or the most recent one. Pass a *SendOptions
-// with BusinessConnectionID to unpin on behalf of a business account, which
-// needs the message ID.
+// Unpin unpins a message in a supergroup or a channel: the one passed as
+// an Editable or as an int message ID, or the most recent one. Pass a
+// *SendOptions with BusinessConnectionID to unpin on behalf of a business
+// account, which needs the message.
 //
 // Bot API: unpinChatMessage.
 func (b *Bot) Unpin(chat Recipient, opts ...interface{}) error {
@@ -1301,15 +1303,19 @@ func (b *Bot) Unpin(chat Recipient, opts ...interface{}) error {
 		"chat_id": chat.Recipient(),
 	}
 
+	var sendOpts []interface{}
 	for _, opt := range opts {
 		switch v := opt.(type) {
 		case int:
 			params["message_id"] = strconv.Itoa(v)
-		case *SendOptions:
-			if v.BusinessConnectionID != "" {
-				params["business_connection_id"] = v.BusinessConnectionID
-			}
+		case Editable:
+			params["message_id"], _ = v.MessageSig()
+		default:
+			sendOpts = append(sendOpts, opt)
 		}
+	}
+	if id := b.extractOptions(sendOpts).BusinessConnectionID; id != "" {
+		params["business_connection_id"] = id
 	}
 
 	_, err := b.Raw("unpinChatMessage", params)

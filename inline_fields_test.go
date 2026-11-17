@@ -173,6 +173,14 @@ func TestNotifyUnpinProfilePhotosOptions(t *testing.T) {
 	assert.Equal(t, map[string]string{"chat_id": "7"}, srv.Last().Params)
 	require.NoError(t, b.Unpin(ChatID(7), 3, &SendOptions{BusinessConnectionID: "bc"}))
 	assert.Equal(t, map[string]string{"chat_id": "7", "message_id": "3", "business_connection_id": "bc"}, srv.Last().Params)
+	require.NoError(t, b.Unpin(ChatID(7), &Message{ID: 4, Chat: &Chat{ID: 7}}))
+	assert.Equal(t, "4", srv.Last().Params["message_id"])
+	require.NoError(t, b.Notify(ChatID(7), Typing, &Topic{ThreadID: 6}))
+	assert.Equal(t, "6", srv.Last().Params["message_thread_id"])
+
+	// An option neither takes is a mistake, not something to skip.
+	assert.Panics(t, func() { b.Notify(ChatID(7), Typing, int32(5)) })
+	assert.Panics(t, func() { b.Unpin(ChatID(7), int64(3)) })
 
 	srv.Reply("getUserProfilePhotos", json.RawMessage(`{"total_count":9,"photos":[[{"file_id":"s"},{"file_id":"l"}]]}`))
 	photos, err := b.ProfilePhotosOf(&User{ID: 7})
