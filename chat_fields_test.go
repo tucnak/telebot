@@ -60,4 +60,9 @@ func TestSubscriptionInviteLinks(t *testing.T) {
 	_, err = b.EditSubscriptionInviteLink(ChatID(-100), &ChatInviteLink{InviteLink: "https://t.me/+x", Name: "Gold"})
 	require.NoError(t, err)
 	assert.Equal(t, map[string]string{"chat_id": "-100", "invite_link": "https://t.me/+x", "name": "Gold"}, srv.Last().Params)
+
+	_, err = b.EditSubscriptionInviteLink(ChatID(-100), &ChatInviteLink{InviteLink: "https://t.me/+x"})
+	require.NoError(t, err)
+	assert.Equal(t, "", srv.Last().Params["name"], "an empty name is sent to remove it")
+	assert.Contains(t, srv.Last().Params, "name")
 }

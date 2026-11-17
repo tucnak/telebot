@@ -731,16 +731,14 @@ func (b *Bot) CreateSubscriptionInviteLink(chat Recipient, link *ChatInviteLink)
 }
 
 // EditSubscriptionInviteLink renames a subscription invite link created by
-// the bot (Bot API 7.9).
+// the bot; an empty Name removes its name (Bot API 7.9).
 //
 // Bot API: editChatSubscriptionInviteLink.
 func (b *Bot) EditSubscriptionInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error) {
 	params := map[string]string{
 		"chat_id":     chat.Recipient(),
 		"invite_link": link.InviteLink,
-	}
-	if link.Name != "" {
-		params["name"] = link.Name
+		"name":        link.Name,
 	}
 	return b.inviteLink("editChatSubscriptionInviteLink", params)
 }
