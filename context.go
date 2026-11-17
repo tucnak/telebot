@@ -248,6 +248,10 @@ func (c *nativeContext) Message() *Message {
 		return c.u.ChannelPost
 	case c.u.EditedChannelPost != nil:
 		return c.u.EditedChannelPost
+	case c.u.BusinessMessage != nil:
+		return c.u.BusinessMessage
+	case c.u.EditedBusinessMessage != nil:
+		return c.u.EditedBusinessMessage
 	default:
 		return nil
 	}
