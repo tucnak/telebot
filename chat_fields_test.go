@@ -44,3 +44,20 @@ func TestPaidMessages(t *testing.T) {
 	require.NoError(t, json.Unmarshal([]byte(`{"name":"New","icon_color":1,"message_thread_id":3,"is_name_implicit":true}`), &topic))
 	assert.True(t, topic.IsNameImplicit)
 }
+
+func TestSubscriptionInviteLinks(t *testing.T) {
+	b, srv := newFakeBot(t)
+	link := json.RawMessage(`{"invite_link":"https://t.me/+x","creator":{"id":1},"creates_join_request":false,"is_primary":false,"is_revoked":false,
+		"name":"VIP","subscription_period":2592000,"subscription_price":50}`)
+	srv.Reply("createChatSubscriptionInviteLink", link)
+	srv.Reply("editChatSubscriptionInviteLink", link)
+
+	got, err := b.CreateSubscriptionInviteLink(ChatID(-100), &ChatInviteLink{Name: "VIP", SubscriptionPeriod: 2592000, SubscriptionPrice: 50})
+	require.NoError(t, err)
+	assert.Equal(t, 50, got.SubscriptionPrice)
+	assert.Equal(t, map[string]string{"chat_id": "-100", "name": "VIP", "subscription_period": "2592000", "subscription_price": "50"}, srv.Last().Params)
+
+	_, err = b.EditSubscriptionInviteLink(ChatID(-100), &ChatInviteLink{InviteLink: "https://t.me/+x", Name: "Gold"})
+	require.NoError(t, err)
+	assert.Equal(t, map[string]string{"chat_id": "-100", "invite_link": "https://t.me/+x", "name": "Gold"}, srv.Last().Params)
+}

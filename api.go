@@ -37,6 +37,7 @@ type API interface {
 	CreateInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error)
 	CreateInvoiceLink(i Invoice) (string, error)
 	CreateStickerSet(of Recipient, set *StickerSet) error
+	CreateSubscriptionInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error)
 	CreateTopic(chat *Chat, topic *Topic) (*Topic, error)
 	CustomEmojiStickers(ids []string) ([]Sticker, error)
 	DeclineJoinRequest(chat Recipient, user *User) error
@@ -69,6 +70,7 @@ type API interface {
 	EditReplyMarkup(msg Editable, markup *ReplyMarkup) (*Message, error)
 	EditSharedWidgetData(widgetID, publicData string, cacheTime int) error
 	EditStory(connectionID string, storyID int, story StoryParams) (*Story, error)
+	EditSubscriptionInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error)
 	EditTopic(chat *Chat, topic *Topic) error
 	File(file *File) (io.ReadCloser, error)
 	FileByID(fileID string) (File, error)

@@ -344,6 +344,11 @@ type ChatInviteLink struct {
 
 	// (Optional) Number of pending join requests created using this link.
 	PendingCount int `json:"pending_join_request_count"`
+
+	// Bot API 7.9: (Optional) For subscription links, the seconds between
+	// payments and the Telegram Stars paid each period.
+	SubscriptionPeriod int `json:"subscription_period,omitempty"`
+	SubscriptionPrice  int `json:"subscription_price,omitempty"`
 }
 
 // Story is a story posted to a chat.
@@ -706,6 +711,53 @@ func (b *Bot) SendChatJoinRequestWebApp(queryID, url string) error {
 		"web_app_url":                url,
 	})
 	return err
+}
+
+// CreateSubscriptionInviteLink creates a subscription invite link for a
+// channel, with link's Name, SubscriptionPeriod (currently always 2592000
+// seconds) and SubscriptionPrice in Telegram Stars (Bot API 7.9).
+//
+// Bot API: createChatSubscriptionInviteLink.
+func (b *Bot) CreateSubscriptionInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error) {
+	params := map[string]string{
+		"chat_id":             chat.Recipient(),
+		"subscription_period": strconv.Itoa(link.SubscriptionPeriod),
+		"subscription_price":  strconv.Itoa(link.SubscriptionPrice),
+	}
+	if link.Name != "" {
+		params["name"] = link.Name
+	}
+	return b.inviteLink("createChatSubscriptionInviteLink", params)
+}
+
+// EditSubscriptionInviteLink renames a subscription invite link created by
+// the bot (Bot API 7.9).
+//
+// Bot API: editChatSubscriptionInviteLink.
+func (b *Bot) EditSubscriptionInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error) {
+	params := map[string]string{
+		"chat_id":     chat.Recipient(),
+		"invite_link": link.InviteLink,
+	}
+	if link.Name != "" {
+		params["name"] = link.Name
+	}
+	return b.inviteLink("editChatSubscriptionInviteLink", params)
+}
+
+func (b *Bot) inviteLink(method string, params map[string]string) (*ChatInviteLink, error) {
+	data, err := b.Raw(method, params)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result *ChatInviteLink
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return resp.Result, nil
 }
 
 // ApproveJoinRequest approves a chat join request.
