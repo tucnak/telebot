@@ -27,6 +27,11 @@ var AllowedUpdates = []string{
 	"widget_query",
 	"shared_widget_query",
 	"managed_bot",
+	"business_connection",
+	"business_message",
+	"edited_business_message",
+	"deleted_business_messages",
+	"purchased_paid_media",
 }
 
 // Poller is a provider of Updates.

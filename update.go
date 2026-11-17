@@ -469,6 +469,14 @@ func (b *Bot) ProcessContext(c Context) {
 		b.handle(OnSubscription, c)
 		return
 	}
+	if u.MessageReaction != nil {
+		b.handle(OnReaction, c)
+		return
+	}
+	if u.MessageReactionCount != nil {
+		b.handle(OnReactionCount, c)
+		return
+	}
 	if u.GenerationStopped != nil {
 		b.handle(OnGenerationStopped, c)
 		return

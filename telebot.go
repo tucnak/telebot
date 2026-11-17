@@ -148,6 +148,8 @@ const (
 	OnGuestMessage            = "\aguest_message"
 	OnPurchasedPaidMedia      = "\apurchased_paid_media"
 	OnSubscription            = "\asubscription"
+	OnReaction                = "\amessage_reaction"
+	OnReactionCount           = "\amessage_reaction_count"
 	OnGenerationStopped       = "\astopped_message_generation"
 	OnWidgetQuery             = "\awidget_query"
 	OnSharedWidgetQuery       = "\ashared_widget_query"

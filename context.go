@@ -91,6 +91,13 @@ type Context interface {
 	// ManagedBot returns the created or changed managed bot.
 	ManagedBot() *ManagedBotUpdated
 
+	// MessageReaction returns the change of a user's reactions to a message.
+	MessageReaction() *MessageReaction
+
+	// MessageReactionCount returns the changed anonymous reactions to a
+	// message.
+	MessageReactionCount() *MessageReactionCount
+
 	// Sender returns the current recipient, depending on the context type.
 	// Returns nil if user is not presented.
 	Sender() *User
@@ -352,6 +359,14 @@ func (c *nativeContext) ManagedBot() *ManagedBotUpdated {
 	return c.u.ManagedBot
 }
 
+func (c *nativeContext) MessageReaction() *MessageReaction {
+	return c.u.MessageReaction
+}
+
+func (c *nativeContext) MessageReactionCount() *MessageReactionCount {
+	return c.u.MessageReactionCount
+}
+
 func (c *nativeContext) Sender() *User {
 	switch {
 	case c.u.Callback != nil:
@@ -382,6 +397,8 @@ func (c *nativeContext) Sender() *User {
 		return c.u.SharedWidgetQuery.Sender
 	case c.u.ManagedBot != nil:
 		return c.u.ManagedBot.User
+	case c.u.MessageReaction != nil:
+		return c.u.MessageReaction.User
 	case c.u.Boost != nil:
 		if b := c.u.Boost.Boost; b != nil && b.Source != nil {
 			return b.Source.Booster
@@ -408,6 +425,10 @@ func (c *nativeContext) Chat() *Chat {
 		return c.u.GenerationStopped.Chat
 	case c.u.WidgetQuery != nil:
 		return c.u.WidgetQuery.Chat
+	case c.u.MessageReaction != nil:
+		return c.u.MessageReaction.Chat
+	case c.u.MessageReactionCount != nil:
+		return c.u.MessageReactionCount.Chat
 	default:
 		return nil
 	}
