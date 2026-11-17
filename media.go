@@ -356,16 +356,6 @@ func (v *Voice) MediaFile() *File {
 	return &v.File
 }
 
-// InputMedia returns the voice note as an InputMediaVoiceNote, which Telegram
-// accepts in rich messages (Bot API 10.2).
-func (v *Voice) InputMedia() InputMedia {
-	return InputMedia{
-		Type:     "voice_note",
-		Caption:  v.Caption,
-		Duration: v.Duration,
-	}
-}
-
 // VideoNote represents a video message.
 //
 // Bot API: VideoNote.

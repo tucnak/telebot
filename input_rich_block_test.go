@@ -111,6 +111,7 @@ func TestSendRichMedia(t *testing.T) {
 		HTML: `<img src="tg://photo?id=p1">`,
 		Media: []InputRichMessageMedia{
 			{ID: "p1", Media: &Photo{File: FromReader(strings.NewReader("img"))}},
+			{ID: "a1", Media: &Voice{File: File{FileID: "v"}, Duration: 3}},
 		},
 	})
 	require.NoError(t, err)
@@ -119,17 +120,25 @@ func TestSendRichMedia(t *testing.T) {
 	var rich struct {
 		HTML  string `json:"html"`
 		Media []struct {
-			ID    string            `json:"id"`
-			Media map[string]string `json:"media"`
+			ID    string                 `json:"id"`
+			Media map[string]interface{} `json:"media"`
 		} `json:"media"`
 	}
 	req.JSON(t, "rich_message", &rich)
 	assert.Equal(t, `<img src="tg://photo?id=p1">`, rich.HTML)
-	require.Len(t, rich.Media, 1)
+	require.Len(t, rich.Media, 2)
 	assert.Equal(t, "p1", rich.Media[0].ID)
 	assert.Equal(t, "photo", rich.Media[0].Media["type"])
 	assert.Equal(t, "attach://rich0", rich.Media[0].Media["media"])
 	assert.Equal(t, "img", string(req.Files["rich0"].Data))
+	assert.Equal(t, "voice_note", rich.Media[1].Media["type"])
+	assert.Equal(t, "v", rich.Media[1].Media["media"])
+
+	// A voice note is input media in rich messages only.
+	_, err = b.Edit(&Message{ID: 1, Chat: &Chat{ID: 2}}, &Voice{File: File{FileID: "v"}})
+	assert.Equal(t, ErrUnsupportedWhat, err)
+	_, err = b.Send(ChatID(2), &InputRichMessage{Media: []InputRichMessageMedia{{ID: "s", Media: &Sticker{File: File{FileID: "s"}}}}})
+	assert.Error(t, err)
 }
 
 func TestSendRichDraftBlocks(t *testing.T) {

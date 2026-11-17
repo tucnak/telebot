@@ -259,8 +259,8 @@ type InputRichBlockDocument struct {
 //
 // Bot API: InputRichMessageMedia.
 type InputRichMessageMedia struct {
-	ID    string     `json:"id"`
-	Media Inputtable `json:"media"`
+	ID    string `json:"id"`
+	Media Media  `json:"media"`
 }
 
 // richWire is a block or media object ready for encoding/json.
@@ -315,20 +315,31 @@ func (e *richEncoder) blocks(bs []InputRichBlock) ([]richWire, error) {
 }
 
 // media encodes m as an InputMedia object, uploading it if it is local.
-func (e *richEncoder) media(m Inputtable) (*InputMedia, error) {
+func (e *richEncoder) media(m Media) (*InputMedia, error) {
 	if m == nil || m.MediaFile() == nil {
 		return nil, errors.New("telebot: rich message media is missing")
 	}
-	repr := m.MediaFile().process("rich"+strconv.Itoa(len(e.files)), e.files)
-	if repr == "" {
+
+	var im InputMedia
+	switch v := m.(type) {
+	case *Voice:
+		// Only rich messages take a voice note as input media, so Voice is
+		// not an Inputtable.
+		im = InputMedia{Type: "voice_note", Caption: v.Caption, Duration: v.Duration}
+	case Inputtable:
+		im = v.InputMedia()
+	default:
+		return nil, errors.New("telebot: unsupported rich message media")
+	}
+
+	im.Media = m.MediaFile().process("rich"+strconv.Itoa(len(e.files)), e.files)
+	if im.Media == "" {
 		return nil, errors.New("telebot: rich message media does not exist")
 	}
-	im := m.InputMedia()
-	im.Media = repr
 	return &im, nil
 }
 
-func (e *richEncoder) mediaBlock(typ, key string, m Inputtable, caption *RichBlockCaption) (richWire, error) {
+func (e *richEncoder) mediaBlock(typ, key string, m Media, caption *RichBlockCaption) (richWire, error) {
 	im, err := e.media(m)
 	if err != nil {
 		return nil, err
