@@ -16,6 +16,8 @@ const (
 )
 
 // Poll contains information about a poll.
+//
+// Bot API: Poll.
 type Poll struct {
 	ID         string       `json:"id"`
 	Type       PollType     `json:"type"`
@@ -42,6 +44,8 @@ type Poll struct {
 }
 
 // PollOption contains information about one answer option in a poll.
+//
+// Bot API: PollOption.
 type PollOption struct {
 	Text       string          `json:"text"`
 	VoterCount int             `json:"voter_count"`
@@ -50,6 +54,8 @@ type PollOption struct {
 }
 
 // PollAnswer represents an answer of a user in a non-anonymous poll.
+//
+// Bot API: PollAnswer.
 type PollAnswer struct {
 	PollID  string `json:"poll_id"`
 	Sender  *User  `json:"user"`

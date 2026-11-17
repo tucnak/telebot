@@ -7,6 +7,8 @@ import (
 )
 
 // User object represents a Telegram user, bot.
+//
+// Bot API: User.
 type User struct {
 	ID int64 `json:"id"`
 
@@ -39,6 +41,8 @@ func (u *User) Recipient() string {
 }
 
 // Chat object represents a Telegram user, bot, group or a channel.
+//
+// Bot API: Chat, ChatFullInfo.
 type Chat struct {
 	ID int64 `json:"id"`
 
@@ -106,12 +110,16 @@ const (
 )
 
 // ChatLocation represents a location to which a chat is connected.
+//
+// Bot API: ChatLocation.
 type ChatLocation struct {
 	Location Location `json:"location,omitempty"`
 	Address  string   `json:"address,omitempty"`
 }
 
 // ChatPhoto object represents a chat photo.
+//
+// Bot API: ChatPhoto.
 type ChatPhoto struct {
 	// File identifiers of small (160x160) chat photo
 	SmallFileID   string `json:"small_file_id"`
@@ -123,6 +131,8 @@ type ChatPhoto struct {
 }
 
 // ChatMember object represents information about a single chat member.
+//
+// Bot API: ChatMember, ChatMemberOwner, ChatMemberAdministrator, ChatMemberMember, ChatMemberRestricted, ChatMemberLeft, ChatMemberBanned.
 type ChatMember struct {
 	Rights
 
@@ -162,6 +172,8 @@ const (
 )
 
 // ChatMemberUpdate object represents changes in the status of a chat member.
+//
+// Bot API: ChatMemberUpdated.
 type ChatMemberUpdate struct {
 	// Chat where the user belongs to.
 	Chat *Chat `json:"chat"`
@@ -218,6 +230,8 @@ func (i ChatID) Recipient() string {
 }
 
 // ChatJoinRequest represents a join request sent to a chat.
+//
+// Bot API: ChatJoinRequest.
 type ChatJoinRequest struct {
 	// Chat to which the request was sent.
 	Chat *Chat `json:"chat"`
@@ -243,6 +257,8 @@ type ChatJoinRequest struct {
 }
 
 // ChatInviteLink object represents an invite for a chat.
+//
+// Bot API: ChatInviteLink.
 type ChatInviteLink struct {
 	// The invite link.
 	InviteLink string `json:"invite_link"`
@@ -275,6 +291,9 @@ type ChatInviteLink struct {
 	PendingCount int `json:"pending_join_request_count"`
 }
 
+// Story is a story posted to a chat.
+//
+// Bot API: Story.
 type Story struct {
 	// Unique identifier for the story in the chat
 	ID int `json:"id"`
@@ -283,6 +302,9 @@ type Story struct {
 	Poster *Chat `json:"chat"`
 }
 
+// Birthdate is the birthdate of a user.
+//
+// Bot API: Birthdate.
 type Birthdate struct {
 	// Day of the user's birth; 1-31
 	Day int `json:"day"`
@@ -295,6 +317,8 @@ type Birthdate struct {
 }
 
 // ChatFullInfo object contains full information about a chat.
+//
+// Bot API: ChatFullInfo.
 type ChatFullInfo struct {
 	ID int64 `json:"id"`
 
@@ -372,11 +396,18 @@ type ChatFullInfo struct {
 	FirstProfileAudio *Audio `json:"first_profile_audio,omitempty"`
 }
 
+// ChatBackground is a chat background.
+//
+// Bot API: ChatBackground.
 type ChatBackground struct {
 	// Type of the background
 	Type BackgroundType `json:"type"`
 }
 
+// BackgroundType is the type of a chat background: a fill, a wallpaper,
+// a pattern or a chat theme.
+//
+// Bot API: BackgroundType, BackgroundTypeFill, BackgroundTypeWallpaper, BackgroundTypePattern, BackgroundTypeChatTheme.
 type BackgroundType struct {
 	// Type of the background, always “fill”
 	Type string `json:"type"`
@@ -408,6 +439,10 @@ type BackgroundType struct {
 	ThemeName string `json:"theme_name,omitempty"`
 }
 
+// BackgroundFill is the way a background is filled: a solid color, a
+// gradient or a freeform gradient.
+//
+// Bot API: BackgroundFill, BackgroundFillSolid, BackgroundFillGradient, BackgroundFillFreeformGradient.
 type BackgroundFill struct {
 	// Type of the background fill.
 	Type string `json:"type"`
@@ -445,6 +480,8 @@ func (c *Chat) Time() time.Time {
 }
 
 // InviteLink should be used to export chat's invite link.
+//
+// Bot API: exportChatInviteLink.
 func (b *Bot) InviteLink(chat *Chat) (string, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -465,6 +502,8 @@ func (b *Bot) InviteLink(chat *Chat) (string, error) {
 }
 
 // CreateInviteLink creates an additional invite link for a chat.
+//
+// Bot API: createChatInviteLink.
 func (b *Bot) CreateInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -498,6 +537,8 @@ func (b *Bot) CreateInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInvit
 }
 
 // EditInviteLink edits a non-primary invite link created by the bot.
+//
+// Bot API: editChatInviteLink.
 func (b *Bot) EditInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -532,6 +573,8 @@ func (b *Bot) EditInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteL
 }
 
 // RevokeInviteLink revokes an invite link created by the bot.
+//
+// Bot API: revokeChatInviteLink.
 func (b *Bot) RevokeInviteLink(chat Recipient, link string) (*ChatInviteLink, error) {
 	params := map[string]string{
 		"chat_id":     chat.Recipient(),
@@ -554,6 +597,8 @@ func (b *Bot) RevokeInviteLink(chat Recipient, link string) (*ChatInviteLink, er
 }
 
 // ApproveJoinRequest approves a chat join request.
+//
+// Bot API: approveChatJoinRequest.
 func (b *Bot) ApproveJoinRequest(chat Recipient, user *User) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -569,6 +614,8 @@ func (b *Bot) ApproveJoinRequest(chat Recipient, user *User) error {
 }
 
 // DeclineJoinRequest declines a chat join request.
+//
+// Bot API: declineChatJoinRequest.
 func (b *Bot) DeclineJoinRequest(chat Recipient, user *User) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -584,6 +631,8 @@ func (b *Bot) DeclineJoinRequest(chat Recipient, user *User) error {
 }
 
 // SetGroupTitle should be used to update group title.
+//
+// Bot API: setChatTitle.
 func (b *Bot) SetGroupTitle(chat *Chat, title string) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -595,6 +644,8 @@ func (b *Bot) SetGroupTitle(chat *Chat, title string) error {
 }
 
 // SetGroupDescription should be used to update group description.
+//
+// Bot API: setChatDescription.
 func (b *Bot) SetGroupDescription(chat *Chat, description string) error {
 	params := map[string]string{
 		"chat_id":     chat.Recipient(),
@@ -606,6 +657,8 @@ func (b *Bot) SetGroupDescription(chat *Chat, description string) error {
 }
 
 // SetGroupPhoto should be used to update group photo.
+//
+// Bot API: setChatPhoto.
 func (b *Bot) SetGroupPhoto(chat *Chat, p *Photo) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -616,6 +669,8 @@ func (b *Bot) SetGroupPhoto(chat *Chat, p *Photo) error {
 }
 
 // SetGroupStickerSet should be used to update group's group sticker set.
+//
+// Bot API: setChatStickerSet.
 func (b *Bot) SetGroupStickerSet(chat *Chat, setName string) error {
 	params := map[string]string{
 		"chat_id":          chat.Recipient(),
@@ -627,6 +682,8 @@ func (b *Bot) SetGroupStickerSet(chat *Chat, setName string) error {
 }
 
 // SetGroupPermissions sets default chat permissions for all members.
+//
+// Bot API: setChatPermissions.
 func (b *Bot) SetGroupPermissions(chat *Chat, perms Rights) error {
 	params := map[string]interface{}{
 		"chat_id":     chat.Recipient(),
@@ -641,6 +698,8 @@ func (b *Bot) SetGroupPermissions(chat *Chat, perms Rights) error {
 }
 
 // DeleteGroupPhoto should be used to just remove group photo.
+//
+// Bot API: deleteChatPhoto.
 func (b *Bot) DeleteGroupPhoto(chat *Chat) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -651,6 +710,8 @@ func (b *Bot) DeleteGroupPhoto(chat *Chat) error {
 }
 
 // DeleteGroupStickerSet should be used to just remove group sticker set.
+//
+// Bot API: deleteChatStickerSet.
 func (b *Bot) DeleteGroupStickerSet(chat *Chat) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),

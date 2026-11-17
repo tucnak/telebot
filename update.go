@@ -3,6 +3,8 @@ package telebot
 import "strings"
 
 // Update object represents an incoming update.
+//
+// Bot API: Update.
 type Update struct {
 	ID int `json:"update_id"`
 

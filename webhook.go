@@ -39,6 +39,8 @@ type WebhookEndpoint struct {
 // add the Webhook to a http-mux.
 //
 // If you want to ignore the automatic setWebhook call, you can set IgnoreSetWebhook to true.
+//
+// Bot API: WebhookInfo.
 type Webhook struct {
 	Listen           string   `json:"url"`
 	MaxConnections   int      `json:"max_connections"`
@@ -119,6 +121,10 @@ func (h *Webhook) getParams() map[string]string {
 	return params
 }
 
+// Poll registers the webhook with Telegram, unless IgnoreSetWebhook is set,
+// and serves updates until stop is closed.
+//
+// Bot API: setWebhook.
 func (h *Webhook) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 	// by default, the set webhook method will be called, to ignore it, set IgnoreSetWebhook to true
 	if !h.IgnoreSetWebhook {
@@ -172,6 +178,8 @@ func (h *Webhook) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // Webhook returns the current webhook status.
+//
+// Bot API: getWebhookInfo.
 func (b *Bot) Webhook() (*Webhook, error) {
 	data, err := b.Raw("getWebhookInfo", nil)
 	if err != nil {
@@ -189,12 +197,16 @@ func (b *Bot) Webhook() (*Webhook, error) {
 
 // SetWebhook configures a bot to receive incoming
 // updates via an outgoing webhook.
+//
+// Bot API: setWebhook.
 func (b *Bot) SetWebhook(w *Webhook) error {
 	_, err := b.sendFiles("setWebhook", w.getFiles(), w.getParams())
 	return err
 }
 
 // RemoveWebhook removes webhook integration.
+//
+// Bot API: deleteWebhook.
 func (b *Bot) RemoveWebhook(dropPending ...bool) error {
 	drop := false
 	if len(dropPending) > 0 {

@@ -20,6 +20,8 @@ import (
 // and to edit a message into rich content through Edit:
 //
 //	b.Edit(msg, &telebot.InputRichMessage{HTML: "<b>done</b>"})
+//
+// Bot API: InputRichMessage.
 type InputRichMessage struct {
 	// (Optional) Content described using Telegram's extended HTML formatting.
 	HTML string `json:"html,omitempty"`
@@ -68,6 +70,8 @@ func (i *InputRichMessage) Send(b *Bot, to Recipient, opt *SendOptions) (*Messag
 // finalized you must Send the complete InputRichMessage to persist it. draftID
 // must be non-zero — updates sharing the same identifier are animated
 // client-side. Of the send options only ThreadID is honored.
+//
+// Bot API: sendRichMessageDraft.
 func (b *Bot) SendRichDraft(to Recipient, draftID int, rich *InputRichMessage, opts ...interface{}) error {
 	if to == nil {
 		return ErrBadRecipient
@@ -97,6 +101,8 @@ func (b *Bot) SendRichDraft(to Recipient, draftID int, rich *InputRichMessage, o
 
 // InputRichMessageContent represents the content of a rich message to be sent
 // as the result of an inline, guest or Web App query (Bot API 10.1).
+//
+// Bot API: InputRichMessageContent.
 type InputRichMessageContent struct {
 	// The rich message to be sent.
 	RichMessage *InputRichMessage `json:"rich_message"`
@@ -109,6 +115,8 @@ func (i *InputRichMessageContent) IsInputMessageContent() bool {
 
 // RichMessage represents a received rich formatted message (Bot API 10.1),
 // available on Message.RichMessage. Its content is a tree of RichBlock values.
+//
+// Bot API: RichMessage.
 type RichMessage struct {
 	// Content of the message, as an ordered list of blocks.
 	Blocks []RichBlock `json:"blocks"`

@@ -58,6 +58,8 @@ const (
 //
 // RichText is a received-only type — rich content is sent as HTML or Markdown
 // via InputRichMessage, never as a block tree.
+//
+// Bot API: RichText, RichTextBold, RichTextItalic, RichTextUnderline, RichTextStrikethrough, RichTextSpoiler, RichTextDateTime, RichTextTextMention, RichTextSubscript, RichTextSuperscript, RichTextMarked, RichTextCode, RichTextCustomEmoji, RichTextMathematicalExpression, RichTextUrl, RichTextEmailAddress, RichTextPhoneNumber, RichTextBankCardNumber, RichTextMention, RichTextHashtag, RichTextCashtag, RichTextBotCommand, RichTextAnchor, RichTextAnchorLink, RichTextReference, RichTextReferenceLink.
 type RichText struct {
 	// Kind is the wire form this value was decoded from.
 	Kind RichTextKind `json:"-"`

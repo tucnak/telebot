@@ -11,6 +11,8 @@ const (
 
 // Reaction describes the type of reaction.
 // Describes an instance of ReactionTypeCustomEmoji and ReactionTypeEmoji.
+//
+// Bot API: ReactionType, ReactionTypeEmoji, ReactionTypeCustomEmoji, ReactionTypePaid.
 type Reaction struct {
 	// Type of the reaction, always “emoji”
 	Type string `json:"type"`
@@ -24,6 +26,8 @@ type Reaction struct {
 
 // ReactionCount represents a reaction added to a message along
 // with the number of times it was added.
+//
+// Bot API: ReactionCount.
 type ReactionCount struct {
 	// Type of the reaction.
 	Type Reaction `json:"type"`
@@ -44,6 +48,8 @@ type Reactions struct {
 // React changes the chosen reactions on a message. Automatically forwarded messages from a channel to its discussion group have
 // the same available reactions as messages in the channel.
 // Bot API 8.3+: Reactions are now allowed on most service messages.
+//
+// Bot API: setMessageReaction.
 func (b *Bot) React(to Recipient, msg Editable, r Reactions) error {
 	if to == nil {
 		return ErrBadRecipient

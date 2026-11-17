@@ -7,6 +7,8 @@ import (
 )
 
 // File object represents any sort of file.
+//
+// Bot API: File, InputFile.
 type File struct {
 	FileID   string `json:"file_id"`
 	UniqueID string `json:"file_unique_id"`

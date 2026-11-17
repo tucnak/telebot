@@ -9,6 +9,8 @@ import (
 // ReplyMarkup controls two convenient options for bot-user communications
 // such as reply keyboard and inline "keyboard" (a grid of buttons as a part
 // of the message).
+//
+// Bot API: InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, ForceReply.
 type ReplyMarkup struct {
 	// InlineKeyboard is a grid of InlineButtons displayed in the message.
 	//
@@ -230,6 +232,8 @@ func (r *ReplyMarkup) CopyText(text, copyText string) Btn {
 //
 // Set either Contact or Location to true in order to request
 // sensitive info, such as user's phone number or current location.
+//
+// Bot API: KeyboardButton.
 type ReplyButton struct {
 	Text              string      `json:"text"`
 	IconCustomEmojiID string      `json:"icon_custom_emoji_id,omitempty"`
@@ -259,6 +263,8 @@ func (pt PollType) MarshalJSON() ([]byte, error) {
 //
 // To pass the pointers to bool use a special tele.Flag function,
 // that way you will be able to reflect the three-state bool (nil, false, true).
+//
+// Bot API: KeyboardButtonRequestUsers, KeyboardButtonRequestChat.
 type ReplyRecipient struct {
 	ID int32 `json:"request_id"`
 
@@ -280,6 +286,8 @@ type ReplyRecipient struct {
 }
 
 // RecipientShared combines both UserShared and ChatShared objects.
+//
+// Bot API: UsersShared, ChatShared.
 type RecipientShared struct {
 	ID       int32  `json:"request_id"` // chat, users
 	ChatID   int64  `json:"chat_id"`    // chat only
@@ -298,6 +306,8 @@ type RecipientShared struct {
 }
 
 // InlineButton represents a button displayed in the message.
+//
+// Bot API: InlineKeyboardButton.
 type InlineButton struct {
 	// Unique slagish name for this kind of button,
 	// try to be as specific as possible.
@@ -389,6 +399,8 @@ func (b Btn) Inline() *InlineButton {
 // Login represents a parameter of the inline keyboard button
 // used to automatically authorize a user. Serves as a great replacement
 // for the Telegram Login Widget when the user is coming from Telegram.
+//
+// Bot API: LoginUrl.
 type Login struct {
 	URL         string `json:"url"`
 	Text        string `json:"forward_text,omitempty"`
@@ -398,11 +410,15 @@ type Login struct {
 
 // CopyTextButton represents an inline keyboard button that copies
 // specified text to the clipboard when pressed.
+//
+// Bot API: CopyTextButton.
 type CopyTextButton struct {
 	Text string `json:"text"`
 }
 
 // MenuButton describes the bot's menu button in a private chat.
+//
+// Bot API: MenuButton, MenuButtonCommands, MenuButtonWebApp, MenuButtonDefault.
 type MenuButton struct {
 	Type   MenuButtonType `json:"type"`
 	Text   string         `json:"text,omitempty"`

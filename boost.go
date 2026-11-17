@@ -6,6 +6,8 @@ import (
 )
 
 // Boost contains information about a chat boost.
+//
+// Bot API: ChatBoost.
 type Boost struct {
 	// Unique identifier of the boost.
 	ID string `json:"boost_id"`
@@ -42,6 +44,8 @@ const (
 )
 
 // BoostSource describes the source of a chat boost.
+//
+// Bot API: ChatBoostSource, ChatBoostSourcePremium, ChatBoostSourceGiftCode, ChatBoostSourceGiveaway.
 type BoostSource struct {
 	// Source of the boost, always (“premium”, “gift_code”, “giveaway”).
 	Source BoostSourceType `json:"source"`
@@ -63,12 +67,16 @@ type BoostSource struct {
 }
 
 // BoostAdded represents a service message about a user boosting a chat.
+//
+// Bot API: ChatBoostAdded.
 type BoostAdded struct {
 	// Number of boosts added by the user.
 	Count int `json:"boost_count"`
 }
 
 // BoostUpdated represents a boost added to a chat or changed.
+//
+// Bot API: ChatBoostUpdated.
 type BoostUpdated struct {
 	// Chat which was boosted.
 	Chat *Chat `json:"chat"`
@@ -78,6 +86,8 @@ type BoostUpdated struct {
 }
 
 // BoostRemoved represents a boost removed from a chat.
+//
+// Bot API: ChatBoostRemoved.
 type BoostRemoved struct {
 	// Chat which was boosted.
 	Chat *Chat `json:"chat"`
@@ -94,6 +104,8 @@ type BoostRemoved struct {
 
 // UserBoosts gets the list of boosts added to a chat by a user.
 // Requires administrator rights in the chat.
+//
+// Bot API: getUserChatBoosts.
 func (b *Bot) UserBoosts(chat, user Recipient) ([]Boost, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),

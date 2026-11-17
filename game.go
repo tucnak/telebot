@@ -7,6 +7,8 @@ import (
 
 // Game object represents a game.
 // Their short names acts as unique identifiers.
+//
+// Bot API: Game.
 type Game struct {
 	Name string `json:"game_short_name"`
 
@@ -26,6 +28,8 @@ type CallbackGame struct {
 
 // GameHighScore object represents one row
 // of the high scores table for a game.
+//
+// Bot API: GameHighScore.
 type GameHighScore struct {
 	User     *User `json:"user"`
 	Position int   `json:"position"`
@@ -44,6 +48,8 @@ type GameHighScore struct {
 // plus two of their closest neighbors on each side.
 // Will also return the top three users
 // if the user and his neighbors are not among them.
+//
+// Bot API: getGameHighScores.
 func (b *Bot) GameScores(user Recipient, msg Editable) ([]GameHighScore, error) {
 	msgID, chatID := msg.MessageSig()
 
@@ -76,6 +82,8 @@ func (b *Bot) GameScores(user Recipient, msg Editable) ([]GameHighScore, error) 
 //
 // If the message was sent by the bot, returns the edited Message,
 // otherwise returns nil and ErrTrueResult.
+//
+// Bot API: setGameScore.
 func (b *Bot) SetGameScore(user Recipient, msg Editable, score GameHighScore) (*Message, error) {
 	msgID, chatID := msg.MessageSig()
 

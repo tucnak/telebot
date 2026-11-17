@@ -3,6 +3,8 @@ package telebot
 import "time"
 
 // Giveaway represents a message about a scheduled giveaway.
+//
+// Bot API: Giveaway.
 type Giveaway struct {
 	// The list of chats which the user must join to participate in the giveaway.
 	Chats []Chat `json:"chats"`
@@ -45,6 +47,8 @@ func (g *Giveaway) SelectionDate() time.Time {
 
 // GiveawayWinners object represents a message about the completion of a
 // giveaway with public winners.
+//
+// Bot API: GiveawayWinners.
 type GiveawayWinners struct {
 	// The chat that created the giveaway.
 	Chat *Chat `json:"chat"`
@@ -94,6 +98,8 @@ func (g *GiveawayWinners) SelectionDate() time.Time {
 }
 
 // GiveawayCreated represents a service message about the creation of a scheduled giveaway.
+//
+// Bot API: GiveawayCreated.
 type GiveawayCreated struct {
 	// (Optional) The number of Telegram Stars to be split between giveaway winners;
 	// for Telegram Star giveaways only.
@@ -102,6 +108,8 @@ type GiveawayCreated struct {
 
 // GiveawayCompleted represents a service message about the completion of a
 // giveaway without public winners.
+//
+// Bot API: GiveawayCompleted.
 type GiveawayCompleted struct {
 	// Number of winners in the giveaway.
 	WinnerCount int `json:"winner_count"`

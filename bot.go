@@ -16,6 +16,8 @@ import (
 
 // NewBot does try to build a Bot with token `token`, which
 // is a secret API key assigned to particular bot.
+//
+// Bot API: getMe.
 func NewBot(pref Settings) (*Bot, error) {
 	if pref.Updates == 0 {
 		pref.Updates = 100
@@ -217,6 +219,8 @@ func (b *Bot) Trigger(endpoint interface{}, c Context) error {
 
 // Start brings bot into motion by consuming incoming
 // updates (see Bot.Updates channel).
+//
+// Bot API: getUpdates.
 func (b *Bot) Start() {
 	if b.Poller == nil {
 		panic("telebot: can't start without a poller")
@@ -294,6 +298,8 @@ func (b *Bot) NewContext(u Update) Context {
 //   - *ReplyMarkup (a component of SendOptions)
 //   - Option (a shortcut flag for popular options)
 //   - ParseMode (HTML, Markdown, etc)
+//
+// Bot API: sendMessage, sendPhoto, sendAudio, sendDocument, sendVideo, sendAnimation, sendVoice, sendVideoNote, sendSticker, sendLocation, sendVenue, sendInvoice, sendPoll, sendDice, sendGame, sendRichMessage.
 func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
@@ -319,6 +325,8 @@ func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Messag
 //
 // Only ParseMode, Entities and ThreadID send options are honored; other fields
 // are not accepted by sendMessageDraft.
+//
+// Bot API: sendMessageDraft.
 func (b *Bot) SendDraft(to Recipient, draftID int, text string, opts ...interface{}) error {
 	if to == nil {
 		return ErrBadRecipient
@@ -350,6 +358,8 @@ func (b *Bot) SendDraft(to Recipient, draftID int, text string, opts ...interfac
 
 // SendPaidMedia sends multiple instances of paid media as a single message.
 // To include the caption, make sure the first PaidInputtable of an album has it.
+//
+// Bot API: sendPaidMedia.
 func (b *Bot) SendPaidMedia(to Recipient, stars int, a PaidAlbum, opts ...interface{}) (*Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
@@ -402,6 +412,8 @@ func (b *Bot) SendPaidMedia(to Recipient, stars int, a PaidAlbum, opts ...interf
 // SendAlbum sends multiple instances of media as a single message.
 // To include the caption, make sure the first Inputtable of an album has it.
 // From all existing options, it only supports tele.Silent.
+//
+// Bot API: sendMediaGroup.
 func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
@@ -472,6 +484,8 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 
 // Reply behaves just like Send() with an exception of "reply-to" indicator.
 // This function will panic upon nil Message.
+//
+// Bot API: sendMessage, sendPhoto, sendAudio, sendDocument, sendVideo, sendAnimation, sendVoice, sendVideoNote, sendSticker, sendLocation, sendVenue, sendInvoice, sendPoll, sendDice, sendGame, sendRichMessage.
 func (b *Bot) Reply(to *Message, what interface{}, opts ...interface{}) (*Message, error) {
 	sendOpts := b.extractOptions(opts)
 	if sendOpts == nil {
@@ -484,6 +498,8 @@ func (b *Bot) Reply(to *Message, what interface{}, opts ...interface{}) (*Messag
 
 // Forward behaves just like Send() but of all options it only supports Silent (see Bots API).
 // This function will panic upon nil Editable.
+//
+// Bot API: forwardMessage.
 func (b *Bot) Forward(to Recipient, msg Editable, opts ...interface{}) (*Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
@@ -519,6 +535,8 @@ func (b *Bot) Forward(to Recipient, msg Editable, opts ...interface{}) (*Message
 // If some of the specified messages can't be found or forwarded, they are skipped.
 // Service messages and messages with protected content can't be forwarded.
 // Album grouping is kept for forwarded messages.
+//
+// Bot API: forwardMessages.
 func (b *Bot) ForwardMany(to Recipient, msgs []Editable, opts ...*SendOptions) ([]Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
@@ -529,6 +547,8 @@ func (b *Bot) ForwardMany(to Recipient, msgs []Editable, opts ...*SendOptions) (
 // Copy behaves just like Forward() but the copied message doesn't have a link to the original message (see Bots API).
 //
 // This function will panic upon nil Editable.
+//
+// Bot API: copyMessage.
 func (b *Bot) Copy(to Recipient, msg Editable, opts ...interface{}) (*Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
@@ -567,6 +587,8 @@ func (b *Bot) Copy(to Recipient, msg Editable, opts ...interface{}) (*Message, e
 // correct_option_id is known to the bot. The method is analogous
 // to the method forwardMessages, but the copied messages don't have a link to the original message.
 // Album grouping is kept for copied messages.
+//
+// Bot API: copyMessages.
 func (b *Bot) CopyMany(to Recipient, msgs []Editable, opts ...*SendOptions) ([]Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
@@ -589,6 +611,8 @@ func (b *Bot) CopyMany(to Recipient, msgs []Editable, opts ...*SendOptions) ([]M
 //	b.Edit(m, tele.Location{42.1337, 69.4242})
 //	b.Edit(c, "edit inline message from the callback")
 //	b.Edit(r, "edit message from chosen inline result")
+//
+// Bot API: editMessageText, editMessageLiveLocation.
 func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Message, error) {
 	var (
 		method string
@@ -663,6 +687,8 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 //
 // If edited message is sent by the bot, returns it,
 // otherwise returns nil and ErrTrueResult.
+//
+// Bot API: editMessageReplyMarkup.
 func (b *Bot) EditReplyMarkup(msg Editable, markup *ReplyMarkup) (*Message, error) {
 	msgID, chatID := msg.MessageSig()
 	params := make(map[string]string)
@@ -696,6 +722,8 @@ func (b *Bot) EditReplyMarkup(msg Editable, markup *ReplyMarkup) (*Message, erro
 //
 // If edited message is sent by the bot, returns it,
 // otherwise returns nil and ErrTrueResult.
+//
+// Bot API: editMessageCaption.
 func (b *Bot) EditCaption(msg Editable, caption string, opts ...interface{}) (*Message, error) {
 	msgID, chatID := msg.MessageSig()
 
@@ -731,6 +759,8 @@ func (b *Bot) EditCaption(msg Editable, caption string, opts ...interface{}) (*M
 //
 //	b.EditMedia(m, &tele.Photo{File: tele.FromDisk("chicken.jpg")})
 //	b.EditMedia(m, &tele.Video{File: tele.FromURL("http://video.mp4")})
+//
+// Bot API: editMessageMedia.
 func (b *Bot) EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*Message, error) {
 	var (
 		repr  string
@@ -820,6 +850,8 @@ func (b *Bot) EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*M
 //   - If the bot is an administrator of a group, it can delete any message there.
 //   - If the bot has can_delete_messages permission in a supergroup or a
 //     channel, it can delete any message there.
+//
+// Bot API: deleteMessage.
 func (b *Bot) Delete(msg Editable) error {
 	msgID, chatID := msg.MessageSig()
 
@@ -834,6 +866,8 @@ func (b *Bot) Delete(msg Editable) error {
 
 // DeleteMany deletes multiple messages simultaneously.
 // If some of the specified messages can't be found, they are skipped.
+//
+// Bot API: deleteMessages.
 func (b *Bot) DeleteMany(msgs []Editable) error {
 	params := make(map[string]string)
 	embedMessages(params, msgs)
@@ -851,6 +885,8 @@ func (b *Bot) DeleteMany(msgs []Editable) error {
 //
 // Currently, Telegram supports only a narrow range of possible
 // actions, these are aligned as constants of this package.
+//
+// Bot API: sendChatAction.
 func (b *Bot) Notify(to Recipient, action ChatAction, threadID ...int) error {
 	if to == nil {
 		return ErrBadRecipient
@@ -877,6 +913,8 @@ func (b *Bot) Notify(to Recipient, action ChatAction, threadID ...int) error {
 //	b.Ship(query)          // OK
 //	b.Ship(query, opts...) // OK with options
 //	b.Ship(query, "Oops!") // Error message
+//
+// Bot API: answerShippingQuery.
 func (b *Bot) Ship(query *ShippingQuery, what ...interface{}) error {
 	params := map[string]string{
 		"shipping_query_id": query.ID,
@@ -907,6 +945,8 @@ func (b *Bot) Ship(query *ShippingQuery, what ...interface{}) error {
 }
 
 // Accept finalizes the deal.
+//
+// Bot API: answerPreCheckoutQuery.
 func (b *Bot) Accept(query *PreCheckoutQuery, errorMessage ...string) error {
 	params := map[string]string{
 		"pre_checkout_query_id": query.ID,
@@ -931,6 +971,8 @@ func (b *Bot) Accept(query *PreCheckoutQuery, errorMessage ...string) error {
 //
 //	b.Respond(c)
 //	b.Respond(c, response)
+//
+// Bot API: answerCallbackQuery.
 func (b *Bot) Respond(c *Callback, resp ...*CallbackResponse) error {
 	var r *CallbackResponse
 	if resp == nil {
@@ -947,6 +989,8 @@ func (b *Bot) Respond(c *Callback, resp ...*CallbackResponse) error {
 // Answer sends a response for a given inline query. A query can only
 // be responded to once, subsequent attempts to respond to the same query
 // will result in an error.
+//
+// Bot API: answerInlineQuery.
 func (b *Bot) Answer(query *Query, resp *QueryResponse) error {
 	resp.QueryID = query.ID
 
@@ -960,6 +1004,8 @@ func (b *Bot) Answer(query *Query, resp *QueryResponse) error {
 
 // AnswerWebApp sends a response for a query from Web App and returns
 // information about an inline message sent by a Web App on behalf of a user
+//
+// Bot API: answerWebAppQuery.
 func (b *Bot) AnswerWebApp(query *Query, r Result) (*WebAppMessage, error) {
 	r.Process(b)
 
@@ -988,6 +1034,8 @@ func (b *Bot) AnswerWebApp(query *Query, r Result) (*WebAppMessage, error) {
 //
 // Usually, Telegram-provided File objects miss FilePath so you might need to
 // perform an additional request to fetch them.
+//
+// Bot API: getFile.
 func (b *Bot) FileByID(fileID string) (File, error) {
 	params := map[string]string{
 		"file_id": fileID,
@@ -1009,6 +1057,8 @@ func (b *Bot) FileByID(fileID string) (File, error) {
 
 // Download saves the file from Telegram servers locally.
 // Maximum file size to download is 20 MB.
+//
+// Bot API: getFile.
 func (b *Bot) Download(file *File, localFilename string) error {
 	reader, err := b.File(file)
 	if err != nil {
@@ -1032,6 +1082,8 @@ func (b *Bot) Download(file *File, localFilename string) error {
 }
 
 // File gets a file from Telegram servers.
+//
+// Bot API: getFile.
 func (b *Bot) File(file *File) (io.ReadCloser, error) {
 	f, err := b.FileByID(file.FileID)
 	if err != nil {
@@ -1067,6 +1119,8 @@ func (b *Bot) File(file *File) (io.ReadCloser, error) {
 //
 // If the message is sent by the bot, returns it,
 // otherwise returns nil and ErrTrueResult.
+//
+// Bot API: stopMessageLiveLocation.
 func (b *Bot) StopLiveLocation(msg Editable, opts ...interface{}) (*Message, error) {
 	msgID, chatID := msg.MessageSig()
 
@@ -1091,6 +1145,8 @@ func (b *Bot) StopLiveLocation(msg Editable, opts ...interface{}) (*Message, err
 //
 // It supports ReplyMarkup.
 // This function will panic upon nil Editable.
+//
+// Bot API: stopPoll.
 func (b *Bot) StopPoll(msg Editable, opts ...interface{}) (*Poll, error) {
 	msgID, chatID := msg.MessageSig()
 
@@ -1117,6 +1173,8 @@ func (b *Bot) StopPoll(msg Editable, opts ...interface{}) (*Poll, error) {
 }
 
 // Leave makes bot leave a group, supergroup or channel.
+//
+// Bot API: leaveChat.
 func (b *Bot) Leave(chat Recipient) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -1130,6 +1188,8 @@ func (b *Bot) Leave(chat Recipient) error {
 //
 // It supports Silent option.
 // This function will panic upon nil Editable.
+//
+// Bot API: pinChatMessage.
 func (b *Bot) Pin(msg Editable, opts ...interface{}) error {
 	msgID, chatID := msg.MessageSig()
 
@@ -1147,6 +1207,8 @@ func (b *Bot) Pin(msg Editable, opts ...interface{}) error {
 
 // Unpin unpins a message in a supergroup or a channel.
 // It supports tb.Silent option.
+//
+// Bot API: unpinChatMessage.
 func (b *Bot) Unpin(chat Recipient, messageID ...int) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -1161,6 +1223,8 @@ func (b *Bot) Unpin(chat Recipient, messageID ...int) error {
 
 // UnpinAll unpins all messages in a supergroup or a channel.
 // It supports tb.Silent option.
+//
+// Bot API: unpinAllChatMessages.
 func (b *Bot) UnpinAll(chat Recipient) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -1174,11 +1238,15 @@ func (b *Bot) UnpinAll(chat Recipient) error {
 //
 // Including current name of the user for one-on-one conversations,
 // current username of a user, group or channel, etc.
+//
+// Bot API: getChat.
 func (b *Bot) ChatByID(id int64) (*Chat, error) {
 	return b.ChatByUsername(strconv.FormatInt(id, 10))
 }
 
 // ChatByUsername fetches chat info by its username.
+//
+// Bot API: getChat.
 func (b *Bot) ChatByUsername(name string) (*Chat, error) {
 	params := map[string]string{
 		"chat_id": name,
@@ -1202,6 +1270,8 @@ func (b *Bot) ChatByUsername(name string) (*Chat, error) {
 }
 
 // ChatFullInfo fetches full information about a chat.
+//
+// Bot API: getChat.
 func (b *Bot) ChatFullInfo(chat Recipient) (*ChatFullInfo, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -1227,6 +1297,8 @@ func (b *Bot) ChatFullInfo(chat Recipient) (*ChatFullInfo, error) {
 }
 
 // ProfilePhotosOf returns list of profile pictures for a user.
+//
+// Bot API: getUserProfilePhotos.
 func (b *Bot) ProfilePhotosOf(user *User) ([]Photo, error) {
 	params := map[string]string{
 		"user_id": user.Recipient(),
@@ -1250,6 +1322,8 @@ func (b *Bot) ProfilePhotosOf(user *User) ([]Photo, error) {
 }
 
 // UserProfileAudios represents the audios displayed on a user's profile.
+//
+// Bot API: UserProfileAudios.
 type UserProfileAudios struct {
 	TotalCount int     `json:"total_count"`
 	Audios     []Audio `json:"audios"`
@@ -1258,6 +1332,8 @@ type UserProfileAudios struct {
 // ProfileAudiosOf returns a list of profile audios for a user.
 // offset is the sequential number of the first audio to be returned (0 to start).
 // limit caps the number of audios; values 1-100 are accepted (0 means default 100).
+//
+// Bot API: getUserProfileAudios.
 func (b *Bot) ProfileAudiosOf(user *User, offset, limit int) (*UserProfileAudios, error) {
 	params := map[string]string{
 		"user_id": user.Recipient(),
@@ -1284,6 +1360,8 @@ func (b *Bot) ProfileAudiosOf(user *User, offset, limit int) (*UserProfileAudios
 }
 
 // ChatMemberOf returns information about a member of a chat.
+//
+// Bot API: getChatMember.
 func (b *Bot) ChatMemberOf(chat, user Recipient) (*ChatMember, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -1306,6 +1384,8 @@ func (b *Bot) ChatMemberOf(chat, user Recipient) (*ChatMember, error) {
 
 // MenuButton returns the current value of the bot's menu button in a private chat,
 // or the default menu button.
+//
+// Bot API: getChatMenuButton.
 func (b *Bot) MenuButton(chat *User) (*MenuButton, error) {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -1332,6 +1412,8 @@ func (b *Bot) MenuButton(chat *User) (*MenuButton, error) {
 //
 //   - MenuButtonType for simple menu buttons (default, commands)
 //   - MenuButton complete structure for web_app menu button type
+//
+// Bot API: setChatMenuButton.
 func (b *Bot) SetMenuButton(chat *User, mb interface{}) error {
 	params := map[string]interface{}{}
 
@@ -1352,6 +1434,8 @@ func (b *Bot) SetMenuButton(chat *User, mb interface{}) error {
 }
 
 // Logout logs out from the cloud Bot API server before launching the bot locally.
+//
+// Bot API: logOut.
 func (b *Bot) Logout() (bool, error) {
 	data, err := b.Raw("logOut", nil)
 	if err != nil {
@@ -1369,6 +1453,8 @@ func (b *Bot) Logout() (bool, error) {
 }
 
 // Close closes the bot instance before moving it from one local server to another.
+//
+// Bot API: close.
 func (b *Bot) Close() (bool, error) {
 	data, err := b.Raw("close", nil)
 	if err != nil {
@@ -1386,6 +1472,8 @@ func (b *Bot) Close() (bool, error) {
 }
 
 // BotInfo represents a single object of BotName, BotDescription, BotShortDescription instances.
+//
+// Bot API: BotName, BotDescription, BotShortDescription.
 type BotInfo struct {
 	Name             string `json:"name,omitempty"`
 	Description      string `json:"description,omitempty"`
@@ -1393,6 +1481,8 @@ type BotInfo struct {
 }
 
 // SetMyName change's the bot name.
+//
+// Bot API: setMyName.
 func (b *Bot) SetMyName(name, language string) error {
 	params := map[string]string{
 		"name":          name,
@@ -1404,12 +1494,16 @@ func (b *Bot) SetMyName(name, language string) error {
 }
 
 // MyName returns the current bot name for the given user language.
+//
+// Bot API: getMyName.
 func (b *Bot) MyName(language string) (*BotInfo, error) {
 	return b.botInfo(language, "getMyName")
 }
 
 // SetMyDescription change's the bot description, which is shown in the chat
 // with the bot if the chat is empty.
+//
+// Bot API: setMyDescription.
 func (b *Bot) SetMyDescription(desc, language string) error {
 	params := map[string]string{
 		"description":   desc,
@@ -1421,12 +1515,16 @@ func (b *Bot) SetMyDescription(desc, language string) error {
 }
 
 // MyDescription the current bot description for the given user language.
+//
+// Bot API: getMyDescription.
 func (b *Bot) MyDescription(language string) (*BotInfo, error) {
 	return b.botInfo(language, "getMyDescription")
 }
 
 // SetMyShortDescription change's the bot short description, which is shown on
 // the bot's profile page and is sent together with the link when users share the bot.
+//
+// Bot API: setMyShortDescription.
 func (b *Bot) SetMyShortDescription(desc, language string) error {
 	params := map[string]string{
 		"short_description": desc,
@@ -1438,6 +1536,8 @@ func (b *Bot) SetMyShortDescription(desc, language string) error {
 }
 
 // MyShortDescription the current bot short description for the given user language.
+//
+// Bot API: getMyShortDescription.
 func (b *Bot) MyShortDescription(language string) (*BotInfo, error) {
 	return b.botInfo(language, "getMyShortDescription")
 }
@@ -1486,6 +1586,8 @@ func (p *InputProfilePhotoAnimated) inputProfilePhoto(files map[string]File) ([]
 }
 
 // SetMyProfilePhoto changes the profile photo of the bot.
+//
+// Bot API: setMyProfilePhoto.
 func (b *Bot) SetMyProfilePhoto(photo InputProfilePhoto) error {
 	files := make(map[string]File)
 	data, err := photo.inputProfilePhoto(files)
@@ -1500,11 +1602,17 @@ func (b *Bot) SetMyProfilePhoto(photo InputProfilePhoto) error {
 }
 
 // RemoveMyProfilePhoto removes the profile photo of the bot.
+//
+// Bot API: removeMyProfilePhoto.
 func (b *Bot) RemoveMyProfilePhoto() error {
 	_, err := b.Raw("removeMyProfilePhoto", nil)
 	return err
 }
 
+// StarTransactions returns the bot's Telegram Star transactions in
+// chronological order.
+//
+// Bot API: getStarTransactions.
 func (b *Bot) StarTransactions(offset, limit int) ([]StarTransaction, error) {
 	params := map[string]int{
 		"offset": offset,
@@ -1548,6 +1656,8 @@ func (b *Bot) botInfo(language, key string) (*BotInfo, error) {
 
 // SetUserEmojiStatus changes the emoji status for a given user that previously
 // allowed the bot to manage their emoji status via the Mini App Bot API.
+//
+// Bot API: setUserEmojiStatus.
 func (b *Bot) SetUserEmojiStatus(user Recipient, emojiStatusCustomEmojiID string, expirationDate ...int64) error {
 	params := map[string]string{
 		"user_id": user.Recipient(),

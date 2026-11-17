@@ -10,6 +10,8 @@ import (
 const Stars = "XTR"
 
 // ShippingQuery contains information about an incoming shipping query.
+//
+// Bot API: ShippingQuery.
 type ShippingQuery struct {
 	Sender  *User           `json:"from"`
 	ID      string          `json:"id"`
@@ -18,6 +20,8 @@ type ShippingQuery struct {
 }
 
 // ShippingAddress represents a shipping address.
+//
+// Bot API: ShippingAddress.
 type ShippingAddress struct {
 	CountryCode string `json:"country_code"`
 	State       string `json:"state"`
@@ -28,6 +32,8 @@ type ShippingAddress struct {
 }
 
 // ShippingOption represents one shipping option.
+//
+// Bot API: ShippingOption.
 type ShippingOption struct {
 	ID     string  `json:"id"`
 	Title  string  `json:"title"`
@@ -35,6 +41,8 @@ type ShippingOption struct {
 }
 
 // Payment contains basic information about a successful payment.
+//
+// Bot API: SuccessfulPayment.
 type Payment struct {
 	Currency         string `json:"currency"`
 	Total            int    `json:"total_amount"`
@@ -50,6 +58,9 @@ type Payment struct {
 	IsFirstRecurring           bool  `json:"is_first_recurring,omitempty"`
 }
 
+// RefundedPayment contains basic information about a refunded payment.
+//
+// Bot API: RefundedPayment.
 type RefundedPayment struct {
 	Currency         string `json:"currency"`
 	Total            int    `json:"total_amount"`
@@ -59,6 +70,8 @@ type RefundedPayment struct {
 }
 
 // PreCheckoutQuery contains information about an incoming pre-checkout query.
+//
+// Bot API: PreCheckoutQuery.
 type PreCheckoutQuery struct {
 	Sender   *User  `json:"from"`
 	ID       string `json:"id"`
@@ -70,6 +83,8 @@ type PreCheckoutQuery struct {
 }
 
 // Order represents information about an order.
+//
+// Bot API: OrderInfo.
 type Order struct {
 	Name        string          `json:"name"`
 	PhoneNumber string          `json:"phone_number"`
@@ -78,6 +93,8 @@ type Order struct {
 }
 
 // Invoice contains basic information about an invoice.
+//
+// Bot API: Invoice.
 type Invoice struct {
 	Title       string  `json:"title"`
 	Description string  `json:"description"`
@@ -173,6 +190,8 @@ func (i Invoice) params() map[string]string {
 }
 
 // Price represents a portion of the price for goods or services.
+//
+// Bot API: LabeledPrice.
 type Price struct {
 	Label  string `json:"label"`
 	Amount int    `json:"amount"`
@@ -202,6 +221,8 @@ func (c Currency) ToTotal(total float64) int {
 }
 
 // CreateInvoiceLink creates a link for a payment invoice.
+//
+// Bot API: createInvoiceLink.
 func (b *Bot) CreateInvoiceLink(i Invoice) (string, error) {
 	data, err := b.Raw("createInvoiceLink", i.params())
 	if err != nil {
@@ -218,6 +239,8 @@ func (b *Bot) CreateInvoiceLink(i Invoice) (string, error) {
 }
 
 // RefundStars returns a successful payment in Telegram Stars.
+//
+// Bot API: refundStarPayment.
 func (b *Bot) RefundStars(to Recipient, chargeID string) error {
 	params := map[string]string{
 		"user_id":                    to.Recipient(),
@@ -233,6 +256,8 @@ func (b *Bot) RefundStars(to Recipient, chargeID string) error {
 }
 
 // EditUserStarSubscription allows the bot to cancel or re-enable extension of a subscription paid in Telegram Stars.
+//
+// Bot API: editUserStarSubscription.
 func (b *Bot) EditUserStarSubscription(user Recipient, chargeID string, isCanceled bool) error {
 	params := map[string]string{
 		"user_id":                    user.Recipient(),
@@ -245,6 +270,8 @@ func (b *Bot) EditUserStarSubscription(user Recipient, chargeID string, isCancel
 }
 
 // VerifyUser verifies a user with the specified level and requirements.
+//
+// Bot API: verifyUser.
 func (b *Bot) VerifyUser(user Recipient, level VerificationLevel, requirements *VerificationRequirements) error {
 	params := map[string]string{
 		"user_id": user.Recipient(),
@@ -262,6 +289,8 @@ func (b *Bot) VerifyUser(user Recipient, level VerificationLevel, requirements *
 }
 
 // VerifyChat verifies a chat with the specified level and requirements.
+//
+// Bot API: verifyChat.
 func (b *Bot) VerifyChat(chat *Chat, level VerificationLevel, requirements *VerificationRequirements) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),
@@ -279,6 +308,8 @@ func (b *Bot) VerifyChat(chat *Chat, level VerificationLevel, requirements *Veri
 }
 
 // RemoveUserVerification removes verification from a user.
+//
+// Bot API: removeUserVerification.
 func (b *Bot) RemoveUserVerification(user Recipient) error {
 	params := map[string]string{
 		"user_id": user.Recipient(),
@@ -289,6 +320,8 @@ func (b *Bot) RemoveUserVerification(user Recipient) error {
 }
 
 // RemoveChatVerification removes verification from a chat.
+//
+// Bot API: removeChatVerification.
 func (b *Bot) RemoveChatVerification(chat *Chat) error {
 	params := map[string]string{
 		"chat_id": chat.Recipient(),

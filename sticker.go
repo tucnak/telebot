@@ -33,6 +33,8 @@ const (
 )
 
 // StickerSet represents a sticker set.
+//
+// Bot API: StickerSet.
 type StickerSet struct {
 	Type          StickerSetType   `json:"sticker_type"`
 	Format        StickerSetFormat `json:"sticker_format"`
@@ -50,6 +52,9 @@ type StickerSet struct {
 	Input []InputSticker
 }
 
+// InputSticker describes a sticker to be added to a sticker set.
+//
+// Bot API: InputSticker.
 type InputSticker struct {
 	File
 	Sticker      string        `json:"sticker"`
@@ -61,6 +66,8 @@ type InputSticker struct {
 
 // MaskPosition describes the position on faces where
 // a mask should be placed by default.
+//
+// Bot API: MaskPosition.
 type MaskPosition struct {
 	Feature MaskFeature `json:"point"`
 	XShift  float32     `json:"x_shift"`
@@ -69,6 +76,8 @@ type MaskPosition struct {
 }
 
 // UploadSticker uploads a sticker file for later use.
+//
+// Bot API: uploadStickerFile.
 func (b *Bot) UploadSticker(to Recipient, format StickerSetFormat, f File) (*File, error) {
 	params := map[string]string{
 		"user_id":        to.Recipient(),
@@ -90,6 +99,8 @@ func (b *Bot) UploadSticker(to Recipient, format StickerSetFormat, f File) (*Fil
 }
 
 // StickerSet returns a sticker set on success.
+//
+// Bot API: getStickerSet.
 func (b *Bot) StickerSet(name string) (*StickerSet, error) {
 	data, err := b.Raw("getStickerSet", map[string]string{"name": name})
 	if err != nil {
@@ -106,6 +117,8 @@ func (b *Bot) StickerSet(name string) (*StickerSet, error) {
 }
 
 // CreateStickerSet creates a new sticker set.
+//
+// Bot API: createNewStickerSet.
 func (b *Bot) CreateStickerSet(of Recipient, set *StickerSet) error {
 	files := make(map[string]File)
 	for i, s := range set.Input {
@@ -136,6 +149,8 @@ func (b *Bot) CreateStickerSet(of Recipient, set *StickerSet) error {
 }
 
 // AddStickerToSet adds a new sticker to the existing sticker set.
+//
+// Bot API: addStickerToSet.
 func (b *Bot) AddStickerToSet(of Recipient, name string, sticker InputSticker) error {
 	files := make(map[string]File)
 	repr := sticker.File.process("0", files)
@@ -157,6 +172,8 @@ func (b *Bot) AddStickerToSet(of Recipient, name string, sticker InputSticker) e
 }
 
 // SetStickerPosition moves a sticker in set to a specific position.
+//
+// Bot API: setStickerPositionInSet.
 func (b *Bot) SetStickerPosition(sticker string, position int) error {
 	params := map[string]string{
 		"sticker":  sticker,
@@ -168,6 +185,8 @@ func (b *Bot) SetStickerPosition(sticker string, position int) error {
 }
 
 // DeleteSticker deletes a sticker from a set created by the bot.
+//
+// Bot API: deleteStickerFromSet.
 func (b *Bot) DeleteSticker(sticker string) error {
 	_, err := b.Raw("deleteStickerFromSet", map[string]string{"sticker": sticker})
 	return err
@@ -182,6 +201,8 @@ func (b *Bot) DeleteSticker(sticker string) error {
 // up to 32 kilobytes in size.
 //
 // Animated sticker set thumbnail can't be uploaded via HTTP URL.
+//
+// Bot API: setStickerSetThumbnail.
 func (b *Bot) SetStickerSetThumb(of Recipient, set *StickerSet) error {
 	if set.Thumbnail == nil {
 		return errors.New("telebot: thumbnail is required")
@@ -205,6 +226,8 @@ func (b *Bot) SetStickerSetThumb(of Recipient, set *StickerSet) error {
 }
 
 // SetStickerSetTitle sets the title of a created sticker set.
+//
+// Bot API: setStickerSetTitle.
 func (b *Bot) SetStickerSetTitle(s StickerSet) error {
 	params := map[string]string{
 		"name":  s.Name,
@@ -216,6 +239,8 @@ func (b *Bot) SetStickerSetTitle(s StickerSet) error {
 }
 
 // DeleteStickerSet deletes a sticker set that was created by the bot.
+//
+// Bot API: deleteStickerSet.
 func (b *Bot) DeleteStickerSet(name string) error {
 	params := map[string]string{"name": name}
 
@@ -224,6 +249,8 @@ func (b *Bot) DeleteStickerSet(name string) error {
 }
 
 // SetStickerEmojis changes the list of emoji assigned to a regular or custom emoji sticker.
+//
+// Bot API: setStickerEmojiList.
 func (b *Bot) SetStickerEmojis(sticker string, emojis []string) error {
 	data, err := json.Marshal(emojis)
 	if err != nil {
@@ -240,6 +267,8 @@ func (b *Bot) SetStickerEmojis(sticker string, emojis []string) error {
 }
 
 // SetStickerKeywords changes search keywords assigned to a regular or custom emoji sticker.
+//
+// Bot API: setStickerKeywords.
 func (b *Bot) SetStickerKeywords(sticker string, keywords []string) error {
 	mk, err := json.Marshal(keywords)
 	if err != nil {
@@ -256,6 +285,8 @@ func (b *Bot) SetStickerKeywords(sticker string, keywords []string) error {
 }
 
 // SetStickerMaskPosition changes the mask position of a mask sticker.
+//
+// Bot API: setStickerMaskPosition.
 func (b *Bot) SetStickerMaskPosition(sticker string, mask MaskPosition) error {
 	data, err := json.Marshal(mask)
 	if err != nil {
@@ -272,6 +303,8 @@ func (b *Bot) SetStickerMaskPosition(sticker string, mask MaskPosition) error {
 }
 
 // CustomEmojiStickers returns the information about custom emoji stickers by their ids.
+//
+// Bot API: getCustomEmojiStickers.
 func (b *Bot) CustomEmojiStickers(ids []string) ([]Sticker, error) {
 	data, _ := json.Marshal(ids)
 
@@ -294,6 +327,8 @@ func (b *Bot) CustomEmojiStickers(ids []string) ([]Sticker, error) {
 }
 
 // SetCustomEmojiStickerSetThumb sets the thumbnail of a custom emoji sticker set.
+//
+// Bot API: setCustomEmojiStickerSetThumbnail.
 func (b *Bot) SetCustomEmojiStickerSetThumb(name, id string) error {
 	params := map[string]string{
 		"name":            name,
@@ -305,6 +340,8 @@ func (b *Bot) SetCustomEmojiStickerSetThumb(name, id string) error {
 }
 
 // ReplaceStickerInSet returns True on success, if existing sticker was replaced with a new one.
+//
+// Bot API: replaceStickerInSet.
 func (b *Bot) ReplaceStickerInSet(of Recipient, stickerSet, oldSticker string, sticker InputSticker) (bool, error) {
 	files := make(map[string]File)
 

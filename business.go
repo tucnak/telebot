@@ -5,6 +5,9 @@ import (
 	"time"
 )
 
+// BusinessConnection describes the connection of the bot with a business account.
+//
+// Bot API: BusinessConnection.
 type BusinessConnection struct {
 	// Unique identifier of the business connection
 	ID string `json:"id"`
@@ -33,6 +36,9 @@ func (b *BusinessConnection) Time() time.Time {
 	return time.Unix(b.Unixtime, 0)
 }
 
+// BusinessMessagesDeleted is received when messages are deleted from a connected business account.
+//
+// Bot API: BusinessMessagesDeleted.
 type BusinessMessagesDeleted struct {
 	// Unique identifier of the business connection
 	BusinessConnectionID string `json:"business_connection_id"`
@@ -45,6 +51,9 @@ type BusinessMessagesDeleted struct {
 	MessageIDs []int `json:"message_ids"`
 }
 
+// BusinessIntro is the intro of a business account.
+//
+// Bot API: BusinessIntro.
 type BusinessIntro struct {
 	// (Optional)
 	// Title text of the business intro
@@ -57,6 +66,9 @@ type BusinessIntro struct {
 	Sticker *Sticker `json:"sticker"`
 }
 
+// BusinessLocation is the location of a business account.
+//
+// Bot API: BusinessLocation.
 type BusinessLocation struct {
 	// Address of the business
 	Address string `json:"address"`
@@ -65,6 +77,9 @@ type BusinessLocation struct {
 	Location *Location `json:"location"`
 }
 
+// BusinessOpeningHoursInterval is a time interval when a business is open.
+//
+// Bot API: BusinessOpeningHoursInterval.
 type BusinessOpeningHoursInterval struct {
 	// The minute's sequence number in a week, starting on Monday,
 	// marking the start of the time interval during which the business
@@ -77,6 +92,9 @@ type BusinessOpeningHoursInterval struct {
 	ClosingMinute int `json:"closing_minute"`
 }
 
+// BusinessOpeningHours are the opening hours of a business account.
+//
+// Bot API: BusinessOpeningHours.
 type BusinessOpeningHours struct {
 	// Unique name of the time zone for which the opening hours are defined
 	Timezone string `json:"time_zone_name"`
@@ -86,6 +104,8 @@ type BusinessOpeningHours struct {
 }
 
 // BusinessConnection returns the information about the connection of the bot with a business account.
+//
+// Bot API: getBusinessConnection.
 func (b *Bot) BusinessConnection(id string) (*BusinessConnection, error) {
 	params := map[string]string{
 		"business_connection_id": id,

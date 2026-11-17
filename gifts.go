@@ -6,6 +6,8 @@ import (
 )
 
 // Gift represents a gift that can be sent by the bot.
+//
+// Bot API: Gift.
 type Gift struct {
 	// Unique identifier of the gift
 	ID string `json:"id"`
@@ -27,12 +29,16 @@ type Gift struct {
 }
 
 // Gifts represents a list of gifts.
+//
+// Bot API: Gifts.
 type Gifts struct {
 	// The list of gifts
 	Gifts []Gift `json:"gifts"`
 }
 
 // GetAvailableGifts returns the list of gifts that can be sent by the bot to users.
+//
+// Bot API: getAvailableGifts.
 func (b *Bot) GetAvailableGifts() ([]Gift, error) {
 	data, err := b.Raw("getAvailableGifts", nil)
 	if err != nil {
@@ -51,6 +57,8 @@ func (b *Bot) GetAvailableGifts() ([]Gift, error) {
 // SendGift sends a gift to the given user or chat member. The gift can't be converted to Telegram Stars by the user.
 // Additional text can be passed as a string option. PayForUpgrade can be passed as a bool to pay for upgrading the gift.
 // For Bot API 8.3+, you can pass a chat as the first parameter to send gifts to specific chat members.
+//
+// Bot API: sendGift.
 func (b *Bot) SendGift(to Recipient, giftID string, opts ...interface{}) error {
 	params := map[string]string{
 		"gift_id": giftID,

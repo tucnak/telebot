@@ -8,6 +8,8 @@ type CallbackEndpoint interface {
 
 // Callback object represents a query from a callback button in an
 // inline keyboard.
+//
+// Bot API: CallbackQuery.
 type Callback struct {
 	ID string `json:"id"`
 

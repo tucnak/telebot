@@ -9,6 +9,8 @@ import (
 // Query is an incoming inline query. When the user sends
 // an empty query, your bot could return some default or
 // trending results.
+//
+// Bot API: InlineQuery.
 type Query struct {
 	// Unique identifier for this query. 1-64 bytes.
 	ID string `json:"id"`
@@ -70,6 +72,8 @@ type QueryResponse struct {
 
 // QueryResponseButton represents a button to be shown above inline query results.
 // You must use exactly one of the optional fields.
+//
+// Bot API: InlineQueryResultsButton.
 type QueryResponseButton struct {
 	// Label text on the button
 	Text string `json:"text"`
@@ -86,6 +90,8 @@ type QueryResponseButton struct {
 
 // SwitchInlineQuery represents an inline button that switches the current
 // user to inline mode in a chosen chat, with an optional default inline query.
+//
+// Bot API: SwitchInlineQueryChosenChat.
 type SwitchInlineQuery struct {
 	// (Optional) The default inline query to be inserted in the input field.
 	// If left empty, only the bot's username will be inserted.
@@ -106,6 +112,8 @@ type SwitchInlineQuery struct {
 
 // InlineResult represents a result of an inline query that was chosen
 // by the user and sent to their chat partner.
+//
+// Bot API: ChosenInlineResult.
 type InlineResult struct {
 	Sender    *User     `json:"from"`
 	Location  *Location `json:"location,omitempty"`
@@ -182,6 +190,8 @@ func inferIQR(result Result) error {
 }
 
 // SavePreparedInlineMessage stores a message that can be sent by a user of a Mini App.
+//
+// Bot API: savePreparedInlineMessage.
 func (b *Bot) SavePreparedInlineMessage(user Recipient, result Result, opts ...interface{}) (*PreparedInlineMessage, error) {
 	params := map[string]string{
 		"user_id": user.Recipient(),

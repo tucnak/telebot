@@ -23,6 +23,9 @@ const (
 	RevenueStateFailed    RevenueState = "failed"
 )
 
+// StarTransaction describes a Telegram Star transaction.
+//
+// Bot API: StarTransaction.
 type StarTransaction struct {
 	// Unique identifier of the transaction. Coincides with the identifier of the
 	// original transaction for refund transactions. Coincides with
@@ -49,6 +52,8 @@ type StarTransaction struct {
 }
 
 // TransactionPartnerChat describes a transaction partner that is a chat.
+//
+// Bot API: TransactionPartnerChat.
 type TransactionPartnerChat struct {
 	// Type of the transaction partner, always "chat"
 	Type TransactionType `json:"type"`
@@ -57,6 +62,10 @@ type TransactionPartnerChat struct {
 	Chat *Chat `json:"chat"`
 }
 
+// TransactionPartner describes the source or the recipient of a Telegram
+// Star transaction.
+//
+// Bot API: TransactionPartner, TransactionPartnerUser, TransactionPartnerFragment, TransactionPartnerTelegramAds, TransactionPartnerTelegramApi, TransactionPartnerOther.
 type TransactionPartner struct {
 	// Type of the state
 	Type    TransactionType `json:"type"`
@@ -79,6 +88,9 @@ type TransactionPartner struct {
 	Chat *TransactionPartnerChat `json:"chat,omitempty"`
 }
 
+// RevenueWithdrawal describes the state of a revenue withdrawal operation.
+//
+// Bot API: RevenueWithdrawalState, RevenueWithdrawalStatePending, RevenueWithdrawalStateSucceeded, RevenueWithdrawalStateFailed.
 type RevenueWithdrawal struct {
 	// Type of the state
 	Type RevenueState `json:"type"`
@@ -91,6 +103,8 @@ type RevenueWithdrawal struct {
 }
 
 // TransactionPartnerAffiliateProgram describes the affiliate program that paid the transaction.
+//
+// Bot API: TransactionPartnerAffiliateProgram.
 type TransactionPartnerAffiliateProgram struct {
 	// Type of the transaction partner, always "affiliate_program"
 	Type TransactionType `json:"type"`
@@ -155,6 +169,8 @@ type VerificationInfo struct {
 }
 
 // AffiliateInfo contains information about the affiliate program from which the transaction was made.
+//
+// Bot API: AffiliateInfo.
 type AffiliateInfo struct {
 	// (Optional) Information about the affiliate program that paid the transaction
 	AffiliateProgram *TransactionPartnerAffiliateProgram `json:"affiliate_program,omitempty"`

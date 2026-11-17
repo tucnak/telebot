@@ -31,6 +31,8 @@ const (
 // RichBlock is a single block of a received RichMessage (Bot API 10.1). It is a
 // polymorphic type discriminated by Type; only the fields relevant to a given
 // Type are populated. RichBlock is a received-only type.
+//
+// Bot API: RichBlock, RichBlockParagraph, RichBlockSectionHeading, RichBlockPreformatted, RichBlockFooter, RichBlockDivider, RichBlockMathematicalExpression, RichBlockAnchor, RichBlockList, RichBlockBlockQuotation, RichBlockPullQuotation, RichBlockCollage, RichBlockSlideshow, RichBlockTable, RichBlockDetails, RichBlockMap, RichBlockAnimation, RichBlockAudio, RichBlockPhoto, RichBlockVideo, RichBlockVoiceNote, RichBlockThinking.
 type RichBlock struct {
 	// Type is the block discriminator (see the RichBlock* constants).
 	Type string `json:"type"`
@@ -126,6 +128,8 @@ func (rb *RichBlock) UnmarshalJSON(data []byte) error {
 }
 
 // RichBlockCaption is the caption of a media or container rich block.
+//
+// Bot API: RichBlockCaption.
 type RichBlockCaption struct {
 	// Text of the caption.
 	Text RichText `json:"text"`
@@ -136,6 +140,8 @@ type RichBlockCaption struct {
 
 // RichBlockTableCell is a single cell of a "table" rich block. An omitted Text
 // denotes an invisible cell spanned into by a neighbour.
+//
+// Bot API: RichBlockTableCell.
 type RichBlockTableCell struct {
 	Text     *RichText `json:"text,omitempty"`
 	IsHeader bool      `json:"is_header,omitempty"`
@@ -146,6 +152,8 @@ type RichBlockTableCell struct {
 }
 
 // RichBlockListItem is a single entry of a "list" rich block.
+//
+// Bot API: RichBlockListItem.
 type RichBlockListItem struct {
 	// Label is the rendered bullet or number of the item.
 	Label string `json:"label,omitempty"`

@@ -8,6 +8,8 @@ type InputMessageContent interface {
 
 // InputTextMessageContent represents the content of a text message to be
 // sent as the result of an inline query.
+//
+// Bot API: InputTextMessageContent.
 type InputTextMessageContent struct {
 	// Text of the message to be sent, 1-4096 characters.
 	Text string `json:"message_text"`
@@ -26,6 +28,8 @@ func (input *InputTextMessageContent) IsInputMessageContent() bool {
 
 // InputLocationMessageContent represents the content of a location message
 // to be sent as the result of an inline query.
+//
+// Bot API: InputLocationMessageContent.
 type InputLocationMessageContent struct {
 	Lat float32 `json:"latitude"`
 	Lng float32 `json:"longitude"`
@@ -37,6 +41,8 @@ func (input *InputLocationMessageContent) IsInputMessageContent() bool {
 
 // InputVenueMessageContent represents the content of a venue message to
 // be sent as the result of an inline query.
+//
+// Bot API: InputVenueMessageContent.
 type InputVenueMessageContent struct {
 	Lat float32 `json:"latitude"`
 	Lng float32 `json:"longitude"`
@@ -57,6 +63,8 @@ func (input *InputVenueMessageContent) IsInputMessageContent() bool {
 
 // InputContactMessageContent represents the content of a contact
 // message to be sent as the result of an inline query.
+//
+// Bot API: InputContactMessageContent.
 type InputContactMessageContent struct {
 	// Contact's phone number.
 	PhoneNumber string `json:"phone_number"`

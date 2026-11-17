@@ -1,6 +1,8 @@
 package telebot
 
 // ResultBase must be embedded into all IQRs.
+//
+// Bot API: InlineQueryResult.
 type ResultBase struct {
 	// Unique identifier for this result, 1-64 Bytes.
 	// If left unspecified, a 64-bit FNV-1 hash will be calculated
@@ -63,6 +65,8 @@ func (r *ResultBase) Process(b *Bot) {
 // GameResult represents a game. Game is a content type
 // supported by Telegram, which can be sent back to the
 // user as a result for an inline query.
+//
+// Bot API: InlineQueryResultGame.
 type GameResult struct {
 	ResultBase
 
@@ -71,6 +75,8 @@ type GameResult struct {
 }
 
 // ArticleResult represents a link to an article or web page.
+//
+// Bot API: InlineQueryResultArticle.
 type ArticleResult struct {
 	ResultBase
 
@@ -98,6 +104,8 @@ type ArticleResult struct {
 }
 
 // AudioResult represents a link to an mp3 audio file.
+//
+// Bot API: InlineQueryResultAudio, InlineQueryResultCachedAudio.
 type AudioResult struct {
 	ResultBase
 
@@ -121,6 +129,8 @@ type AudioResult struct {
 }
 
 // ContactResult represents a contact with a phone number.
+//
+// Bot API: InlineQueryResultContact.
 type ContactResult struct {
 	ResultBase
 
@@ -147,6 +157,8 @@ type ContactResult struct {
 }
 
 // DocumentResult represents a link to a file.
+//
+// Bot API: InlineQueryResultDocument, InlineQueryResultCachedDocument.
 type DocumentResult struct {
 	ResultBase
 
@@ -180,6 +192,8 @@ type DocumentResult struct {
 }
 
 // GifResult represents a link to an animated GIF file.
+//
+// Bot API: InlineQueryResultGif, InlineQueryResultCachedGif.
 type GifResult struct {
 	ResultBase
 
@@ -216,6 +230,8 @@ type GifResult struct {
 }
 
 // LocationResult represents a location on a map.
+//
+// Bot API: InlineQueryResultLocation.
 type LocationResult struct {
 	ResultBase
 
@@ -230,6 +246,8 @@ type LocationResult struct {
 
 // Mpeg4GifResult represents a link to a video animation
 // (H.264/MPEG-4 AVC video without sound).
+//
+// Bot API: InlineQueryResultMpeg4Gif, InlineQueryResultCachedMpeg4Gif.
 type Mpeg4GifResult struct {
 	ResultBase
 
@@ -266,6 +284,8 @@ type Mpeg4GifResult struct {
 }
 
 // PhotoResult represents a link to a photo.
+//
+// Bot API: InlineQueryResultPhoto, InlineQueryResultCachedPhoto.
 type PhotoResult struct {
 	ResultBase
 
@@ -299,6 +319,8 @@ type PhotoResult struct {
 }
 
 // VenueResult represents a venue.
+//
+// Bot API: InlineQueryResultVenue.
 type VenueResult struct {
 	ResultBase
 
@@ -325,6 +347,8 @@ type VenueResult struct {
 
 // VideoResult represents a link to a page containing an embedded
 // video player or a video file.
+//
+// Bot API: InlineQueryResultVideo, InlineQueryResultCachedVideo.
 type VideoResult struct {
 	ResultBase
 
@@ -364,6 +388,8 @@ type VideoResult struct {
 
 // VoiceResult represents a link to a voice recording in an .ogg
 // container encoded with OPUS.
+//
+// Bot API: InlineQueryResultVoice, InlineQueryResultCachedVoice.
 type VoiceResult struct {
 	ResultBase
 
@@ -384,6 +410,8 @@ type VoiceResult struct {
 }
 
 // StickerResult represents an inline cached sticker response.
+//
+// Bot API: InlineQueryResultCachedSticker.
 type StickerResult struct {
 	ResultBase
 
@@ -392,6 +420,8 @@ type StickerResult struct {
 }
 
 // PreparedInlineMessage describes an inline message to be sent by a user of a Mini App.
+//
+// Bot API: PreparedInlineMessage.
 type PreparedInlineMessage struct {
 	// Unique identifier of the prepared message
 	ID string `json:"id"`

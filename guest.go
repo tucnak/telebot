@@ -3,11 +3,15 @@ package telebot
 import "encoding/json"
 
 // SentGuestMessage describes an inline message sent by a guest bot.
+//
+// Bot API: SentGuestMessage.
 type SentGuestMessage struct {
 	InlineMessageID string `json:"inline_message_id"`
 }
 
 // AnswerGuest sends a response for a given guest message.
+//
+// Bot API: answerGuestQuery.
 func (b *Bot) AnswerGuest(msg *Message, result Result) (*SentGuestMessage, error) {
 	result.Process(b)
 	if err := inferIQR(result); err != nil {

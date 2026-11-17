@@ -7,6 +7,8 @@ import (
 )
 
 // Message object represents a message.
+//
+// Bot API: Message.
 type Message struct {
 	ID int `json:"message_id"`
 
@@ -380,6 +382,8 @@ type Message struct {
 }
 
 // ChatOwnerLeft describes a service message about the chat owner leaving the chat.
+//
+// Bot API: ChatOwnerLeft.
 type ChatOwnerLeft struct {
 	// (Optional) The user who will become the new owner of the chat
 	// if the previous owner does not return to the chat.
@@ -387,6 +391,8 @@ type ChatOwnerLeft struct {
 }
 
 // ChatOwnerChanged describes a service message about an ownership change in the chat.
+//
+// Bot API: ChatOwnerChanged.
 type ChatOwnerChanged struct {
 	// The new owner of the chat.
 	NewOwner *User `json:"new_owner"`
@@ -394,6 +400,8 @@ type ChatOwnerChanged struct {
 
 // MessageEntity object represents "special" parts of text messages,
 // including hashtags, usernames, URLs, etc.
+//
+// Bot API: MessageEntity.
 type MessageEntity struct {
 	// Specifies entity type.
 	Type EntityType `json:"type"`
@@ -462,6 +470,8 @@ type Entities []MessageEntity
 
 // ProximityAlert sent whenever a user in the chat triggers
 // a proximity alert set by another user.
+//
+// Bot API: ProximityAlertTriggered.
 type ProximityAlert struct {
 	Traveler *User `json:"traveler,omitempty"`
 	Watcher  *User `json:"watcher,omitempty"`
@@ -469,6 +479,8 @@ type ProximityAlert struct {
 }
 
 // AutoDeleteTimer represents a service message about a change in auto-delete timer settings.
+//
+// Bot API: MessageAutoDeleteTimerChanged.
 type AutoDeleteTimer struct {
 	Unixtime int `json:"message_auto_delete_time"`
 }
@@ -587,6 +599,8 @@ func (m *Message) Media() Media {
 }
 
 // MessageReaction object represents a change of a reaction on a message performed by a user.
+//
+// Bot API: MessageReactionUpdated.
 type MessageReaction struct {
 	// The chat containing the message the user reacted to.
 	Chat *Chat `json:"chat"`
@@ -618,6 +632,8 @@ func (mu *MessageReaction) Time() time.Time {
 
 // MessageReactionCount represents reaction changes on a message with
 // anonymous reactions.
+//
+// Bot API: MessageReactionCountUpdated.
 type MessageReactionCount struct {
 	// The chat containing the message.
 	Chat *Chat `json:"chat"`
@@ -639,6 +655,8 @@ func (mc *MessageReactionCount) Time() time.Time {
 
 // TextQuote contains information about the quoted part of a message that is
 // replied to by the given message.
+//
+// Bot API: TextQuote.
 type TextQuote struct {
 	// Text of the quoted part of a message that is replied to by the given message.
 	Text string `json:"text"`
@@ -658,6 +676,8 @@ type TextQuote struct {
 }
 
 // MessageOrigin a message reference that has been sent originally by a known user.
+//
+// Bot API: MessageOrigin, MessageOriginUser, MessageOriginHiddenUser, MessageOriginChat, MessageOriginChannel.
 type MessageOrigin struct {
 	// Type of the message origin, always “channel”.
 	Type string `json:"type"`
@@ -692,6 +712,8 @@ func (mo *MessageOrigin) Time() time.Time {
 
 // ExternalReply contains information about a message that is being replied to,
 // which may come from another chat or forum topic.
+//
+// Bot API: ExternalReplyInfo.
 type ExternalReply struct {
 	// Origin of the message replied to by the given message.
 	Origin *MessageOrigin `json:"origin"`
@@ -770,6 +792,8 @@ type ExternalReply struct {
 }
 
 // ReplyParams describes reply parameters for the message that is being sent.
+//
+// Bot API: ReplyParameters.
 type ReplyParams struct {
 	// Identifier of the message that will be replied to in the current chat,
 	// or in the chat chat_id if it is specified.

@@ -66,6 +66,8 @@ type LongPoller struct {
 }
 
 // Poll does long polling.
+//
+// Bot API: getUpdates.
 func (p *LongPoller) Poll(b *Bot, dest chan Update, stop chan struct{}) {
 	for {
 		select {
