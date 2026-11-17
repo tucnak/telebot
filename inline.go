@@ -213,6 +213,9 @@ func (b *Bot) SavePreparedInlineMessage(user Recipient, result Result, opts ...i
 	}
 
 	for _, opt := range opts {
+		if chats, ok := opt.(*PreparedInlineChats); ok && chats != nil {
+			opt = *chats
+		}
 		switch v := opt.(type) {
 		case bool:
 			params["allow_user_chats"] = strconv.FormatBool(v)
