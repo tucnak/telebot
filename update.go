@@ -34,6 +34,8 @@ type Update struct {
 	PurchasedPaidMedia      *PaidMediaPurchased       `json:"purchased_paid_media"`
 	Subscription            *BotSubscriptionUpdated   `json:"subscription,omitempty"`
 	GenerationStopped       *MessageGenerationStopped `json:"stopped_message_generation,omitempty"`
+	WidgetQuery             *WidgetQuery              `json:"widget_query,omitempty"`
+	SharedWidgetQuery       *SharedWidgetQuery        `json:"shared_widget_query,omitempty"`
 }
 
 // ProcessUpdate processes a single incoming update.
@@ -408,6 +410,14 @@ func (b *Bot) ProcessContext(c Context) {
 	}
 	if u.GenerationStopped != nil {
 		b.handle(OnGenerationStopped, c)
+		return
+	}
+	if u.WidgetQuery != nil {
+		b.handle(OnWidgetQuery, c)
+		return
+	}
+	if u.SharedWidgetQuery != nil {
+		b.handle(OnSharedWidgetQuery, c)
 		return
 	}
 }

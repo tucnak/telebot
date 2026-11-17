@@ -82,6 +82,12 @@ type Context interface {
 	// GenerationStopped returns the draft whose generation the user stopped.
 	GenerationStopped() *MessageGenerationStopped
 
+	// WidgetQuery returns the query from a widget.
+	WidgetQuery() *WidgetQuery
+
+	// SharedWidgetQuery returns the query from a forwarded shared widget.
+	SharedWidgetQuery() *SharedWidgetQuery
+
 	// Sender returns the current recipient, depending on the context type.
 	// Returns nil if user is not presented.
 	Sender() *User
@@ -331,6 +337,14 @@ func (c *nativeContext) GenerationStopped() *MessageGenerationStopped {
 	return c.u.GenerationStopped
 }
 
+func (c *nativeContext) WidgetQuery() *WidgetQuery {
+	return c.u.WidgetQuery
+}
+
+func (c *nativeContext) SharedWidgetQuery() *SharedWidgetQuery {
+	return c.u.SharedWidgetQuery
+}
+
 func (c *nativeContext) Sender() *User {
 	switch {
 	case c.u.Callback != nil:
@@ -355,6 +369,10 @@ func (c *nativeContext) Sender() *User {
 		return c.u.ChatJoinRequest.Sender
 	case c.u.Subscription != nil:
 		return c.u.Subscription.User
+	case c.u.WidgetQuery != nil:
+		return c.u.WidgetQuery.Sender
+	case c.u.SharedWidgetQuery != nil:
+		return c.u.SharedWidgetQuery.Sender
 	case c.u.Boost != nil:
 		if b := c.u.Boost.Boost; b != nil && b.Source != nil {
 			return b.Source.Booster
@@ -379,6 +397,8 @@ func (c *nativeContext) Chat() *Chat {
 		return c.u.ChatJoinRequest.Chat
 	case c.u.GenerationStopped != nil:
 		return c.u.GenerationStopped.Chat
+	case c.u.WidgetQuery != nil:
+		return c.u.WidgetQuery.Chat
 	default:
 		return nil
 	}

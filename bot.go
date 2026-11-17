@@ -299,7 +299,7 @@ func (b *Bot) NewContext(u Update) Context {
 //   - Option (a shortcut flag for popular options)
 //   - ParseMode (HTML, Markdown, etc)
 //
-// Bot API: sendMessage, sendPhoto, sendAudio, sendDocument, sendVideo, sendAnimation, sendVoice, sendVideoNote, sendSticker, sendLocation, sendVenue, sendInvoice, sendPoll, sendDice, sendGame, sendRichMessage.
+// Bot API: sendMessage, sendPhoto, sendAudio, sendDocument, sendVideo, sendAnimation, sendVoice, sendVideoNote, sendSticker, sendLocation, sendVenue, sendInvoice, sendPoll, sendDice, sendGame, sendRichMessage, sendWidget, sendSharedWidget.
 func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
@@ -487,7 +487,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 // Reply behaves just like Send() with an exception of "reply-to" indicator.
 // This function will panic upon nil Message.
 //
-// Bot API: sendMessage, sendPhoto, sendAudio, sendDocument, sendVideo, sendAnimation, sendVoice, sendVideoNote, sendSticker, sendLocation, sendVenue, sendInvoice, sendPoll, sendDice, sendGame, sendRichMessage.
+// Bot API: sendMessage, sendPhoto, sendAudio, sendDocument, sendVideo, sendAnimation, sendVoice, sendVideoNote, sendSticker, sendLocation, sendVenue, sendInvoice, sendPoll, sendDice, sendGame, sendRichMessage, sendWidget, sendSharedWidget.
 func (b *Bot) Reply(to *Message, what interface{}, opts ...interface{}) (*Message, error) {
 	sendOpts := b.extractOptions(opts)
 	if sendOpts == nil {

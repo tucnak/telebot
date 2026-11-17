@@ -13,6 +13,7 @@ type API interface {
 	Answer(query *Query, resp *QueryResponse) error
 	AnswerGuest(msg *Message, result Result) (*SentGuestMessage, error)
 	AnswerWebApp(query *Query, r Result) (*WebAppMessage, error)
+	AnswerWidgetQuery(queryID, data string) error
 	ApproveJoinRequest(chat Recipient, user *User) error
 	Ban(chat *Chat, member *ChatMember, revokeMessages ...bool) error
 	BanSenderChat(chat *Chat, sender Recipient) error
@@ -54,6 +55,7 @@ type API interface {
 	EditInviteLink(chat Recipient, link *ChatInviteLink) (*ChatInviteLink, error)
 	EditMedia(msg Editable, media Inputtable, opts ...interface{}) (*Message, error)
 	EditReplyMarkup(msg Editable, markup *ReplyMarkup) (*Message, error)
+	EditSharedWidgetData(widgetID, publicData string, cacheTime int) error
 	EditTopic(chat *Chat, topic *Topic) error
 	File(file *File) (io.ReadCloser, error)
 	FileByID(fileID string) (File, error)
@@ -78,6 +80,7 @@ type API interface {
 	React(to Recipient, msg Editable, r Reactions) error
 	RefundStars(to Recipient, chargeID string) error
 	EditUserStarSubscription(user Recipient, chargeID string, isCanceled bool) error
+	EditWidgetData(msg Editable, publicData, chatData *string) error
 	RemoveMyProfilePhoto() error
 	RemoveWebhook(dropPending ...bool) error
 	ReopenGeneralTopic(chat *Chat) error

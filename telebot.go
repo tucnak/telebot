@@ -132,6 +132,8 @@ const (
 	OnPurchasedPaidMedia      = "\apurchased_paid_media"
 	OnSubscription            = "\asubscription"
 	OnGenerationStopped       = "\astopped_message_generation"
+	OnWidgetQuery             = "\awidget_query"
+	OnSharedWidgetQuery       = "\ashared_widget_query"
 )
 
 // ChatAction is a client-side status indicating bot activity.

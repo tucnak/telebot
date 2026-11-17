@@ -207,6 +207,9 @@ type Message struct {
 	// (Optional) For a rich message, the rich formatted content (Bot API 10.1).
 	RichMessage *RichMessage `json:"rich_message,omitempty"`
 
+	// (Optional) Message is an HTML widget (Bot API 10.4).
+	Widget *Widget `json:"widget,omitempty"`
+
 	// (Optional) The bot that actually sent the message on behalf of the business account.
 	// Available only for outgoing messages sent on behalf of the connected business account.
 	BusinessBot *User `json:"sender_business_bot"`
@@ -817,6 +820,9 @@ type ExternalReply struct {
 
 	// (Optional) True, if the message media is covered by a spoiler animation.
 	HasMediaSpoiler bool `json:"has_media_spoiler"`
+
+	// (Optional) Message is an HTML widget (Bot API 10.4).
+	Widget *Widget `json:"widget,omitempty"`
 }
 
 // ReplyParams describes reply parameters for the message that is being sent.
