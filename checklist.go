@@ -58,12 +58,7 @@ func (c *Checklist) input() (string, error) {
 	}
 	tasks := make([]richWire, len(c.Tasks))
 	for i, t := range c.Tasks {
-		tw := richWire{"id": t.ID, "text": t.Text}
-		tw.set("parse_mode", t.ParseMode)
-		if len(t.TextEntities) > 0 {
-			tw["text_entities"] = t.TextEntities
-		}
-		tasks[i] = tw
+		tasks[i] = t.input()
 	}
 	w["tasks"] = tasks
 	w.set("others_can_add_tasks", c.OthersCanAddTasks)
@@ -71,6 +66,16 @@ func (c *Checklist) input() (string, error) {
 
 	data, err := json.Marshal(w)
 	return string(data), err
+}
+
+// input returns the task as an InputChecklistTask.
+func (t ChecklistTask) input() richWire {
+	w := richWire{"id": t.ID, "text": t.Text}
+	w.set("parse_mode", t.ParseMode)
+	if len(t.TextEntities) > 0 {
+		w["text_entities"] = t.TextEntities
+	}
+	return w
 }
 
 // Send delivers the checklist through bot b to recipient, on behalf of the

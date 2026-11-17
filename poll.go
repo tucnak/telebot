@@ -7,7 +7,10 @@ import (
 	"time"
 )
 
-// PollType defines poll types.
+// PollType defines poll types. As ReplyButton.Poll, it is sent as a
+// KeyboardButtonPollType.
+//
+// Bot API: KeyboardButtonPollType.
 type PollType string
 
 const (
@@ -129,7 +132,7 @@ type Link struct {
 // *Location or *Venue; *Audio and *Document for the poll and explanation
 // only; *Sticker and *Link for options only.
 //
-// Bot API: InputPollMedia, InputPollOptionMedia, InputMediaLocation, InputMediaVenue, InputMediaSticker.
+// Bot API: InputPollMedia, InputPollOptionMedia.
 type InputPollMedia interface{}
 
 // PollOption contains information about one answer option in a poll.

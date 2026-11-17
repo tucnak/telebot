@@ -17,7 +17,7 @@ type Media interface {
 // InputMedia represents a composite InputMedia struct that is
 // used by Telebot in sending and editing media methods.
 //
-// Bot API: InputMedia, InputMediaAnimation, InputMediaAudio, InputMediaDocument, InputMediaPhoto, InputMediaVideo, InputMediaVoiceNote, InputMediaLivePhoto, InputPaidMediaPhoto, InputPaidMediaVideo, InputPaidMediaLivePhoto.
+// Bot API: InputMedia, InputMediaAnimation, InputMediaAudio, InputMediaDocument, InputMediaPhoto, InputMediaVideo, InputMediaVoiceNote, InputMediaLivePhoto, InputPaidMedia, InputPaidMediaPhoto, InputPaidMediaVideo, InputPaidMediaLivePhoto.
 type InputMedia struct {
 	Type                 string   `json:"type"`
 	Media                string   `json:"media"`

@@ -279,6 +279,16 @@ func TestCoverage(t *testing.T) {
 		}
 	}
 
+	// A type is mapped once, by a doc comment or by representedBy.
+	for name := range representedBy {
+		if _, ok := types[name]; !ok {
+			t.Errorf("representedBy names %q, which is not a Bot API type", name)
+		}
+		if byType[name] != nil {
+			t.Errorf("%s is in representedBy but also named by %v", name, byType[name])
+		}
+	}
+
 	// Every exported Bot method that calls the Bot API says which method(s).
 	reach := pkg.reachesAPI()
 	for _, f := range sortedDecls(pkg.funcs) {
@@ -316,6 +326,24 @@ func TestCoverage(t *testing.T) {
 	if !bytes.Equal(got, want) {
 		t.Error("COVERAGE.md is out of date, run: go test -run TestCoverage -update")
 	}
+}
+
+// representedBy names how telebot handles Bot API types that have no Go
+// type of their own: empty service messages decoded as *struct{}, result
+// wrappers decoded inside a method, and input media built from other types.
+var representedBy = map[string]string{
+	"ForumTopicClosed":          "Message.TopicClosed",
+	"ForumTopicReopened":        "Message.TopicReopened",
+	"GeneralForumTopicHidden":   "Message.GeneralTopicHidden",
+	"GeneralForumTopicUnhidden": "Message.GeneralTopicUnhidden",
+	"SharedUser":                "RecipientShared.Users",
+	"StarTransactions":          "Bot.StarTransactions",
+	"UserProfilePhotos":         "Bot.ProfilePhotosOf",
+	"UserChatBoosts":            "Bot.UserBoosts",
+	"ResponseParameters":        "FloodError, GroupError",
+	"InputMediaLocation":        "Location as InputPollMedia",
+	"InputMediaVenue":           "Venue as InputPollMedia",
+	"InputMediaSticker":         "Sticker as InputPollMedia",
 }
 
 // notBotAPITypes are exported structs with json tags that are telebot's own,
@@ -375,7 +403,10 @@ func renderCoverage(spec *botapispec.Spec, pkg *goPackage, byMethod, byType map[
 	for _, ty := range spec.Types {
 		impl := "**missing**"
 		var missing []string
-		if names := byType[ty.Name]; names != nil {
+		if how, ok := representedBy[ty.Name]; ok {
+			impl = "`" + how + "`"
+			typesDone++
+		} else if names := byType[ty.Name]; names != nil {
 			impl = code(names)
 			typesDone++
 			have := map[string]bool{}

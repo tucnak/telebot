@@ -8,7 +8,7 @@ import (
 
 // Message object represents a message.
 //
-// Bot API: Message.
+// Bot API: Message, MaybeInaccessibleMessage, InaccessibleMessage, MessageId.
 type Message struct {
 	ID int `json:"message_id"`
 

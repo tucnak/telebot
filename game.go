@@ -23,6 +23,8 @@ type Game struct {
 }
 
 // CallbackGame is a placeholder, currently holds no information
+//
+// Bot API: CallbackGame.
 type CallbackGame struct {
 }
 

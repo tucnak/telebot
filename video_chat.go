@@ -5,6 +5,8 @@ import "time"
 type (
 	// VideoChatStarted represents a service message about a video chat
 	// started in the chat.
+	//
+	// Bot API: VideoChatStarted.
 	VideoChatStarted struct{}
 
 	// VideoChatEnded represents a service message about a video chat
