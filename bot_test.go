@@ -813,8 +813,8 @@ func TestBot(t *testing.T) {
 	// })
 
 	// Bot API 8.0 Tests
-	t.Run("GetAvailableGifts", func(t *testing.T) {
-		gifts, err := b.GetAvailableGifts()
+	t.Run("AvailableGifts", func(t *testing.T) {
+		gifts, err := b.AvailableGifts()
 		// Even if there are no gifts available, the method should not error
 		// It should return an empty slice instead
 		if err == nil {
@@ -858,7 +858,7 @@ func TestBot(t *testing.T) {
 	})
 
 	t.Run("SendGift", func(t *testing.T) {
-		// This requires a valid gift ID from GetAvailableGifts
+		// This requires a valid gift ID from AvailableGifts
 		// We test with an invalid ID to ensure error handling works
 		err := b.SendGift(&User{ID: userID}, "invalid_gift_id")
 		// Expected to error with invalid gift ID

@@ -119,7 +119,7 @@ A method's "unseen parameters" are parameters that the functions calling it, and
 | [getChatMenuButton](https://core.telegram.org/bots/api#getchatmenubutton) | `Bot.MenuButton` |  |
 | [setMyDefaultAdministratorRights](https://core.telegram.org/bots/api#setmydefaultadministratorrights) | `Bot.SetDefaultRights` |  |
 | [getMyDefaultAdministratorRights](https://core.telegram.org/bots/api#getmydefaultadministratorrights) | `Bot.DefaultRights` |  |
-| [getAvailableGifts](https://core.telegram.org/bots/api#getavailablegifts) | `Bot.GetAvailableGifts` |  |
+| [getAvailableGifts](https://core.telegram.org/bots/api#getavailablegifts) | `Bot.AvailableGifts` |  |
 | [sendGift](https://core.telegram.org/bots/api#sendgift) | `Bot.SendGift` |  |
 | [giftPremiumSubscription](https://core.telegram.org/bots/api#giftpremiumsubscription) | `Bot.GiftPremiumSubscription` |  |
 | [verifyUser](https://core.telegram.org/bots/api#verifyuser) | `Bot.Verify` |  |

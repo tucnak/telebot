@@ -18,6 +18,7 @@ type API interface {
 	AnswerWidget(queryID, data string) error
 	ApproveSuggestedPost(msg Editable, sendDate int64) error
 	ApproveJoinRequest(chat Recipient, user *User) error
+	AvailableGifts() ([]Gift, error)
 	Ban(chat *Chat, member *ChatMember, revokeMessages ...bool) error
 	BanSenderChat(chat *Chat, sender Recipient) error
 	BusinessConnection(id string) (*BusinessConnection, error)
@@ -78,7 +79,6 @@ type API interface {
 	Forward(to Recipient, msg Editable, opts ...interface{}) (*Message, error)
 	ForwardMany(to Recipient, msgs []Editable, opts ...*SendOptions) ([]Message, error)
 	GameScores(user Recipient, msg Editable) ([]GameHighScore, error)
-	GetAvailableGifts() ([]Gift, error)
 	GiftPremiumSubscription(user Recipient, months, stars int, text string, opts ...interface{}) error
 	HideGeneralTopic(chat *Chat) error
 	InviteLink(chat *Chat) (string, error)

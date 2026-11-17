@@ -223,10 +223,10 @@ type Gifts struct {
 	Gifts []Gift `json:"gifts"`
 }
 
-// GetAvailableGifts returns the list of gifts that can be sent by the bot to users.
+// AvailableGifts returns the list of gifts that can be sent by the bot to users.
 //
 // Bot API: getAvailableGifts.
-func (b *Bot) GetAvailableGifts() ([]Gift, error) {
+func (b *Bot) AvailableGifts() ([]Gift, error) {
 	data, err := b.Raw("getAvailableGifts", nil)
 	if err != nil {
 		return nil, err
