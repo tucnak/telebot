@@ -328,6 +328,10 @@ type InlineButton struct {
 	CallbackGame          *CallbackGame      `json:"callback_game,omitempty"`
 	Pay                   bool               `json:"pay,omitempty"`
 	CopyText              *CopyTextButton    `json:"copy_text,omitempty"`
+
+	// (Optional) Makes the button disabled; it does nothing when pressed
+	// (Bot API 10.3).
+	Disabled *DisabledButton `json:"disabled,omitempty"`
 }
 
 // MarshalJSON implements json.Marshaler interface.
@@ -432,3 +436,9 @@ const (
 	MenuButtonCommands MenuButtonType = "commands"
 	MenuButtonWebApp   MenuButtonType = "web_app"
 )
+
+// DisabledButton marks a button as disabled (Bot API 10.3). It holds no
+// information.
+//
+// Bot API: DisabledButton.
+type DisabledButton struct{}

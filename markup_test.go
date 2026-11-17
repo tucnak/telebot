@@ -1,6 +1,7 @@
 package telebot
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -62,4 +63,10 @@ func TestOptions(t *testing.T) {
 	data, err := PollQuiz.MarshalJSON()
 	require.NoError(t, err)
 	assert.Equal(t, []byte(`{"type":"quiz"}`), data)
+}
+
+func TestDisabledInlineButton(t *testing.T) {
+	data, err := json.Marshal(InlineButton{Text: "x", Disabled: &DisabledButton{}})
+	require.NoError(t, err)
+	assert.Contains(t, string(data), `"disabled":{}`)
 }
