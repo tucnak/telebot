@@ -299,7 +299,7 @@ func (b *Bot) NewContext(u Update) Context {
 //   - Option (a shortcut flag for popular options)
 //   - ParseMode (HTML, Markdown, etc)
 //
-// Bot API: sendMessage, sendPhoto, sendAudio, sendDocument, sendVideo, sendAnimation, sendVoice, sendVideoNote, sendSticker, sendLocation, sendVenue, sendInvoice, sendPoll, sendDice, sendGame, sendRichMessage, sendWidget, sendSharedWidget, sendLivePhoto.
+// Bot API: sendMessage, sendPhoto, sendAudio, sendDocument, sendVideo, sendAnimation, sendVoice, sendVideoNote, sendSticker, sendLocation, sendVenue, sendInvoice, sendPoll, sendDice, sendGame, sendRichMessage, sendWidget, sendSharedWidget, sendLivePhoto, sendChecklist.
 func (b *Bot) Send(to Recipient, what interface{}, opts ...interface{}) (*Message, error) {
 	if to == nil {
 		return nil, ErrBadRecipient
@@ -498,7 +498,7 @@ func (b *Bot) SendAlbum(to Recipient, a Album, opts ...interface{}) ([]Message, 
 // Reply behaves just like Send() with an exception of "reply-to" indicator.
 // This function will panic upon nil Message.
 //
-// Bot API: sendMessage, sendPhoto, sendAudio, sendDocument, sendVideo, sendAnimation, sendVoice, sendVideoNote, sendSticker, sendLocation, sendVenue, sendInvoice, sendPoll, sendDice, sendGame, sendRichMessage, sendWidget, sendSharedWidget, sendLivePhoto.
+// Bot API: sendMessage, sendPhoto, sendAudio, sendDocument, sendVideo, sendAnimation, sendVoice, sendVideoNote, sendSticker, sendLocation, sendVenue, sendInvoice, sendPoll, sendDice, sendGame, sendRichMessage, sendWidget, sendSharedWidget, sendLivePhoto, sendChecklist.
 func (b *Bot) Reply(to *Message, what interface{}, opts ...interface{}) (*Message, error) {
 	sendOpts := b.extractOptions(opts)
 	if sendOpts == nil {
@@ -625,7 +625,7 @@ func (b *Bot) CopyMany(to Recipient, msgs []Editable, opts ...*SendOptions) ([]M
 //	b.Edit(c, "edit inline message from the callback")
 //	b.Edit(r, "edit message from chosen inline result")
 //
-// Bot API: editMessageText, editMessageLiveLocation.
+// Bot API: editMessageText, editMessageLiveLocation, editMessageChecklist.
 func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Message, error) {
 	var (
 		method string
@@ -641,6 +641,13 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 	case string:
 		method = "editMessageText"
 		params["text"] = v
+	case *Checklist:
+		method = "editMessageChecklist"
+		checklist, err := v.input()
+		if err != nil {
+			return nil, err
+		}
+		params["checklist"] = checklist
 	case *InputRichMessage:
 		method = "editMessageText"
 		rich, f, err := encodeRich(v)
@@ -682,8 +689,9 @@ func (b *Bot) Edit(msg Editable, what interface{}, opts ...interface{}) (*Messag
 	sendOpts := b.extractOptions(opts)
 	b.embedSendOptions(params, sendOpts)
 
-	// Rich content carries its own markup; text parse options never apply.
-	if _, ok := params["rich_message"]; ok {
+	// Rich content and checklists carry their own markup; text parse options
+	// never apply.
+	if params["rich_message"] != "" || params["checklist"] != "" {
 		delete(params, "parse_mode")
 		delete(params, "entities")
 	}

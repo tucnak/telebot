@@ -96,6 +96,10 @@ type Message struct {
 	// (Bot API 9.6).
 	ReplyToPollOptionID string `json:"reply_to_poll_option_id,omitempty"`
 
+	// (Optional) Identifier of the checklist task being replied to
+	// (Bot API 9.2).
+	ReplyToChecklistTaskID int `json:"reply_to_checklist_task_id,omitempty"`
+
 	// (Optional) Time of last edit in Unix.
 	LastEdit int64 `json:"edit_date"`
 
@@ -168,6 +172,9 @@ type Message struct {
 
 	// (Optional) Message is a live photo (Bot API 10.0).
 	LivePhoto *LivePhoto `json:"live_photo,omitempty"`
+
+	// (Optional) Message is a checklist (Bot API 9.1).
+	Checklist *Checklist `json:"checklist,omitempty"`
 
 	// For an animation, information about it.
 	Animation *Animation `json:"animation"`
@@ -325,6 +332,17 @@ type Message struct {
 
 	// Service message: a transfer with a TON wallet (Bot API 10.4).
 	TonWalletTransfer *TonWalletTransfer `json:"ton_wallet_transfer,omitempty"`
+
+	// Service message: checklist tasks were marked as done or not done
+	// (Bot API 9.1).
+	ChecklistTasksDone *ChecklistTasksDone `json:"checklist_tasks_done,omitempty"`
+
+	// Service message: tasks were added to a checklist (Bot API 9.1).
+	ChecklistTasksAdded *ChecklistTasksAdded `json:"checklist_tasks_added,omitempty"`
+
+	// Service message: the price of direct messages to the channel changed
+	// (Bot API 9.1).
+	DirectMessagePriceChanged *DirectMessagePriceChanged `json:"direct_message_price_changed,omitempty"`
 
 	// Service message: an option was added to a poll (Bot API 9.6).
 	PollOptionAdded *PollOptionAdded `json:"poll_option_added,omitempty"`
@@ -810,6 +828,9 @@ type ExternalReply struct {
 	// (Optional) Message is a live photo (Bot API 10.0).
 	LivePhoto *LivePhoto `json:"live_photo,omitempty"`
 
+	// (Optional) Message is a checklist (Bot API 9.1).
+	Checklist *Checklist `json:"checklist,omitempty"`
+
 	// (Optional) Message is a video note, information about the video message.
 	Note *VideoNote `json:"video_note"`
 
@@ -899,6 +920,9 @@ type ReplyParams struct {
 	// (Optional) Persistent identifier of the poll option to reply to
 	// (Bot API 9.6).
 	PollOptionID string `json:"poll_option_id,omitempty"`
+
+	// (Optional) Identifier of the checklist task to reply to (Bot API 9.2).
+	ChecklistTaskID int `json:"checklist_task_id,omitempty"`
 }
 
 // PaidMessagesWaived is a service message about the sender using a link that
@@ -907,3 +931,15 @@ type ReplyParams struct {
 //
 // Bot API: PaidMessagesWaived.
 type PaidMessagesWaived struct{}
+
+// DirectMessagePriceChanged is a service message about a change in the price
+// of direct messages to a channel (Bot API 9.1).
+//
+// Bot API: DirectMessagePriceChanged.
+type DirectMessagePriceChanged struct {
+	// Direct messages are enabled for the channel.
+	Enabled bool `json:"are_direct_messages_enabled"`
+
+	// (Optional) Stars users must pay for each direct message.
+	StarCount int `json:"direct_message_star_count,omitempty"`
+}

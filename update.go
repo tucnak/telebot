@@ -153,6 +153,18 @@ func (b *Bot) ProcessContext(c Context) {
 			b.handle(OnManagedBotCreated, c)
 			return
 		}
+		if m.ChecklistTasksDone != nil {
+			b.handle(OnChecklistTasksDone, c)
+			return
+		}
+		if m.ChecklistTasksAdded != nil {
+			b.handle(OnChecklistTasksAdded, c)
+			return
+		}
+		if m.DirectMessagePriceChanged != nil {
+			b.handle(OnDirectMessagePriceChanged, c)
+			return
+		}
 		if m.PollOptionAdded != nil {
 			b.handle(OnPollOptionAdded, c)
 			return
@@ -476,6 +488,8 @@ func (b *Bot) handleMedia(c Context) bool {
 		fired = b.handle(OnVideoNote, c)
 	case m.LivePhoto != nil:
 		fired = b.handle(OnLivePhoto, c)
+	case m.Checklist != nil:
+		fired = b.handle(OnChecklist, c)
 	default:
 		return false
 	}

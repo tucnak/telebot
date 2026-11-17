@@ -1,6 +1,9 @@
 package telebot
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type TransactionType = string
 
@@ -246,4 +249,34 @@ func (c *StarTransaction) NanostarAmountAsTON() float64 {
 // HasNanostarAmount returns whether the transaction has a nanostar amount.
 func (c *StarTransaction) HasNanostarAmount() bool {
 	return c.NanostarAmount > 0
+}
+
+// StarAmount is an amount of Telegram Stars (Bot API 9.1).
+//
+// Bot API: StarAmount.
+type StarAmount struct {
+	// Whole Stars, rounded towards zero; can be negative.
+	Amount int64 `json:"amount"`
+
+	// (Optional) Billionths of a Star, from -999999999 to 999999999.
+	NanostarAmount int64 `json:"nanostar_amount,omitempty"`
+}
+
+// StarBalance returns the bot's current balance of Telegram Stars
+// (Bot API 9.1).
+//
+// Bot API: getMyStarBalance.
+func (b *Bot) StarBalance() (*StarAmount, error) {
+	data, err := b.Raw("getMyStarBalance", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Result *StarAmount
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, wrapError(err)
+	}
+	return resp.Result, nil
 }

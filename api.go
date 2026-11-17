@@ -132,6 +132,7 @@ type API interface {
 	SetWebhook(w *Webhook) error
 	ShareThemeBackdrops() ([]ChatShareThemeBackdrop, error)
 	Ship(query *ShippingQuery, what ...interface{}) error
+	StarBalance() (*StarAmount, error)
 	StarTransactions(offset, limit int) ([]StarTransaction, error)
 	StickerSet(name string) (*StickerSet, error)
 	StopLiveLocation(msg Editable, opts ...interface{}) (*Message, error)
