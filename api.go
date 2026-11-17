@@ -137,5 +137,6 @@ type API interface {
 	UnpinAllTopicMessages(chat *Chat, topic *Topic) error
 	UploadSticker(to Recipient, format StickerSetFormat, f File) (*File, error)
 	UserBoosts(chat, user Recipient) ([]Boost, error)
+	Verify(to Recipient, description string, opts ...interface{}) error
 	Webhook() (*Webhook, error)
 }

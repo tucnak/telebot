@@ -269,7 +269,43 @@ func (b *Bot) EditUserStarSubscription(user Recipient, chargeID string, isCancel
 	return err
 }
 
+// Verify verifies a user, when to is a *User, or else a chat, on behalf of
+// the organization the bot represents. description is an optional custom
+// description of the verification, 0-70 characters; it must be empty if the
+// organization isn't allowed to set one. Of the options, the parse mode and
+// entities apply to the description.
+//
+// Bot API: verifyUser, verifyChat.
+func (b *Bot) Verify(to Recipient, description string, opts ...interface{}) error {
+	if to == nil {
+		return ErrBadRecipient
+	}
+
+	method, params := "verifyChat", map[string]string{"chat_id": to.Recipient()}
+	if user, ok := to.(*User); ok {
+		method, params = "verifyUser", map[string]string{"user_id": user.Recipient()}
+	}
+	if description != "" {
+		params["custom_description"] = description
+	}
+
+	sendOpts := b.extractOptions(opts)
+	if len(sendOpts.Entities) > 0 {
+		entities, _ := json.Marshal(sendOpts.Entities)
+		params["custom_description_entities"] = string(entities)
+	} else if sendOpts.ParseMode != ModeDefault && description != "" {
+		params["custom_description_parse_mode"] = sendOpts.ParseMode
+	}
+
+	_, err := b.Raw(method, params)
+	return err
+}
+
 // VerifyUser verifies a user with the specified level and requirements.
+//
+// Deprecated: the Bot API has no level or requirements parameters, which
+// Telegram ignores, and this method cannot set a custom description. Use
+// Verify.
 //
 // Bot API: verifyUser.
 func (b *Bot) VerifyUser(user Recipient, level VerificationLevel, requirements *VerificationRequirements) error {
@@ -289,6 +325,10 @@ func (b *Bot) VerifyUser(user Recipient, level VerificationLevel, requirements *
 }
 
 // VerifyChat verifies a chat with the specified level and requirements.
+//
+// Deprecated: the Bot API has no level or requirements parameters, which
+// Telegram ignores, and this method cannot set a custom description. Use
+// Verify.
 //
 // Bot API: verifyChat.
 func (b *Bot) VerifyChat(chat *Chat, level VerificationLevel, requirements *VerificationRequirements) error {

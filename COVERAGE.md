@@ -122,8 +122,8 @@ A method's "unseen parameters" are parameters whose name appears nowhere in tele
 | [getAvailableGifts](https://core.telegram.org/bots/api#getavailablegifts) | `Bot.GetAvailableGifts` |  |
 | [sendGift](https://core.telegram.org/bots/api#sendgift) | `Bot.SendGift` |  |
 | [giftPremiumSubscription](https://core.telegram.org/bots/api#giftpremiumsubscription) | **missing** |  |
-| [verifyUser](https://core.telegram.org/bots/api#verifyuser) | `Bot.VerifyUser` | custom_description, custom_description_parse_mode, custom_description_entities |
-| [verifyChat](https://core.telegram.org/bots/api#verifychat) | `Bot.VerifyChat` | custom_description, custom_description_parse_mode, custom_description_entities |
+| [verifyUser](https://core.telegram.org/bots/api#verifyuser) | `Bot.Verify`, `Bot.VerifyUser` |  |
+| [verifyChat](https://core.telegram.org/bots/api#verifychat) | `Bot.Verify`, `Bot.VerifyChat` |  |
 | [removeUserVerification](https://core.telegram.org/bots/api#removeuserverification) | `Bot.RemoveUserVerification` |  |
 | [removeChatVerification](https://core.telegram.org/bots/api#removechatverification) | `Bot.RemoveChatVerification` |  |
 | [readBusinessMessage](https://core.telegram.org/bots/api#readbusinessmessage) | **missing** |  |
